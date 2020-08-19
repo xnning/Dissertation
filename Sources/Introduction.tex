@@ -1,0 +1,122 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Introduction}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Contributions}
+
+In summary the contributions of this thesis are:
+
+\begin{itemize}
+
+\item Section \ref{chap:BiDirectional} proposes a new design for type inference of higher-ranked types.
+  \begin{itemize}
+  \item We design a variant of bi-directional type checking
+    where the inference mode is combined with a new, so-called, application
+    mode. The application mode naturally propagates type information from
+    arguments to the functions.
+  \item With the application mode, we give a new design for type inference of
+    higher-ranked type, which generalizes the HM type system, supports a
+    polymorphic let as syntactic sugar, and infers higher rank types. We present
+    a syntax-directed specification, an elaboration semantics to System F, and
+    an algorithmic type system with completeness and soundness proofs.
+  \end{itemize}
+
+\item Section \ref{chap:Gradual} presents the type system \gpc, which extends predicative implicit
+  higher-rank polymorphism with gradual types.
+  \begin{itemize}
+  \item We define a framework for consistent subtyping with a new definition of
+    consistent subtyping that subsumes and generalizes that of
+    \cite{siek:consistent:subtyping} and can deal with polymorphism and top
+    types; and a syntax-directed version of consistent subtyping that is sound
+    and complete with respect to our definition of consistent subtyping, but
+    still guesses instantiations.
+  \item Based on consistent subtyping, we present GPC. We prove that our
+    calculus satisfies the static aspects of the refined criteria for gradual
+    typing \cite{siek:criteria}, and is type-safe by
+    a type-directed translation to \pbc \cite{amal:blame}.
+  \item We present a sound and complete
+    bidirectional algorithm for implementing the declarative system based on
+    the design principle of \cite{garcia:principal}.
+  \end{itemize}
+  
+\item We present a new design of the context for ???, where ???.
+  \begin{itemize}
+  \item We come up with a strategy called promotion that resolves the dependency between types.
+  \end{itemize}
+
+\item We further explore the design of promotion by an application to kind
+  inference for datatypes.
+  \begin{itemize}
+  \item We formalize Haskell98’s datatype declarations, providing both a
+    declarative specification and syntax-driven algorithm for kind inference. We
+    prove that the algorithm is sound and observe how Haskell98’s technique of
+    defaulting unconstrained kinds to ⋆ leads to incompleteness. We believe that
+    ours is the first formalization of this aspect of Haskell98. Its inclusion
+    in this paper both sheds light on this historically important language and
+    also prepares us for the more challenging features of modern Haskell.
+  \end{itemize}
+  
+
+
+\item A comprehensive Coq mechanization of all metatheory, including type
+  safety, coherence, algorithmic soundness and completeness, etc.\footnote{For
+    convenience, whenever possible, definitions, lemmas and theorems have hyperlinks (click
+    \href{https://github.com/bixuanzju/phd-thesis-artifact}{\leftpointright}) to their Coq counterparts. Also since \fnamee completely
+    subsumes \namee, to save work, for \namee metatheory we provide cross
+    references to the corresponding \fnamee Coq definitions, instead.} This has
+  notably revealed several missing lemmas and oversights in Pierce's manual
+  proof of BCD's algorithmic subtyping~\citep{pierce1989decision}. As a
+  by-product, we obtain the first mechanically verified BCD-style subtyping
+  algorithm with coercions.
+
+
+\end{itemize}
+
+
+% The author also contributed to the following publications that do not directly
+% relate to the topics of this thesis:
+% \begin{itemize}
+% \item Ningning Xie, Xuan Bi, Bruno C. d. S. Oliveira. 2018. ``Consistent Subtyping for All''.
+%   In \emph{European Symposium on Programming (ESOP)}.
+% \item Yanpeng Yang, Xuan Bi, Bruno C. d. S. Oliveira. 2016. ``Unified Syntax with
+%   Iso-Types''. In \emph{Asian Symposium on Programming Languages and
+%     Systems (APLAS)}.
+% \item Tomas Tauber, Xuan Bi, Zhiyuan Shi, Weixin Zhang, Huang Li, Zhenrui Zhang,
+%   Bruno C. d. S. Oliveira. 2015. ``Memory-efficient Tail Calls in the JVM with
+%   Imperative Functional Objects''. In \emph{Asian Symposium on
+%     Programming Languages and Systems (APLAS)}.
+% \end{itemize}
+
+
+\section{Organization}
+
+This thesis is largely based on the
+publications by the author~\citep{esop2018:arguments,esop2018:consistent,toplas:consistent,popl:kind},
+as indicated below.
+\begin{description}
+\item[\cref{chap:nested,chap:coherence:simple}:] Ningning Xie and Bruno C. d. S.
+  Oliveira. 2018. ``Let Arguments Go First''. In
+  \emph{European Symposium on Programming (ESOP)}.
+\item[\cref{chap:fi,chap:coherence:poly}:] Ningning Xie, Xuan Bi, and Bruno C. d. S.
+  Oliveira. 2018. ``Consistent Subtyping for All''. In
+  \emph{European Symposium on Programming (ESOP)}.
+\item[\cref{chap:fi,chap:coherence:poly}:] Ningning Xie, Xuan Bi, Bruno C. d. S.
+  Oliveira, and Tom Schrijvers. 2019. ``Consistent Subtyping for All''. In
+  \emph{ACM Transactions on Programming Languages and Systems (TOPLAS)}.
+\item[\cref{chap:traits,chap:case_study}:] Ningning Xie, Richard Eisenber and Bruno C. d. S. Oliveira.
+  2020. ``Kind Inference for Datatypes''. In \emph{Kind Inference for Datatypes}.
+\end{description}
+
+
+\noindent\makebox[\linewidth]{\rule{0.7\textwidth}{0.4pt}}
+
+\vspace{1.5\baselineskip}
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Thesis"
+%%% org-ref-default-bibliography: "../Thesis.bib"
+%%% End:

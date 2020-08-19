@@ -1,0 +1,117 @@
+% Basics
+\usepackage{fixltx2e}
+\usepackage{url}
+\usepackage{fancyvrb}
+\usepackage{mdwlist}  % Miscellaneous list-related commands
+\usepackage{bookmark}
+
+% https://www.nesono.com/?q=book/export/html/347
+% Package for inserting TODO statements in nice colorful boxes - so that you
+% won’t forget to ﬁx/remove them. To add a todo statement, use something like
+% \todo{Find better wording here}.
+\usepackage{todonotes}
+
+%% Math
+\usepackage{bm}       % Bold symbols in maths mode
+\usepackage{amssymb}
+
+% http://tex.stackexchange.com/questions/114151/how-do-i-reference-in-appendix-a-theorem-given-in-the-body
+\usepackage{thmtools, thm-restate}
+
+%% Theoretical computer science
+\usepackage{stmaryrd}
+\usepackage{mathtools}  % For "::=" ( \Coloneqq )
+
+%% Font
+% \usepackage[euler-digits,euler-hat-accent]{eulervm}
+
+\usepackage{pifont}
+\usepackage{textgreek}
+
+
+
+\usepackage{savesym}
+\savesymbol{checkmark}
+\usepackage{dingbat}
+
+\usepackage{comment}
+
+\usepackage{longtable}
+
+\usepackage{tikz-cd}
+\usetikzlibrary{babel}
+
+
+% Code highlighting
+\usepackage{listings}
+
+\lstset{%
+  % backgroundcolor=\color{white},
+  basicstyle=\small\ttfamily,
+  keywordstyle=\sffamily\bfseries,
+  captionpos=none,
+  columns=flexible,
+  keepspaces=true,
+  showspaces=false,               % show spaces adding particular underscores
+  showstringspaces=false,         % underline spaces within strings
+  showtabs=false,                 % show tabs within strings adding particular underscores
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+  escapeinside={(*}{*)},
+  literate={lam}{{$\lambda$}}1 {->}{{$\rightarrow$}}1 {Top}{{$\top$}}1 {o+o}{{$\oplus$}}1 {=>}{{$\Rightarrow$}}1 {/\\}{{$\Lambda$}}1,
+  tabsize=2,
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  sensitive=false
+}
+
+\lstdefinelanguage{sedel}{
+  keywords={main, Int, String, Bool, self, Void, Class, All, extends, this, trait, inherits, super, type, Trait, override, new, if, then, else, let, in, letrec},
+  identifierstyle=\color{black},
+  morecomment=[l]{--},
+  morecomment=[l]{//},
+  morestring=[b]",
+  xleftmargin  = 3mm,
+  morestring=[b]'
+}
+
+
+\lstdefinelanguage{simple}{
+  keywords={letrec, in, let},
+  identifierstyle=\color{black},
+  xleftmargin  = 3mm,
+}
+
+
+\lstdefinelanguage{gbeta}{%
+  language     = java,
+  morekeywords = {virtual,refine},
+  xleftmargin  = 3mm
+}
+
+
+\lstdefinelanguage{JavaScript}{
+  keywords={function, const, extends, super, class, export, boolean, throw, implements, import, this, typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  identifierstyle=\color{black},
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  xleftmargin  = 3mm,
+  morestring=[b]"
+}
+
+
+\lstset{language=sedel}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{observation}{Observation}
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}

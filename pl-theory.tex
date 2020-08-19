@@ -1,0 +1,72 @@
+% General
+\newcommand{\code}[1]{\texttt {#1}}
+\newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
+
+% Logic
+\newcommand{\turns}{\vdash}
+
+% PL
+\newcommand{\subst}[2]{\lbrack #1 / #2 \rbrack}
+\newcommand{\concatOp}{+\kern-1.3ex+\kern0.8ex}  % http://tex.stackexchange.com/a/4195/73122
+
+% Constructors
+\newcommand{\for}[2]{\forall #1. \, #2}
+\newcommand{\lam}[2]{\lambda #1. \, #2}
+\newcommand{\app}[2]{#1 \; #2}
+\newcommand{\blam}[2]{\Lambda #1. #2}
+\newcommand{\tapp}[2]{#1 \; #2}
+
+\newcommand{\pair}[2]{\langle #1, #2 \rangle}
+\newcommand{\inter}[2]{#1 \,\&\, #2}
+\newcommand{\mer}[2]{#1 \, ,, \, #2}
+\newcommand{\proj}[2]{{\code{proj}}_{#1} #2}
+\newcommand{\ctx}[2]{#1\left\{#2\right\}}
+\newcommand{\bra}[1]{\llbracket #1 \rrbracket}
+
+
+\newcommand{\recordType}[2]{\{ #1 : #2 \}}
+\newcommand{\recordCon}[2]{\{ #1 = #2 \}}
+
+\newcommand{\ifThenElse}[3]{\code{if} \; #1 \; \code{then} \; #2 \; \code{else} \; #3}
+
+\newcommand{\defeq}{\triangleq}
+
+\newcommand{\logeq}[2]{#1 \backsimeq_{log} #2}
+\newcommand{\kleq}[2]{#1 \backsimeq #2}
+\newcommand{\ctxeq}[3]{#1 \backsimeq_{ctx} #2 : #3}
+
+\newcommand{\stepn}{\longmapsto^*}
+\newcommand{\step}{\longmapsto}
+
+
+\newcommand{\name}{$\mathsf{NeColus}$\xspace}
+\newcommand{\namee}{$\lambda_{i}^{+}$\xspace}
+\newcommand\oname{$\lambda_{i}$\xspace}
+\newcommand\fname{$\mathsf{F}_{i}$\xspace}
+\newcommand\fnamee{$\mathsf{F}_{i}^{+}$\xspace}
+\newcommand\tname{$\lambda_{co}$\xspace}
+\newcommand\tnamee{$\mathsf{F}_{co}$\xspace}
+\newcommand\sedel{$\mathsf{SEDEL}$\xspace}
+\newcommand\visitor{\textsc{Visitor}s\xspace}
+\newcommand\fsub{$\mathsf{F}_{<:}$\xspace}
+\newcommand\dname{$\lambda_{,,}$\xspace}
+\newcommand\lname{$\lambda_{\land}^{\lor}$\xspace}
+
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
+
+
+% Logical equivalence related macros
+\newcommand{\valR}[2]{\mathcal{V}\bra{#1 ; #2}}
+\newcommand{\valRR}[1]{\mathcal{V}\bra{#1}}
+\newcommand{\eeR}[2]{\mathcal{E}\bra{#1 ; #2}}
+\newcommand{\eeRR}[1]{\mathcal{E}\bra{#1}}
+\newcommand{\ggR}[1]{\mathcal{G}\bra{#1}}
+\newcommand{\ddR}[1]{\mathcal{D}\bra{#1}}
+
+\newcommand{\hll}[2][gray!40]{\colorbox{#1}{#2}}
+\newcommand{\hlmath}[2][gray!40]{%
+  \colorbox{#1}{$\displaystyle#2$}}
+
+\newcommand{\rulehl}[1]{}

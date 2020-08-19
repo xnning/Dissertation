@@ -1,0 +1,66 @@
+%
+\noindent
+%
+% Programs are hard to write. It was so 50 years ago at the time of the so-called
+% software crisis; it still remains so nowadays. Over the years, we have
+% learned---the hard way---that software should be constructed in a
+% \emph{modular} way, i.e., as a network of smaller and loosely connected
+% modules. To facilitate writing modular code, researchers and software
+% practitioners have developed new methodologies; new programming paradigms;
+% stronger type systems; as well as better tooling support. Still, this is not
+% enough to cope with today's needs. Several reasons have been raised for the lack
+% of satisfactory solutions, but one that is constantly pointed out is the
+% inadequacy of existing programming languages for the construction of
+% modular software.
+
+% This thesis investigates \emph{disjoint intersection types}, a variant of
+% intersection types. Disjoint intersections types have great potential to serve
+% as a foundation for powerful, flexible and yet type-safe and easy to reason OO
+% languages, suitable for writing modular software. On the theoretical side, this
+% thesis shows how to significantly increase the expressiveness of disjoint
+% intersection types by adding support for \emph{nested composition}, along with
+% \emph{parametric polymorphism}. Nested composition extends inheritance to work
+% on a whole family of classes, enabling high degrees of modularity and code
+% reuse. The combination with parametric polymorphism further improves the
+% state-of-art encodings of extensible designs. However, the extension with nested
+% composition and parametric polymorphism is challenging, for two different
+% reasons. Firstly, the subtyping relation that supports these features is
+% non-trivial. Secondly, the syntactic method used to prove coherence for previous
+% calculi with disjoint intersection types is too inflexible. This thesis
+% addresses the first problem by adapting and extending the well-known BCD
+% subtyping with records, universal quantification and coercions. To address the
+% second problem, this thesis proposes a powerful proof method to establish
+% coherence. Hence, this thesis puts disjoint intersection types on a solid
+% footing by thoroughly exploring their meta-theoretical properties.
+
+% On the pragmatic side, this thesis proposes a new language design with support
+% for \emph{first-class traits}, \emph{dynamic inheritance} and nested
+% composition. First-class traits allow two objects of statically unknown types
+% to be composed without conflicts. Dynamic inheritance allows a class to inherit
+% from other classes at \emph{run time}. To address the challenges of typing
+% first-class traits and detecting conflicts statically, this thesis shows how to
+% model source language constructs for first-class traits and dynamic inheritance
+% by leveraging the fine-grained expressiveness of disjoint intersection types. To
+% illustrate the applicability of the new design, this thesis conducts a case
+% study that modularizes programming language features using a highly modular form
+% of \visitor.
+
+% All the results and metatheory presented (unless otherwise indicated) in this
+% thesis are mechanized in Coq in order to show the rigorousness of the approach.
+% This thesis unifies ideas that are seemingly unrelated but powerful on their
+% own---dynamic inheritance, first-class traits, nested composition---by a
+% lightweight mechanism, thus providing new insights into software modularity and
+% extensibility.
+
+\vspace{1.5\baselineskip}
+
+\noindent\makebox[\linewidth]{\rule{0.7\textwidth}{0.4pt}}
+
+
+% \newpage
+
+% \begin{flushright}
+%   \null\vspace{\stretch{1}}
+%   \textit{To my beloved parents}
+%   \vspace{\stretch{2}}\null
+% \end{flushright}
