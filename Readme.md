@@ -1,6 +1,6 @@
 # My PhD Thesis
 
-Working-in-process :D.
+Working-in-progress :D.
 
 **Let me know if you have any good advice against procrastination**.
 
