@@ -1,0 +1,21 @@
+\section{The Odersky-L{\"a}ufer Type System}
+
+\begin{figure}[t]
+  \begin{small}
+    \centering
+    \begin{tabular}{lrcl} \toprule
+      Types & $[[A]], [[B]]$ & $\Coloneqq$ & $[[int]] \mid [[a]] \mid [[A -> B]] \mid [[\/ a. A]]  $ \\
+      Monotypes & $[[t]], [[s]]$ & $\Coloneqq$ & $ [[int]] \mid [[a]] \mid [[t -> s]] $ \\
+      Terms & $[[e]]$ & $\Coloneqq$ & $ [[x]]  \mid [[n]]  \mid [[\x : A . e]] \mid [[ \x . e ]] \mid [[e1 e2]] \mid [[ let x = e1 in e2  ]] $ \\
+      Contexts & $[[dd]]$ & $\Coloneqq$ & $ [[empty]]  \mid [[dd , x : A]]  \mid [[dd, a]]$ \\
+      \bottomrule
+    \end{tabular}
+
+    \drules[u]{$ [[dd ||- e : A ]] $}{Typing}{var, int, lamann, lam, app, sub, gen, let}
+
+    \drules[s]{$ [[dd |- A <: B ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR}
+
+  \end{small}
+  \caption{Syntax and static semantics of the Odersky-L{\"a}ufer type system.}
+  \label{fig:original-typing}
+\end{figure}
