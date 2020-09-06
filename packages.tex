@@ -1,3 +1,113 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Some of my favourite personal adjustments
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% These are the adjustments that I consider necessary for typesetting
+% a nice thesis. However, they are *not* included in the template, as
+% I do not want to force you to use them.
+
+% This ensures that I am able to typeset bold font in table while still aligning the numbers
+% correctly.
+\usepackage{etoolbox}
+
+\usepackage[binary-units=true]{siunitx}
+\DeclareSIUnit\px{px}
+
+\sisetup{%
+  detect-all           = true,
+  detect-family        = true,
+  detect-mode          = true,
+  detect-shape         = true,
+  detect-weight        = true,
+  detect-inline-weight = math,
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Hyperlinks & bookmarks
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[%
+  colorlinks = true,
+  citecolor  = black,
+  linkcolor  = RoyalBlue,
+  urlcolor   = black,
+  backref    = page
+  ]{hyperref}
+
+\usepackage[capitalise]{cleveref}
+
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{%
+    \ifcase #1%
+          \or [cited on page~#2]%
+          \else [cited on pages~#2]%
+    \fi%
+    }
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bibliography
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[sort]{natbib}
+\setcitestyle{%
+    authoryear,%
+    open={[},close={]},citesep={;},%
+    aysep={},yysep={,},%
+    notesep={, }}
+
+% Explain list of backreferences.
+% https://tex.stackexchange.com/a/70953/1340
+\renewcommand{\bibpreamble}{%
+  [Citing pages are listed after each reference.]%
+  \par\bigskip}
+
+% ACM bibliography style looks more professional
+\bibliographystyle{ACM-Reference-Format}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fonts
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifxetexorluatex
+  \setmainfont{Minion Pro}
+\else
+  \usepackage[lf]{ebgaramond}
+  \usepackage[oldstyle,scale=0.7]{sourcecodepro}
+  \singlespacing
+\fi
+
+\renewcommand{\th}{\textsuperscript{\textup{th}}\xspace}
+
+\usepackage{xeCJK}
+% \setCJKmainfont{喜鹊聚珍体}
+
+% \newacronym[description={Principal component analysis}]{PCA}{PCA}{principal component analysis}
+% \newacronym                                            {SNF}{SNF}{Smith normal form}
+% \newacronym[description={Topological data analysis}]   {TDA}{TDA}{topological data analysis}
+
+% \newglossaryentry{LaTeX}{%
+%   name        = {\LaTeX},
+%   description = {A document preparation system},
+%   sort        = {LaTeX},
+% }
+
+% \newglossaryentry{Real numbers}{%
+%   name        = {$\real$},
+%   description = {The set of real numbers},
+%   sort        = {Real numbers},
+% }
+
+% \makeindex
+% \makeglossaries
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load up my personal packages
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{metalogo}
+
+
 % Basics
 \usepackage{fixltx2e}
 \usepackage{url}
@@ -115,3 +225,142 @@
 \newtheorem{observation}{Observation}
 \theoremstyle{remark}
 \newtheorem*{remark}{Remark}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Ott includes
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{ottalt}
+\inputott{Gen/ott-rules}
+\renewcommand\ottaltinferrule[4]{
+  \inferrule*[narrower=0.6,lab=#1,#2]
+    {#3}
+    {#4}
+}
+%%----------------------------------------------------------------------------%%
+
+%%----------------------------------------------------------------------------%%
+%%    Environment for Title Page                                              %%
+%%----------------------------------------------------------------------------%%
+
+\makeatletter
+\renewcommand{\maketitle}
+{%
+  \begin{titlepage}
+    \renewcommand{\baselinestretch}{1}
+    \begin{center}
+      \vspace*{\stretch{3}}
+      {\LARGE\@title\par}
+      \vspace*{1cm}
+      {\large\textit{by}\par}
+      \vspace*{1cm}
+      {\Large\@author\par}
+      {\Large(谢宁宁)\par}
+      \vspace*{\stretch{5}}
+      {{\includegraphics[width=30mm]{figures/hku}} \par}
+      {\hbox{}\par}
+      \vspace*{\stretch{5}}
+      {
+      	% \textsl{(Temporary Binding for Examination Purposes)} \\
+      	% \vspace*{3cm}
+      	{\normalsize
+      	A thesis submitted in partial fulfillment of the requirements for \\
+        the degree of Doctor of Philosophy \\
+        at The University of Hong Kong \\
+        \par
+        }
+      }
+      \vspace*{\stretch{1}}
+      {\large\@date\par}
+      \vspace*{\stretch{1}}
+    \end{center}
+  \end{titlepage}
+} \makeatother
+
+
+
+
+%%----------------------------------------------------------------------------%%
+%%    Environment for Abstract                                                %%
+%%----------------------------------------------------------------------------%%
+
+\makeatletter
+\newenvironment{abstract}%
+{
+  \if@twocolumn
+    \@restonecoltrue\onecolumn
+  \else
+    \@restonecolfalse\newpage
+  \fi
+  \pagestyle{empty}%
+  \setcounter{page}\@ne
+  \mbox{}
+  \newpage
+  \pagestyle{empty}%
+  \setcounter{page}\@ne
+  \cleardoublepage
+  \begin{center}
+  \large
+  Abstract of thesis entitled            \par
+  \textbf{``\@title''}                   \par
+                                         \vspace*{0.2in}
+  Submitted by                           \par
+  \@author                               \par
+                                         \vspace*{0.2in}
+  for the degree of Doctor of Philosophy \\
+  at The University of Hong Kong         \\
+  in \@date
+  \end{center}
+  \vspace*{0.5in}
+}%
+{
+  \if@restonecol\twocolumn \else \newpage \fi
+  \if@twoside\else
+  \setcounter{page}\@ne
+  \fi
+}
+\makeatother
+
+%%----------------------------------------------------------------------------%%
+%%    Environment for Declaration                                             %%
+%%----------------------------------------------------------------------------%%
+
+
+\makeatletter
+\newcommand{\makedeclaration}
+{
+\chapter*{Declaration}
+\addcontentsline{toc}{chapter}{Declaration}
+\noindent I declare that this thesis represents my own work, except
+where due acknowledgment is made, and that it has not been
+previously included in a thesis, dissertation or report submitted
+to this University or to any other institution for a degree,
+diploma or other qualifications.
+\vspace*{1.5in}
+
+\noindent%
+\begin{tabular}{@{}l@{}}
+\dotfill \\
+\@author\hspace*{3cm}\\
+\@date\\
+\end{tabular}
+}
+\makeatother
+
+%%----------------------------------------------------------------------------%%
+%%    Environment for Acknowledgments                                         %%
+%%----------------------------------------------------------------------------%%
+
+\makeatletter
+\newcommand{\makeAck}
+{
+\chapter*{Acknowledgments}
+\addcontentsline{toc}{chapter}{Acknowledgments}
+\input{acknowledgment}
+}
+\makeatother
+
+
+\KOMAoptions{listof=totoc}
+% \setkomafont{sectioning}{\normalfont\bfseries}

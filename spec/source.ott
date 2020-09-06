@@ -1,0 +1,1245 @@
+metavar typvar, a, b, L ::=
+
+metavar expvar, x, y, f, g, n, m, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
+
+indexvar index, j ::=
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL TYPE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+grammar
+
+% Types
+
+dtyp, A, B, C :: 'dtyp_' ::=
+  | int            ::   :: int
+  | nat            ::   :: nat
+  | natu            ::   :: natu {{ tex \mathsf{Nat}_\unknown }}
+  | float            ::   :: float
+  | bool            ::   :: bool
+  | boolu            ::   :: boolu {{ tex \mathsf{Bool}_\unknown }}
+  | a              ::   :: tvar
+  | A -> B         ::   :: arrow
+  | \/ a . A       ::   :: all
+  | mu a . A       ::   :: mu {{ tex \mu [[a]] [[.]] [[A]] }}
+  | unknown        ::   :: unknown
+  | static         ::   :: static
+  | gradual        ::   :: gradual
+  | List A         ::   :: list
+  | Listu A         ::   :: listu
+  | A [ A2 ~> B ]  :: M :: subst
+  | [ OO ] aA      :: S :: ctx_subst
+  | [ OO ] A       :: S :: ctx_subst2
+  | ( A )          :: S :: parens
+  | r @ ( A )      :: S :: red   {{ tex {\color{red} [[A]] } }}
+  | b @ ( A )      :: S :: blue {{ tex {\color{blue} [[A]] } }}
+  | o @ ( A )      :: S :: orange {{ tex {\color{orange} [[A]] } }}
+  | r @ \/ a . A   :: S :: red_all {{ tex [[\/]] {\color{red} [[a]]} . [[A]] }}
+  | b @ \/ a . A   :: S :: blue_all {{ tex [[\/]] {\color{blue} [[a]]} . [[A]] }}
+  | S ( A )        :: S :: subst2
+
+% Mono Types
+
+dtyp_mono, t {{ tex \tau }}, s {{ tex \sigma }} :: 'dtyp_mono_' ::=
+  | int       ::   :: int
+  | a         ::   :: tvar
+  | t -> s    ::   :: arrow
+  | static    ::   :: static
+  | gradual   ::   :: gradual
+
+% Castable Mono Types
+
+dtyp_mono_cast, tc {{ tex t }} :: 'dtyp_mono_cast_' ::=
+  | int        :: :: int
+  | a          :: :: tvar
+  | tc1 -> tc2 :: :: arrow
+  | gradual    :: :: gradual
+
+% Castable Types
+
+dtyp_castable, gc  {{ tex \mathbb{C} }}  :: 'dtyp_castable_' ::=
+  | int        :: :: int
+  | a          :: :: tvar
+  | gc1 -> gc2 :: :: arrow
+  | \/ a . gc  :: :: all
+  | unknown    :: :: unknown
+  | gradual    :: :: gradual
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO TYPE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Existential variable
+
+evar {{ tex \widehat{a} }}, evarb {{ tex \widehat{b} }}  :: 'evar_' ::=
+  | sa :: :: evar {{ tex \widehat{a}_{S} }}
+  | ga :: :: gevar {{ tex \widehat{a}_{G} }}
+  | sb :: :: evarb {{ tex \widehat{b}_{S} }}
+  | gb :: :: gevarb {{ tex \widehat{b}_{G} }}
+
+
+% marker
+ma :: 'ma_' ::=
+  | mevar :: :: mevar   {{ tex \blacktriangleright_{ \widehat{a} } }}
+  | mevarb :: :: mevarb   {{ tex \blacktriangleright_{ \widehat{b} } }}
+  | msa :: :: msa  {{ tex \blacktriangleright_{ \widehat{a}_S } }}
+  | msb :: :: msb  {{ tex \blacktriangleright_{ \widehat{b}_S } }}
+
+
+% Types
+
+atyp, aA {{ tex A }}, aB {{ tex B }}, aC {{ tex C }} :: 'atyp_' ::=
+  | int            ::   :: int
+  | a              ::   :: tvar
+  | evar           ::   :: evar
+  | aA -> aB       ::   :: arrow
+  | \/ a . aA      ::   :: all
+  | unknown        ::   :: unknown
+  | static         ::   :: static
+  | gradual        ::   :: gradual
+  | aA [ a ~> at ] :: M :: subst
+  | [ GG ] aA      :: S :: ctx_subst
+  | ( aA )         :: S :: parens
+
+% Static Types
+
+atyp_static, aT {{ tex T }} :: 'atyp_static_' ::=
+  | int        ::   :: int
+  | a          ::   :: tvar
+  | evar       ::   :: evar
+  | aT1 -> aT2 ::   :: arrow
+  | \/ a . aT  ::   :: all
+  | static     ::   :: static
+  | gradual    ::   :: gradual
+  | [ GG ] aA  :: S :: ctx_subst
+
+% Mono Types
+
+atyp_mono, at {{ tex \tau }}, as {{ tex \sigma }} :: 'atyp_mono_' ::=
+  | int       ::   :: int
+  | a         ::   :: tvar
+  | evar      ::   :: evar
+  | at -> as  ::   :: arrow
+  | static    ::   :: static
+  | gradual   ::   :: gradual
+  | [ GG ] aA :: S :: ctx_subst
+
+% Castable Mono Types
+
+atyp_mono_cast, atc {{ tex t }} :: 'atyp_mono_cast_' ::=
+  | int          :: :: int
+  | a            :: :: tvar
+  | evar         :: :: evar
+  | atc1 -> atc2 :: :: arrow
+  | gradual      :: :: gradual
+
+% Castable Types
+
+atyp_castable, agc  {{ tex \mathbb{C} }}  :: 'atyp_castable_' ::=
+  | int          :: :: int
+  | a            :: :: tvar
+  | evar         :: :: evar
+  | agc1 -> agc2 :: :: arrow
+  | \/ a . agc   :: :: all
+  | unknown      :: :: unknown
+  | gradual      :: :: gradual
+
+% Static Castable Types
+atyp_scastable, asc {{ tex \mathbb{S} }} :: 'atyp_scastable_' ::=
+  | int          :: :: int
+  | a            :: :: tvar
+  | evar         :: :: evar
+  | asc1 -> asc2 :: :: arrow
+  | \/ a . asc   :: :: all
+  | gradual      :: :: gradual
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL EXPR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+dexp, e :: 'dtrm_' ::=
+  | 1                ::   :: one
+  | x                ::   :: var
+  | n                ::   :: lit
+  | cons             ::   :: cons
+  | consu             ::   :: consu
+  | nil              ::   :: nilu
+  | nilu              ::   :: nil
+  | zerou            :: :: zero {{ tex \mathsf{zero}_\unknown }}
+  | succu            :: :: succu {{ tex \mathsf{succ}_\unknown }}
+  | trueu            :: :: trueu {{ tex \mathsf{true}_\unknown }}
+  | fold [ A ]       ::   :: fold  {{ tex [[fold]]_{[[A]]} }}
+  | unfold [ A ]       ::   :: unfold  {{ tex [[unfold]]_{[[A]]} }}
+  | \ x . e          ::   :: abs
+  | \ x : A . e      ::   :: absan
+  | e1 e2            ::   :: app
+  | let x = e1 in e2 ::   :: let
+  | let x : A = e1 in e2 ::   :: letann
+  | ( e )            :: S :: paren
+  | e : A            :: S :: anno
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO EXPR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+aexp, ae {{ tex e }} :: 'atrm_' ::=
+  | x                  ::   :: var
+  | n                  ::   :: lit
+  | \ x . ae           ::   :: abs
+  | \ x : aA . ae      ::   :: absan
+  | ae1 ae2            ::   :: app
+  | ae : aA            ::   :: anno
+  | let x = ae1 in ae2 ::   :: let
+  | ( ae )             :: S :: paren
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL CONTEXT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+dctx, dd {{ tex \Psi}}  :: 'dctx_' ::=
+  | empty       ::   :: empty
+  | dd , x : A  ::   :: cons_var
+  | dd , a      ::   :: cons_tvar
+  | [ OO ] DD     :: S :: ctx_subst
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO CONTEXT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \Omega }}, DL {{ tex \Delta_L }}, DR {{ tex \Delta_R }}, GL {{ tex \Gamma_L }}, GR {{ tex \Gamma_R }}, GM {{ tex \Gamma_M }}, OL {{ tex \Omega_L }} , OR {{ tex \Omega_R }} :: 'actx_' ::=
+  | empty                                          ::   :: empty
+  | GG , x : aA                                    ::   :: cons_var
+  | GG , a                                         ::   :: cons_tvar
+  | GG , ma                                        ::   :: cons_mark
+  | GG , evar                                      ::   :: cons_evar
+  | GG , evar = at                                 ::   :: cons_evar_solu
+  | GG [ a ]                                       :: S :: ctx_tvar
+  | GG [ evar ]                                    :: S :: ctx_etvar
+  | GG [ GG1 ]                                     :: S :: ctx_ctx
+  | GG [ evar1 , evar2 ]                           :: S :: ctx_etvar2
+  | GG [ evar1 , evar2 , evar3 ]                   :: S :: ctx_etvar3
+  | GG [ evar = at ]                               :: S :: ctx_etvar_solve
+  | GG [ evar1 , evar2 = at ]                      :: S :: ctx_etvar_solve2
+  | GG [ evar1 , evar2 , evar3 = at ]              :: S :: ctx_etvar_solve3
+  | GG [ evar1 = at1 , evar2 = at2 , evar3 = at3 ] :: S :: ctx_etvar_solve4
+  | GG , a , DD                                    :: S :: middle
+  | GG , x : aA , DD                               :: S :: middle2
+  | GG , evar , DD                                 :: S :: middle3
+  | GG , evar = at , DD                            :: S :: middle4
+  | GG , DD                                        :: S :: ext
+  | ( GG )                                         :: S :: parens
+  | [ aA ] GG                                      :: S :: subst_ctx {{ tex  \mathsf{contaminate}( [[GG]] , [[aA]] ) }}
+  | | GG |                                         :: S :: solve_ctx
+  | evar    :: S :: singleton
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PBC EXPR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }} :: 'ptrm_' ::=
+  | 1              ::   :: one
+  | x              ::   :: var
+  | n              ::   :: lit
+  | \ x : A . pe   ::   :: absann
+  | /\ a . pe      ::   :: tabs
+  | pe1 pe2        ::   :: app
+  | < A `-> B > pe ::   :: cast
+  | ( pe )         :: S :: paren
+  | S ( pe )       :: S :: subst
+
+pvalue, pv {{ tex v }} :: 'pvalue_' ::=
+  | n              ::   :: lit
+  | \ x : A . pe   ::   :: absann
+  | /\ a . pe      ::   :: tabs
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TERMINALS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+terminals :: 'terminals_' ::=
+  | ~       :: :: consist {{ tex \sim }}
+  | ->      :: :: arrow   {{ tex \rightarrow }}
+  | int     :: :: int     {{ tex \mathsf{Int} }}
+  | nat     :: :: nat     {{ tex \mathsf{Nat} }}
+  | bool     :: :: bool     {{ tex \mathsf{Bool} }}
+  | float     :: :: float     {{ tex \mathsf{Float} }}
+  | List     ::  :: list  {{ tex \mathsf{List} }}
+  | Listu    ::  :: listu {{ tex \mathsf{List}_\unknown }}
+  | n       :: :: lit     {{ tex \mathsf{n} }}
+  | cons       :: :: cons     {{ tex \mathsf{cons} }}
+  | consu       :: :: consu     {{ tex \mathsf{cons}_\unknown }}
+  | nil       :: :: nil     {{ tex \mathsf{nil} }}
+  | nilu       :: :: nilu     {{ tex \mathsf{nil}_\unknown }}
+  | fold      :: :: fold   {{ tex \mathbf{fold} }}
+  | unfold      :: :: unfold   {{ tex \mathbf{unfold} }}
+  | .       :: :: dot     {{ tex .\, }}
+  | unknown :: :: unknown {{ tex \star }}
+  | empty   :: :: empty   {{ tex \bullet }}
+  | |-      :: :: turnstile {{ tex \vdash }}
+  | ||-     :: :: turnstile2 {{ tex \vdash^\mathit{OL} }}
+  | -|      :: :: dashv {{ tex \dashv }}
+  | ~>      :: :: mapsto    {{ tex \mapsto }}
+  | <~      :: :: conssub   {{ tex \lesssim }}
+  | <~~     :: :: inst   {{ tex \lessapprox }}
+  | \       :: :: lambda    {{ tex \lambda }}
+  | ~~>     :: :: translate {{ tex \rightsquigarrow }}
+  | /\      :: :: tlambda   {{ tex \Lambda }}
+  | \/      :: :: forall   {{ tex \forall }}
+  | `->     :: :: cast      {{ tex \hookrightarrow }}
+  | <       :: :: lbr  {{ tex \langle }}
+  | >       :: :: rbr  {{ tex \rangle }}
+  | static  :: :: sta {{ tex \mathcal{S} }}
+  | gradual :: :: gra {{ tex \mathcal{G} }}
+  | |>      :: :: match {{ tex \triangleright  }}
+  | =>      :: :: inf   {{ tex \Rightarrow }}
+  | <=      :: :: chk   {{ tex \Leftarrow }}
+  | -->     :: :: ext   {{ tex \longrightarrow }}
+  | S       :: :: psubst {{ tex \psubst }}
+  | blame   :: :: blame  {{ tex \mathsf{blame} }}
+  | ==>     :: :: reduce {{ tex \Downarrow }}
+
+
+formula :: formula_ ::=
+  | judgement             :: :: judgement
+  | a in dd               :: :: bind_tvar {{ tex [[a]] \in [[dd]] }}
+  | r @ ( a ) in dd       :: :: bind_red_tvar {{ tex {\color{red} [[a]] } \in [[dd]] }}
+  | b @ ( a ) in dd       :: :: bind_blue_tvar {{ tex {\color{blue} [[a]] } \in [[dd]] }}
+  | a in GG               :: :: bind_tvar2 {{ tex [[a]] \in [[GG]] }}
+  | ( x : A ) in dd       :: :: bind_var {{ tex ( [[x]] : [[A]] ) \in [[dd]] }}
+  | ( x : aA ) in GG      :: :: bind_var2 {{ tex ( [[x]] : [[aA]] ) \in [[GG]] }}
+  | evar in fv ( aA )     :: :: fv {{ tex [[evar]] \in \textsc{fv} ( [[aA]] ) }}
+  | evar notin fv ( aA )  :: :: nfv {{ tex [[evar]] \notin \textsc{fv} ( [[aA]] ) }}
+  | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
+  | a notin fv ( GG )     :: :: afv {{ tex [[a]] \notin \textsc{fv} ( [[GG]] ) }}
+  | ma notin fv ( GG )     :: :: mafv {{ tex [[ma]] \notin \textsc{fv} ( [[GG]] ) }}
+  | x notin fv ( GG )     :: :: xfv {{ tex [[x]] \notin \textsc{fv} ( [[GG]] ) }}
+  | aA = aB               :: :: eq
+  | dd |- e : A           :: :: typ
+  | dd |- pe : A :: :: ptyp {{ tex [[dd]] \vdash^\mathit{B} [[pe]] : [[A]] }}
+  | CC : ( dd |- A ) ~~> ( dd' |- A' ) :: :: ctx {{ tex [[CC]] : ( [[dd]] \vdash^\mathit{B} [[A]] ) \rightsquigarrow ( [[dd']] \vdash^\mathit{B} [[A']] ) }}
+  | A1 <: A2 :: :: sub
+  | A1 <~ A2 :: :: csub
+  | || A ||               :: :: sizeA {{ tex \llbracket [[A]] \rrbracket }}
+  | || e ||e              :: :: sizeE {{ tex \llbracket [[e]] \rrbracket_\mathcal{E} }}
+  | || pe ||              :: :: size {{ tex \llbracket [[pe]] \rrbracket }}
+  | || pe ||e             :: :: size_e {{ tex \llbracket [[pe]] \rrbracket_\mathcal{E} }}
+  | || pe ||s             :: :: size_s {{ tex \llbracket [[pe]] \rrbracket_\mathcal{S} }}
+  | || pe ||g             :: :: size_g {{ tex \llbracket [[pe]] \rrbracket_\mathcal{G} }}
+  | e <<= e'   :: :: eless  {{ tex [[e]] \sqsubseteq [[e']] }}
+  | A <<= B   :: :: tless  {{ tex [[A]] \sqsubseteq [[B]] }}
+  | pe <<= pe'   :: :: peless  {{ tex [[pe]] \sqsubseteq [[pe']] }}
+  | dd1 | dd2 |- pe1 <<= pe2 :: :: bless {{ tex [[dd1]] \shortmid [[dd2]] \vdash [[pe1]] \sqsubseteq^\mathit{B} [[pe2]] }}
+  | aA <~~ evar    :: :: inst
+  | evar <~~ aA    :: :: inst2
+  | \ pe \   ::  :: type_erasure {{ tex \lfloor [[pe]] \rfloor }}
+  | pe ==> pv  ::  :: reduce 
+  | pe ==> blame  ::  :: blame
+  | aA <~ aB :: :: algo
+
+
+subrules
+  t <:: A
+  gc <:: A
+  tc <:: t
+  tc <:: t
+  aT <:: aA
+  at <:: aT
+  atc <:: at
+  agc <:: aA
+  asc <:: agc
+  pv <:: pe
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL CONSISTENCY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+DConsist :: '' ::=
+
+defn
+
+A ~ B ::  :: dconsist :: dconsist_ by
+
+
+------- :: refl
+A ~ A
+
+
+------------- :: unknownR
+A ~ unknown
+
+------------- :: unknownL
+unknown ~ A
+
+
+------------- :: unknownbR
+b@(gc) ~ unknown
+
+------------- :: unknownbL
+unknown ~ b@(gc)
+
+
+A1 ~ B1
+A2 ~ B2
+-------------------- :: arrow
+A1 -> A2 ~ B1 -> B2
+
+A ~ B
+------------------ :: forall
+\/ a. A ~ \/ a. B
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL WELL FORMEDNESS OF TYPES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+DWft :: '' ::=
+
+defn
+
+dd |- A ::  :: dwft :: d_ by
+
+--------- :: int
+dd |- int
+
+
+--------- :: unknown
+dd |- unknown
+
+
+-------------- :: static
+dd |- static
+
+-------------- :: gradual
+dd |- gradual
+
+
+a in dd
+-------- :: tvar
+dd |- a
+
+dd |- A
+dd |- B
+-------------- :: arrow
+dd |- A -> B
+
+dd, a |- A
+-------------- :: forall
+dd |- \/ a. A
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL SUBTYPING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+DSubtyping :: '' ::=
+
+defn
+
+dd |- A <: B ::  :: dsubtyping :: s_ by
+
+
+dd, a |- A <: B
+----------------- :: forallR
+dd |- A <: \/ a. B
+
+
+dd |- t
+dd |- A [a ~> t] <: B
+----------------- :: forallL
+dd |- \/ a. A <: B
+
+
+dd |- r @ (t)
+dd |- A [r @ (a) ~> r @ (t) ] <: B
+------------------------ :: forallLr
+dd |- r @ \/ a. A <: B
+
+dd |- b @ (t)
+dd |- A [b @ (a) ~> b @ (t) ] <: B
+------------------------ :: forallLb
+dd |- b @ \/ a. A <: B
+
+
+a in dd
+-------------------- :: tvar
+dd |- a <: a
+
+
+r@(a) in dd
+-------------------- :: tvarr
+dd |- r@(a) <: r@(a)
+
+b@(a) in dd
+-------------------- :: tvarb
+dd |- b@(a) <: b@(a)
+
+
+-------------------- :: int
+dd |- int <: int
+
+
+-------------------- :: intr
+dd |- r@(int) <: r@(int)
+
+-------------------- :: intb
+dd |- b@(int) <: b@(int)
+
+dd |- B1 <: A1
+dd |- A2 <: B2
+---------------------------- :: arrow
+dd |- A1 -> A2 <: B1 -> B2
+
+
+--------------------------- :: unknown
+dd |- unknown <: unknown
+
+
+--------------------------- :: unknownb
+dd |- b@(unknown) <: b@(unknown)
+
+--------------------------- :: spar
+dd |- r@(static) <: r@(static)
+
+--------------------------- :: gparr
+dd |- r@(gradual) <: r@(gradual)
+
+--------------------------- :: gparb
+dd |- b@(gradual) <: b@(gradual)
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL CONSISTENT SUBTYPING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+DConSub :: '' ::=
+
+defn
+
+dd |- A <~ B ::  :: dconsub :: cs_ by
+
+
+dd, a |- A <~ B
+----------------- :: forallR
+dd |- A <~ \/ a. B
+
+dd |- t
+dd |- A [a ~> t] <~ B
+----------------- :: forallL
+dd |- \/ a. A <~ B
+
+dd |- B1 <~ A1
+dd |- A2 <~ B2
+---------------------------- :: arrow
+dd |- A1 -> A2 <~ B1 -> B2
+
+a in dd
+-------------------- :: tvar
+dd |- a <~ a
+
+-------------------- :: int
+dd |- int <~ int
+
+
+--------------------------- :: unknownL
+dd |- unknown <~ A
+
+--------------------------- :: unknownR
+dd |- A <~ unknown
+
+
+--------------------------- :: unknownLL
+dd |- unknown <~ gc
+
+--------------------------- :: unknownRR
+dd |- gc <~ unknown
+
+--------------------------- :: spar
+dd |- static <~ static
+
+--------------------------- :: gpar
+dd |- gradual <~ gradual
+
+
+% dd |- A <: A'
+% A' ~ B'
+% dd |- B' <: B
+% --------------------------- :: spec
+% dd |- A <~ B
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL TYPING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+DTyping :: '' ::=
+
+defn
+
+dd |- e : A ~~> pe ::  :: dtyping :: '' {{ tex [[dd]] [[|-]] [[e]] : [[A]] \otthl{[[~~>]] [[pe]]} }}
+by
+
+
+(x : A) in dd
+--------------------------- :: var
+dd |- x : A ~~> x
+
+--------------------------- :: int
+dd |- n : int ~~> n
+
+dd, a |- e : A ~~> pe
+--------------------------- :: gen
+dd |- e : \/ a. A ~~> /\a. pe
+
+dd, x: A |- e : B ~~> pe
+--------------------------- :: lamann
+dd |- \x: A. e : A -> B ~~> \x:A. pe
+
+dd, x: t |- e : B ~~> pe
+--------------------------- :: lam
+dd |- \x. e : t -> B ~~> \x:t. pe
+
+dd |- e1 : A ~~> pe1
+dd |- A |> A1 -> A2
+dd |- e2 : A3 ~~> pe2
+dd |- A3 <~ A1
+------------------------------- :: app
+dd |- e1 e2 : A2 ~~> (< A `-> A1 -> A2 > pe1) (<A3 `-> A1> pe2)
+
+
+dd |- e1 : A ~~> pe1
+dd, x : A |- e2 : B ~~> pe2
+--------------------------------------------------- :: let
+dd |- let x = e1 in e2 : B ~~>  (\x : A . pe2) pe1
+
+
+
+defn
+
+dd ||- e : A  ::  :: udtyping :: 'u_' by
+
+
+(x : A) in dd
+--------------------------- :: var
+dd ||- x : A
+
+--------------------------- :: int
+dd ||- n : int
+
+dd, a ||- e : A
+--------------------------- :: gen
+dd ||- e : \/ a. A
+
+dd, x: A ||- e : B
+--------------------------- :: lamann
+dd ||- \x: A. e : A -> B
+
+dd, x: t ||- e : B
+--------------------------- :: lam
+dd ||- \x. e : t -> B
+
+
+dd ||- e1 : A1 -> A2
+dd ||- e2 : A1
+------------------------------- :: app
+dd ||- e1 e2 : A2
+
+
+dd ||- e : A1
+dd |- A1 <: A2
+--------------------------- :: sub
+dd ||- e : A2
+
+
+dd ||- e1 : A
+dd, x : A ||- e2 : B
+------------------------------ :: let
+dd ||- let x = e1 in e2 : B
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL MATCHING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+defns
+DMatching :: '' ::=
+
+defn
+
+dd |- A |> B ::  :: dmatching :: m_ by
+
+
+dd |- t
+dd |- A [a ~> t] |> A1 -> A2
+-------------------------------- :: forall
+dd |- \/ a . A |> A1 -> A2
+
+
+-------------------------- :: arr
+dd |- A1 -> A2 |> A1 -> A2
+
+
+-------------------------------------- :: unknown
+dd |- unknown |> unknown -> unknown
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WELL FORMEDNESS OF ALGO CONTEXTS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+Wfc :: '' ::=
+
+defn
+
+|- GG ::  :: wfc :: wf_ by
+
+
+
+
+----------------------- :: empty
+|- empty
+
+
+|- GG
+x notin fv(GG)
+GG |- aA
+----------------- :: var
+|- GG , x : aA
+
+
+
+|- GG
+a notin fv(GG)
+----------------- :: tvar
+|- GG , a
+
+
+|- GG
+evar notin fv(GG)
+----------------- :: evar
+|- GG , evar
+
+
+|- GG
+evar notin fv(GG)
+GG |- at
+----------------- :: solved
+|- GG , evar = at
+
+|- GG
+mevar notin fv(GG)
+----------------- :: marker
+|- GG , mevar
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO WELL FORMEDNESS OF TYPES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+AWft :: '' ::=
+
+defn
+
+GG |- aA ::  :: awft :: ad_ by
+
+--------- :: int
+GG |- int
+
+
+--------- :: unknown
+GG |- unknown
+
+
+--------- :: static
+GG |- static
+
+
+--------- :: gradual
+GG |- gradual
+
+
+-------- :: tvar
+GG[a] |- a
+
+
+------------------ :: evar
+GG[evar] |- evar
+
+
+------------------ :: solved
+GG[evar = at] |- evar
+
+
+GG |- aA
+GG |- aB
+-------------- :: arrow
+GG |- aA -> aB
+
+GG, a |- aA
+-------------- :: forall
+GG |- \/ a. aA
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO CONSISTENT SUBTYPING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+AConSub :: '' ::=
+
+defn
+
+GG |- aA <~ aB -| DD ::  :: aconsub :: as_
+by
+
+
+-------------------------- :: tvar
+GG[a] |- a <~ a -| GG[a]
+
+
+
+-------------------------- :: evar
+GG[evar] |- evar <~ evar -| GG[evar]
+
+
+-------------------- :: int
+GG |- int <~ int -| GG
+
+
+GG |- aB1 <~ aA1 -| TT
+TT |- [TT] aA2 <~ [TT] aB2 -| DD
+----------------------------------------- :: arrow
+GG |- aA1 -> aA2 <~ aB1 -> aB2 -| DD
+
+
+GG, a |- aA <~ aB -| DD, a, TT
+----------------------------- :: forallR
+GG |- aA <~ \/ a. aB -| DD
+
+
+GG, mevar, evar |- aA [a ~> evar] <~ aB -| DD, mevar, TT
+------------------------------ :: forallL
+GG |- \/ a. aA <~ aB -| DD
+
+
+GG, msa, sa |- aA [a ~> sa] <~ aB -| DD, msa, TT
+------------------------------ :: forallLL
+GG |- \/ a. aA <~ aB -| DD
+
+
+--------------------------- :: spar
+GG |- static <~ static -| GG
+
+--------------------------- :: gpar
+GG |- gradual <~ gradual -| GG
+
+
+--------------------------- :: unknownL
+GG |- unknown <~ aA -| GG
+
+--------------------------- :: unknownR
+GG |- aA <~ unknown -| GG
+
+
+--------------------------- :: unknownLL
+GG |- unknown <~ agc -| [agc] GG
+
+--------------------------- :: unknownRR
+GG |- agc <~ unknown -| [agc] GG
+
+
+evar notin fv(aA)
+GG[evar] |- evar <~~ aA -| DD
+---------------------------------- :: instL
+GG[evar] |-  evar <~ aA -| DD
+
+
+
+evar notin fv(aA)
+GG[evar] |- aA <~~ evar -| DD
+---------------------------------- :: instR
+GG[evar] |-  aA <~ evar -| DD
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% INSTANTIATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+defns
+AInst :: '' ::=
+
+defn
+
+GG |- evar <~~ aA -| DD :: :: instl :: instl_
+by
+
+
+
+GG |- at
+--------------------------------------------- :: solve
+GG, evar, GG' |- evar <~~ at -| GG, evar = at, GG'
+
+
+--------------------------------------------- :: solveU
+GG[evar] |- evar <~~ unknown -| GG[evar]
+
+
+
+GG |- at
+--------------------------------------------- :: solveS
+GG, sa, GG' |- sa <~~ at -| GG, sa = at, GG'
+
+
+GG |- atc
+--------------------------------------------- :: solveG
+GG, ga, GG' |- ga <~~ atc -| GG, ga = atc, GG'
+
+
+
+--------------------------------------------- :: solveUS
+GG[sa] |- sa <~~ unknown -| GG[ga, sa = ga]
+
+
+--------------------------------------------- :: solveUG
+GG[ga] |- ga <~~ unknown -| GG[ga]
+
+
+------------------------------------------------------------- :: reach
+GG[evar][evarb] |- evar <~~ evarb -| GG[evar][evarb = evar]
+
+
+------------------------------------------------------------- :: reachSG1
+GG[sa][gb] |- sa <~~ gb -| GG[ga , sa = ga][gb = ga]
+
+
+------------------------------------------------------------- :: reachSG2
+GG[sb][ga] |- ga <~~ sb -| GG[gb , sb = gb][ga = gb]
+
+
+------------------------------------------------------------- :: reachOther
+GG[evar][evarb] |- evar <~~ evarb -| GG[evar][evarb = evar]
+
+
+
+
+GG[evar2, evar1, evar = evar1 -> evar2] |- aA1 <~~ evar1 -| TT
+TT |- evar2 <~~ [TT]aA2 -| DD
+----------------------------------------------------------------- :: arr
+GG[evar] |- evar <~~ aA1 -> aA2 -| DD
+
+
+
+
+GG[evar] , b |- evar <~~ aB -| DD , b , TT
+--------------------------------------- :: forallR
+GG[evar] |- evar <~~ \/b . aB -| DD
+
+
+
+
+defn
+GG |- aA <~~ evar -| DD :: :: instr :: instr_
+by
+
+GG |- at
+--------------------------------------------- :: solve
+GG, evar, GG' |- at <~~ evar -| GG, evar = at, GG'
+
+
+--------------------------------------------- :: solveU
+GG[evar] |- unknown <~~ evar -| GG[evar]
+
+GG |- at
+--------------------------------------------- :: solveS
+GG, sa, GG' |- at <~~ sa -| GG, sa = at, GG'
+
+
+GG |- atc
+--------------------------------------------- :: solveG
+GG, ga, GG' |- atc <~~ ga -| GG, ga = atc, GG'
+
+
+
+--------------------------------------------- :: solveUS
+GG[sa] |- unknown  <~~ sa  -| GG[ga, sa = ga]
+
+
+--------------------------------------------- :: solveUG
+GG[ga] |- unknown  <~~ ga  -| GG[ga]
+
+
+
+------------------------------------------------------------- :: reach
+GG[evar][evarb] |- evarb <~~ evar -| GG[evar][evarb = evar]
+
+
+------------------------------------------------------------- :: reachSG1
+GG[sa][gb] |- gb <~~ sa -| GG[ga , sa = ga][gb = ga]
+
+
+------------------------------------------------------------- :: reachSG2
+GG[sb][ga] |- sb <~~ ga -| GG[gb , sb = gb][ga = gb]
+
+
+------------------------------------------------------------- :: reachOther
+GG[evar][evarb] |- evarb <~~ evar -| GG[evar][evarb = evar]
+
+
+
+
+GG[evar2, evar1, evar = evar1 -> evar2] |- evar1 <~~ aA1 -| TT
+TT |- [TT]aA2 <~~ evar2  -| DD
+----------------------------------------------------------------- :: arr
+GG[evar] |- aA1 -> aA2  <~~ evar -| DD
+
+
+GG[evar] , mevarb, evarb |- aB[b ~> evarb] <~~ evar -| DD, mevarb, TT
+-------------------------------------------------- :: forallL
+GG[evar] |- \/b . aB <~~ evar -| DD
+
+
+GG[evar] , msb, sb |- aB[b ~> sb] <~~ evar -| DD, msb, TT
+-------------------------------------------------- :: forallLL
+GG[evar] |- \/b . aB <~~ evar -| DD
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO TYPING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+ATyping :: '' ::=
+
+defn
+
+GG |- ae => aA -| DD ::  :: inf :: 'inf_'
+by
+
+(x : aA) in GG
+--------------------------- :: var
+GG |- x => aA -| GG
+
+
+
+--------------------------- :: int
+GG |- n => int -| GG
+
+
+GG |- aA
+GG, evarb,  x: aA |- ae <= evarb -| DD, x : aA, TT
+------------------------------------------- :: lamann
+GG |- \x: aA. ae => aA -> evarb -| DD
+
+
+GG |- aA
+GG, sb,  x: aA |- ae <= sb -| DD, x : aA, TT
+------------------------------------------- :: lamann2
+GG |- \x: aA. ae => aA -> sb -| DD
+
+
+GG, evar, evarb, x : evar |- ae <= evarb -| DD, x : evar, TT
+------------------------------------ :: lam
+GG |- \x. ae => evar -> evarb  -| DD
+
+
+GG, sa, sb, x : sa |- ae <= sb -| DD, x : sa, TT
+------------------------------------ :: lam2
+GG |- \x. ae => sa -> sb  -| DD
+
+
+GG |- ae1 => aA -| TT1
+TT1 |- [TT1] aA |> aA1 -> aA2 -| TT2
+TT2 |- ae2 <= [TT2]aA1 -| DD
+------------------------------- :: app
+GG |- ae1 ae2 => aA2  -| DD
+
+
+
+GG |- aA
+GG |- ae <= aA -| DD
+---------------------- :: anno
+GG |- ae : aA => aA -| DD
+
+
+GG |- ae1 => aA -| TT1
+TT1, evar, x : aA |- ae2 <= evar -| DD, x : aA, TT2
+------------------------------------------------ :: let
+GG |- let x = ae1 in ae2 => evar -| DD
+
+
+GG |- ae1 => aA -| TT1
+TT1, sa, x : aA |- ae2 <= sa -| DD, x : aA, TT2
+------------------------------------------------ :: let2
+GG |- let x = ae1 in ae2 => sa -| DD
+
+defn
+
+GG |- ae <= aA -| DD ::  :: chk :: 'chk_'
+by
+
+
+GG, a |- ae <= aA -| DD , a , TT
+--------------------------- :: gen
+GG |- ae <= \/ a. aA -| DD
+
+
+
+GG, x : aA |- ae <= aB -| DD, x : aA, TT
+------------------------------------ :: lam
+GG |- \x. ae <= aA -> aB  -| DD
+
+
+GG |- ae => aA -| TT
+TT |- [TT]aA <~ [TT]aB -| DD
+------------------------------------ :: sub
+GG |- ae <= aB -| DD
+
+
+GG |- ae1 => aA -| TT
+TT, x : aA |- ae2 <= aB -| DD, x : aA, TT'
+------------------------------------------------ :: let
+GG |- let x = ae1 in ae2 <= aB -| DD
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO MATCHING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+defns
+AMatching :: '' ::=
+
+defn
+
+GG |- aA |> aA1 -> aA2 -| DD ::  :: amatching :: am_
+by
+
+
+
+GG , evar |- aA[a ~> evar] |> aA1 -> aA2 -| DD
+-------------------------------------------- :: forall
+GG |- \/a. aA |> aA1 -> aA2 -| DD
+
+
+GG , sa |- aA[a ~> sa] |> aA1 -> aA2 -| DD
+-------------------------------------------- :: forallL
+GG |- \/a. aA |> aA1 -> aA2 -| DD
+
+
+------------------------------------------ :: arr
+GG |-  aA1 -> aA2 |> aA1 -> aA2 -| GG
+
+
+------------------------------------------ :: unknown
+GG |-  unknown |> unknown -> unknown -| GG
+
+
+---------------------------------------------------------------------------------- :: var
+GG[evar] |-  evar |> evar1 -> evar2 -| GG[evar1 , evar2 , evar = evar1 -> evar2]
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CONTEXT EXTENSION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+Extension :: '' ::=
+
+
+defn
+
+GG --> DD :: :: cext :: 'ext_' by
+
+
+
+--------------- :: id
+empty --> empty
+
+
+
+GG --> DD
+[DD] aA = [DD] aA'
+-------------------------------- :: var
+GG , x : aA --> DD , x : aA'
+
+
+GG --> DD
+-------------------- :: tvar
+GG , a  -->  DD , a
+
+
+GG --> DD
+------------------------- :: evar
+GG , evar --> DD , evar
+
+
+GG --> DD
+[DD] at = [DD] at'
+------------------------------------- :: solved
+GG , evar = at --> DD , evar = at'
+
+
+GG --> DD
+------------------------------------- :: solve
+GG , evar  --> DD , evar = at
+
+
+GG --> DD
+------------------------------------- :: solveS
+GG , sa  --> DD , sa = at
+
+
+GG --> DD
+------------------------------------- :: solveG
+GG , ga --> DD , ga = atc
+
+
+GG --> DD
+------------------------------------- :: add
+GG  --> DD , evar
+
+
+GG --> DD
+------------------------------------- :: marker
+GG, mevar  --> DD , mevar
+
+
+
+GG --> DD
+------------------------------------- :: addSolve
+GG  --> DD , evar = at
+
+
+
+GG --> DD
+------------------------------------- :: addSolveS
+GG  --> DD , sa = at
+
+
+GG --> DD
+------------------------------------- :: addSolveG
+GG  --> DD , ga = atc
