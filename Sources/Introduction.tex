@@ -2,6 +2,8 @@
 \chapter{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+mention that in this thesis when we say ``higher-rank polymorphism'' we mean
+``predicative implicit higher-rank polymorphism''.
 
 \section{Contributions}
 
@@ -10,7 +12,7 @@ In summary the contributions of this thesis are:
 \begin{itemize}
 
 \item \cref{chap:BiDirectional} proposes a new design for type inference
-  predicative implicit higher-rank polymorphism.
+  higher-rank polymorphism.
   \begin{itemize}
   \item We design a variant of bi-directional type checking
     where the inference mode is combined with a new, so-called, application
@@ -23,7 +25,7 @@ In summary the contributions of this thesis are:
     an algorithmic type system with completeness and soundness proofs.
   \end{itemize}
 
-\item \cref{chap:Gradual} extends predicative implicit higher-rank
+\item \cref{chap:Gradual} extends higher-rank
   polymorphism with gradual types.
   \begin{itemize}
   \item We define a framework for consistent subtyping with
@@ -45,11 +47,11 @@ In summary the contributions of this thesis are:
     the design principle of \cite{garcia:principal}.
   \end{itemize}
   
-\item \Cref{chap:kindinference} presents a variant of unification for implicit higher-rank polymorphism
+\item \Cref{chap:kindinference} presents a variant of unification for higher-rank polymorphism
   \begin{itemize}
   \item We propose a process named \textit{promotion}, which promotes a type so
     that it is well-typed in the prefix context of a type variable.
-  \item We apply promotion to predicative implicit higher-rank polymorphism and
+  \item We apply promotion to higher-rank polymorphism and
     redesign the type variable instantiation.
   \item We further explore the design of promotion by an application to the kind
   inference problem for datatypes.
