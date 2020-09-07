@@ -1,5 +1,7 @@
 \section{The Odersky-L{\"a}ufer Type System}
 
+\subsection{Higher-rank Types}
+
 \begin{figure}[t]
   \begin{small}
     \centering
@@ -11,11 +13,17 @@
       \bottomrule
     \end{tabular}
 
-    \drules[u]{$ [[dd ||- e : A ]] $}{Typing}{var, int, lamann, lam, app, sub, gen, let}
+    \drules[ol]{$ [[dd |-OL e : A ]] $}{Typing}{var, int, lamann, lam, app, sub, gen, let}
 
-    \drules[s]{$ [[dd |- A <: B ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR}
+    \drules[ol-s]{$ [[dd |-OL A <: B ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR}
 
   \end{small}
   \caption{Syntax and static semantics of the Odersky-L{\"a}ufer type system.}
   \label{fig:original-typing}
 \end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../Thesis.bib"
+%%% End:

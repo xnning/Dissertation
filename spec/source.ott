@@ -289,7 +289,8 @@ terminals :: 'terminals_' ::=
   | unknown :: :: unknown {{ tex \star }}
   | empty   :: :: empty   {{ tex \bullet }}
   | |-      :: :: turnstile {{ tex \vdash }}
-  | ||-     :: :: turnstile2 {{ tex \vdash^\mathit{OL} }}
+  | |-OL    :: :: turnstile1 {{ tex \vdash^\mathit{OL} }}
+  | ||-OL   :: :: turnstile2 {{ tex \vdash^\mathit{OL} }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -412,6 +413,10 @@ DWft :: '' ::=
 
 defn
 
+dd |-OL A ::  :: oldwft :: ol_d_ by
+
+defn
+
 dd |- A ::  :: dwft :: d_ by
 
 --------- :: int
@@ -448,6 +453,31 @@ dd |- \/ a. A
 
 defns
 DSubtyping :: '' ::=
+
+defn
+
+dd |-OL A <: B ::  :: oldsubtyping :: ol_s_ by
+
+a in dd
+-------------------- :: tvar
+dd |-OL a <: a
+
+-------------------- :: int
+dd |-OL int <: int
+
+dd |-OL B1 <: A1
+dd |-OL A2 <: B2
+---------------------------- :: arrow
+dd |-OL A1 -> A2 <: B1 -> B2
+
+dd |-OL t
+dd |-OL A [a ~> t] <: B
+----------------- :: forallL
+dd |-OL \/ a. A <: B
+
+dd, a |-OL A <: B
+----------------- :: forallR
+dd |-OL A <: \/ a. B
 
 defn
 
@@ -632,45 +662,45 @@ dd |- let x = e1 in e2 : B ~~>  (\x : A . pe2) pe1
 
 defn
 
-dd ||- e : A  ::  :: udtyping :: 'u_' by
+dd |-OL e : A  ::  :: udtyping :: 'ol_' by
 
 
 (x : A) in dd
 --------------------------- :: var
-dd ||- x : A
+dd |-OL x : A
 
 --------------------------- :: int
-dd ||- n : int
+dd |-OL n : int
 
-dd, a ||- e : A
+dd, a |-OL e : A
 --------------------------- :: gen
-dd ||- e : \/ a. A
+dd |-OL e : \/ a. A
 
-dd, x: A ||- e : B
+dd, x: A |-OL e : B
 --------------------------- :: lamann
-dd ||- \x: A. e : A -> B
+dd |-OL \x: A. e : A -> B
 
-dd, x: t ||- e : B
+dd, x: t |-OL e : B
 --------------------------- :: lam
-dd ||- \x. e : t -> B
+dd |-OL \x. e : t -> B
 
 
-dd ||- e1 : A1 -> A2
-dd ||- e2 : A1
+dd |-OL e1 : A1 -> A2
+dd |-OL e2 : A1
 ------------------------------- :: app
-dd ||- e1 e2 : A2
+dd |-OL e1 e2 : A2
 
 
-dd ||- e : A1
+dd |-OL e : A1
 dd |- A1 <: A2
 --------------------------- :: sub
-dd ||- e : A2
+dd |-OL e : A2
 
 
-dd ||- e1 : A
-dd, x : A ||- e2 : B
+dd |-OL e1 : A
+dd, x : A |-OL e2 : B
 ------------------------------ :: let
-dd ||- let x = e1 in e2 : B
+dd |-OL let x = e1 in e2 : B
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL MATCHING
