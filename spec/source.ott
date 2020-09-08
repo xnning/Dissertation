@@ -1,8 +1,8 @@
-metavar typvar, a, b, L ::=
+metavar typvar, a {{ tex a }}, b, L ::=
 
 metavar expvar, x, y, f, g, n, m, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
 
-indexvar index, j ::=
+indexvar index, i, j ::=
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL TYPE
@@ -12,23 +12,31 @@ grammar
 
 % Types
 
-dtyp, A, B, C :: 'dtyp_' ::=
+varset, avs  :: 'varset_' ::=
+  | a                        ::  :: a {{ tex a }}
+  | avs1 , .. , avs2         ::  :: append
+  | fv ( dd )                ::  :: fv_dd
+  | fv ( GG )                ::  :: fv_gg
+  | avs set                  ::  :: a_set {{ tex \overbar{[[avs]]} }}
+
+dtyp, A {{tex \sigma}}, B, C :: 'dtyp_' ::=
   | int            ::   :: int
   | nat            ::   :: nat
-  | natu            ::   :: natu {{ tex \mathsf{Nat}_\unknown }}
-  | float            ::   :: float
-  | bool            ::   :: bool
-  | boolu            ::   :: boolu {{ tex \mathsf{Bool}_\unknown }}
+  | natu           ::   :: natu {{ tex \mathsf{Nat}_\unknown }}
+  | float          ::   :: float
+  | bool           ::   :: bool
+  | boolu          ::   :: boolu {{ tex \mathsf{Bool}_\unknown }}
   | a              ::   :: tvar
   | A -> B         ::   :: arrow
-  | \/ a . A       ::   :: all
+  | \/ varset . A  ::   :: all
+  | \/ varset . t  ::   :: all_mono
   | mu a . A       ::   :: mu {{ tex \mu [[a]] [[.]] [[A]] }}
   | unknown        ::   :: unknown
   | static         ::   :: static
   | gradual        ::   :: gradual
   | List A         ::   :: list
-  | Listu A         ::   :: listu
-  | A [ A2 ~> B ]  :: M :: subst
+  | Listu A        ::   :: listu
+  | A [ </  Ai ~> Bi // i /> ]  :: M :: subst
   | [ OO ] aA      :: S :: ctx_subst
   | [ OO ] A       :: S :: ctx_subst2
   | ( A )          :: S :: parens
@@ -41,12 +49,13 @@ dtyp, A, B, C :: 'dtyp_' ::=
 
 % Mono Types
 
-dtyp_mono, t {{ tex \tau }}, s {{ tex \sigma }} :: 'dtyp_mono_' ::=
+dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }} :: 'dtyp_mono_' ::=
   | int       ::   :: int
   | a         ::   :: tvar
   | t -> s    ::   :: arrow
   | static    ::   :: static
   | gradual   ::   :: gradual
+  | t [ </  ti ~>  si // i /> ]  :: M :: subst
 
 % Castable Mono Types
 
@@ -62,7 +71,7 @@ dtyp_castable, gc  {{ tex \mathbb{C} }}  :: 'dtyp_castable_' ::=
   | int        :: :: int
   | a          :: :: tvar
   | gc1 -> gc2 :: :: arrow
-  | \/ a . gc  :: :: all
+  | \/ varset . gc  :: :: all
   | unknown    :: :: unknown
   | gradual    :: :: gradual
 
@@ -183,6 +192,8 @@ dexp, e :: 'dtrm_' ::=
   | let x : A = e1 in e2 ::   :: letann
   | ( e )            :: S :: paren
   | e : A            :: S :: anno
+  | ( e1 , e2 )      ::   :: pair
+  | 'a'              ::   :: a
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -276,6 +287,8 @@ terminals :: 'terminals_' ::=
   | nat     :: :: nat     {{ tex \mathsf{Nat} }}
   | bool     :: :: bool     {{ tex \mathsf{Bool} }}
   | float     :: :: float     {{ tex \mathsf{Float} }}
+  | notin    ::  :: notin {{ tex \notin       }}
+  | fv       ::  :: fv {{ tex \textsc{fv}  }}
   | List     ::  :: list  {{ tex \mathsf{List} }}
   | Listu    ::  :: listu {{ tex \mathsf{List}_\unknown }}
   | n       :: :: lit     {{ tex \mathsf{n} }}
@@ -324,7 +337,7 @@ formula :: formula_ ::=
   | evar in fv ( aA )     :: :: fv {{ tex [[evar]] \in \textsc{fv} ( [[aA]] ) }}
   | evar notin fv ( aA )  :: :: nfv {{ tex [[evar]] \notin \textsc{fv} ( [[aA]] ) }}
   | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
-  | a notin fv ( GG )     :: :: afv {{ tex [[a]] \notin \textsc{fv} ( [[GG]] ) }}
+  | varset1 notin varset2     :: :: notin_varset
   | ma notin fv ( GG )     :: :: mafv {{ tex [[ma]] \notin \textsc{fv} ( [[GG]] ) }}
   | x notin fv ( GG )     :: :: xfv {{ tex [[x]] \notin \textsc{fv} ( [[GG]] ) }}
   | aA = aB               :: :: eq
@@ -658,6 +671,41 @@ dd, x : A |- e2 : B ~~> pe2
 --------------------------------------------------- :: let
 dd |- let x = e1 in e2 : B ~~>  (\x : A . pe2) pe1
 
+defn
+
+dd |- HM e : A  ::  :: hmtyping :: 'hm_' {{ tex [[dd]] [[|-]]^{\mathsf{HM} } [[e]] : [[A]] }}  by
+
+(x : A) in dd
+--------------------------- :: var
+dd |-HM x : A
+
+--------------------------- :: int
+dd |-HM n : int
+
+</ ai // i /> notin fv(dd)
+dd |-HM e : t
+--------------------------- :: gen
+dd |-HM e : \/ </ ai // i />  . t
+
+dd, x: t1 |-HM e : t2
+--------------------------- :: lam
+dd |-HM \x. e : t1 -> t2
+
+
+dd |-HM e1 : t1 -> t2
+dd |-HM e2 : t1
+------------------------------- :: app
+dd |-HM e1 e2 : t2
+
+
+dd |-HM e1 : A
+dd, x : A |-HM e2 : t
+------------------------------ :: let
+dd |-HM let x = e1 in e2 : t
+
+dd |-HM e : \/ </ ai // i /> . t
+--------------------------- :: inst
+dd |-HM e : t [ </ ai ~> ti // i /> ]
 
 
 defn
