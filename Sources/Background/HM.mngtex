@@ -99,10 +99,17 @@ $[[a]]$ can be instantiated to, $[[A1]]$ can be instantiated to match $[[A2]]$.
 In \rref{hm-s-forallL}, by contrast, the $[[a]]$ in $[[\/a . A1]]$ can be
 instantiated to any monotype to match the right hand side.
 
+Given the subtyping relation, now we can formally state that HM enjoys
+\textit{principality}. That is, for every well-typed expression in HM, there
+exists one type for the expression, which is more general than any other types
+the expression can derive. Formally,
 
-\begin{definition}[Principal types for HM]
-\end{definition}
-
+\begin{theorem}[Principality for HM]
+  If $[[dd |-HM e : A]]$,
+  then there exists $[[A']]$ such that $[[dd |-HM e : A']]$,
+  and for all $[[A]]$ such that $[[dd |-HM e : A]]$,
+  we have $[[|-HM A' <: A]]$.
+\end{theorem}
 
 
 
