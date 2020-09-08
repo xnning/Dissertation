@@ -17,6 +17,7 @@ varset, avs  :: 'varset_' ::=
   | avs1 , .. , avs2         ::  :: append
   | fv ( dd )                ::  :: fv_dd
   | fv ( GG )                ::  :: fv_gg
+  | fv ( A )                 ::  :: fv_A
   | avs set                  ::  :: a_set {{ tex \overbar{[[avs]]} }}
 
 dtyp, A {{tex \sigma}}, B, C :: 'dtyp_' ::=
@@ -303,7 +304,8 @@ terminals :: 'terminals_' ::=
   | empty   :: :: empty   {{ tex \bullet }}
   | |-      :: :: turnstile {{ tex \vdash }}
   | |-OL    :: :: turnstile1 {{ tex \vdash^\mathit{OL} }}
-  | ||-OL   :: :: turnstile2 {{ tex \vdash^\mathit{OL} }}
+  | |-HM    :: :: turnstile2 {{ tex \vdash^\mathit{HM} }}
+  | ||-OL   :: :: turnstile3 {{ tex \vdash^\mathit{OL} }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -466,6 +468,31 @@ dd |- \/ a. A
 
 defns
 DSubtyping :: '' ::=
+
+defn
+
+|-HM A <: B ::  :: hm_subtyping :: hm_s_ by
+
+-------------------- :: tvar
+|-HM a <: a
+
+-------------------- :: int
+|-HM int <: int
+
+|-HM t3 <: t1
+|-HM t2 <: t4
+---------------------------- :: arrow
+|-HM t1 -> t2 <: t3 -> t4
+
+|-HM A1 [a ~> t] <: A2
+----------------- :: forallL
+|-HM \/ a. A1 <: A2
+
+a notin fv(A1)
+|-HM A1 <: A2
+----------------- :: forallR
+|-HM A1 <: \/ a . A2
+
 
 defn
 
@@ -673,7 +700,7 @@ dd |- let x = e1 in e2 : B ~~>  (\x : A . pe2) pe1
 
 defn
 
-dd |- HM e : A  ::  :: hmtyping :: 'hm_' {{ tex [[dd]] [[|-]]^{\mathsf{HM} } [[e]] : [[A]] }}  by
+dd |-HM e : A  ::  :: hmtyping :: 'hm_' by
 
 (x : A) in dd
 --------------------------- :: var

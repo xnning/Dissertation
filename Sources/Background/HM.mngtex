@@ -64,16 +64,44 @@ type-check the body $[[e2]]$.
 \Rref{hm-gen} and \rref{hm-inst} correspond to type variable
 \emph{generalization} and \emph{instantiation} respectively. In
 \rref{hm-gen}, we can generalize over type variables $[[ </ ai // i /> ]]$ which
-is not bound in the type context $[[dd]]$. In \rref{hm-inst}, we can always
+are not bound in the type context $[[dd]]$. In \rref{hm-inst}, we can
 instantiate the type variables with arbitrary \emph{monomorphic} types.
 
 
 \subsection{Principal Type Scheme}
 
+\begin{figure}[t]
+  \begin{small}
+    \drules[hm-s]{$ [[|-HM A1 <: A2]] $}{Subtping}{int,tvar,arrow,forallR,forallL}
+
+  \end{small}
+  \caption{Subtyping in the Hindley-Milner type system.}
+  \label{fig:HM:subtyping}
+\end{figure}
+
 One salient feature of HM is that the system enjoys the existence of
-\textit{principal types}, without requiring any type annotations.
+\emph{principal types}, without requiring any type annotations. Before we
+present the definition of principal types, let's first define the
+\emph{subtyping} relation among types.
+
+The judgment $[[|-HM A1 <: A2]]$, given in \Cref{fig:HM:subtyping}, reads that
+$[[A1]]$ is a subtype of $[[A2]]$. The subtyping relation indicates that
+$[[A1]]$ is more \textit{general} than $[[A2]]$: for any instantiation of
+$[[A2]]$, we can find an instantiation of $[[A1]]$ to make two types match.
+\Rref{hm-s-int} and \rref{hm-s-tvar} are simply reflexive. In \rref{hm-s-arrow},
+functions are \textit{contravariant} on arguments, and \textit{covariant} on
+return types. \Rref{hm-s-forallR} has a polymorphic type $[[\/a. A2]]$ on
+the right hand side. In order to prove the subtyping relation for \textit{all}
+possible instantiation of $[[a]]$, we \textit{skolemize} $[[a]]$, by making
+sure $[[a]]$ does not appear in $[[A1]]$ (up to $\alpha$-renaming). In this
+case, if $[[A1]]$ is still a subtype of $[[A2]]$, we are sure then whatever
+$[[a]]$ can be instantiated to, $[[A1]]$ can be instantiated to match $[[A2]]$.
+In \rref{hm-s-forallL}, by contrast, the $[[a]]$ in $[[\/a . A1]]$ can be
+instantiated to any monotype to match the right hand side.
 
 
+\begin{definition}[Principal types for HM]
+\end{definition}
 
 
 
