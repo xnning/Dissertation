@@ -1,26 +1,109 @@
 \section{The Odersky-L{\"a}ufer Type System}
 
+The HM system is simple, flexible and powerful. However, since the type
+annotations in lambda abstractions are always missing, HM only derives
+polymorphic types with \textit{rank 1}. That is, universal quantifiers only
+appear at the top level. Polymorphic types have \textit{higher-rank}, if
+universal quantifiers can appear anywhere in a type.
+
+\cite{odersky:putting} proposed a type system, hereafter referred to as OL,
+where lambda abstractions are allowed to have \textit{higher-rank} types as type
+annotations, while unannotated lambda abstractions can still have only
+monotypes.
+
 \subsection{Higher-rank Types}
 
+We define the rank of types as follows.
+
+\begin{definition}
+The \textit{rank} of a type is the depth at which universal quantifiers appear
+contravariantly \citep{kfoury:type}. Formally,
+
+\begin{center}
+\begin{tabular}{lcl} \toprule
+  $\mathsf{rank}([[t]])$        & $=$ & $0$ \\
+  $\mathsf{rank}([[A1 -> A2]])$ & $=$ & $\mathsf{max}(\mathsf{rank}([[A1]]) + 1, \mathsf{rank}([[A2]]) )$ \\
+  $\mathsf{rank}([[\/ a. A]])$  & $=$ & $\mathsf{max}(1, \mathsf{rank}([[A]]) )$ \\
+  \bottomrule
+\end{tabular}
+\end{center}
+\end{definition}
+
+From the definition, we can see that monotypes always have rank $0$, and the
+polymorphic types $[[A]]$ in HM (\Cref{fig:HM}) has at most rank $1$.
+
+
+
 \begin{figure}[t]
-  \begin{small}
     \centering
     \begin{tabular}{lrcl} \toprule
-      Types & $[[A]], [[B]]$ & $\Coloneqq$ & $[[int]] \mid [[a]] \mid [[A -> B]] \mid [[\/ a. A]]  $ \\
-      Monotypes & $[[t]], [[s]]$ & $\Coloneqq$ & $ [[int]] \mid [[a]] \mid [[t -> s]] $ \\
-      Terms & $[[e]]$ & $\Coloneqq$ & $ [[x]]  \mid [[n]]  \mid [[\x : A . e]] \mid [[ \x . e ]] \mid [[e1 e2]] \mid [[ let x = e1 in e2  ]] $ \\
-      Contexts & $[[dd]]$ & $\Coloneqq$ & $ [[empty]]  \mid [[dd , x : A]]  \mid [[dd, a]]$ \\
+      Expressions & $[[e]]$  & $\Coloneqq$ & $[[x]]  \mid [[n]]  \mid [[\x : A . e]] \mid [[ \x . e ]] \mid [[e1 e2]] \mid [[ let x = e1 in e2  ]] $ \\
+      Types       & $[[A]]$  & $\Coloneqq$ & $[[int]] \mid [[a]] \mid [[A1 -> A2]] \mid [[\/ a. A]] $ \\
+      Monotypes   & $[[t]]$  & $\Coloneqq$ & $[[int]] \mid [[a]] \mid [[t1 -> t2]] $ \\
+      Contexts    & $[[dd]]$ & $\Coloneqq$ & $[[empty]]  \mid [[dd , x : A]]  \mid [[dd, a]] $ \\
       \bottomrule
     \end{tabular}
-
-    \drules[ol]{$ [[dd |-OL e : A ]] $}{Typing}{var, int, lamann, lam, app, sub, gen, let}
-
-    \drules[ol-s]{$ [[dd |-OL A <: B ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR}
-
-  \end{small}
-  \caption{Syntax and static semantics of the Odersky-L{\"a}ufer type system.}
-  \label{fig:original-typing}
+  \caption{Syntax of the Odersky-L{\"a}ufer type system.}
+  \label{fig:OL}
 \end{figure}
+
+
+
+\subsection{Syntax}
+
+The syntax of OL is given in \Cref{fig:OL}. Comparing to HM (\Cref{fig:HM}), we
+observe the following differences.
+
+First, expressions $[[e]]$ have both unannotated lambda abstractions $[[\x.
+e]]$, and annotated lambda abstractions $[[\x : A . e]]$, where the type
+annotation $[[A]]$ is a polymorphic type. Thus unlike HM, the argument type for
+a function can be polymorphic in OL.
+
+Second, the polymorphic types $[[A]]$ now include integers $[[int]]$, type
+variables $[[a]]$, functions $[[A1 -> A2]]$ and universal quantifications
+$[[\/a. A]]$. Since the function type can be polymorphic, we see that OL
+supports \textit{arbitrary} rank of types. The definition of monotypes remain
+the same. Note that polymorphic types still subsume monotypes.
+
+Finally, in addition to variable types, the context $[[dd]]$ now also keeps
+track of type variables. This representation is not necessary for the system, but
+it sets us well for future specification for algorithmic systems. We use the
+context to check the well-formedness of types, as we will see later.
+
+\begin{figure}
+  \drules[ol]{$ [[dd |-OL e : A ]] $}{Typing}{var, int, lamann, lam, app, let, gen, sub}
+
+  \drules[ol-s]{$ [[dd |-OL A1 <: A2 ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR}
+
+  \drules[ol-wf]{$ [[dd |-OL A ]] $}{Well-formedness}{int, tvar, arrow, forall}
+  \caption{Static semantics of the Odersky-L{\"a}ufer type system.}
+  \label{fig:OL:static}
+\end{figure}
+
+
+\subsection{Static Semantics}
+
+The static semantics of OL is given in \Cref{fig:OL:static}.
+
+\Rref{ol-var} and \rref{ol-int} are the same as that of HM. \Rref{ol-lamann}
+type-checks annotated lambda abstractions, by simply putting $[[x:A]]$ into the
+context to type the body. For unannotated lambda abstractions in \rref{ol-lam},
+the system still guesses a mere monotype. That is, the system never guesses a
+polymorphic type for lambdas; instead, an explicit type annotation is required.
+\Rref{ol-app}, \rref{ol-let} and \rref{ol-gen} are similar as HM, except that
+polymorphic types may appear as the result in all rules. The subsumption
+\rref{ol-sub} is crucial for OL, which allows an expression of type $[[A1]]$ to
+have a subtype $[[A2]]$. Note that the instantiation \rref{hm-inst} in HM is a
+special case of \rref{ol-sub}.
+
+The subtyping relation of OL $[[dd |-OL A1 <: A2]]$ also generalizes the
+subtyping relation of HM. In particular, in \rref{ol-s-arrow}, functions are
+\textit{contravariant} on arguments, and \textit{covariant} on return types.
+This rule allows us to compare higher-rank polymorphic types, rather than just
+polymorphic types with universal quantifiers only at the top level.
+
+\paragraph{Predicativity.}
+
 
 %%% Local Variables:
 %%% mode: latex

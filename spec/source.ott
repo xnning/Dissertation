@@ -428,7 +428,23 @@ DWft :: '' ::=
 
 defn
 
-dd |-OL A ::  :: oldwft :: ol_d_ by
+dd |-OL A ::  :: oldwft :: ol_wf_ by
+
+--------- :: int
+dd |-OL int
+
+a in dd
+-------- :: tvar
+dd |-OL a
+
+dd |-OL A1
+dd |-OL A2
+-------------- :: arrow
+dd |-OL A1 -> A2
+
+dd, a |-OL A
+-------------- :: forall
+dd |-OL \/ a. A
 
 defn
 
@@ -473,16 +489,8 @@ defn
 
 |-HM A <: B ::  :: hm_subtyping :: hm_s_ by
 
--------------------- :: tvar
-|-HM a <: a
-
--------------------- :: int
-|-HM int <: int
-
-|-HM t3 <: t1
-|-HM t2 <: t4
----------------------------- :: arrow
-|-HM t1 -> t2 <: t3 -> t4
+-------------------- :: refl
+|-HM t <: t
 
 |-HM A1 [a ~> t] <: A2
 ----------------- :: forallL
@@ -496,7 +504,7 @@ a notin fv(A1)
 
 defn
 
-dd |-OL A <: B ::  :: oldsubtyping :: ol_s_ by
+dd |-OL A <: B ::  :: ol_subtyping :: ol_s_ by
 
 a in dd
 -------------------- :: tvar
@@ -505,19 +513,19 @@ dd |-OL a <: a
 -------------------- :: int
 dd |-OL int <: int
 
-dd |-OL B1 <: A1
-dd |-OL A2 <: B2
+dd |-OL A3 <: A1
+dd |-OL A2 <: A4
 ---------------------------- :: arrow
-dd |-OL A1 -> A2 <: B1 -> B2
+dd |-OL A1 -> A2 <: A3 -> A4
 
 dd |-OL t
-dd |-OL A [a ~> t] <: B
+dd |-OL A [a ~> t] <: A2
 ----------------- :: forallL
-dd |-OL \/ a. A <: B
+dd |-OL \/ a. A1 <: A2
 
-dd, a |-OL A <: B
+dd, a |-OL A1 <: A2
 ----------------- :: forallR
-dd |-OL A <: \/ a. B
+dd |-OL A1 <: \/ a. A2
 
 defn
 
@@ -737,7 +745,7 @@ dd |-HM e : t [ </ ai ~> ti // i /> ]
 
 defn
 
-dd |-OL e : A  ::  :: udtyping :: 'ol_' by
+dd |-OL e : A  ::  :: ol_dtyping :: 'ol_' by
 
 
 (x : A) in dd
@@ -751,14 +759,13 @@ dd, a |-OL e : A
 --------------------------- :: gen
 dd |-OL e : \/ a. A
 
-dd, x: A |-OL e : B
+dd, x: A1 |-OL e : A2
 --------------------------- :: lamann
-dd |-OL \x: A. e : A -> B
+dd |-OL \x: A1. e : A1 -> A2
 
-dd, x: t |-OL e : B
+dd, x: t |-OL e : A
 --------------------------- :: lam
-dd |-OL \x. e : t -> B
-
+dd |-OL \x. e : t -> A
 
 dd |-OL e1 : A1 -> A2
 dd |-OL e2 : A1
@@ -772,10 +779,10 @@ dd |- A1 <: A2
 dd |-OL e : A2
 
 
-dd |-OL e1 : A
-dd, x : A |-OL e2 : B
+dd |-OL e1 : A1
+dd, x : A1 |-OL e2 : A2
 ------------------------------ :: let
-dd |-OL let x = e1 in e2 : B
+dd |-OL let x = e1 in e2 : A2
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL MATCHING
