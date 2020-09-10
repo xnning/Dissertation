@@ -310,6 +310,7 @@ terminals :: 'terminals_' ::=
   | |-      :: :: turnstile {{ tex \vdash }}
   | |-OL    :: :: turnstile1 {{ tex \vdash^\mathit{OL} }}
   | |-HM    :: :: turnstile2 {{ tex \vdash^\mathit{HM} }}
+  | |-DK    :: :: turnstile4 {{ tex \vdash^\mathit{DK} }}
   | ||-OL   :: :: turnstile3 {{ tex \vdash^\mathit{OL} }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
@@ -327,6 +328,7 @@ terminals :: 'terminals_' ::=
   | |>      :: :: match {{ tex \triangleright  }}
   | =>      :: :: inf   {{ tex \Rightarrow }}
   | <=      :: :: chk   {{ tex \Leftarrow }}
+  | =>=>    :: :: application {{ tex \Rightarrow\!\!\Rightarrow }}
   | -->     :: :: ext   {{ tex \longrightarrow }}
   | S       :: :: psubst {{ tex \psubst }}
   | blame   :: :: blame  {{ tex \mathsf{blame} }}
@@ -435,7 +437,11 @@ DWft :: '' ::=
 
 defn
 
-dd |-OL A ::  :: oldwft :: ol_wf_ by
+dd |-DK A ::  :: dkwft :: dk_wf_ by
+
+defn
+
+dd |-OL A ::  :: odwft :: ol_wf_ by
 
 --------- :: int
 dd |-OL int
@@ -549,6 +555,10 @@ dd |-OL \/ a. A1 <: A2
 dd, a |-OL A1 <: A2
 ----------------- :: forallR
 dd |-OL A1 <: \/ a. A2
+
+defn
+
+dd |-DK A <: B ::  :: dk_subtyping :: dk_s_ by
 
 defn
 
@@ -810,7 +820,75 @@ dd |-OL let x = e1 in e2 : A2
 
 defn
 
-dd |-DK e mode A  ::  :: dk_dtyping :: 'dk_' by
+dd |-DK e => A  ::  :: dk_inf :: 'dk_inf_' by
+
+(x : A) in dd
+--------------------------- :: var
+dd |-DK x => A
+
+--------------------------- :: int
+dd |-DK n => int
+
+dd |-DK t1 -> t2
+dd, x: t1 |-DK e => t2
+--------------------------- :: lam
+dd |-DK \x. e => t1 -> t2
+
+dd |-DK e1 => A
+dd |-DK A |> A1 -> A2
+dd |-DK e2 <= A1
+------------------------------- :: app
+dd |-DK e1 e2 => A2
+
+dd |-DK e <= A
+--------------------------- :: anno
+dd |-DK e : A => A
+
+dd |-DK e1 => A
+dd |-DK A . e2 =>=> A2
+------------------------------- :: app2
+dd |-DK e1 e2 => A2
+
+defn
+
+dd |-DK e <= A  ::  :: dk_chk :: 'dk_chk_' by
+
+--------------------------- :: int
+dd |-DK n <= int
+
+dd, a |-DK e <= A
+--------------------------- :: gen
+dd |-DK e <= \/ a. A
+
+
+dd, x: A1 |-DK e <= A2
+--------------------------- :: lam
+dd |-DK \x. e <= A1 -> A2
+
+
+dd |-DK e => A1
+dd |-DK A1 <: A2
+--------------------------- :: sub
+dd |-DK e <= A2
+
+
+defn
+
+dd |-DK A1 . e =>=> A  ::  :: dk_app :: 'dk_app_'
+{{ tex [[dd]] [[|-DK]] [[A1]] \cdot [[e]] [[=>=>]] [[A]] }}
+by
+
+dd |-DK e <= A1
+--------------------------- :: arr
+dd |-DK A1 -> A2 . e =>=> A2
+
+dd |-DK t
+dd |-DK A[a ~> t] . e =>=> A1 -> A2
+--------------------------- :: forall
+dd |-DK \/a. A . e =>=> A1 -> A2
+
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL MATCHING
@@ -819,6 +897,20 @@ dd |-DK e mode A  ::  :: dk_dtyping :: 'dk_' by
 
 defns
 DMatching :: '' ::=
+
+defn
+
+dd |-DK A |> B ::  :: dk_matching :: dk_m_ by
+
+
+dd |-DK t
+dd |-DK A [a ~> t] |> A1 -> A2
+-------------------------------- :: forall
+dd |-DK \/ a . A |> A1 -> A2
+
+
+-------------------------- :: arr
+dd |-DK A1 -> A2 |> A1 -> A2
 
 defn
 

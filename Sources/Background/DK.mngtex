@@ -1,19 +1,34 @@
 \section{The Dunfield-Krishnaswami Type System}
 
+Both HM and OL derive only monotypes for unannotated lambda abstractions.
+OL improves on HM by allowing polymorphic lambda abstractions as long as the
+polymorphic type annotations are given explicitly.
+
+The Dunfield-Krishnaswami type system \citep{DK}, hereafter refered to as DM,
+give a bidirectional account of higher-rank polymorphism, where type
+information can be propagated through the syntax tree. Therefore, it is possible
+for a variable bound in a lambda abstraction to get a polymorphic type without
+requiring explicit type annotations.
 
 
 
-\subsection{Bi-directional Type Checking}
+\subsection{Bidirectional Type Checking}
 
-Bi-directional type checking has been known in the folklore of type systems for
+Bidirectional type checking has been known in the folklore of type systems for
 a long time. It was popularized by Pierce and Turner’s work on local type
-inference \citep{pierce:local}. The key idea in local type inference is simple.
-In particular, type inference is \textit{local} in the sense that missing
-annotations are reconstructed using information from adjacent nodes in the
-syntax tree. Local type inference was introduced as an alternative to HM type
-systems, which could easily deal with polymorphic languages with subtyping.
+inference \citep{pierce:local}. Local type inference was introduced as an
+alternative to HM type systems, which could easily deal with polymorphic
+languages with subtyping. The key idea in local type inference is simple.
 
-Bi-directional type checking is one component of local type inference that,
+\begin{quote}
+\textit{
+  ``... are local in the sense that missing annotations are recovered using
+  only information from adjacent nodes in the syntax tree, without long-distance
+  constraints such as unification variables.''}
+\end{quote}
+
+
+Bidirectional type checking is one component of local type inference that,
 aided by some type annotations, enables type inference in an expressive language
 with polymorphism and subtyping. In its basic form typing is split into
 \textit{inference} and \textit{checking} modes. The most salient feature of a bi-
@@ -21,13 +36,13 @@ directional type-checker is when information deduced from inference mode is used
 to guide checking of an expression in checked mode.
 
 Since Pierce and Turner’s work, various other authors have proved the
-effectiveness of bi-directional type checking in several other settings,
+effectiveness of bidirectional type checking in several other settings,
 including many different systems with subtyping
 \citep{davies:intersection,dunfield:tridirectional}, systems with dependent
 types \citep{asperti:bi:dependent,coquand:algorithm,loh:tutorial,Xi:dependent},
 etc.
 
-In particular, bi-directional type checking has also been combined with HM-style
+In particular, bidirectional type checking has also been combined with HM-style
 techniques for providing type inference in the presence of higher-rank type,
 including DK and \cite{practical:inference}.
 
@@ -35,22 +50,131 @@ including DK and \cite{practical:inference}.
 \begin{figure}[t]
   \centering
     \begin{tabular}{lrcl} \toprule
-      Expressions & $[[ae]]$ & \syndef & $[[x]] \mid [[n]] \mid [[\x . ae]] \mid [[ \x : aA . ae ]]  \mid [[ae1 ae2]] \mid [[ae : aA]] $ \\
-      Types & $[[s]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] $ \\
-      Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[t1 -> t2]] $ \\
-      Algorithmic Contexts & $[[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , x : aA]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]] $ \\
-      Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , x : aA]] \mid [[OO , a]] \mid [[OO, evar = at]] $ \\ \bottomrule
+      Expressions & $[[e]]$ & \syndef & $[[x]] \mid [[n]] \mid [[ \x : A . e ]] \mid [[\x . e]]  \mid [[e1 e2]] \mid [[e : A]] $ \\
+      Types & $[[A]] $ & \syndef & $ [[int]] \mid [[a]] \mid  [[A1 -> A2]] \mid [[\/ a. A]] $ \\
+      Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[t1 -> t2]] $ \\
+      Contexts & $[[dd]]$ & \syndef & $[[empty]] \mid [[dd , x : A]] \mid [[dd , a]] $ \\
     \end{tabular}
-  \caption{Syntax of the algorithmic Dunfield-Krishnaswami Type System}
+  \caption{Syntax of the Dunfield-Krishnaswami Type System}
   \label{fig:DK}
 \end{figure}
 
 \subsection{Syntax}
 
-The syntax of DK is given in \Cref{fig:DK}.
+The syntax of the DK is given in \Cref{fig:DK}. Comparing to OL, the definition
+of expressions slightly differs. First, the expressions $e$ in DK have no let
+expressions. \cite{DK} omitted let-binding from the formal development, but
+argued that restoring let-bindings is easy, as long as they get no special
+treatment incompatible with substitution (e.g., a syntax-directed HM does
+polymorphic generalization only at let-bindings). Second, DK has annotated
+expressions $[[e:A]]$, in which the type annotation can be propagated inward the
+expression, as we will see shortly.
+
+The definitions of types and contexts are the same as in OL. Thus, DK also shares
+the same well-formedness definitions as in OL (\Cref{fig:OL:wf}). We thus omit the
+definitions, but use $[[|-DK]]$ to denote the corresponding judgments in DK.
+
+\subsection{Static Semantics}
+
+\begin{figure}
+  \drules[dk-inf]{$ [[dd |-DK e => A ]] $}{Type Inference}{var, int,lam, app, anno}
+  \drules[dk-chk]{$ [[dd |-DK e <= A ]] $}{Type Checking}{int, lam, gen, sub}
+  \drules[dk-m]{$ [[dd |-DK A1 |> A2]] $}{Matching}{forall, arr}
+  \caption{Static semantics of the Dunfield-Krishnaswami type system.}
+  \label{fig:DK:static}
+\end{figure}
+
+\Cref{fig:DK:static} presents the typing rules for DK. The system uses
+bidirectional type checking to accommodate polymorphism. Traditionally, two
+modes are employed in bidirectional systems: the inference mode $[[dd |-DK e =>
+A]]$, which takes a term $[[e]]$ and produces a type $[[A]]$, similar to the
+judgment $[[dd |- e : A]]$ in previous systems; the new checking mode $[[dd |-DK
+e <= A]]$, which takes a term $[[e]]$ and a type $[[A]]$ as input, and ensures
+that the term $[[e]]$ checks against $[[A]]$. We first discuss rules in the
+inference mode.
+
+\paragraph{Type Inference.}
+
+\Rref{dk-inf-var} and \rref{dk-inf-int} are straightforward. To infer
+unannotated lambdas, \rref{dk-inf-lam} guesses a monotype. \Rref{dk-inf-app}
+first infers the type $[[A]]$ of the expression $[[e1]]$. Then, because $[[e1]]$
+is applied as a function, the type $[[A]]$ is decomposed into a function type
+$[[A1 -> A2]]$, using the matching judgment (discussed shortly). Now since the
+function expects an argument of type $[[A1]]$, the rule proceeds by checking
+$[[e2]]$ against $[[A1]]$. Similarly, for an annotated expression $[[e : A]]$,
+\rref{dk-inf-anno} simply checks $[[e]]$ against $[[A]]$. Both rules
+(\rref{dk-inf-app} and \rref{dk-inf-anno}) have mode switched from inference to checking.
+
+\paragraph{Type Checking.}
+
+Now we turn to the checking mode. When an expression is checked against a type,
+the expression is expected to have the type. More importantly, the checking mode
+allows us to push the type information into the expressions.
+
+\Rref{dk-chk-int} checks literals again the integer type $[[int]]$.
+\Rref{dk-chk-lam} is where the system benefits from bidirectional type checking:
+the type information gets pushed inside an lambda. For an unannotated lambda
+abstraction $[[\x. e]]$, recall that in the inference mode, we can only guess a
+monotype for $[[x]]$. With the checking mode, when $[[\x. e]]$ is checked
+against $[[A1 -> A2]]$, instead of a guessed type, $[[x]]$ gets directly the
+argument type $[[A1]]$, which may be a polymorphic type. Then the rule proceeds
+by checking $[[e]]$ with $[[A2]]$, allowing the type information to be pushed
+further inside.
+
+\Rref{dk-chk-gen} deals with a polymorphic type $[[\/a. A]]$, by putting the
+(fresh) type variable $[[a]]$ into the context to check $[[e]]$ against $[[A]]$.
+\Rref{dk-chk-sub} switches the mode from checking to inference: an expression
+$[[e]]$ can be checked against $[[A2]]$, if $[[e]]$ infers the type $[[A1]]$ and
+$[[A1]]$ is a subtype of $[[A2]]$.
+
+\paragraph{Matching.}
+
+In \rref{dk-inf-app} where we type-check $[[e1 e2]]$, we derive that $[[e1]]$
+has type $[[A]]$, but $[[e1]]$ must have a function type so that it can be
+applied to an argument. The \textit{matching} judgment instantiates $[[A]]$ into
+a function.
+
+Matching has two rules: \rref{dk-m-forall} instantiates a polymorphic type, by
+substituting $[[a]]$ with a well-formed monotype $[[t]]$, and continues matching
+on $[[ A[a ~> t] ]]$; \rref{dk-m-arr} returns the function type directly.
+
+In \cite{DK}, they use an \textit{application} judgment instead of matching. The
+judgment $[[dd |-DK A1 . e =>=> A2]]$, whose definition is given below, is
+interpreted as, when we apply an expression of type $[[A1]]$ to the expression
+$[[e]]$, we get a return type $[[A2]]$.
+
+\drules[dk-app]{$ [[dd |-DK A1 . e =>=> A2]] $}{Application}{forall,arr}
+
+with the application judgment, \rref{dk-inf-app} is changed to \rref{dk-inf-app2}.
+
+\begin{center}
+  \drule{dk-inf-appTwo}
+\end{center}
+
+It can be easily shown that the presentation of \rref{dk-inf-app} with matching
+is equivalent to that of \rref{dk-inf-app2} with the application judgment.
+Essentially, they both make sure that the expression being applied has an arrow
+type $[[A1 -> A2]]$, and then check the argument against $[[A1]]$.
+
+We prefer the presentation of \rref{dk-inf-app} with matching, where matching is
+a simple and standalone process whose purpose is clear. In contrast, it is less
+comprehensible with \rref{dk-inf-app2} and the application judgment, where all
+three forms of the judgment (inference, checking, application) are mutually
+dependent.
+
+\paragraph{Subtyping} DK shares the same subtyping relation as of OL. We thus
+omit the definition and use $[[dd |-DK A1 <: A2]]$ to denote the subtyping
+relation in DK.
+
+
+
+
+
+
+
 
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
-%%% org-ref-default-bibliography: "../Thesis.bib"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
 %%% End:
