@@ -197,3 +197,190 @@ series = {POPL '96}
   year={1999},
   publisher={Elsevier}
 }
+
+@article{pierce:local,
+author = {Pierce, Benjamin C. and Turner, David N.},
+title = {Local Type Inference},
+year = {2000},
+issue_date = {Jan. 2000},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {22},
+number = {1},
+issn = {0164-0925},
+url = {https://doi.org/10.1145/345099.345100},
+doi = {10.1145/345099.345100},
+journal = {ACM Trans. Program. Lang. Syst.},
+month = jan,
+pages = {1–44},
+numpages = {44},
+keywords = {polymorphism, subtyping, type inference}
+}
+
+@inproceedings{10.1145/351240.351259,
+author = {Davies, Rowan and Pfenning, Frank},
+title = {Intersection Types and Computational Effects},
+year = {2000},
+isbn = {1581132026},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/351240.351259},
+doi = {10.1145/351240.351259},
+abstract = {We show that standard formulations of intersection type systems are unsound in the presence of computational effects, and propose a solution similar to the value restriction for polymorphism adopted in the revised definition of Standard ML. It differs in that it is not tied to let-expressions and requires an additional weakening of the usual subtyping rules. We also present a bi-directional type-checking algorithm for the resulting language that does not require an excessive amount of type annotations and illustrate it through some examples. We further show that the type assignment system can be extended to incorporate parametric polymorphism. Taken together, we see our system and associated type-checking algorithm as a significant step towards the introduction of intersection types into realistic programming languages. The added expressive power would allow many more properties of programs to be stated by the programmer and statically verified by a compiler.},
+booktitle = {Proceedings of the Fifth ACM SIGPLAN International Conference on Functional Programming},
+pages = {198–208},
+numpages = {11},
+series = {ICFP '00}
+}
+
+@article{davies:intersection,
+author = {Davies, Rowan and Pfenning, Frank},
+title = {Intersection Types and Computational Effects},
+year = {2000},
+issue_date = {Sept. 2000},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {35},
+number = {9},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/357766.351259},
+doi = {10.1145/357766.351259},
+journal = {SIGPLAN Not.},
+month = sep,
+pages = {198–208},
+numpages = {11}
+}
+
+@inproceedings{10.1145/964001.964025,
+author = {Dunfield, Joshua and Pfenning, Frank},
+title = {Tridirectional Typechecking},
+year = {2004},
+isbn = {158113729X},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/964001.964025},
+doi = {10.1145/964001.964025},
+abstract = {In prior work we introduced a pure type assignment system that encompasses a rich set of property types, including intersections, unions, and universally and existentially quantified dependent types. This system was shown sound with respect to a call-by-value operational semantics with effects, yet is inherently undecidable.In this paper we provide a decidable formulation for this system based on bidirectional checking, combining type synthesis and analysis following logical principles. The presence of unions and existential quantification requires the additional ability to visit subterms in evaluation position before the context in which they occur, leading to a tridirectional type system. While soundness with respect to the type assignment system is immediate, completeness requires the novel concept of contextual type annotations, introducing a notion from the study of principal typings into the source program.},
+booktitle = {Proceedings of the 31st ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {281–292},
+numpages = {12},
+keywords = {intersection types, type refinements, union types, dependent types},
+location = {Venice, Italy},
+series = {POPL '04}
+}
+
+@article{dunfield:tridirectional,
+author = {Dunfield, Joshua and Pfenning, Frank},
+title = {Tridirectional Typechecking},
+year = {2004},
+issue_date = {January 2004},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {39},
+number = {1},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/982962.964025},
+doi = {10.1145/982962.964025},
+journal = {SIGPLAN Not.},
+month = jan,
+pages = {281–292},
+numpages = {12},
+keywords = {dependent types, union types, intersection types, type refinements}
+}
+
+
+@inproceedings{10.1145/2500365.2500582,
+author = {Dunfield, Joshua and Krishnaswami, Neelakantan R.},
+title = {Complete and Easy Bidirectional Typechecking for Higher-Rank Polymorphism},
+year = {2013},
+isbn = {9781450323260},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/2500365.2500582},
+doi = {10.1145/2500365.2500582},
+abstract = {Bidirectional typechecking, in which terms either synthesize a type or are checked against a known type, has become popular for its scalability (unlike Damas-Milner type inference, bidirectional typing remains decidable even for very expressive type systems), its error reporting, and its relative ease of implementation. Following design principles from proof theory, bidirectional typing can be applied to many type constructs. The principles underlying a bidirectional approach to polymorphism, however, are less obvious. We give a declarative, bidirectional account of higher-rank polymorphism, grounded in proof theory; this calculus enjoys many properties such as eta-reduction and predictability of annotations. We give an algorithm for implementing the declarative system; our algorithm is remarkably simple and well-behaved, despite being both sound and complete.},
+booktitle = {Proceedings of the 18th ACM SIGPLAN International Conference on Functional Programming},
+pages = {429–442},
+numpages = {14},
+keywords = {bidirectional typechecking, higher-rank polymorphism},
+location = {Boston, Massachusetts, USA},
+series = {ICFP '13}
+}
+
+@article{DK,
+author = {Dunfield, Joshua and Krishnaswami, Neelakantan R.},
+title = {Complete and Easy Bidirectional Typechecking for Higher-Rank Polymorphism},
+year = {2013},
+issue_date = {September 2013},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {48},
+number = {9},
+issn = {0362-1340},
+url = {https://doi.org/10.1145/2544174.2500582},
+doi = {10.1145/2544174.2500582},
+journal = {SIGPLAN Not.},
+month = sep,
+pages = {429–442},
+numpages = {14},
+keywords = {bidirectional typechecking, higher-rank polymorphism}
+}
+
+
+@article{asperti:bi:dependent,
+  title={A Bi-Directional Refinement Algorithm for the Calculus of (Co) Inductive Constructions},
+  author={Asperti, Andrea and Ricciotti, Wilmer and Coen, Claudio Sacerdoti and Tassi, Enrico},
+  year={2012},
+  journal={Logical Methods in Computer Science},
+  volume={8},
+  pages={1--49},
+  publisher={Technischen Universitat Braunschweig},
+}
+
+@article{coquand:algorithm,
+  title={An algorithm for type-checking dependent types},
+  author={Coquand, Thierry},
+  journal={Science of Computer Programming},
+  volume={26},
+  number={1-3},
+  pages={167--177},
+  year={1996},
+  publisher={Elsevier}
+}
+
+@article{loh:tutorial,
+  title={A tutorial implementation of a dependently typed lambda calculus},
+  author={L{\"o}h, Andres and McBride, Conor and Swierstra, Wouter},
+  journal={Fundamenta informaticae},
+  volume={102},
+  number={2},
+  pages={177--207},
+  year={2010},
+  publisher={IOS Press}
+}
+@inproceedings{Xi:dependent,
+author = {Xi, Hongwei and Pfenning, Frank},
+title = {Dependent Types in Practical Programming},
+year = {1999},
+isbn = {1581130953},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/292540.292560},
+doi = {10.1145/292540.292560},
+booktitle = {Proceedings of the 26th ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
+pages = {214–227},
+numpages = {14},
+location = {San Antonio, Texas, USA},
+series = {POPL '99}
+}
+
+@article{practical:inference,
+  title={Practical type inference for arbitrary-rank types},
+  author={Jones, Simon Peyton and Vytiniotis, Dimitrios and Weirich, Stephanie and Shields, Mark},
+  journal={Journal of functional programming},
+  volume={17},
+  number={1},
+  pages={1--82},
+  year={2007},
+  publisher={Cambridge University Press}
+}

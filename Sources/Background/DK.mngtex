@@ -1,1 +1,56 @@
 \section{The Dunfield-Krishnaswami Type System}
+
+
+
+
+\subsection{Bi-directional Type Checking}
+
+Bi-directional type checking has been known in the folklore of type systems for
+a long time. It was popularized by Pierce and Turner’s work on local type
+inference \citep{pierce:local}. The key idea in local type inference is simple.
+In particular, type inference is \textit{local} in the sense that missing
+annotations are reconstructed using information from adjacent nodes in the
+syntax tree. Local type inference was introduced as an alternative to HM type
+systems, which could easily deal with polymorphic languages with subtyping.
+
+Bi-directional type checking is one component of local type inference that,
+aided by some type annotations, enables type inference in an expressive language
+with polymorphism and subtyping. In its basic form typing is split into
+\textit{inference} and \textit{checking} modes. The most salient feature of a bi-
+directional type-checker is when information deduced from inference mode is used
+to guide checking of an expression in checked mode.
+
+Since Pierce and Turner’s work, various other authors have proved the
+effectiveness of bi-directional type checking in several other settings,
+including many different systems with subtyping
+\citep{davies:intersection,dunfield:tridirectional}, systems with dependent
+types \citep{asperti:bi:dependent,coquand:algorithm,loh:tutorial,Xi:dependent},
+etc.
+
+In particular, bi-directional type checking has also been combined with HM-style
+techniques for providing type inference in the presence of higher-rank type,
+including DK and \cite{practical:inference}.
+
+
+\begin{figure}[t]
+  \centering
+    \begin{tabular}{lrcl} \toprule
+      Expressions & $[[ae]]$ & \syndef & $[[x]] \mid [[n]] \mid [[\x . ae]] \mid [[ \x : aA . ae ]]  \mid [[ae1 ae2]] \mid [[ae : aA]] $ \\
+      Types & $[[s]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] $ \\
+      Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[t1 -> t2]] $ \\
+      Algorithmic Contexts & $[[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , x : aA]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]] $ \\
+      Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , x : aA]] \mid [[OO , a]] \mid [[OO, evar = at]] $ \\ \bottomrule
+    \end{tabular}
+  \caption{Syntax of the algorithmic Dunfield-Krishnaswami Type System}
+  \label{fig:DK}
+\end{figure}
+
+\subsection{Syntax}
+
+The syntax of DK is given in \Cref{fig:DK}.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../Thesis.bib"
+%%% End:

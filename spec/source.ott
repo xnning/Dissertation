@@ -12,6 +12,10 @@ grammar
 
 % Types
 
+mode :: 'mode_' ::=
+  | =>       ::  :: infer {{ tex \Rightarrow }}
+  | <=       ::  :: check {{ tex \Leftarrow }}
+
 varset, avs  :: 'varset_' ::=
   | a                        ::  :: a {{ tex a }}
   | avs1 , .. , avs2         ::  :: append
@@ -101,11 +105,11 @@ ma :: 'ma_' ::=
 
 % Types
 
-atyp, aA {{ tex A }}, aB {{ tex B }}, aC {{ tex C }} :: 'atyp_' ::=
+atyp, aA {{ tex \sigma }}, aB, aC  :: 'atyp_' ::=
   | int            ::   :: int
   | a              ::   :: tvar
   | evar           ::   :: evar
-  | aA -> aB       ::   :: arrow
+  | aA1 -> aA2     ::   :: arrow
   | \/ a . aA      ::   :: all
   | unknown        ::   :: unknown
   | static         ::   :: static
@@ -343,8 +347,10 @@ formula :: formula_ ::=
   | varset1 notin varset2     :: :: notin_varset
   | ma notin fv ( GG )     :: :: mafv {{ tex [[ma]] \notin \textsc{fv} ( [[GG]] ) }}
   | x notin fv ( GG )     :: :: xfv {{ tex [[x]] \notin \textsc{fv} ( [[GG]] ) }}
-  | aA = aB               :: :: eq
+  | aA1 = aA2             :: :: eq
   | dd |- e : A           :: :: typ
+  | dd |- e => A           :: :: typ_inf
+  | dd |- e <= A           :: :: typ_chk
   | dd |- pe : A :: :: ptyp {{ tex [[dd]] \vdash^\mathit{B} [[pe]] : [[A]] }}
   | CC : ( dd |- A ) ~~> ( dd' |- A' ) :: :: ctx {{ tex [[CC]] : ( [[dd]] \vdash^\mathit{B} [[A]] ) \rightsquigarrow ( [[dd']] \vdash^\mathit{B} [[A']] ) }}
   | A1 <: A2 :: :: sub
@@ -364,7 +370,7 @@ formula :: formula_ ::=
   | \ pe \   ::  :: type_erasure {{ tex \lfloor [[pe]] \rfloor }}
   | pe ==> pv  ::  :: reduce 
   | pe ==> blame  ::  :: blame
-  | aA <~ aB :: :: algo
+  | aA1 <~ aA2 :: :: algo
 
 
 subrules
@@ -802,6 +808,10 @@ dd, x : A1 |-OL e2 : A2
 ------------------------------ :: let
 dd |-OL let x = e1 in e2 : A2
 
+defn
+
+dd |-DK e mode A  ::  :: dk_dtyping :: 'dk_' by
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL MATCHING
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -920,10 +930,10 @@ GG[evar] |- evar
 GG[evar = at] |- evar
 
 
-GG |- aA
-GG |- aB
+GG |- aA1
+GG |- aA2
 -------------- :: arrow
-GG |- aA -> aB
+GG |- aA1 -> aA2
 
 GG, a |- aA
 -------------- :: forall
@@ -940,7 +950,7 @@ AConSub :: '' ::=
 
 defn
 
-GG |- aA <~ aB -| DD ::  :: aconsub :: as_
+GG |- aA1 <~ aA2 -| DD ::  :: aconsub :: as_
 by
 
 
