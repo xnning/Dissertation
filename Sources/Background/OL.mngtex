@@ -3,7 +3,7 @@
 The HM system is simple, flexible and powerful. However, since the type
 annotations in lambda abstractions are always missing, HM only derives
 polymorphic types with \textit{rank 1}. That is, universal quantifiers only
-appear at the top level. Polymorphic types have \textit{higher-rank}, if
+appear at the top level. Polymorphic types are of \textit{higher-rank}, if
 universal quantifiers can appear anywhere in a type.
 
 \cite{odersky:putting} proposed a type system, hereafter referred to as OL,
@@ -62,20 +62,40 @@ a function can be polymorphic in OL.
 Second, the polymorphic types $[[A]]$ now include integers $[[int]]$, type
 variables $[[a]]$, functions $[[A1 -> A2]]$ and universal quantifications
 $[[\/a. A]]$. Since the function type can be polymorphic, we see that OL
-supports \textit{arbitrary} rank of types. The definition of monotypes remain
+supports \textit{arbitrary} rank of types. The definition of monotypes remains
 the same. Note that polymorphic types still subsume monotypes.
 
-Finally, in addition to variable types, the context $[[dd]]$ now also keeps
-track of type variables. This representation is not necessary for the system, but
-it sets us well for future specification for algorithmic systems. We use the
-context to check the well-formedness of types, as we will see later.
+Finally, in addition to variable types, the contexts $[[dd]]$ now also keep
+track of type variables. Moreover, contexts are \textit{ordered}, in the sense
+that in a well-formed context, the type of a variable cannot refer to type
+variables that appear after the variable in the context. This form of contexts
+can also be adopted in an alternative representation for HM. In HM formalized in
+the previous section, contexts do not track type variables; instead, the system
+explicitly checks that type variables are fresh with respect to a context or a
+type when needed. Here we include type variables in contexts, as it sets us well
+for the Dunfield-Krishnaswami type system to be introduced in the next section.
+Also, it provides a complete view of the possible formalism of contexts in a
+type system with generalization. As before, we assume all items in a context are
+distinct.
+
+The well-formedness rules for OL are given in \Cref{fig:OL:wf}. A type is
+well-formed if all its free type variables are bound in the context
+(\rref{ol-wf-tvar}), and a context is well-formed if all its types are
+well-formed in their corresponding prefix context (\rref{ol-cwf-var}).
+
+\begin{figure}
+  \drules[ol-wf]{$ [[dd |-OL A ]] $}{Type Well-formedness}{int, tvar, arrow, forall}
+  \drules[ol-cwf]{$ [[dd ok]] $}{Context Well-formedness}{empty,var,tvar}
+  \caption{Well-formedness of types and contexts in the Odersky-L{\"a}ufer type system.}
+  \label{fig:OL:wf}
+\end{figure}
+
 
 \begin{figure}
   \drules[ol]{$ [[dd |-OL e : A ]] $}{Typing}{var, int, lamann, lam, app, let, gen, sub}
 
   \drules[ol-s]{$ [[dd |-OL A1 <: A2 ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR}
 
-  \drules[ol-wf]{$ [[dd |-OL A ]] $}{Well-formedness}{int, tvar, arrow, forall}
   \caption{Static semantics of the Odersky-L{\"a}ufer type system.}
   \label{fig:OL:static}
 \end{figure}
@@ -90,11 +110,16 @@ type-checks annotated lambda abstractions, by simply putting $[[x:A]]$ into the
 context to type the body. For unannotated lambda abstractions in \rref{ol-lam},
 the system still guesses a mere monotype. That is, the system never guesses a
 polymorphic type for lambdas; instead, an explicit type annotation is required.
-\Rref{ol-app}, \rref{ol-let} and \rref{ol-gen} are similar as HM, except that
-polymorphic types may appear as the result in all rules. The subsumption
-\rref{ol-sub} is crucial for OL, which allows an expression of type $[[A1]]$ to
-have a subtype $[[A2]]$. Note that the instantiation \rref{hm-inst} in HM is a
-special case of \rref{ol-sub}.
+\Rref{ol-app}, \rref{ol-let} are similar as HM, except that polymorphic types
+may appear in all return types. \Rref{ol-gen} shows the generalization rule, we
+put a new type variable $[[a]]$ into the context, and the return type $[[A]]$ is
+then generalized over $[[a]]$, returning $[[\/a. A]]$.
+
+The subsumption \rref{ol-sub} is crucial for OL, which allows an expression of
+type $[[A1]]$ to have type $[[A2]]$ with $[[dd |- A1 <: A2]]$. Note that the
+instantiation \rref{hm-inst} in HM is a special case of \rref{ol-sub}, as we
+have $[[\/ </ ai // i /> . t <: t [ </ ai ~> ti // i /> ] ]]$ by applying
+\rref{hm-s-forallL} repeatedly.
 
 The subtyping relation of OL $[[dd |-OL A1 <: A2]]$ also generalizes the
 subtyping relation of HM. In particular, in \rref{ol-s-arrow}, functions are
@@ -102,7 +127,26 @@ subtyping relation of HM. In particular, in \rref{ol-s-arrow}, functions are
 This rule allows us to compare higher-rank polymorphic types, rather than just
 polymorphic types with universal quantifiers only at the top level.
 
-\paragraph{Predicativity.}
+\subsection{Predicativity}
+
+In a system with high-ranker types, one important design decision to make is
+whether the system is \textit{predicative} or \textit{impredicative}. A system
+is predicative, if the type variable bound by a universal quantifier is only
+allowed to be substituted by a monotype; otherwise it is impredicative. It is
+well-known that general type inference for impredicativity is
+undecidable~\citep{F:undecidable}. OL is predicative, which can be seen from
+\rref{ol-s-forallL}. We focus only on predicative type systems throughout the
+thesis.
+
+\subsection{Relating to HM}
+
+It can be proved that OL is a conservative extension of HM. That is, every
+well-typed expression in HM is well-typed in OL, modulo the different
+representation of contexts.
+
+Moreover, since OL is predicative and only guesses monotypes for unannotated
+lambda abstractions, its algorithmic system can be implemented as a direct
+extension of the one for HM.
 
 
 %%% Local Variables:

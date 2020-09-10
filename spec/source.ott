@@ -282,6 +282,7 @@ pvalue, pv {{ tex v }} :: 'pvalue_' ::=
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 terminals :: 'terminals_' ::=
+  | ok      :: :: ok {{ tex \mathsf{ok} }}
   | ~       :: :: consist {{ tex \sim }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
   | int     :: :: int     {{ tex \mathsf{Int} }}
@@ -477,6 +478,22 @@ dd |- A -> B
 dd, a |- A
 -------------- :: forall
 dd |- \/ a. A
+
+defn
+
+dd ok :: :: ol_well_formed_tctx :: 'ol_cwf_' {{ tex [[dd]] \ [[ok]] }} by
+
+------------------------- :: empty
+empty ok
+
+dd ok
+dd |- A
+------------------------- :: var
+dd , x : A ok
+
+dd ok
+------------------------- :: tvar
+dd , a ok
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL SUBTYPING
@@ -763,6 +780,7 @@ dd, x: A1 |-OL e : A2
 --------------------------- :: lamann
 dd |-OL \x: A1. e : A1 -> A2
 
+dd |-OL t
 dd, x: t |-OL e : A
 --------------------------- :: lam
 dd |-OL \x. e : t -> A

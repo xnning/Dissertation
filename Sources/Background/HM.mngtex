@@ -31,8 +31,10 @@ reconstructed by the type system.
 Types consist of polymorphic types $[[A]]$ and monomorphic types $[[t]]$. A
 polymorphic type is a sequence of universal quantifications (which can be empty)
 followed by a monomorphic type $[[t]]$, which can be integer $[[int]]$, type
-variable $[[a]]$ and function $[[t1 -> t2]]$. A context $[[dd]]$ tracks the type
-information for variables.
+variable $[[a]]$ and function $[[t1 -> t2]]$.
+
+A context $[[dd]]$ tracks the type information for variables. We implicitly
+assume items in a context are distinct throughout the thesis.
 
 % The standard representation of HM is often given without constants or primitive
 % types, while they can be easily included. In our case, we include
