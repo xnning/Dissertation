@@ -333,6 +333,7 @@ terminals :: 'terminals_' ::=
   | S       :: :: psubst {{ tex \psubst }}
   | blame   :: :: blame  {{ tex \mathsf{blame} }}
   | ==>     :: :: reduce {{ tex \Downarrow }}
+  | <:      :: :: subtype {{ tex <: }}
 
 
 formula :: formula_ ::=
