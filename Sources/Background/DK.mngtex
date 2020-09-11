@@ -54,7 +54,8 @@ including DK and \cite{practical:inference}.
       Types & $[[A]] $ & \syndef & $ [[int]] \mid [[a]] \mid  [[A1 -> A2]] \mid [[\/ a. A]] $ \\
       Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[t1 -> t2]] $ \\
       Contexts & $[[dd]]$ & \syndef & $[[empty]] \mid [[dd , x : A]] \mid [[dd , a]] $ \\
-    \end{tabular}
+      \bottomrule
+    \end{tabular} \\
   \caption{Syntax of the Dunfield-Krishnaswami Type System}
   \label{fig:DK}
 \end{figure}

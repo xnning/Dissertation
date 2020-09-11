@@ -16,9 +16,12 @@
   \label{fig:HM}
 \end{figure}
 
+The global type-inference algorithms employed in modern functional languages
+such as ML, Haskell and OCaml, are derived from the Hindley-Milner type system.
 The Hindley-Milner type system, hereafter referred to as HM, is a polymorphic
 type discipline first discovered in \cite{hindley}, later rediscovered by
 \cite{milner}, and also closely formalized by \cite{Damas:Milner}.
+
 
 \subsection{Syntax}
 
@@ -28,10 +31,10 @@ applications $[[e1 e2]]$ and $[[let x = e1 in e2]]$. Note here lambda
 abstractions have no type annotations, and the type information is to be
 reconstructed by the type system.
 
-Types consist of polymorphic types $[[A]]$ and monomorphic types $[[t]]$. A
+Types consist of polymorphic types $[[A]]$ and monomorphic types (monotypes) $[[t]]$. A
 polymorphic type is a sequence of universal quantifications (which can be empty)
-followed by a monomorphic type $[[t]]$, which can be integer $[[int]]$, type
-variable $[[a]]$ and function $[[t1 -> t2]]$.
+followed by a monotype $[[t]]$, which can be the integer type $[[int]]$, type
+variables $[[a]]$ and function types $[[t1 -> t2]]$.
 
 A context $[[dd]]$ tracks the type information for variables. We implicitly
 assume items in a context are distinct throughout the thesis.
@@ -44,27 +47,27 @@ assume items in a context are distinct throughout the thesis.
 
 \subsection{Static Semantics}
 
-The typing judgment $[[dd |-HM e : A]]$ derives the type $[[A]]$ of the
-expression $[[e]]$ under the context $[[dd]]$. \Rref{hm-var} fetches a
+The declarative typing judgment $[[dd |-HM e : A]]$ derives the type $[[A]]$ of
+the expression $[[e]]$ under the context $[[dd]]$. \Rref{hm-var} fetches a
 polymorphic type $[[x : A]]$ from the context. Literals always have the integer
-type (\rref{hm-int}). For lambdas (\rref{hm-lam}), since there is no
-type for the binder given, the system \emph{guesses} a \emph{monomorphic}
-type $[[t1]]$ as the type of $[[x]]$, and derives the type $[[t2]]$ as the body
-$[[e]]$, returning a function $[[t1 -> t2]]$. The function type is then
-eliminated by applications. In \rref{hm-app}, the type of the parameter must
-match the argument's type $t1$, and the application returns type $[[t2]]$.
+type (\rref{hm-int}). For lambdas (\rref{hm-lam}), since there is no type for
+the binder given, the system \emph{guesses} a \emph{monotype} $[[t1]]$ as the
+type of $[[x]]$, and derives the type $[[t2]]$ for the body $[[e]]$, returning a
+function $[[t1 -> t2]]$. Function types are eliminated by applications. In
+\rref{hm-app}, the type of the argument must match the parameter's type
+$[[t1]]$, and the whole application returns type $[[t2]]$.
 
 \Rref{hm-let} is the key rule for flexibility in HM, where a
 \emph{polymorphic} expression can be defined, and later instantiated with
 different types in the call sites. In this rule, the expression $[[e1]]$ has a
-polymorphic type $[[A]]$, and the rule adds $[[e1 : A]]$ into the context to
-type-check the body $[[e2]]$. 
+polymorphic type $[[A]]$, and the rule adds $[[x : A]]$ into the context to
+type-check $[[e2]]$.
 
-\Rref{hm-gen} and \rref{hm-inst} correspond to type variable
-\emph{generalization} and \emph{instantiation} respectively. In
-\rref{hm-gen}, we can generalize over type variables $[[ </ ai // i /> ]]$ which
-are not bound in the type context $[[dd]]$. In \rref{hm-inst}, we can
-instantiate the type variables with arbitrary \emph{monomorphic} types.
+\Rref{hm-gen} and \rref{hm-inst} correspond to \emph{generalization} and
+\emph{instantiation} respectively. In \rref{hm-gen}, we can generalize over type
+variables $[[ </ ai // i /> ]]$ which are not bound in the type context
+$[[dd]]$. In \rref{hm-inst}, we can instantiate the type variables with
+arbitrary \emph{monotypes}.
 
 
 \subsection{Principal Type Scheme}
@@ -92,7 +95,14 @@ subtyping relation for \textit{all} possible instantiation of $[[a]]$, we
 $[[A2]]$, we are sure then whatever $[[a]]$ can be instantiated to, $[[A1]]$ can
 be instantiated to match $[[A2]]$. In \rref{hm-s-forallL}, by contrast, the
 $[[a]]$ in $[[\/a . A1]]$ can be instantiated to any monotype to match the right
-hand side.
+hand side. For example:
+
+\begin{center}
+  \begin{tabular}{lcl}
+    $[[int -> int]]$  & $[[<:]]$ & $[[int -> int]]$ \\
+    $[[\/a. a -> a]]$  & $[[<:]]$ & $[[int -> int]]$ \\
+  \end{tabular}
+\end{center}
 
 Given the subtyping relation, now we can formally state that HM enjoys
 \textit{principality}. That is, for every well-typed expression in HM, there
@@ -106,12 +116,23 @@ the expression can derive. Formally,
   we have $[[|-HM A' <: A]]$.
 \end{theorem}
 
+Consider the expression $[[\x. x]]$. It has a principal type $[[\/a. a -> a]]$,
+which is more general than other options, e.g., $[[int -> int]]$, $[[(int ->
+int) -> (int -> int)]]$, etc.
 
-% \subsection{Discussion}
+\subsection{Algorithmic Type System}
 
-% - type safety
+The declarative specification of HM given in \Cref{fig:HM} does not directly
+lead to an algorithm, because there are still many guesses in the system, such
+as in \rref{hm-lam}.
 
-% - sound and complete algorithm
+There exists a sound and complete type inference algorithm for HM
+\citep{Damas:Milner}, which has served as the basis for the type inference
+algorithm for many other systems \citep{odersky:putting,practical:inference},
+including the system presented in \Cref{chap:BiDirectional}. We will discuss
+more about it in \Cref{chap:BiDirectional}.
+
+
 
 
 %%% Local Variables:
