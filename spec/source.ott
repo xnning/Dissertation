@@ -328,7 +328,7 @@ terminals :: 'terminals_' ::=
   | |>      :: :: match {{ tex \triangleright  }}
   | =>      :: :: inf   {{ tex \Rightarrow }}
   | <=      :: :: chk   {{ tex \Leftarrow }}
-  | =>=>    :: :: application {{ tex \Rightarrow\!\!\Rightarrow }}
+  | =>=>    :: :: application {{ tex \Rightarrow\!\!\!\!\Rightarrow }}
   | -->     :: :: ext   {{ tex \longrightarrow }}
   | S       :: :: psubst {{ tex \psubst }}
   | blame   :: :: blame  {{ tex \mathsf{blame} }}
