@@ -180,6 +180,7 @@ atyp_scastable, asc {{ tex \mathbb{S} }} :: 'atyp_scastable_' ::=
 dexp, e :: 'dtrm_' ::=
   | 1                ::   :: one
   | x                ::   :: var
+  | id               ::   :: id {{ tex \mathsf{id} }}
   | n                ::   :: lit
   | cons             ::   :: cons
   | consu             ::   :: consu
@@ -221,11 +222,16 @@ aexp, ae {{ tex e }} :: 'atrm_' ::=
 % DECL CONTEXT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dctx, dd {{ tex \Psi}}  :: 'dctx_' ::=
+dctx, dd {{ tex \Psi}} :: 'dctx_' ::=
   | empty       ::   :: empty
   | dd , x : A  ::   :: cons_var
   | dd , a      ::   :: cons_tvar
   | [ OO ] DD     :: S :: ctx_subst
+
+sctx, ss {{ tex \Sigma }} :: 'sctx_' ::=
+  | empty       ::   :: empty
+  | ss , A      ::   :: cons_type
+  | A           ::   :: singleton
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -289,6 +295,7 @@ terminals :: 'terminals_' ::=
   | ok      :: :: ok {{ tex \mathsf{ok} }}
   | ~       :: :: consist {{ tex \sim }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
+  | let     :: :: let     {{ tex \mathbf{let} }}
   | int     :: :: int     {{ tex \mathsf{Int} }}
   | nat     :: :: nat     {{ tex \mathsf{Nat} }}
   | bool     :: :: bool     {{ tex \mathsf{Bool} }}
@@ -310,8 +317,8 @@ terminals :: 'terminals_' ::=
   | |-      :: :: turnstile {{ tex \vdash }}
   | |-OL    :: :: turnstile1 {{ tex \vdash^\mathit{OL} }}
   | |-HM    :: :: turnstile2 {{ tex \vdash^\mathit{HM} }}
-  | |-DK    :: :: turnstile4 {{ tex \vdash^\mathit{DK} }}
-  | ||-OL   :: :: turnstile3 {{ tex \vdash^\mathit{OL} }}
+  | |-DK    :: :: turnstile3 {{ tex \vdash^\mathit{DK} }}
+  | |-AP    :: :: turnstile4 {{ tex \vdash^\mathit{AP} }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -338,6 +345,9 @@ terminals :: 'terminals_' ::=
 
 formula :: formula_ ::=
   | judgement             :: :: judgement
+  | dd |- e => A          :: :: ap_inf_empty
+  | dd ; ss |- e => A     :: :: ap_app_empty
+  | ss |- A1 <: A2        :: :: ap_sub
   | a in dd               :: :: bind_tvar {{ tex [[a]] \in [[dd]] }}
   | r @ ( a ) in dd       :: :: bind_red_tvar {{ tex {\color{red} [[a]] } \in [[dd]] }}
   | b @ ( a ) in dd       :: :: bind_blue_tvar {{ tex {\color{blue} [[a]] } \in [[dd]] }}
@@ -374,6 +384,7 @@ formula :: formula_ ::=
   | pe ==> pv  ::  :: reduce 
   | pe ==> blame  ::  :: blame
   | aA1 <~ aA2 :: :: algo
+  | A1 = A2    ::  :: typ_eq
 
 
 subrules
@@ -560,6 +571,10 @@ dd |-OL A1 <: \/ a. A2
 defn
 
 dd |-DK A <: B ::  :: dk_subtyping :: dk_s_ by
+
+defn
+
+ss |-AP A <: B ::  :: ap_subtyping :: ap_s_ by
 
 defn
 
@@ -888,7 +903,13 @@ dd |-DK A[a ~> t] . e =>=> A1 -> A2
 --------------------------- :: forall
 dd |-DK \/a. A . e =>=> A1 -> A2
 
+defn
 
+dd ; ss  |-AP e => A  ::  :: ap_inf :: 'ap_inf_' by
+
+defn
+
+dd ; ss  |-AP e <= A  ::  :: ap_chk :: 'ap_chk_' by
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

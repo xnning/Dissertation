@@ -1,0 +1,246 @@
+\section{Introduction}
+
+\subsection{Revisiting Bidirectional Type Checking}
+
+Traditional type checking rules can be heavyweight on annotations, in the sense
+that lambda-bound variables always need explicit annotations. As we have seen in
+\Cref{chap:DK}, bidirectional type checking \citep{pierce:local} provides
+an alternative, which allows types to propagate downward the syntax tree. For
+example, in the expression $[[ (\f:int->int. f) (\y. y)]]$, the type of
+$[[y]]$ is provided by the type annotation on $[[f]]$. This is supported by
+the bidirectional typing \rref{dk-inf-app} for applications:
+
+\renewcommand\ottaltinferrule[4]{
+  \inferrule*[narrower=1,lab=#1,#2]
+  {#3}
+  {#4}
+}
+\[
+  \drule{dk-inf-app}
+\]
+
+\noindent Specifically, if we know that the type of $[[e_1]]$ is a function from
+$[[A1 -> A2]]$, we can check that $[[e_2]]$ has type $[[A1]]$. Notice that here
+the type information flows from functions to arguments.
+
+One guideline for designing bidirectional type checking rules
+\citep{dunfield:tridirectional} is to distinguish introduction rules from
+elimination rules. Constructs which correspond to introduction forms are
+\emph{checked} against a given type, while constructs corresponding to
+elimination forms \emph{infer} (or synthesize) their types. For instance, under
+this design principle, the introduction rule for literals is supposed to be in
+checking mode, as in the rule \rref{dk-chk-int}:
+
+\[
+  \drule{dk-chk-int}
+\]
+
+
+Unfortunately, this means that the trivial program $[[1]]$ cannot type-check,
+which in this case has to be rewritten to $[[1 : int]]$.
+
+In this particular case, bidirectional type checking goes against its original
+intention of removing burden from programmers, since a seemingly unnecessary
+annotation is needed. Therefore, in practice, bidirectional type systems do not
+strictly follow the guideline, and usually have additional inference rules for
+the introduction form of constructs. For literals, the corresponding rule is
+\rref{dk-inf-int}.
+
+\[
+  \drule{dk-inf-int}
+\]
+
+Now we can type check $[[1]]$, but the price to pay is that two typing rules for
+literals are needed. Worse still, the same criticism applies to other constructs
+(e.g., pairs). This shows one drawback of bidirectional type checking: often to
+minimize annotations, many rules are duplicated for having both inference and
+checking mode, which scales up with the typing rules in a type system.
+
+\subsection{Type Checking with The Application Mode}
+
+We propose a variant of bidirectional type checking with a new
+\emph{application mode} (unrelated to the application judgment in DK). The
+application mode preserves the advantage of bidirectional type checking, namely
+many redundant annotations are removed, while certain programs can type check
+with even fewer annotations. Also, with our proposal, the inference mode is a
+special case of the application mode, so it does not produce duplications of
+rules in the type system. Additionally, the checking mode can still be
+\emph{easily} combined into the system. The essential idea of the application
+mode is to enable the type information flow in applications to propagate from
+arguments to functions (instead of from functions to arguments as in traditional
+bidirectional type checking).
+
+To motivate the design of bidirectional type checking with an application mode,
+consider the simple expression
+
+$[[(\x. x) 1]]$
+
+
+\noindent This expression cannot type check in traditional bidirectional type
+checking, because unannotated abstractions, as a construct which correspond to
+introduction forms, only have a checking mode, so annotations are
+required~\footnote{It type-checks in DK, because in DK rules for lambdas are
+  duplicated for having both inference (integrated with type inference
+  techniques) and checking mode.}. For example,
+
+$[[((\x. x) : int -> int) 1]]$
+
+In this example we can observe that if the type of the argument is accounted
+for in inferring the type of $[[\x. x]]$, then it is actually possible to
+deduce that the lambda expression has type $[[int -> int]]$ , from the
+argument \lstinline{1}.
+
+\paragraph{The Application Mode.}
+
+If types flow from the arguments to the function, an alternative idea is to push
+the type of the arguments into the typing of the function, as follows,
+\begin{mathpar}
+\inferrule*[lab=App]{
+            [[dd |- e2 => A1]]
+         \\ [[dd ; ss, A1 |- e1 => A -> B ]]
+            }{
+            [[dd ; ss |- e1 e2 => B]]
+            }
+\end{mathpar}
+
+\noindent In this rule, there are two kinds of judgments. The first judgment is
+just the usual inference mode, which is used to infer the type of the argument
+$[[e_2]]$. The second judgment, the application mode, is similar to the
+inference mode, but it has an additional context $[[ss]]$. The context $[[ss]]$
+is a stack that tracks the types of the arguments of outer applications. In the
+rule for application, the type of the argument $[[e_2]]$ synthesizes its type
+$[[A1]]$, which then is pushed into the application context $[[ss]]$ for
+inferring the type of $[[e_1]]$. Applications are themselves in the application
+mode, since they can be in the context of an outer application.
+
+Lambda expressions can now make use of the application context, leading to the
+following rule:
+\begin{mathpar}
+\inferrule*[lab=Lam]{
+            [[dd , x : A; ss |- e => B]]
+            }{
+            [[dd ; ss , A |- \x. e => A -> B ]]
+            }
+\end{mathpar}
+
+\noindent The type $[[A]]$ that appears last in the application context
+serves as the type for $[[x]]$, and type checking continues with a smaller
+application context and $[[x:A]]$ in the typing context. Therefore, using
+the rule \rref{App} and \rref{Lam}, the expression $[[(\x. x) 1]]$ can
+type-check without annotations, since the type $[[int]]$ of the argument
+$[[1]]$ is used as the type of the binding $[[x]]$.
+
+Note that, since the examples so far are based on simple types, obviously they
+can be solved by integrating type inference and relying on techniques like
+unification or constraint solving (as in DK). However, here the point is that
+the application mode helps to reduce the number of annotations \emph{without
+  requiring such sophisticated techniques}. Also, the application mode helps
+with situations where those techniques cannot be easily applied, such as type
+systems with subtyping.
+
+\paragraph{Interpretation of the Application Mode.}
+
+As we have seen, the guideline for designing bi-directional type checking
+\citep{dunfield:tridirectional}, based on introduction and elimination rules,
+is often not enough in practice. This leads to extra introduction rules in the
+inference mode. The application mode does not distinguish between introduction
+rules and elimination rules. Instead, to decide whether a rule should be in
+inference or application mode, we need to think whether the expression can be
+applied or not. Variables, lambda expressions and applications are all examples
+of expressions that can be applied, and they should have application mode rules.
+However literals or pairs cannot be applied and should have inference rules. For
+example, type checking pairs would simply have the inference mode.
+Nevertheless elimination rules of pairs could have non-empty application
+contexts (see Section~\ref{subsec:pairs} for details). In the application mode,
+arguments are always inferred first in applications and propagated through
+application contexts. An empty application context means that an expression is
+not being applied to anything, which allows us to model the inference mode as a
+particular case\footnote{Although the application mode generalizes the inference mode,
+  we refer to them as two different modes. Thus the variant of bi-directional
+  type checking in this paper is interpreted as a type system with both
+  \emph{inference} and \emph{application} modes.}.
+
+\paragraph{Partial Type Checking.}
+
+The inference mode synthesizes the type of an expression, and the checked mode
+checks an expression against some type. A natural question is how do these modes
+compare to application mode. An answer is that, in some sense: the application
+mode is stronger than inference mode, but weaker than checked mode.
+Specifically, the inference mode means that we know nothing about the type an
+expression before hand. The checked mode means that the whole type of the
+expression is already known before hand. With the application mode we know some
+partial type information about the type of an expression: we know some of its
+argument types (since it must be a function type when the application context is
+non-empty), but not the return type.
+
+Instead of nothing or all, this partialness gives us a finer grain notion on how
+much we know about the type of an expression. For example, assume $[[e: A1 -> A2
+-> A3]]$. In the inference mode, we only have ${e}$. In the checked mode, we
+have both $[[e]]$ and $[[A1 -> A2 -> A3]]$. In the application mode, we have
+$[[e]]$, and maybe an empty context (which degenerates into inference mode), or
+an application context $[[A1]]$ (we know the type of first argument), or an
+application context $[[A1]], [[A2]]$ (we know the types of both arguments).
+
+\paragraph{Trade-offs.}
+
+Note that the application mode is \textit{not} conservative over traditional
+bidirectional type checking due to the different information flow. However, it
+provides a new design choice for type inference/checking algorithms, especially
+for those where the information about arguments is useful. Therefore we next
+discuss some benefits of the application mode for two interesting cases where
+functions are either variables; or lambda (or type) abstractions.
+
+\subsection{Benefits of Information Flowing from Arguments to  Functions}
+
+\paragraph{Local Constraint Solver for Function Variables.}
+
+Many type systems, including type systems with \emph{implicit polymorphism}
+and/or \emph{static overloading}, need information about the types of the
+arguments when type checking function variables. For example, in conventional
+functional languages with implicit polymorphism, function calls such as $[[(id
+1)]]$ where $[[id]] : [[\/ a. (a -> a)]]$, are \emph{pervasive}. In such a
+function call the type system must instantiate $[[a]]$ to $[[int]]$. Dealing
+with such implicit instantiation gets trickier in systems with
+\emph{higher-ranked types}. For example, \cite{practical:inference} require
+additional syntactic forms and relations, whereas DK add a special purpose
+matching or the application judgment.
+
+With the application mode, all the type information about the arguments being
+applied is available in application contexts and can be used to solve
+instantiation constraints. To exploit such information, the type system employs
+a special subtyping judgment called \emph{application subtyping}, with the form
+$[[ss |- A1 <: A2]]$. Unlike conventional subtyping, computationally $[[dd]]$
+and $[[A1]]$ are interpreted as inputs and $[[A2]]$ as output. In above example,
+we have that $[[int |- \/a.a -> a <: A]]$ and we can determine that
+$[[a = int]]$ and $[[A = int -> int]]$. In this way, type system is able to solve
+the constraints \textit{locally} according to the application contexts since we
+no longer need to propagate the instantiation constraints to the typing process.
+
+% ===========================================================
+
+\paragraph{Declaration Desugaring for Lambda Abstractions.}
+
+An interesting consequence of the usage of an application mode is that it
+enables the following $[[let]]$ sugar:
+
+\[
+[[let x = e1 in e2]] [[~~>]] [[(\x. e2) e1]]
+\]
+
+\noindent Such syntactic sugar for $[[let]]$ is, of course, standard. However,
+in the context of implementations of typed languages it normally requires extra
+type annotations or a more sophisticated type-directed translation. Type
+checking $[[(\x. e2) e1]]$ would normally require annotations (for example an
+higher-rank type annotation for $[[x]]$), or otherwise such annotation should be
+inferred first. Nevertheless, with the application mode no extra
+annotations/inference is required, since from the type of the argument $[[e1]]$
+it is possible to deduce the type of $[[x]]$. Generally speaking, with the
+application mode \emph{annotations are never needed for applied lambdas}. Thus
+\lstinline{let} can be the usual sugar from the untyped lambda calculus,
+including HM-style \lstinline{let} expression and even type declarations.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
