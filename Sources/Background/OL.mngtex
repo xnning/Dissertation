@@ -5,9 +5,14 @@ The HM system is simple, flexible and powerful. However, since the type
 annotations in lambda abstractions are always missing, HM only derives
 polymorphic types of \textit{rank 1}. That is, universal quantifiers only appear
 at the top level. Polymorphic types are of \textit{higher-rank}, if universal
-quantifiers can appear anywhere in a type. \cite{odersky:putting} proposed a
-type system, hereafter referred to as OL, which extends HM by allowing lambda
-abstractions to have explicit \textit{higher-rank} types as type annotations.
+quantifiers can appear anywhere in a type.
+
+Essentially higher-rank types enable much of the expressive power of System F,
+with the advantage of implicit polymorphism. Complete type inference for System
+F is known to be undecidable \citep{F:undecidable}. \cite{odersky:putting}
+proposed a type system, hereafter referred to as OL, which extends HM by
+allowing lambda abstractions to have explicit \textit{higher-rank} types as type
+annotations.
 
 \subsection{Higher-rank Types}
 
