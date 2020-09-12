@@ -217,7 +217,7 @@ numpages = {44},
 keywords = {polymorphism, subtyping, type inference}
 }
 
-@inproceedings{10.1145/351240.351259,
+@inproceedings{davies:intersection,
 author = {Davies, Rowan and Pfenning, Frank},
 title = {Intersection Types and Computational Effects},
 year = {2000},
@@ -226,47 +226,10 @@ publisher = {Association for Computing Machinery},
 address = {New York, NY, USA},
 url = {https://doi.org/10.1145/351240.351259},
 doi = {10.1145/351240.351259},
-abstract = {We show that standard formulations of intersection type systems are unsound in the presence of computational effects, and propose a solution similar to the value restriction for polymorphism adopted in the revised definition of Standard ML. It differs in that it is not tied to let-expressions and requires an additional weakening of the usual subtyping rules. We also present a bi-directional type-checking algorithm for the resulting language that does not require an excessive amount of type annotations and illustrate it through some examples. We further show that the type assignment system can be extended to incorporate parametric polymorphism. Taken together, we see our system and associated type-checking algorithm as a significant step towards the introduction of intersection types into realistic programming languages. The added expressive power would allow many more properties of programs to be stated by the programmer and statically verified by a compiler.},
 booktitle = {Proceedings of the Fifth ACM SIGPLAN International Conference on Functional Programming},
 pages = {198–208},
 numpages = {11},
 series = {ICFP '00}
-}
-
-@article{davies:intersection,
-author = {Davies, Rowan and Pfenning, Frank},
-title = {Intersection Types and Computational Effects},
-year = {2000},
-issue_date = {Sept. 2000},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-volume = {35},
-number = {9},
-issn = {0362-1340},
-url = {https://doi.org/10.1145/357766.351259},
-doi = {10.1145/357766.351259},
-journal = {SIGPLAN Not.},
-month = sep,
-pages = {198–208},
-numpages = {11}
-}
-
-@inproceedings{10.1145/964001.964025,
-author = {Dunfield, Joshua and Pfenning, Frank},
-title = {Tridirectional Typechecking},
-year = {2004},
-isbn = {158113729X},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/964001.964025},
-doi = {10.1145/964001.964025},
-abstract = {In prior work we introduced a pure type assignment system that encompasses a rich set of property types, including intersections, unions, and universally and existentially quantified dependent types. This system was shown sound with respect to a call-by-value operational semantics with effects, yet is inherently undecidable.In this paper we provide a decidable formulation for this system based on bidirectional checking, combining type synthesis and analysis following logical principles. The presence of unions and existential quantification requires the additional ability to visit subterms in evaluation position before the context in which they occur, leading to a tridirectional type system. While soundness with respect to the type assignment system is immediate, completeness requires the novel concept of contextual type annotations, introducing a notion from the study of principal typings into the source program.},
-booktitle = {Proceedings of the 31st ACM SIGPLAN-SIGACT Symposium on Principles of Programming Languages},
-pages = {281–292},
-numpages = {12},
-keywords = {intersection types, type refinements, union types, dependent types},
-location = {Venice, Italy},
-series = {POPL '04}
 }
 
 @article{dunfield:tridirectional,
