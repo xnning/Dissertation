@@ -1,4 +1,5 @@
 \section{The Odersky-L{\"a}ufer Type System}
+\label{chap:OL}
 
 The HM system is simple, flexible and powerful. However, since the type
 annotations in lambda abstractions are always missing, HM only derives

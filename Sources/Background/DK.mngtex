@@ -1,4 +1,5 @@
 \section{The Dunfield-Krishnaswami Type System}
+\label{chap:DK}
 
 Both HM and OL derive only monotypes for unannotated lambda abstractions. OL
 improves on HM by allowing polymorphic lambda abstractions but requires the

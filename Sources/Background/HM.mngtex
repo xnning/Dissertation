@@ -1,4 +1,5 @@
 \section{The Hindley-Milner Type System}
+\label{chap:HM}
 
 \begin{figure}[t]
     \centering
