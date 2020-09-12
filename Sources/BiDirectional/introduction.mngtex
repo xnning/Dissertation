@@ -216,8 +216,6 @@ $[[a = int]]$ and $[[A = int -> int]]$. In this way, type system is able to solv
 the constraints \textit{locally} according to the application contexts since we
 no longer need to propagate the instantiation constraints to the typing process.
 
-% ===========================================================
-
 \paragraph{Declaration Desugaring for Lambda Abstractions.}
 
 An interesting consequence of the usage of an application mode is that it
@@ -230,13 +228,13 @@ enables the following $[[let]]$ sugar:
 \noindent Such syntactic sugar for $[[let]]$ is, of course, standard. However,
 in the context of implementations of typed languages it normally requires extra
 type annotations or a more sophisticated type-directed translation. Type
-checking $[[(\x. e2) e1]]$ would normally require annotations (for example an
-higher-rank type annotation for $[[x]]$), or otherwise such annotation should be
-inferred first. Nevertheless, with the application mode no extra
-annotations/inference is required, since from the type of the argument $[[e1]]$
-it is possible to deduce the type of $[[x]]$. Generally speaking, with the
-application mode \emph{annotations are never needed for applied lambdas}. Thus
-\lstinline{let} can be the usual sugar from the untyped lambda calculus,
+checking $[[(\x. e2) e1]]$ would normally require annotations (for example a
+higher-rank type annotation for $[[x]]$ as in OL and DK), or otherwise such
+annotation should be inferred first. Nevertheless, with the application mode no
+extra annotations/inference is required, since from the type of the argument
+$[[e1]]$ it is possible to deduce the type of $[[x]]$. Generally speaking, with
+the application mode \emph{annotations are never needed for applied lambdas}.
+Thus \lstinline{let} can be the usual sugar from the untyped lambda calculus,
 including HM-style \lstinline{let} expression and even type declarations.
 
 %%% Local Variables:
