@@ -1,0 +1,68 @@
+\section{Declarative System}
+
+This section first presents the declarative, \emph{syntax-directed}
+specification for \ap. The interesting aspects about the new type system are: 1)
+the typing rules, which employ a combination of inference and \mode modes; 2)
+the novel subtyping relation under an application context.
+
+% Later, we prove our type system is type-safe by a type
+% directed translation to System F\citep{systemF}.
+% in
+% Section~\ref{subsec:translation}. Finally an algorithmic type system is discussed
+% in Section~\ref{subsec:algorithmic}.
+
+\subsection{Syntax}
+
+\begin{figure}
+  \centering
+  \begin{tabular}{lrcl} \toprule
+    Expressions & $[[e]]$  & $\Coloneqq$ & $[[x]]  \mid [[n]]  \mid [[\x : A . e]] \mid [[ \x . e ]] \mid [[e1 e2]] $ \\
+    Types       & $[[A]]$  & $\Coloneqq$ & $[[int]] \mid [[a]] \mid [[A1 -> A2]] \mid [[\/ a. A]] $ \\
+    Monotypes   & $[[t]]$  & $\Coloneqq$ & $[[int]] \mid [[a]] \mid [[t1 -> t2]] $ \\
+    Contexts    & $[[dd]]$ & $\Coloneqq$ & $[[empty]]  \mid [[dd , x : A]]  $ \\
+    Application Contexts & $[[ss]]$ & $\Coloneqq$ & $[[empty]]  \mid [[ss, A]]  $ \\
+    \bottomrule
+    \end{tabular}
+  \caption{Syntax of System \ap.}
+  \label{fig:AP}
+\end{figure}
+
+The syntax of the language is given in \Cref{fig:AP}.
+
+\paragraph{Expressions.}
+
+The definition of expressions $[[e]]$ include variables ($[[x]]$), integers
+($[[n]]$), annotated lambda abstractions ($[[\x:A . e]]$), lambda abstractions
+($[[\x.e]]$), and applications ($[[e1 e2]]$). Notably, the syntax does not
+include a $[[let]]$ expression ($[[let x = e1 in e2]]$). Let expressions can be
+regarded as the standard syntax sugar $[[(\x. e2) e1]]$, as illustrated in more
+detail later.
+
+\paragraph{Types.} 
+
+Types include the integer type $[[int]]$, type variables ($[[a]]$), functions
+($[[A1 -> A2]]$) and polymorphic types ($[[\/a. A]]$). Monotypes are types
+without universal quantifiers.
+
+
+\paragraph{Contexts.}
+
+Typing contexts $[[dd]]$ are standard: they map a term variable $[[x]]$ to its
+type $[[A]]$. In this system, the context is modeled in a HM-style context
+(\Cref{sec:HM}), which does not track type variables. Again, we implicitly
+assume that all the variables in $[[dd]]$ are distinct.
+
+The main novelty lies in the \emph{application contexts} $[[ss]]$, which are the
+main data structure needed to allow types to flow from arguments to functions.
+Application contexts are modeled as a stack. The stack collects the types of
+arguments in applications. The context is a stack because if a type is pushed
+last then it will be popped first. For example, inferring expression $[[e]]$
+under application context ($[[a, int]]$), means $[[e]]$ is now being applied to
+two arguments $[[e1]], [[e2]]$, with $[[e1:int]]$, $[[e2 :a]]$, so $[[e]]$
+should be of type $[[int -> a -> A]]$ for some $[[A]]$.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

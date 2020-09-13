@@ -1,5 +1,5 @@
 \section{The Dunfield-Krishnaswami Type System}
-\label{chap:DK}
+\label{sec:DK}
 
 Both HM and OL derive only monotypes for unannotated lambda abstractions. OL
 improves on HM by allowing polymorphic lambda abstractions but requires the
@@ -45,7 +45,7 @@ etc.
 In particular, bidirectional type checking has also been combined with HM-style
 techniques for providing type inference in the presence of higher-rank type,
 including DK and \cite{practical:inference}. Let's revisit the example in
-\Cref{chap:OL}:
+\Cref{sec:OL}:
 
 \begin{lstlisting}
 (\f. (f 1, f 'a')) (\x. x)

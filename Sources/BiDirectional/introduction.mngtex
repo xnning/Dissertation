@@ -1,4 +1,6 @@
-\section{Introduction}
+\section{Introduction and Motivation}
+
+name \ap
 
 \subsection{Revisiting Bidirectional Type Checking}
 
@@ -152,7 +154,7 @@ of expressions that can be applied, and they should have application mode rules.
 However literals or pairs cannot be applied and should have inference rules. For
 example, type checking pairs would simply have the inference mode.
 Nevertheless elimination rules of pairs could have non-empty application
-contexts (see Section~\ref{subsec:pairs} for details). In the application mode,
+contexts (see Section TODO for details). In the application mode,
 arguments are always inferred first in applications and propagated through
 application contexts. An empty application context means that an expression is
 not being applied to anything, which allows us to model the inference mode as a
@@ -243,8 +245,7 @@ including HM-style \lstinline{let} expression and even type declarations.
 We believe the application mode can be integrated into many traditional
 bidirectional type systems. In this chapter, we focus on integrating the
 application mode into a bidirectional type system with higher-rank types. Our
-paper~\citep{esop2018:arguments} includes another application to a variant of
-System F.
+paper~\citep{esop2018:arguments} includes another application to System F.
 
 Consider again the motivation example used in \Cref{chap:OL}:
 
@@ -280,7 +281,6 @@ functions. For inferring polymorphic types for arguments, we use
 function. A nice consequence of such an approach is that, as mentioned before,
 HM-style polymorphic \lstinline{let} expressions are simply regarded as
 syntactic sugar to a combination of lambda/application:
-
 \[
   [[let x = e1 in e2]] [[~~>]] [[(\x. e2) e1]]
 \]
