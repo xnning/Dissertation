@@ -12,7 +12,28 @@ with the advantage of implicit polymorphism. Complete type inference for System
 F is known to be undecidable \citep{F:undecidable}. \cite{odersky:putting}
 proposed a type system, hereafter referred to as OL, which extends HM by
 allowing lambda abstractions to have explicit \textit{higher-rank} types as type
-annotations.
+annotations. As a motivation, consider the following program\footnote{For the
+  purpose of better illustration, we assume basic constructs like booleans and
+  pairs in examples.}:
+
+\begin{lstlisting}
+(\f. (f 1, f 'a')) (\x. x)
+\end{lstlisting}
+
+\noindent which is not typeable under HM because it fails to infer the type of
+\lstinline{f}, since it is supposed to be polymorphic. With OL we can add the
+type annotation for \lstinline{f}:
+
+\begin{lstlisting}
+(\f : forall a. a -> a. (f 1, f 'a')) (\x. x)
+\end{lstlisting}
+
+\noindent Note that the first function now has a rank-2 type, as the polymorphic
+type \lstinline{\forall a. a -> a} appears in the argument position of a function:
+
+\begin{lstlisting}
+(\f : forall a. a -> a. (f 1, f 'a')) : (\forall a. a -> a) -> (Int, Char)
+\end{lstlisting}
 
 \subsection{Higher-rank Types}
 

@@ -40,9 +40,28 @@ effectiveness of bidirectional type checking in several other settings,
 including many different systems with subtyping
 \citep{davies:intersection,dunfield:tridirectional}, systems with dependent
 types \citep{asperti:bi:dependent,coquand:algorithm,loh:tutorial,Xi:dependent},
-etc. In particular, bidirectional type checking has also been combined with
-HM-style techniques for providing type inference in the presence of higher-rank
-type, including DK and \cite{practical:inference}.
+etc.
+
+In particular, bidirectional type checking has also been combined with HM-style
+techniques for providing type inference in the presence of higher-rank type,
+including DK and \cite{practical:inference}. Let's revisit the example in
+\Cref{chap:OL}:
+
+\begin{lstlisting}
+(\f. (f 1, f 'a')) (\x. x)
+\end{lstlisting}
+
+\noindent which is not typeable in HM as it they fail to infer the type of
+\lstinline{f}, and OL requires type annotations on \lstinline{f}. Using
+bi-directional type checking, the type annotation can be propagated from
+somewhere else. For example, we can rewrite this program as
+
+\begin{lstlisting}
+((\f. (f 1, f 'c')) : (forall a. a -> a) -> (Int, Char)) (\x . x)
+\end{lstlisting}
+
+\noindent Here the type of \lstinline{f} can be easily derived from the type
+signature using checking mode in bi-directional type checking.
 
 
 \begin{figure}[t]

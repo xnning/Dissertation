@@ -237,6 +237,8 @@ the application mode \emph{annotations are never needed for applied lambdas}.
 Thus \lstinline{let} can be the usual sugar from the untyped lambda calculus,
 including HM-style \lstinline{let} expression and even type declarations.
 
+\subsection{Type Inference of Higher-rank Types}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
