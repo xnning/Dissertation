@@ -25,14 +25,14 @@ annotations. As a motivation, consider the following program\footnote{For the
 type annotation for \lstinline{f}:
 
 \begin{lstlisting}
-(\f : forall a. a -> a. (f 1, f 'a')) (\x. x)
+(\f : foralla. a -> a. (f 1, f 'a')) (\x. x)
 \end{lstlisting}
 
 \noindent Note that the first function now has a rank-2 type, as the polymorphic
-type \lstinline{\forall a. a -> a} appears in the argument position of a function:
+type \lstinline{foralla. a -> a} appears in the argument position of a function:
 
 \begin{lstlisting}
-(\f : forall a. a -> a. (f 1, f 'a')) : (\forall a. a -> a) -> (Int, Char)
+(\f : foralla. a -> a. (f 1, f 'a')) : (foralla. a -> a) -> (Int, Char)
 \end{lstlisting}
 
 \subsection{Higher-rank Types}

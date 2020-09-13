@@ -52,12 +52,14 @@ including DK and \cite{practical:inference}. Let's revisit the example in
 \end{lstlisting}
 
 \noindent which is not typeable in HM as it they fail to infer the type of
-\lstinline{f}, and OL requires type annotations on \lstinline{f}. Using
-bi-directional type checking, the type annotation can be propagated from
-somewhere else. For example, we can rewrite this program as
+\lstinline{f}. In OL, it can be type-checked by adding a polymorphic type
+annotation on \lstinline{f}. In DK, we can also add a polymorphic type
+annotation on \lstinline{f}. But with bi-directional type checking, the type
+annotation can be propagated from somewhere else. For example, we can rewrite
+this program as:
 
 \begin{lstlisting}
-((\f. (f 1, f 'c')) : (forall a. a -> a) -> (Int, Char)) (\x . x)
+((\f. (f 1, f 'c')) : (foralla. a -> a) -> (Int, Char)) (\x . x)
 \end{lstlisting}
 
 \noindent Here the type of \lstinline{f} can be easily derived from the type
