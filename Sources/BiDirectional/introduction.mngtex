@@ -286,8 +286,12 @@ syntactic sugar to a combination of lambda/application:
 \]
 
 \noindent With this approach, nested lets can lead to types which are \emph{more
-  general} than HM. For example,
-\lstinline{let s = \x. x in let t = \y. s in e}.
+  general} than HM. For example, consider the following expression:
+
+\begin{lstlisting}
+let s = \x. x in let t = \y. s in e
+\end{lstlisting}
+
 The type of \lstinline{s} is \lstinline{foralla. a -> a} after
 generalization. Because \lstinline{t} returns \lstinline{s} as a result, we
 might expect \lstinline{t: forallb. b -> (foralla. a -> a)}, which is what our
@@ -295,7 +299,7 @@ system will return. However, HM will return type
 \lstinline{t: forallb. foralla. b -> (a -> a)},
 as it can only return rank 1 types, which is less general than
 the previous one according to the subtyping relation for
-polymorphic types in OL~\ref{chap:OL}.
+polymorphic types in OL (\Cref{fig:OL:static}).
 
 \paragraph{Conservativity over the Hindley-Milner Type System.}
 
@@ -308,7 +312,7 @@ application, programs remain typeable.
 
 We will give a full discussion and comparison of related work in Section
 \ref{chap:related}. Among those works, we believe DK and the work by
-\citet{jones2007practical} are the most closely related work to our system. Both
+\citet{practical:inference} are the most closely related work to our system. Both
 their systems and ours are based on a \emph{predicative} type system: universal
 quantifiers can only be instantiated by monotypes. So we would like to emphasize
 our system's properties in relation to those works. In particular, here we
@@ -333,9 +337,13 @@ smaller annotations.
 3) Expressiveness. Based on these two answers, it may seem that our system
 should accept all expressions that are typeable in their system. However, this
 is not true because the application mode is \textit{not} conservative over traditional
-bi-directional type checking. Consider the expression
-\lstinline{(\f : (foralla. a -> a) -> (nat, char). f) (\g. (g 1, g 'a'))},
-which is typeable in their
+bi-directional type checking. Consider the expression:
+
+\begin{lstlisting}
+(\f : (foralla. a -> a) -> (nat, char). f) (\g. (g 1, g 'a'))
+\end{lstlisting}
+
+\noindent which is typeable in their
 system. In this case, even if \lstinline{g} is a polymorphic binding without a
 type annotation the expression can still type-check. This is because the
 original application rule propagates the information from the outer binding into
@@ -351,7 +359,11 @@ In our system the above expression is not typeable, as a consequence
 of the information flow in the application mode.
 However, following our guideline for annotations leads to a program
 that can be type-checked with a smaller annotation:
-\lstinline{(\f. f) (\g : (foralla. a -> a). (g 1, g 'a'))}.
+
+\begin{lstlisting}
+(\f. f) (\g : (foralla. a -> a). (g 1, g 'a')).
+\end{lstlisting}
+
 This means that our work is not conservative over their work, which is due
 to the design choice of the application typing rule. Nevertheless, we can always
 rewrite programs using our guideline, which often leads to
