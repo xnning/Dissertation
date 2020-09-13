@@ -73,7 +73,9 @@ bidirectional type checking).
 To motivate the design of bidirectional type checking with an application mode,
 consider the simple expression
 
-$[[(\x. x) 1]]$
+\begin{lstlisting}
+(\x. x) 1
+\end{lstlisting}
 
 
 \noindent This expression cannot type check in traditional bidirectional type
@@ -82,12 +84,11 @@ introduction forms, only have a checking mode, so annotations are
 required~\footnote{It type-checks in DK, because in DK rules for lambdas are
   duplicated for having both inference (integrated with type inference
   techniques) and checking mode.}. For example,
-
-$[[((\x. x) : int -> int) 1]]$
+\lstinline{((\x. x) : Int -> Int) 1}.
 
 In this example we can observe that if the type of the argument is accounted
-for in inferring the type of $[[\x. x]]$, then it is actually possible to
-deduce that the lambda expression has type $[[int -> int]]$ , from the
+for in inferring the type of \lstinline{\x. x}, then it is actually possible to
+deduce that the lambda expression has type  \lstinline{Int -> Int}, from the
 argument \lstinline{1}.
 
 \paragraph{The Application Mode.}
@@ -201,7 +202,7 @@ functional languages with implicit polymorphism, function calls such as $[[(id
 1)]]$ where $[[id]] : [[\/ a. (a -> a)]]$, are \emph{pervasive}. In such a
 function call the type system must instantiate $[[a]]$ to $[[int]]$. Dealing
 with such implicit instantiation gets trickier in systems with
-\emph{higher-ranked types}. For example, \cite{practical:inference} require
+\emph{higher-rank types}. For example, \cite{practical:inference} require
 additional syntactic forms and relations, whereas DK add a special purpose
 matching or the application judgment.
 
@@ -238,6 +239,122 @@ Thus \lstinline{let} can be the usual sugar from the untyped lambda calculus,
 including HM-style \lstinline{let} expression and even type declarations.
 
 \subsection{Type Inference of Higher-rank Types}
+
+We believe the application mode can be integrated into many traditional
+bidirectional type systems. In this chapter, we focus on integrating the
+application mode into a bidirectional type system with higher-rank types.
+
+Consider again the motivation example used in \Cref{chap:OL}:
+
+\begin{lstlisting}
+(\f. (f 1, f 'a')) (\x. x)
+\end{lstlisting}
+
+\noindent which is not typeable in HM, but can be rewritten to include
+type annotations in OL and DK. For example, both in OL and DK we can write:
+
+\begin{lstlisting}
+(\f:(foralla. a -> a). (f 1, f 'c')) (\x. x)
+\end{lstlisting}
+
+However, although some redundant annotations are removed by bidirectional type
+checking, the burden of inferring higher-rank types is still carried by
+programmers: they are forced to add polymorphic annotations to help with the
+type derivation of higher-rank types. For the above example, the type annotation
+is still \emph{provided by programmers}, even though the necessary type
+information can be derived intuitively without any annotations: \lstinline{f} is
+applied to \lstinline{\x. x}, which is of type \lstinline{foralla. a -> a}.
+
+\paragraph{Type Inference for Higher-rank Types with the Application Mode.}
+
+Using our bi-directional type system with an application mode, the original
+expression can type check without annotations or rewrites:
+\lstinline{(\f. (f 1, f 'c')) (\x. x)}.
+
+This result comes naturally if we allow type information flow from arguments to
+functions. For inferring polymorphic types for arguments, we use
+\emph{generalization}. In the above example, we first infer the type
+\lstinline{foralla. a -> a} for the argument, then pass the type to the
+function. A nice consequence of such an approach is that, as mentioned before,
+HM-style polymorphic \lstinline{let} expressions are simply regarded as
+syntactic sugar to a combination of lambda/application:
+
+\[
+  [[let x = e1 in e2]] [[~~>]] [[(\x. e2) e1]]
+\]
+
+\noindent With this approach, nested lets can lead to types which are \emph{more
+  general} than HM. For example,
+\lstinline{let s = \x. x in let t = \y. s in e}.
+The type of \lstinline{s} is \lstinline{foralla. a -> a} after
+generalization. Because \lstinline{t} returns \lstinline{s} as a result, we
+might expect \lstinline{t: forallb. b -> (foralla. a -> a)}, which is what our
+system will return. However, HM will return type
+\lstinline{t: forallb. foralla. b -> (a -> a)},
+as it can only return rank 1 types, which is less general than
+the previous one according to the subtyping relation for
+polymorphic types in OL~\ref{chap:OL}.
+
+\paragraph{Conservativity over the Hindley-Milner Type System.}
+
+Our type system is a conservative extension over HM, in the sense that every
+program that can type-check in HM is accepted in our type system. This result is
+not surprising: after desugaring \lstinline{let} into a lambda and an
+application, programs remain typeable.
+
+\paragraph{Comparing Predicative Higher-rank Type Inference Systems.}
+
+We will give a full discussion and comparison of related work in Section
+\ref{chap:related}. Among those works, we believe DK and the work by
+\citet{jones2007practical} are the most closely related work to our system. Both
+their systems and ours are based on a \emph{predicative} type system: universal
+quantifiers can only be instantiated by monotypes. So we would like to emphasize
+our system's properties in relation to those works. In particular, here we
+discuss two interesting differences, and also briefly (and informally) discuss
+how the works compare in terms of expressiveness.
+
+1) Inference of higher-rank types. In both works, every polymorphic type
+inferred by the system must correspond to one annotation provided by the
+programmer. However, in our system, some higher-rank types can be inferred
+from the expression itself without any annotation. The motivating expression
+above provides an example of this.
+
+2) Where are annotations needed? Since type annotations are useful for inferring
+higher rank types, a clear answer to the question where annotations are needed
+is necessary so that programmers know when they are required to write
+annotations. To this question, previous systems give a concrete answer: only on
+the binding of polymorphic types. Our answer is slightly different: only on the
+bindings of polymorphic types in abstractions \emph{that are not applied to
+  arguments}. Roughly speaking this means that our system ends up with fewer or
+smaller annotations.
+
+3) Expressiveness. Based on these two answers, it may seem that our system
+should accept all expressions that are typeable in their system. However, this
+is not true because the application mode is \textit{not} conservative over traditional
+bi-directional type checking. Consider the expression
+\lstinline{(\f : (foralla. a -> a) -> (nat, char). f) (\g. (g 1, g 'a'))},
+which is typeable in their
+system. In this case, even if \lstinline{g} is a polymorphic binding without a
+type annotation the expression can still type-check. This is because the
+original application rule propagates the information from the outer binding into
+the inner expressions. Note that the fact that such expression type-checks does
+not contradict their guideline of providing type annotations for every
+polymorphic binder. Programmers that strictly follow their guideline can still
+add a polymorphic type annotation for \lstinline{g}. However it does mean that
+it is a little harder to understand where annotations for polymorphic binders
+can be \emph{omitted} in their system. This requires understanding how the
+applications in checked mode operate.
+
+In our system the above expression is not typeable, as a consequence 
+of the information flow in the application mode.
+However, following our guideline for annotations leads to a program
+that can be type-checked with a smaller annotation:
+\lstinline{(\f. f) (\g : (foralla. a -> a). (g 1, g 'a'))}.
+This means that our work is not conservative over their work, which is due
+to the design choice of the application typing rule. Nevertheless, we can always
+rewrite programs using our guideline, which often leads to
+fewer/smaller annotations.
+
 
 %%% Local Variables:
 %%% mode: latex
