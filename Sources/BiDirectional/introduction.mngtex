@@ -242,7 +242,9 @@ including HM-style \lstinline{let} expression and even type declarations.
 
 We believe the application mode can be integrated into many traditional
 bidirectional type systems. In this chapter, we focus on integrating the
-application mode into a bidirectional type system with higher-rank types.
+application mode into a bidirectional type system with higher-rank types. Our
+paper~\citep{esop2018:arguments} includes another application to a variant of
+System F.
 
 Consider again the motivation example used in \Cref{chap:OL}:
 
