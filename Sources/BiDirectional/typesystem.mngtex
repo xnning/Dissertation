@@ -64,11 +64,7 @@ should be of type $[[int -> a -> A]]$ for some $[[A]]$.
 \subsection{Type System}
 
 \begin{figure}
-  \renewcommand\ottaltinferrule[4]{
-    \inferrule*[narrower=0.6,lab=#1,#2]
-    {#3}
-    {#4}
-  }
+  \renewcommand\ottaltinferrule[4]{\inferrule*[narrower=0.6,lab=#1,#2] {#3} {#4}}
   \drules[ap-inf]{$ [[dd |-AP e => A ]] $}{Typing Inference}{int,lam,lamann}
   \drules[ap-app]{$ [[dd ; ss |-AP e => A ]] $}{Typing Application Mode}{var,lam,lamann,app}
   \drules[ap-as]{$ [[ss |-AP A1 <: A2 ]] $}{Application Subtyping}{empty,forall,arrow}
@@ -126,15 +122,98 @@ $[[e1]]$ is of possibly a higher rank type.
 \paragraph{Let Expressions.}
 
 The language does not have built-in let expressions, but instead supports
-$[[let]]$ as syntactic sugar. The typing rule for let expressions in the
-HM system is (without the gray-shaded part):
-
+$[[let]]$ as syntactic sugar. Recall the syntactic-directed typing rule
+(\rref{hm-let-gen}) for let expressions with generalization in the HM system.
+With slight reformat to match AP, we get (without the gray-shaded part):
+%
 \[
   \inferrule{[[dd |- e1 => A1]]\\
-    [[dd |-gen  A1 = A2]] \\
-    [[dd, x:A2 |- e2 => A3]]}
-  {[[dd |- let x = e1 in e2 => A3]]}
+    [[</ ai // i /> = fv (t) - fv(dd)]] \\
+    [[A2 = \/ </ai // i /> . A1]] \\
+    [[dd, x:A2]] ; \hlmath{[[ss]]} [[|-]] [[e2]] [[=>]] [[A3]]}
+  {[[dd]] ; \hlmath{[[ss]]} [[|-]] [[let x = e1 in e2]] [[=>]] [[A3]] }
 \]
+
+\noindent where we do generalization on the type of $[[e1]]$, which is then
+assigned as the type of $[[x]]$ while inferring $[[e2]]$. Adapting this rule to
+our system with application contexts would result in the gray-shaded part, where
+the application context is only used for $[[e2]]$, because $[[e2]]$ is the
+expression being applied. If we desugar the let expression ($[[let x = e1 in
+e2]]$) to $[[(\x. e2) e1]]$, we have the following derivation:
+%
+\renewcommand\ottaltinferrule[4]{\inferrule*[narrower=1.2,lab=#1,#2] {#3} {#4}}
+\[
+  \inferrule{[[dd |- e1 => A1]] \quad\,\,
+    [[</ ai // i /> = fv (A1) - fv(dd)]] \quad\,\,
+    [[A2 = \/ </ai // i /> . A1]] \quad\,\,
+    \inferrule{[[dd,x:A2 ; ss |- e2 => A3]]}
+    {[[dd;ss,A2 |- \x. e2 => A2 -> A3]]}}
+  {[[dd;ss |- (\x. e2) e2 => A3]]}
+\]
+
+\noindent The type $[[A2]]$ is now pushed into application context in
+\rref{ap-app-app}, and then assigned to $[[x]]$ in \rref{ap-app-lam}. Comparing
+this with the typing derivations for let expressions, we now have same
+preconditions. Thus we can see that the rules in \Cref{fig:AP:static} are
+sufficient to express an HM-style polymorphic let construct.
+
+\paragraph{Meta-theory.}
+
+The type system enjoys several interesting properties, especially lemmas about
+application contexts. Before we present those lemmas, we need a helper
+definition of what it means to use arrows on application contexts.
+
+\begin{definition}[$[[ss -> A]]$]
+  If $[[ss]] = [[A1]], [[A2]], ... [[An]]$,
+  then $[[ss -> A]]$ means the function type $[[An]] [[->]] ... [[->]] [[A2 -> A1 -> A]]$.
+\end{definition}
+
+Such definition is useful to reason about the typing result with application
+contexts. One specific property is that the application context determines the
+form of the typing result.
+
+\begin{lemma}[$[[ss]]$ Coincides with Typing Results]
+  \label{lemma:app-coin-typing}
+  If $[[dd;ss |-AP e => A]]$,
+  then for some $[[A']]$,
+  we have $[[A = ss -> A']]$.
+\end{lemma}
+
+Having this lemma, we can always use the judgment $[[dd;ss |-AP e => ss -> A']]$
+instead of $[[dd;ss|-AP e => A]]$.
+
+In traditional bi-directional type checking, we often have one subsumption rule
+that transfers between inference and checked mode, which states that if an
+expression can be inferred to some type, then it can be checked with this type
+(e.g., \rref{dk-chk-sub} in DK). In our system, we regard the normal inference
+mode $[[dd |-AP e => A]]$ as a special case, when the application context is
+empty. We can also turn from normal inference mode into application mode with an
+application context.
+
+\begin{lemma}[Subsumption]
+  If $[[dd |-AP e => ss -> A]]$,
+  then $[[dd;ss |-AP e => ss -> A]]$.
+\end{lemma}
+
+This lemma is actually a special case for the following one:
+
+\begin{lemma}[Generalized Subsumption]
+  If $[[dd;ss1 |-AP e => ss1 -> ss2 -> A]]$,
+  then $[[dd;ss2,ss1 |-AP e=> ss1 -> ss2 -> A]]$.
+\end{lemma}
+
+The relationship between our system and standard Hindley Milner type system (HM)
+can be established through the desugaring of let expressions. Namely, if $[[e]]$
+is typeable in HM, then the desugared expression $[[e']]$ is typeable in our
+system, with a more general typing result.
+
+\begin{lemma}[AP Conservative over HM]
+  If $[[dd|-HM e : A]]$,
+  and desugaring let expression in $[[e]]$ gives back $[[e']]$,
+  then for some $[[A']]$,
+  we have $[[dd |-AP e' => A']]$,
+  and $ A' <: A$.
+\end{lemma}
 
 %%% Local Variables:
 %%% mode: latex

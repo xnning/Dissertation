@@ -1,8 +1,8 @@
 metavar typvar, a {{ tex a }}, b, L ::=
 
-metavar expvar, x, y, f, g, n, m, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
+metavar expvar, x, y, f, g, m, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
 
-indexvar index, i, j ::=
+indexvar index, i, j, n ::=
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL TYPE
@@ -52,6 +52,7 @@ dtyp, A {{tex \sigma}}, B, C :: 'dtyp_' ::=
   | r @ \/ a . A   :: S :: red_all {{ tex [[\/]] {\color{red} [[a]]} . [[A]] }}
   | b @ \/ a . A   :: S :: blue_all {{ tex [[\/]] {\color{blue} [[a]]} . [[A]] }}
   | S ( A )        :: S :: subst2
+  | ss -> A        ::   :: sctx_type
 
 % Mono Types
 
@@ -231,8 +232,8 @@ dctx, dd {{ tex \Psi}} :: 'dctx_' ::=
 
 sctx, ss {{ tex \Sigma }} :: 'sctx_' ::=
   | empty       ::   :: empty
-  | ss , A      ::   :: cons_type
   | A           ::   :: singleton
+  | ss1 , ss2   ::   :: append
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
