@@ -23,6 +23,7 @@ varset, avs  :: 'varset_' ::=
   | fv ( GG )                ::  :: fv_gg
   | fv ( A )                 ::  :: fv_A
   | avs set                  ::  :: a_set {{ tex \overbar{[[avs]]} }}
+  | avs1 - avs2              ::  :: minus {{ tex [[avs1]] - [[avs2]] }}
 
 dtyp, A {{tex \sigma}}, B, C :: 'dtyp_' ::=
   | int            ::   :: int
@@ -385,6 +386,7 @@ formula :: formula_ ::=
   | pe ==> blame  ::  :: blame
   | aA1 <~ aA2 :: :: algo
   | A1 = A2    ::  :: typ_eq
+  | avs1 = avs2 ::  :: avs_eq
 
 
 subrules
@@ -808,7 +810,7 @@ dd |-HM e : t [ </ ai ~> ti // i /> ]
 dd |-HM x : t [ </ ai ~> ti // i /> ]
 
 dd |-HM e1 : t
-</ ai // i /> notin fv(dd)
+</ ai // i /> = fv (t) - fv(dd)
 dd, x : \/ </ ai // i/> . t |-HM e2 : t
 --------------------------------------- :: let_gen
 dd |-HM let x = e1 in e2 : t
