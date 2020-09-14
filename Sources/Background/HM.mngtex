@@ -129,7 +129,7 @@ A type system is \textit{syntax-directed}, if the typing rules are completely
 driven by the parser. However, in \Cref{fig:HM}, the rule for generalization
 (\rref{hm-gen}) and instantiation (\rref{hm-inst}) can be applied anywhere.
 
-A syntax-directed presentation of HM is also common. In particular, from the
+A syntax-directed presentation of HM can be easily derived. In particular, from the
 typing rules we observe that, except for fetching a variable from the context
 (\rref{hm-var}), the only place where a polymorphic type can be generated is for
 the let expressions (\rref{hm-let}). Thus, a syntax-directed system of HM can be
@@ -142,8 +142,8 @@ and generalization applied to only let expressions. Specifically,
 
 \paragraph{Type Inference.}
 
-The guessing part of the system can be determined by the technique of
-\textit{type inference}. There exists a sound and complete type inference
+The guessing part of the system can be deterministically solved by the technique
+of \textit{type inference}. There exists a sound and complete type inference
 algorithm for HM \citep{Damas:Milner}, which has served as the basis for the
 type inference algorithm for many other systems
 \citep{odersky:putting,practical:inference}, including the system presented in
