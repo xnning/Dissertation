@@ -84,7 +84,9 @@ polymorphic types in HM ($[[A]]$ in \Cref{fig:HM}) has at most rank $1$.
 
 
 
-\subsection{Syntax}
+\subsection{Declarative System}
+
+\paragraph{Syntax.}
 
 The syntax of OL is given in \Cref{fig:OL}. Comparing to HM, we
 observe the following differences.
@@ -132,9 +134,9 @@ rules are straightforward.
 \end{figure}
 
 
-\subsection{Static Semantics}
+\paragraph{Type System.}
 
-The static semantics of OL is given in \Cref{fig:OL:static}.
+The typing rules for OL are given in \Cref{fig:OL:static}.
 
 \Rref{ol-var} and \rref{ol-int} are the same as that of HM. \Rref{ol-lamann}
 type-checks annotated lambda abstractions, by simply putting $[[x:A]]$ into the

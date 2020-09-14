@@ -79,7 +79,9 @@ signature using checking mode in bi-directional type checking.
   \label{fig:DK}
 \end{figure}
 
-\subsection{Syntax}
+\subsection{Declarative System}
+
+\subsubsection{Syntax}
 
 The syntax of the DK is given in \Cref{fig:DK}. Comparing to OL, only the
 definition of expressions slightly differs. First, the expressions $e$ in DK
@@ -94,7 +96,7 @@ The definitions of types and contexts are the same as in OL. Thus, DK also share
 the same well-formedness definition as in OL (\Cref{fig:OL:wf}). We thus omit the
 definitions, but use $[[|-DK]]$ to denote the corresponding judgment in DK.
 
-\subsection{Static Semantics}
+\subsection{Type System}
 
 \begin{figure}
   \drules[dk-inf]{$ [[dd |-DK e => A ]] $}{Type Inference}{var, int,lam, app, anno}
