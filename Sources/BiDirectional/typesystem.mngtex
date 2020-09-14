@@ -74,8 +74,73 @@ should be of type $[[int -> a -> A]]$ for some $[[A]]$.
   \drules[ap-as]{$ [[ss |-AP A1 <: A2 ]] $}{Application Subtyping}{empty,forall,arrow}
 
   \caption{Typing rules of System AP.}
-  \label{fig:OL:static}
+  \label{fig:AP:static}
 \end{figure}
+
+The top part of Figure \ref{fig:AP:static} gives the typing rules for our
+language. The judgment $[[dd ; ss |-AP e => A]]$ is read as: under typing
+context $[[dd]]$, and application context $[[ss]]$, $[[e]]$ has type $[[A]]$.
+The standard inference mode $[[dd |-AP e => A]]$ can be regarded as a special
+case when the application context is empty. Note that the variable names are
+assumed to be fresh enough when new variables are added into the typing context,
+or when generating new type variables.
+
+We discuss the rules when the application context is empty first. Those rules
+are unsurprising. \Rref{ap-inf-int} shows that integer literals are only
+inferred to have type $[[int]]$ under an empty application context. This is
+obvious since an integer cannot accept any arguments. \Rref{ap-inf-lam} deals
+with lambda abstractions when the application context is empty. In this
+situation, a monotype $[[t]]$ is \emph{guessed} for the argument, just like
+previous calculi. \Rref{ap-inf-lamann} also works as expected: a new variable
+$[[x]]$ is put with its type $[[A]]$ into the typing context, and inference
+continues on the abstraction body.
+
+Now we turn to the cases when the application context is not empty.
+\Rref{ap-app-var} says that if $[[x: A1]]$ is in the typing context, and
+$[[A1]]$ is a subtype of $[[A2]]$ under application context $[[ss]]$, then
+$[[x]]$ has type $[[A2]]$. It depends on the subtyping rules that are explained
+in Section TODO.
+
+\Rref{ap-app-lam} shows the strength of application contexts. It states that, without
+annotations, if the application context is non-empty, a type can be popped from
+the application context to serve as the type for $[[x]]$. Inference of the body then
+continues with the rest of the application context. This is possible, because
+the expression $[[\x. e]]$ is being applied to an argument of type $[[A1]]$, which
+is the type at the top of the application context stack.
+
+For lambda abstraction with annotations $[[\x:A1. e]]$, if the and the
+application context has $[[A2]]$, then \rref{ap-app-lamann} first checks that
+$[[A2]]$ is a subtype of $[[A1]]$ before putting $[[x:A1]]$ in the typing
+context. However, note that it is always possible to remove annotations in an
+abstraction if it has been applied to some arguments.
+
+\Rref{ap-app-app} pushes types into the application context. The application rule
+first infers the type of the argument $[[e2]]$ with type $[[A1]]$. Then the
+type $[[A1]]$ is generalized in the same way as the HM type system. We define
+$[[dd |-gen A1 = A2]]$ as:
+
+TODO
+
+The resulting generalized type is $[[A2]]$.
+% The generalization is shown in rule
+% \rul{T-Gen}, where all free type variables are extracted to quantifiers.
+Thus the type of $[[e1]]$ is now inferred under an application context extended
+with type $[[A2]]$. The generalization step is important to infer higher ranked
+types: since $[[A2]]$ is a possibly polymorphic type, which is the argument type
+of $[[e1]]$, then $[[e1]]$ is of possibly a higher rank type.
+
+\paragraph{Let Expressions.}
+
+The language does not have built-in let expressions, but instead supports
+$[[let]]$ as syntactic sugar. The typing rule for let expressions in the
+HM system is (without the gray-shaded part):
+
+\[
+  \inferrule{[[dd |- e1 => A1]]\\
+    [[dd |-gen  A1 = A2]] \\
+    [[dd, x:A2 |- e2 => A3]]}
+  {[[dd |- let x = e1 in e2 => A3]]}
+\]
 
 %%% Local Variables:
 %%% mode: latex

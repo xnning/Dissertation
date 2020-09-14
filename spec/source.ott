@@ -789,12 +789,10 @@ dd, x: t1 |-HM e : t2
 --------------------------- :: lam
 dd |-HM \x. e : t1 -> t2
 
-
 dd |-HM e1 : t1 -> t2
 dd |-HM e2 : t1
 ------------------------------- :: app
 dd |-HM e1 e2 : t2
-
 
 dd |-HM e1 : A
 dd, x : A |-HM e2 : t
@@ -804,6 +802,16 @@ dd |-HM let x = e1 in e2 : t
 dd |-HM e : \/ </ ai // i /> . t
 --------------------------- :: inst
 dd |-HM e : t [ </ ai ~> ti // i /> ]
+
+(x : \/ </ ai // i /> . t) in dd
+--------------------------- :: var_inst
+dd |-HM x : t [ </ ai ~> ti // i /> ]
+
+dd |-HM e1 : t
+</ ai // i /> notin fv(dd)
+dd, x : \/ </ ai // i/> . t |-HM e2 : t
+--------------------------------------- :: let_gen
+dd |-HM let x = e1 in e2 : t
 
 
 defn

@@ -24,7 +24,9 @@ type discipline first discovered in \cite{hindley}, later rediscovered by
 \cite{milner}, and also closely formalized by \cite{Damas:Milner}.
 
 
-\subsection{Syntax}
+\subsection{Declarative System}
+
+\paragraph{Syntax.}
 
 The syntax of HM is given in \Cref{fig:HM}. The expressions $[[e]]$
 include variables $[[x]]$, literals $[[n]]$, lambda abstractions $[[\x. e]]$,
@@ -40,13 +42,7 @@ variables $[[a]]$ and function types $[[t1 -> t2]]$.
 A context $[[dd]]$ tracks the type information for variables. We implicitly
 assume items in a context are distinct throughout the thesis.
 
-% The standard representation of HM is often given without constants or primitive
-% types, while they can be easily included. In our case, we include
-% literals and the integer type as this system serves as the basis for later
-% extensions, which often use primitive types for examples.
-
-
-\subsection{Static Semantics}
+\paragraph{Typing.}
 
 The declarative typing judgment $[[dd |-HM e : A]]$ derives the type $[[A]]$ of
 the expression $[[e]]$ under the context $[[dd]]$. \Rref{hm-var} fetches a
@@ -124,14 +120,35 @@ int) -> (int -> int)]]$, etc.
 \subsection{Algorithmic Type System}
 
 The declarative specification of HM given in \Cref{fig:HM} does not directly
-lead to an algorithm, because there are still many guesses in the system, such
-as in \rref{hm-lam}.
+lead to an algorithm. In particular, the system is not \textit{syntax-directed},
+and there are still many guesses in the system, such as in \rref{hm-lam}.
 
-There exists a sound and complete type inference algorithm for HM
-\citep{Damas:Milner}, which has served as the basis for the type inference
-algorithm for many other systems \citep{odersky:putting,practical:inference},
-including the system presented in \Cref{chap:BiDirectional}. We will discuss
-more about it in \Cref{chap:BiDirectional}.
+\paragraph{Syntax-directed System.}
+
+A type system is \textit{syntax-directed}, if the typing rules are completely
+driven by the parser. However, in \Cref{fig:HM}, the rule for generalization
+(\rref{hm-gen}) and instantiation (\rref{hm-inst}) can be applied anywhere.
+
+A syntax-directed presentation of HM is also common. In particular, from the
+typing rules we observe that, except for fetching a variable from the context
+(\rref{hm-var}), the only place where a polymorphic type can be generated is for
+the let expressions (\rref{hm-let}). Thus, a syntax-directed system of HM can be
+presented as the original system, with instantiation applied to only variables,
+and generalization applied to only let expressions. Specifically,
+\begin{mathpar}
+ \drule{hm-var-inst} \and \drule{hm-let-gen}
+\end{mathpar}
+
+
+\paragraph{Type Inference.}
+
+The guessing part of the system can be determined by the technique of
+\textit{type inference}. There exists a sound and complete type inference
+algorithm for HM \citep{Damas:Milner}, which has served as the basis for the
+type inference algorithm for many other systems
+\citep{odersky:putting,practical:inference}, including the system presented in
+\Cref{chap:BiDirectional}. We will discuss more about it in
+\Cref{chap:BiDirectional}.
 
 
 
