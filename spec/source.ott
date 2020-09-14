@@ -948,7 +948,8 @@ dd ; ss, A2 |-AP \x: A1. e => A2 -> A3
 
 
 dd |-AP e2 => A1
-dd |-gen A1 = A2
+</ ai // i /> =  fv(A1) - fv(dd)
+A2 = \/ </ai//i/> . A1
 dd ; ss, A2 |-AP e1 => A2 -> A3
 ------------------------------- :: app
 dd ; ss |-AP e1 e2 => A3

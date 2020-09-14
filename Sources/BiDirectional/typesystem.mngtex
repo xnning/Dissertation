@@ -114,20 +114,14 @@ $[[A2]]$ is a subtype of $[[A1]]$ before putting $[[x:A1]]$ in the typing
 context. However, note that it is always possible to remove annotations in an
 abstraction if it has been applied to some arguments.
 
-\Rref{ap-app-app} pushes types into the application context. The application rule
-first infers the type of the argument $[[e2]]$ with type $[[A1]]$. Then the
-type $[[A1]]$ is generalized in the same way as the HM type system. We define
-$[[dd |-gen A1 = A2]]$ as:
-
-TODO
-
-The resulting generalized type is $[[A2]]$.
-% The generalization is shown in rule
-% \rul{T-Gen}, where all free type variables are extracted to quantifiers.
-Thus the type of $[[e1]]$ is now inferred under an application context extended
-with type $[[A2]]$. The generalization step is important to infer higher ranked
-types: since $[[A2]]$ is a possibly polymorphic type, which is the argument type
-of $[[e1]]$, then $[[e1]]$ is of possibly a higher rank type.
+\Rref{ap-app-app} pushes types into the application context. The application
+rule first infers the type of the argument $[[e2]]$ with type $[[A1]]$. Then the
+type $[[A1]]$ is generalized in the same way as the HM type system. The
+resulting generalized type is $[[A2]]$. Thus the type of $[[e1]]$ is now
+inferred under an application context extended with type $[[A2]]$. The
+generalization step is important to infer higher ranked types: since $[[A2]]$ is
+a possibly polymorphic type, which is the argument type of $[[e1]]$, then
+$[[e1]]$ is of possibly a higher rank type.
 
 \paragraph{Let Expressions.}
 
