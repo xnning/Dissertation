@@ -1,9 +1,9 @@
 \section{Declarative System}
 
 This section first presents the declarative, \emph{syntax-directed}
-specification for \ap. The interesting aspects about the new type system are: 1)
-the typing rules, which employ a combination of inference and \mode modes; 2)
-the novel subtyping relation under an application context.
+specification of \ap. The interesting aspects about the new type system
+are: 1) the typing rules, which employ a combination of inference and \mode
+modes; 2) the novel subtyping relation under an application context.
 
 % Later, we prove our type system is type-safe by a type
 % directed translation to System F\citep{systemF}.
@@ -60,6 +60,22 @@ last then it will be popped first. For example, inferring expression $[[e]]$
 under application context ($[[a, int]]$), means $[[e]]$ is now being applied to
 two arguments $[[e1]], [[e2]]$, with $[[e1:int]]$, $[[e2 :a]]$, so $[[e]]$
 should be of type $[[int -> a -> A]]$ for some $[[A]]$.
+
+\subsection{Type System}
+
+\begin{figure}
+  \renewcommand\ottaltinferrule[4]{
+    \inferrule*[narrower=0.6,lab=#1,#2]
+    {#3}
+    {#4}
+  }
+  \drules[ap-inf]{$ [[dd |-AP e => A ]] $}{Typing Inference}{int,lam,lamann}
+  \drules[ap-app]{$ [[dd ; ss |-AP e => A ]] $}{Typing Application Mode}{var,lam,lamann,app}
+  \drules[ap-as]{$ [[ss |-AP A1 <: A2 ]] $}{Application Subtyping}{empty,forall,arrow}
+
+  \caption{Typing rules of System AP.}
+  \label{fig:OL:static}
+\end{figure}
 
 %%% Local Variables:
 %%% mode: latex

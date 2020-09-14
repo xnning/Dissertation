@@ -574,7 +574,21 @@ dd |-DK A <: B ::  :: dk_subtyping :: dk_s_ by
 
 defn
 
-ss |-AP A <: B ::  :: ap_subtyping :: ap_s_ by
+ss |-AP A <: B ::  :: ap_subtyping :: ap_as_ by
+
+---------------- :: empty
+empty |-AP A <: A
+
+
+ss, A3 |-AP A1 [a ~> t] <: A2
+------------------------ :: forall
+ss, A3 |-AP \/a. A1 <: A2
+
+
+A3 <: A1
+ss |-AP A2 <: A3
+------------------------ :: arrow
+ss, A3 |-AP A1 -> A2 <: A3 -> A4
 
 defn
 
@@ -905,11 +919,53 @@ dd |-DK \/a. A . e =>=> A1 -> A2
 
 defn
 
-dd ; ss  |-AP e => A  ::  :: ap_inf :: 'ap_inf_' by
+dd ; ss |-AP e => A  ::  :: ap_app :: 'ap_app_' by
+
+(x : A1) in dd
+ss |-AP A1 <: A2
+--------------------------- :: var
+dd ; ss |-AP x => A2
+
+dd, x: A1 |-AP e => A2
+--------------------------- :: lam
+dd ; ss , A1 |-AP \x. e => A1 -> A2
+
+
+A2 <: A1
+dd, x: A1 |-AP e => A3
+--------------------------- :: lamann
+dd ; ss, A2 |-AP \x: A1. e => A2 -> A3
+
+
+dd |-AP e2 => A1
+dd |-gen A1 = A2
+dd ; ss, A2 |-AP e1 => A2 -> A3
+------------------------------- :: app
+dd ; ss |-AP e1 e2 => A3
 
 defn
 
-dd ; ss  |-AP e <= A  ::  :: ap_chk :: 'ap_chk_' by
+dd |-gen A1 = A2 ::  :: ap_gen :: 'ap_gen' {{ tex [[dd]]_{gen} ([[A1]]) = [[A2]] }} by
+
+defn
+
+dd |-AP e => A  ::  :: ap_inf :: 'ap_inf_' by
+
+
+--------------------------- :: int
+dd |-AP n => int
+
+dd, x: t |-AP e => A
+--------------------------- :: lam
+dd |-AP \x. e => t -> A
+
+dd , x: A1 |-AP e => A2
+--------------------------- :: lamann
+dd  |-AP \x: A1. e => A1 -> A2
+
+defn
+
+dd ; ss |-AP e <= A  ::  :: ap_chk :: 'ap_chk_' by
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
