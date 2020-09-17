@@ -98,9 +98,9 @@ $[[a]]$ in $[[\/a . A1]]$ can be instantiated to any monotype to match the right
 hand side. Here are some examples of the subtyping relation:
 
 \begin{center}
-  \begin{tabular}{lcl}
-    $[[int -> int]]$  & $[[<:]]$ & $[[int -> int]]$ \\
-    $[[\/a. a -> a]]$  & $[[<:]]$ & $[[int -> int]]$ \\
+  \begin{tabular}{rr}
+    $[[|-HM]]$ & $ [[int -> int]][[<:]][[int -> int]]$ \\
+    $[[|-HM]]$ & $ [[\/a. a -> a]][[<:]][[int -> int]]$ \\
   \end{tabular}
 \end{center}
 
