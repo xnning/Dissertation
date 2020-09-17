@@ -4,15 +4,18 @@
 Both HM and OL derive only monotypes for unannotated lambda abstractions. OL
 improves on HM by allowing polymorphic lambda abstractions but requires the
 polymorphic type annotations are given explicitly. The Dunfield-Krishnaswami
-type system \citep{DK}, hereafter refered to as DM, give a
+type system \citep{DK}, hereafter refered to as DK, give a
 \textit{bidirectional} account of higher-rank polymorphism, where type
 information can be propagated through the syntax tree. Therefore, it is possible
 for a variable bound in a lambda abstraction without explicit type annotations
-to get a polymorphic type.
+to get a polymorphic type. In this section, we first review the idea of
+bidirectional type checking, and then present the declarative DK and discuss its
+algorithm.
 
 
 
 \subsection{Bidirectional Type Checking}
+\label{sec:DK:bidirectional}
 
 Bidirectional type checking has been known in the folklore of type systems for
 a long time. It was popularized by Pierce and Turner's work on local type
@@ -94,9 +97,9 @@ expression, as we will see shortly.
 
 The definitions of types and contexts are the same as in OL. Thus, DK also shares
 the same well-formedness definition as in OL (\Cref{fig:OL:wf}). We thus omit the
-definitions, but use $[[|-DK]]$ to denote the corresponding judgment in DK.
+definitions, but use $[[dd |-DK A]]$ to denote the corresponding judgment in DK.
 
-\subsection{Type System}
+\subsubsection{Type System}
 
 \begin{figure}
   \drules[dk-inf]{$ [[dd |-DK e => A ]] $}{Type Inference}{var, int,lam, app, anno}
@@ -187,6 +190,8 @@ simple and standalone process whose purpose is clear. In contrast, it is
 relatively less comprehensible with \rref{dk-inf-app2} and the application
 judgment, where all three forms of the judgment (inference, checking,
 application) are mutually dependent.
+% Variants of matching are also used in future systems (\Cref{part:gradual} and
+% \Cref{part:dependentTypes}).
 
 \paragraph{Subtyping.} DK shares the same subtyping relation as of OL. We thus
 omit the definition and use $[[dd |-DK A1 <: A2]]$ to denote the subtyping

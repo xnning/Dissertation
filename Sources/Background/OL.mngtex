@@ -1,11 +1,11 @@
 \section{The Odersky-L{\"a}ufer Type System}
 \label{sec:OL}
 
-The HM system is simple, flexible and powerful. However, since the type
-annotations in lambda abstractions are always missing, HM only derives
-polymorphic types of \textit{rank 1}. That is, universal quantifiers only appear
-at the top level. Polymorphic types are of \textit{higher-rank}, if universal
-quantifiers can appear anywhere in a type.
+The HM system is simple, flexible and powerful. Yet, since the type annotations
+in lambda abstractions are always missing, HM only derives polymorphic types of
+\textit{rank 1}. That is, universal quantifiers only appear at the top level.
+Polymorphic types are of \textit{higher-rank}, if universal quantifiers can
+appear anywhere in a type.
 
 Essentially higher-rank types enable much of the expressive power of System F,
 with the advantage of implicit polymorphism. Complete type inference for System
@@ -13,7 +13,7 @@ F is known to be undecidable \citep{F:undecidable}. \cite{odersky:putting}
 proposed a type system, hereafter referred to as OL, which extends HM by
 allowing lambda abstractions to have explicit \textit{higher-rank} types as type
 annotations. As a motivation, consider the following program\footnote{For the
-  purpose of better illustration, we assume basic constructs like booleans and
+  purpose of illustration, we assume basic constructs like booleans and
   pairs in examples.}:
 
 \begin{lstlisting}
@@ -21,8 +21,9 @@ annotations. As a motivation, consider the following program\footnote{For the
 \end{lstlisting}
 
 \noindent which is not typeable under HM because it fails to infer the type of
-\lstinline{f}, since it is supposed to be polymorphic. With OL we can add the
-type annotation for \lstinline{f}:
+\lstinline{f}: \lstinline{F} is supposed to be polymorphic as it is applied to
+two arguments of different types. With OL we can add the type annotation for
+\lstinline{f}:
 
 \begin{lstlisting}
 (\f : foralla. a -> a. (f 1, f 'a')) (\x. x)
@@ -34,6 +35,10 @@ type \lstinline{foralla. a -> a} appears in the argument position of a function:
 \begin{lstlisting}
 (\f : foralla. a -> a. (f 1, f 'a')) : (foralla. a -> a) -> (Int, Char)
 \end{lstlisting}
+
+In the rest of this section, we first give the definition of the rank of a type,
+and then present the declarative specification of OL, and show that OL is a
+conservative extension of HM.
 
 \subsection{Higher-rank Types}
 
@@ -100,7 +105,7 @@ Second, the polymorphic types $[[A]]$ now include the integer type $[[int]]$,
 type variables $[[a]]$, functions $[[A1 -> A2]]$ and universal quantifications
 $[[\/a. A]]$. Since the argument type in a function can be polymorphic, we see
 that OL supports \textit{arbitrary} rank of types. The definition of monotypes
-remains the same. Obviously polymorphic types still subsume monotypes.
+remains the same, with polymorphic types still subsuming monotypes.
 
 Finally, in addition to variable types, the contexts $[[dd]]$ now also keep
 track of type variables. Note that in the original work in
@@ -108,13 +113,13 @@ track of type variables. Note that in the original work in
 instead, it explicitly checks that type variables are fresh with respect to a
 context or a type when needed. Here we include type variables in contexts, as it
 sets us well for the Dunfield-Krishnaswami type system to be introduced in the
-next section. Moreover, the differences do not change the essence of the type
-system, and it provides a complete view of the possible formalism of contexts in
-a type system with generalization. As before, we assume all items in a context
-are distinct.
+next section. Moreover, it provides a complete view of possible formalisms of
+contexts in a type system with generalization. As before, we assume all items in
+a context are distinct.
 
-Now for a type to be well-formedness, it must have all its free variable bound in
-the context. The type well-formedness rules are given in \Cref{fig:OL:wf}. All
+Now since the context tracks type variables, we define the notion of
+\textit{well-formedness} of types, given in \Cref{fig:OL:wf}. For a type to be
+well-formedness, it must have all its free variable bound in the context. All
 rules are straightforward.
 
 \begin{figure}
@@ -143,9 +148,9 @@ type-checks annotated lambda abstractions, by simply putting $[[x:A]]$ into the
 context to type the body. For unannotated lambda abstractions in \rref{ol-lam},
 the system still guesses a mere monotype. That is, the system never guesses a
 polymorphic type for lambdas; instead, an explicit polymorphic type annotation
-is required. \Rref{ol-app}, \rref{ol-let} are similar as HM, except that
+is required. \Rref{ol-app} and \rref{ol-let} are similar as HM, except that
 polymorphic types may appear in return types. In the generalization
-\rref{ol-gen}, we put a new type variable $[[a]]$ into the context, and the
+\rref{ol-gen}, we put a fresh type variable $[[a]]$ into the context, and the
 return type $[[A]]$ is then generalized over $[[a]]$, returning $[[\/a. A]]$.
 
 The subsumption \rref{ol-sub} is crucial for OL, which allows an expression of
