@@ -199,9 +199,8 @@ relation in DK.
 system. The key idea of the algorithm is using \textit{ordered} algorithmic
 contexts for storing existential variables and their solutions. Comparing to the
 algorithm for HM, they argued that their algorithm is remarkably simple. The
-algorithm is later discussed and used in \Cref{chap:Promotion},
-\Cref{chap:Gradual} and \Cref{chap:kindinference}. We will discuss more about
-it there.
+algorithm is later discussed and used in \Cref{part:gradual} and
+\Cref{part:dependentTypes}. We will discuss more about it there.
 
 
 
