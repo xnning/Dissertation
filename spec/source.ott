@@ -38,6 +38,7 @@ dtyp, A {{tex \sigma}}, B, C :: 'dtyp_' ::=
   | \/ varset . t  ::   :: all_mono
   | mu a . A       ::   :: mu {{ tex \mu [[a]] [[.]] [[A]] }}
   | unknown        ::   :: unknown
+  | question       ::   :: question
   | static         ::   :: static
   | gradual        ::   :: gradual
   | List A         ::   :: list
@@ -315,6 +316,7 @@ terminals :: 'terminals_' ::=
   | unfold      :: :: unfold   {{ tex \mathbf{unfold} }}
   | .       :: :: dot     {{ tex .\, }}
   | unknown :: :: unknown {{ tex \star }}
+  | question ::  :: question {{ tex \mathit{?} }}
   | empty   :: :: empty   {{ tex \bullet }}
   | |-      :: :: turnstile {{ tex \vdash }}
   | |-OL    :: :: turnstile1 {{ tex \vdash^\mathit{OL} }}
@@ -577,7 +579,31 @@ dd |-DK A <: B ::  :: dk_subtyping :: dk_s_ by
 
 defn
 
-ss |-AP A <: B ::  :: ap_subtyping :: ap_as_ by
+|-AP A <: B ::  :: ap_subtyping :: ap_s_ by
+
+------------------ :: int
+|-AP int <: int
+
+------------------ :: tvar
+|-AP a <: a
+
+|-AP A3 <: A1
+|-AP A2 <: A4
+---------------------------- :: arrow
+|-AP A1 -> A2 <: A3 -> A4
+
+|-AP A [a ~> t] <: A2
+----------------- :: forallL
+|-AP \/ a. A1 <: A2
+
+a notin fv(A1)
+|-AP A1 <: A2
+----------------- :: forallR
+|-AP A1 <: \/ a. A2
+
+defn
+
+ss |-AP A <: B ::  :: ap_asubtyping :: ap_as_ by
 
 ---------------- :: empty
 empty |-AP A <: A

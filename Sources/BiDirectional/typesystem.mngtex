@@ -67,6 +67,7 @@ should be of type $[[int -> a -> A]]$ for some $[[A]]$.
   \renewcommand\ottaltinferrule[4]{\inferrule*[narrower=0.6,lab=#1,#2] {#3} {#4}}
   \drules[ap-inf]{$ [[dd |-AP e => A ]] $}{Typing Inference}{int,lam,lamann}
   \drules[ap-app]{$ [[dd ; ss |-AP e => A ]] $}{Typing Application Mode}{var,lam,lamann,app}
+  \drules[ap-s]{$ [[|-AP A1 <: A2 ]] $}{Subtyping}{tvar,int,arrow,forallL,forallR}
   \drules[ap-as]{$ [[ss |-AP A1 <: A2 ]] $}{Application Subtyping}{empty,forall,arrow}
 
   \caption{Typing rules of System AP.}
@@ -95,7 +96,7 @@ Now we turn to the cases when the application context is not empty.
 \Rref{ap-app-var} says that if $[[x: A1]]$ is in the typing context, and
 $[[A1]]$ is a subtype of $[[A2]]$ under application context $[[ss]]$, then
 $[[x]]$ has type $[[A2]]$. It depends on the subtyping rules that are explained
-in Section TODO.
+in \Cref{sec:AP:subtyping}.
 
 \Rref{ap-app-lam} shows the strength of application contexts. It states that, without
 annotations, if the application context is non-empty, a type can be popped from
@@ -214,6 +215,55 @@ system, with a more general typing result.
   we have $[[dd |-AP e' => A']]$,
   and $ A' <: A$.
 \end{lemma}
+
+\subsection{Subtyping}
+\label{sec:AP:subtyping}
+
+We present our subtyping rules at the bottom of Figure \ref{fig:AP:static}.
+Interestingly, our subtyping has two different forms.
+
+\paragraph{Subtyping.} The first subtyping judgment $[[|-AP A1 <: A2]]$ follows
+OL, but in HM-style; that is, without tracking type variables.
+% \Rref{ap-s-tvar} and \rref{ap-s-int} are trivial. In \rref{ap-s-fun},
+% subtyping is contravariant on the argument type, and covariant on the return
+% type.
+\Rref{ap-s-forallR} states $[[A1]]$ is subtype of $[[\/ a . A2]]$ only if
+$[[A1]]$ is a subtype of $[[A2]]$, with the assumption $[[a]]$ is a fresh
+variable. \Rref{ap-s-forallL} says $[[\/ a. A1]]$ is a subtype of $[[A2]]$ if we
+can instantiate it with some $[[t]]$ and show the result is a subtype of
+$[[A2]]$.
+
+\paragraph{Application Subtyping.} The typing \rref{ap-app-var} uses the second
+subtyping judgment $[[ss|-AP A1 <: A2]]$. To motivate this new kind of judgment,
+consider the expression $[[id 1]]$ for example, whose derivation is stuck
+at \rref{ap-app-var} (here we assume $[[id:\/a.a -> a]] \in [[dd]]$):
+%
+\[
+  \inferrule*[right=ap-app-app]{[[dd|-AP 1 => int]]\quad
+    \emptyset = [[ fv(int) - fv(dd) ]] \quad
+      \inferrule*[right=ap-app-var]{ [[id]]:[[\/a.a -> a]] \in [[dd]]\quad
+        \mathsf{???}}
+      {[[dd;int |-AP id => question ]]}
+    }{[[dd |-AP id 1 => question ]] }
+\]
+
+\noindent
+Here we know that $[[id:\/a.a->a]]$ and also, from the application context, that
+$[[id]]$ is applied to an argument of type $[[int]]$. Thus we need a mechanism
+for solving the instantiation $[[a=int]]$ and return a supertype $[[int->int]]$
+as the type of $[[id]]$. This is precisely what the application subtyping
+achieves: resolve instantiation constraints according to the application
+context. Notice that unlike existing works (\cite{practical:inference} or
+DK),application subtyping provides a way to solve instantiation more
+\textit{locally}, since it does not mutually depend on typing.
+
+Back to the rules in \Cref{fig:AP:static}, one way to understand the judgment
+$[[ss|-AP A1 <: A2]]$ from a computational point-of-view is that the type
+$[[A2]]$ is a \emph{computed} output, rather than an input. In other words
+$[[A2]]$ is determined from $[[ss]]$ and $[[A1]]$. This is unlike the judgment
+$[[|-AP A1<:A2]]$, where both $[[A1]]$ and $[[A2]]$ would be computationally
+interpreted as inputs. Therefore it is not possible to view $[[|-AP A1 <: A2]]$
+as a special case of $[[ss|-AP A1 <: A2]]$ where $[[ss]]$ is empty.
 
 %%% Local Variables:
 %%% mode: latex
