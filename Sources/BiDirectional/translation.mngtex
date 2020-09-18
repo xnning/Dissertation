@@ -45,11 +45,19 @@ explicit instantiation.
   \drules[ap-s]{$ [[|-AP A1 <: A2 ~~> ef ]] $}{Subtyping Translation}{tvar,int,arrow,forallL,forallR}
   \drules[ap-as]{$ [[ss |-AP A1 <: A2 ~~> ef ]] $}{Application Subtyping}{empty,forall,arrow}
   \caption{Translation rules of System AP.}
-  \label{fig:AP:translation}
+  \label{fig:AP:sub:trans}
+\end{figure}
+
+\begin{figure}
+  \renewcommand\ottaltinferrule[4]{\inferrule*[narrower=0.6,lab=#1,#2] {#3} {#4}}
+  \drules[ap-inf]{$ [[dd |-AP e => A ~~> es]] $}{Typing Inference}{int,lam,lamann}
+  \drules[ap-app]{$ [[dd ; ss |-AP e => A ~~> es]] $}{Typing Application Mode}{var,lam,lamann,app}
+  \caption{Typing rules of System AP.}
+  \label{fig:AP:trans}
 \end{figure}
 
 The type-directed translation of subtyping is shown in
-\Cref{fig:AP:translation}. The translation follows the subtyping relations from
+\Cref{fig:AP:subtrans}. The translation follows the subtyping relations from
 \Cref{fig:AP:static}, but adds a new component. The judgment $[[|-AP A1 <: A2
 ~~> ef]]$ is read as: if $[[|-AP A1 <: B]]$ holds, it can be translated to a
 coercion function $[[ef]]$ in System F. The coercion function produced by
@@ -78,6 +86,46 @@ between \rref{ap-s-arrow} and \rref{ap-as-arrow}. We therefore omit more
 explanations.
 
 \subsection{Type-Directed Translation of Typing}
+
+
+The type directed translation of typing is shown in the Figure
+\ref{fig:AP:trans}, which extends the rules in Figure \ref{fig:AP}. The judgment
+$[[dd;ss|-AP e => A ~~> es]]$ is read as: if $[[dd;ss|-AP e => A]]$ holds, the
+expression can be translated to term $[[es]]$ in System F. The judgment
+$[[dd|-AP e => A ~~> es]]$ is the special case when the application context is
+empty.
+
+Most translation rules are straightforward. In \rref{ap-app-var}, $[[x]]$ is
+translated to $[[ef x]]$, where $[[ef]]$ is the coercion function generated from
+subtyping. \Rref {ap-app-lamann} applies the coercion function $[[ef]]$ to
+$[[y]]$, then feeds $[[y]]$ to the function generated from the abstraction. When
+generalizing over a type, \rref{ap-app-app} generate type-level abstractions.
+
+\subsection{Type Safety}
+
+We prove that our system is type safe by proving that the translation produces
+well-typed terms.
+
+\begin{lemma}[Soundness of Typing Translation]
+  If $[[dd;ss|-AP e => A ~~> es]]$,
+  then $[[dd|-F es : A]]$.
+\end{lemma}
+
+The lemma relies on the translation of subtyping to produce type-correct
+coercions.
+
+\begin{lemma}[Soundness of Subtyping Translation]\leavevmode
+  \begin{enumerate}
+  \item
+    If $[[|-AP A <: B ~~> ef]]$,
+    then $[[empty|-F ef : A -> B]]$.
+  \item
+    If $[[ss|-AP A <: B ~~> ef]]$,
+    then $[[empty|-F ef : A -> B]]$.
+  \end{enumerate}
+\end{lemma}
+
+\subsection{Coherence}
 
 %%% Local Variables:
 %%% mode: latex

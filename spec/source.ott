@@ -271,7 +271,7 @@ actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% PBC EXPR
+% F, PBC EXPR
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }}, es {{tex s}}, ef {{tex f}} :: 'ptrm_' ::=
@@ -279,7 +279,7 @@ pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }}, es {{tex s}}, e
   | x              ::   :: var
   | n              ::   :: lit
   | \ x : A . pe   ::   :: absann
-  | /\ a . pe      ::   :: tabs
+  | /\ avs . pe      ::   :: tabs
   | pe A           ::   :: tapp
   | pe1 pe2        ::   :: app
   | < A `-> B > pe ::   :: cast
@@ -289,7 +289,7 @@ pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }}, es {{tex s}}, e
 pvalue, pv {{ tex v }} :: 'pvalue_' ::=
   | n              ::   :: lit
   | \ x : A . pe   ::   :: absann
-  | /\ a . pe      ::   :: tabs
+  | /\ avs . pe      ::   :: tabs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TERMINALS
@@ -351,12 +351,14 @@ terminals :: 'terminals_' ::=
 
 formula :: formula_ ::=
   | judgement             :: :: judgement
-  | dd |- e => A          :: :: ap_inf_empty
-  | dd ; ss |- e => A     :: :: ap_app_empty
+  | dd |- e => A          :: :: ap_inf_introduction
+  | dd ; ss |- e => A     :: :: ap_app_introduction
   | |- A1 <: A2           :: :: ap_sub_introduction
   | ss |- A1 <: A2        :: :: ap_sub_introduction2
-  | |-AP A1 <: A2         :: :: ap_sub
-  | ss |-AP A1 <: A2      :: :: ap_app_sub
+  | dd |-AP e => A        :: :: ap_inf_no_trans
+  | dd ; ss |-AP e => A   :: :: ap_app_no_trans
+  | |-AP A1 <: A2         :: :: ap_sub_no_trans
+  | ss |-AP A1 <: A2      :: :: ap_app_sub_no_trans
   | a in dd               :: :: bind_tvar {{ tex [[a]] \in [[dd]] }}
   | r @ ( a ) in dd       :: :: bind_red_tvar {{ tex {\color{red} [[a]] } \in [[dd]] }}
   | b @ ( a ) in dd       :: :: bind_blue_tvar {{ tex {\color{blue} [[a]] } \in [[dd]] }}
@@ -965,30 +967,32 @@ dd |-DK \/a. A . e =>=> A1 -> A2
 
 defn
 
-dd ; ss |-AP e => A  ::  :: ap_app :: 'ap_app_' by
+dd ; ss |-AP e => A ~~> es  ::  :: ap_app :: 'ap_app_'
+{{ tex [[dd]] ; [[ss]] [[|-AP]] [[e]] [[=>]] [[A]] \transto{[[~~>]] [[es]]} }}
+by
 
 (x : A1) in dd
-ss |-AP A1 <: A2
+ss |-AP A1 <: A2 ~~> ef
 --------------------------- :: var
-dd ; ss |-AP x => A2
+dd ; ss |-AP x => A2 ~~> ef x
 
-dd, x: A1 |-AP e => A2
+dd, x: A1 |-AP e => A2 ~~> es
 --------------------------- :: lam
-dd ; ss , A1 |-AP \x. e => A1 -> A2
+dd ; ss , A1 |-AP \x. e => A1 -> A2 ~~> \x:A1. es
 
 
-A2 <: A1
-dd, x: A1 |-AP e => A3
+|-AP A2 <: A1  ~~> ef
+dd, x: A1 |-AP e => A3 ~~> es
 --------------------------- :: lamann
-dd ; ss, A2 |-AP \x: A1. e => A2 -> A3
+dd ; ss, A2 |-AP \x: A1. e => A2 -> A3 ~~> \y:A2. (\x:A1. es) (ef y)
 
 
-dd |-AP e2 => A1
+dd |-AP e2 => A1 ~~> es2
 </ ai // i /> =  fv(A1) - fv(dd)
 A2 = \/ </ai//i/> . A1
-dd ; ss, A2 |-AP e1 => A2 -> A3
+dd ; ss, A2 |-AP e1 => A2 -> A3 ~~> es1
 ------------------------------- :: app
-dd ; ss |-AP e1 e2 => A3
+dd ; ss |-AP e1 e2 => A3 ~~> es1 (/\ </ai//i/>. es2)
 
 defn
 
@@ -1002,15 +1006,15 @@ dd |-AP e => A ~~> ef  ::  :: ap_inf :: 'ap_inf_'
 by
 
 --------------------------- :: int
-dd |-AP n => int
+dd |-AP n => int ~~> n
 
-dd, x: t |-AP e => A
+dd, x: t |-AP e => A ~~> es
 --------------------------- :: lam
-dd |-AP \x. e => t -> A
+dd |-AP \x. e => t -> A ~~> \x:t. es
 
-dd , x: A1 |-AP e => A2
+dd , x: A1 |-AP e => A2 ~~> es
 --------------------------- :: lamann
-dd  |-AP \x: A1. e => A1 -> A2
+dd  |-AP \x: A1. e => A1 -> A2 ~~> \x:A1.es
 
 defn
 
