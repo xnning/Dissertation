@@ -25,7 +25,7 @@ varset, avs  :: 'varset_' ::=
   | avs set                  ::  :: a_set {{ tex \overbar{[[avs]]} }}
   | avs1 - avs2              ::  :: minus {{ tex [[avs1]] - [[avs2]] }}
 
-dtyp, A {{tex \sigma}}, B, C :: 'dtyp_' ::=
+dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4}} :: 'dtyp_' ::=
   | int            ::   :: int
   | nat            ::   :: nat
   | natu           ::   :: natu {{ tex \mathsf{Nat}_\unknown }}
@@ -274,12 +274,13 @@ actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \
 % PBC EXPR
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }} :: 'ptrm_' ::=
+pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }}, es {{tex s}}, ef {{tex f}} :: 'ptrm_' ::=
   | 1              ::   :: one
   | x              ::   :: var
   | n              ::   :: lit
   | \ x : A . pe   ::   :: absann
   | /\ a . pe      ::   :: tabs
+  | pe A           ::   :: tapp
   | pe1 pe2        ::   :: app
   | < A `-> B > pe ::   :: cast
   | ( pe )         :: S :: paren
@@ -323,6 +324,7 @@ terminals :: 'terminals_' ::=
   | |-HM    :: :: turnstile2 {{ tex \vdash^\mathit{HM} }}
   | |-DK    :: :: turnstile3 {{ tex \vdash^\mathit{DK} }}
   | |-AP    :: :: turnstile4 {{ tex \vdash^\mathit{AP} }}
+  | |-F     :: :: turnstileF {{ tex \vdash^\mathit{F} }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -351,7 +353,10 @@ formula :: formula_ ::=
   | judgement             :: :: judgement
   | dd |- e => A          :: :: ap_inf_empty
   | dd ; ss |- e => A     :: :: ap_app_empty
-  | ss |- A1 <: A2        :: :: ap_sub
+  | |- A1 <: A2           :: :: ap_sub_introduction
+  | ss |- A1 <: A2        :: :: ap_sub_introduction2
+  | |-AP A1 <: A2         :: :: ap_sub
+  | ss |-AP A1 <: A2      :: :: ap_app_sub
   | a in dd               :: :: bind_tvar {{ tex [[a]] \in [[dd]] }}
   | r @ ( a ) in dd       :: :: bind_red_tvar {{ tex {\color{red} [[a]] } \in [[dd]] }}
   | b @ ( a ) in dd       :: :: bind_blue_tvar {{ tex {\color{blue} [[a]] } \in [[dd]] }}
@@ -579,45 +584,49 @@ dd |-DK A <: B ::  :: dk_subtyping :: dk_s_ by
 
 defn
 
-|-AP A <: B ::  :: ap_subtyping :: ap_s_ by
+|-AP A <: B ~~> ef ::  :: ap_subtyping :: ap_s_
+{{tex [[|-AP]] [[A]] [[<:]] [[B]] \transto{[[~~>]] [[ef]]} }}
+by
 
 ------------------ :: int
-|-AP int <: int
+|-AP int <: int ~~> \x:int. x
 
 ------------------ :: tvar
-|-AP a <: a
+|-AP a <: a ~~> \x:a . x
 
-|-AP A3 <: A1
-|-AP A2 <: A4
+|-AP A3 <: A1 ~~> ef1
+|-AP A2 <: A4 ~~> ef2
 ---------------------------- :: arrow
-|-AP A1 -> A2 <: A3 -> A4
+|-AP A1 -> A2 <: A3 -> A4  ~~> \x:A1->A2. \y:A3. ef2 (x (ef1 y))
 
-|-AP A [a ~> t] <: A2
+|-AP A [a ~> t] <: A2 ~~> ef
 ----------------- :: forallL
-|-AP \/ a. A1 <: A2
+|-AP \/ a. A1 <: A2 ~~> \x:\/a.A1. ef (x t)
 
 a notin fv(A1)
-|-AP A1 <: A2
+|-AP A1 <: A2 ~~> ef
 ----------------- :: forallR
-|-AP A1 <: \/ a. A2
+|-AP A1 <: \/ a. A2 ~~> \x:A1. /\a. ef x
 
 defn
 
-ss |-AP A <: B ::  :: ap_asubtyping :: ap_as_ by
+ss |-AP A <: B ~~> ef ::  :: ap_asubtyping :: ap_as_
+{{ tex [[ss]] [[|-AP]] [[A]] [[<:]] [[B]] \transto{[[~~>]] [[ef]]} }}
+by
 
 ---------------- :: empty
-empty |-AP A <: A
+empty |-AP A <: A ~~> \x:A. x
 
 
-ss, A3 |-AP A1 [a ~> t] <: A2
+ss, A3 |-AP A1 [a ~> t] <: A2 ~~> ef
 ------------------------ :: forall
-ss, A3 |-AP \/a. A1 <: A2
+ss, A3 |-AP \/a. A1 <: A2 ~~> \x:\/a.A1. ef (x t)
 
 
-|-AP A3 <: A1
-ss |-AP A2 <: A4
+|-AP A3 <: A1 ~~> ef1
+ss |-AP A2 <: A4 ~~> ef2
 ------------------------ :: arrow
-ss, A3 |-AP A1 -> A2 <: A3 -> A4
+ss, A3 |-AP A1 -> A2 <: A3 -> A4 ~~> \x:A1->A2.\y:A3. ef2 (x (ef1 y))
 
 defn
 
@@ -762,7 +771,7 @@ DTyping :: '' ::=
 
 defn
 
-dd |- e : A ~~> pe ::  :: dtyping :: '' {{ tex [[dd]] [[|-]] [[e]] : [[A]] \otthl{[[~~>]] [[pe]]} }}
+dd |- e : A ~~> pe ::  :: dtyping :: '' {{ tex [[dd]] [[|-]] [[e]] : [[A]] \transto{[[~~>]] [[pe]]} }}
 by
 
 
@@ -987,8 +996,10 @@ dd |-gen A1 = A2 ::  :: ap_gen :: 'ap_gen' {{ tex [[dd]]_{gen} ([[A1]]) = [[A2]]
 
 defn
 
-dd |-AP e => A  ::  :: ap_inf :: 'ap_inf_' by
+dd |-AP e => A ~~> ef  ::  :: ap_inf :: 'ap_inf_'
+{{ tex [[dd]] [[|-AP]] [[e]] [[=>]] [[A]] \transto{[[~~>]] [[ef]]} }}
 
+by
 
 --------------------------- :: int
 dd |-AP n => int
@@ -1005,6 +1016,35 @@ defn
 
 dd ; ss |-AP e <= A  ::  :: ap_chk :: 'ap_chk_' by
 
+defn
+
+dd |-F es : A         ::  :: f_     :: 'f_' by
+
+(x : A) in dd
+--------------------------- :: var
+dd |-F x : A
+
+--------------------------- :: int
+dd |-F n : int
+
+dd, x: A1 |-F es : A2
+--------------------------- :: lamann
+dd |-F \x: A1. es : A1 -> A2
+
+dd |-F es1 : A1 -> A2
+dd |-F es2 : A1
+------------------------------- :: app
+dd |-F es1 es2 : A2
+
+dd |-F es : A
+a notin fv(dd)
+------------------------------- :: tabs
+dd |-F /\a. es : \/a. A
+
+
+dd |-F es : \/a. A1
+------------------------------- :: tapp
+dd |-F es A2 : A1 [a~>A2]
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL MATCHING

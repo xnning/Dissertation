@@ -62,6 +62,7 @@ two arguments $[[e1]], [[e2]]$, with $[[e1:int]]$, $[[e2 :a]]$, so $[[e]]$
 should be of type $[[int -> a -> A]]$ for some $[[A]]$.
 
 \subsection{Type System}
+\renewcommand{\transto}[1]{}
 
 \begin{figure}
   \renewcommand\ottaltinferrule[4]{\inferrule*[narrower=0.6,lab=#1,#2] {#3} {#4}}
