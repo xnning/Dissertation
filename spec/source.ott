@@ -18,10 +18,12 @@ mode :: 'mode_' ::=
 
 varset, avs  :: 'varset_' ::=
   | a                        ::  :: a {{ tex a }}
+  | x                        ::  :: x {{ tex x }}
   | avs1 , .. , avs2         ::  :: append
   | fv ( dd )                ::  :: fv_dd
   | fv ( GG )                ::  :: fv_gg
   | fv ( A )                 ::  :: fv_A
+  | fv ( ef )                ::  :: fv_ef
   | avs set                  ::  :: a_set {{ tex \overbar{[[avs]]} }}
   | avs1 - avs2              ::  :: minus {{ tex [[avs1]] - [[avs2]] }}
 
@@ -268,20 +270,33 @@ actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \
   | evar    :: S :: singleton
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% F, PBC EXPR
+% F EXPR
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }}, es {{tex s}}, ef {{tex f}} :: 'ptrm_' ::=
+fexp, es {{tex s}}, ef {{tex f}} :: 'ftrm_' ::=
+  | 1              ::   :: one
+  | x              ::   :: var
+  | n              ::   :: lit
+  | \ x : A . es   ::   :: absann
+  | \ x . es       ::   :: abs
+  | /\ avs . es    ::   :: tabs
+  | es A           ::   :: tapp
+  | es1 es2        ::   :: app
+  | ( es )         :: S :: paren
+  | | es |         ::   :: erase
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PBC EXPR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }} :: 'ptrm_' ::=
   | 1              ::   :: one
   | x              ::   :: var
   | n              ::   :: lit
   | \ x : A . pe   ::   :: absann
-  | /\ avs . pe      ::   :: tabs
-  | pe A           ::   :: tapp
   | pe1 pe2        ::   :: app
+  | /\ a . pe      ::   :: tabs
   | < A `-> B > pe ::   :: cast
   | ( pe )         :: S :: paren
   | S ( pe )       :: S :: subst
@@ -289,7 +304,7 @@ pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }}, es {{tex s}}, e
 pvalue, pv {{ tex v }} :: 'pvalue_' ::=
   | n              ::   :: lit
   | \ x : A . pe   ::   :: absann
-  | /\ avs . pe      ::   :: tabs
+  | /\ a . pe      ::   :: tabs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TERMINALS
@@ -347,6 +362,7 @@ terminals :: 'terminals_' ::=
   | blame   :: :: blame  {{ tex \mathsf{blame} }}
   | ==>     :: :: reduce {{ tex \Downarrow }}
   | <:      :: :: subtype {{ tex <: }}
+  | =nid    :: :: etaid {{ tex =_{\eta id} }}
 
 
 formula :: formula_ ::=
@@ -1049,6 +1065,45 @@ dd |-F /\a. es : \/a. A
 dd |-F es : \/a. A1
 ------------------------------- :: tapp
 dd |-F es A2 : A1 [a~>A2]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Eta ID Equality
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+DEq :: '' ::=
+
+defn
+
+ef1 =nid ef2   ::  :: etaid :: eta_ by
+
+x notin fv(ef)
+------------------ :: reduce
+\x. ef x =nid ef
+
+-------------------- :: id
+(\x. x) ef =nid ef
+
+ef1 =nid ef1'
+ef2 =nid ef2'
+--------------------------- :: app
+ef1 ef2 =nid ef1' ef2'
+
+ef =nid ef'
+------------------- :: lam
+\x. ef =nid \x. ef'
+
+-------------------- :: refl
+ef =nid ef
+
+ef =nid ef'
+-------------------- :: symm
+ef' =nid ef
+
+ef1 =nid ef2
+ef2 =nid ef3
+-------------------- :: trans
+ef1 =nid ef3
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL MATCHING

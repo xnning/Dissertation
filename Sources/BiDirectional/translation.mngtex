@@ -1,4 +1,4 @@
-\section{Type-directed Translation, Coherence and Type-Safety}
+\section{Type-directed Translation}
 \label{sec:AP:translation}
 
 This section discusses the type-directed translation of System \ap into a
@@ -20,7 +20,7 @@ the translation is unique up to this definition.
   \bottomrule
 \end{tabular}
 \drules[f]{$ [[dd |-F es : A ]] $}{Typing}{var,int,lamann,app,tabs,tapp}
-\caption{Syntax and static semantics of System F.}
+\caption{Syntax and typing rules of System F.}
 \label{fig:F}
 \end{figure}
 
@@ -44,7 +44,7 @@ explicit instantiation.
   \renewcommand\ottaltinferrule[4]{\inferrule*[narrower=0.6,lab=#1,#2] {#3} {#4}}
   \drules[ap-s]{$ [[|-AP A1 <: A2 ~~> ef ]] $}{Subtyping Translation}{tvar,int,arrow,forallL,forallR}
   \drules[ap-as]{$ [[ss |-AP A1 <: A2 ~~> ef ]] $}{Application Subtyping}{empty,forall,arrow}
-  \caption{Translation rules of System AP.}
+  \caption{Subtyping translation rules of System AP.}
   \label{fig:AP:sub:trans}
 \end{figure}
 
@@ -52,7 +52,7 @@ explicit instantiation.
   \renewcommand\ottaltinferrule[4]{\inferrule*[narrower=0.6,lab=#1,#2] {#3} {#4}}
   \drules[ap-inf]{$ [[dd |-AP e => A ~~> es]] $}{Typing Inference}{int,lam,lamann}
   \drules[ap-app]{$ [[dd ; ss |-AP e => A ~~> es]] $}{Typing Application Mode}{var,lam,lamann,app}
-  \caption{Typing rules of System AP.}
+  \caption{Typing translation rules of System AP.}
   \label{fig:AP:trans}
 \end{figure}
 
@@ -126,6 +126,90 @@ coercions.
 \end{lemma}
 
 \subsection{Coherence}
+
+One problem with the translation is that there are multiple targets
+corresponding to one expression. This is because in original system there are
+multiple choices when instantiating a polymorphic type, or guessing the
+annotation for unannotated lambda abstraction (\rref{ap-inf-lam}). For each
+choice, the corresponding target will be different. For example, expression
+$[[\x.x]]$ can be type checked with $[[int->int]]$, or $[[a->a]]$, and the
+corresponding targets are $[[\x:int.x]]$, and $[[\x:a.x]]$.
+
+
+Therefore, in order to prove the translation is coherent, we turn to prove that
+all the translations have the same operational semantics. There are two steps
+towards the goal: type erasure, and considering $\eta$ expansion and identity
+functions.
+
+\begin{figure}
+  \centering
+  \begin{tabular}{llp{3cm}lll}\toprule
+    $[[|x|]]$ & = & $[[|x|]]$ & $[[|/\a. es|]]$ & = & $[[|es|]]$\\
+    $[[|n|]]$ & = & $[[|n|]]$ & $[[|es1 es2|]]$ & = & $[[|es1| |es2|]]$\\
+    $[[|\x:A. es|]]$ & = & $[[\x.|es|]]$& $[[|es A|]]$ & = & $[[|es|]]$\\
+    \bottomrule
+  \end{tabular}
+  \drules[eta]{$ [[ef1 =nid ef2]] $}{Eta-id Equality}{reduce,id,app,lam,refl,symm,trans}
+  \caption{Type erasure and eta-id equality of System F.}
+  \label{fig:erasure}
+\end{figure}
+
+\paragraph{Type Erasure.}
+
+Since type information is useless after type-checking, we erase the type
+information of the targets for comparison. The erasure process is given at the
+top of \Cref{fig:erasure}.
+
+The erasure process is standard, where we erase the type annotation in
+abstractions, and remove type abstractions and type applications. The calculus
+after erasure is the untyped lambda calculus.
+
+\paragraph{Eta-id Equality.}
+
+However, even if we have type erasure, multiple targets for one expression can
+still be syntactically different. The problem is that we can insert more
+coercion functions in one translation than another, since an expression can have
+a more polymorphic type in one derivation than another one. So we need a more
+refined definition of equality instead of syntactic equality.
+
+We use a similar definition of eta-id equality as in \citet{chen:coercive},
+given in \Cref{fig:erasure}. In $[[=nid]]$ equality, two expressions are
+regarded as equivalent if they can turn into the same expression through
+$\eta$-reduction or removal of redundant identity functions. The $[[=nid]]$
+relation is reflexive, symmetrical, and transitive. As a small example, we can
+show that $[[\x. (\y.y) ef x =nid ef]]$.
+%
+\[
+  \inferrule*[right=\rref*{eta-reduce}]{
+    \inferrule*[right=\rref*{eta-id}]{
+      \inferrule*[right=\rref*{eta-refl}]
+      {\quad}
+      {[[ef =nid ef]]}
+    }{
+    [[(\y.y) ef =nid ef]]
+    }
+  }{
+    [[\x. (\y.y) ef x =nid ef]]
+  }
+\]
+
+Now we first prove that the erasure of the translation result of subtyping is
+always $[[=nid]]$ to an identity function.
+
+\begin{lemma}[Subtyping Coercions eta-id equal to $[[id]]$]\leavevmode
+  \begin{itemize}
+  \item if $[[|-AP A1 <: B ~~> ef]]$, then $[[ |ef| =nid \x.x ]]$.
+    \item if $[[ss |-AP A1 <: B ~~> ef]]$, then $[[ |ef| =nid \x.x ]]$.
+  \end{itemize}
+\end{lemma}
+
+We then prove that our translation actually generates a \textit{unique} target:
+
+\begin{lemma}[Coherence]
+  If $[[dd1;ss1|-AP e => A ~~> es1]]$,
+  and $[[dd2;ss2|-AP e => B ~~> es2]]$,
+  then $[[|es1| =nid |es2|]]$.
+\end{lemma}
 
 %%% Local Variables:
 %%% mode: latex
