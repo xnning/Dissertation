@@ -158,7 +158,7 @@ this with the typing derivations for let expressions, we now have same
 preconditions. Thus we can see that the rules in \Cref{fig:AP:static} are
 sufficient to express an HM-style polymorphic let construct.
 
-\paragraph{Meta-theory.}
+\paragraph{Metatheory.}
 
 The type system enjoys several interesting properties, especially lemmas about
 application contexts. Before we present those lemmas, we need a helper
@@ -264,6 +264,105 @@ $[[A2]]$ is determined from $[[ss]]$ and $[[A1]]$. This is unlike the judgment
 $[[|-AP A1<:A2]]$, where both $[[A1]]$ and $[[A2]]$ would be computationally
 interpreted as inputs. Therefore it is not possible to view $[[|-AP A1 <: A2]]$
 as a special case of $[[ss|-AP A1 <: A2]]$ where $[[ss]]$ is empty.
+
+There are three rules dealing with application contexts. \Rref{ap-as-empty} is
+for case when the application context is empty. Because it is empty, we have no
+constraints on the type, so we return it back unchanged. Note that this is where
+HM-style systems (also \citet{practical:inference}) would normally use an
+instantiation rule (e.g. \rref{hm-inst} in HM) to remove top-level quantifiers.
+Our system does not need the instantiation rule, because in applications, type
+information flows from arguments to the function, instead of function to
+arguments. In the latter case, the instantiation rule is needed because a
+function type is wanted instead of a polymorphic type. In our approach,
+instantiation of type variables is avoided unless necessary.
+
+The two remaining rules apply when the application context is non-empty, for
+polymorphic and function types respectively. Note that we only need to deal with
+these two cases because $[[int]]$ or type variables $[[a]]$ cannot have a
+non-empty application context. In \rref{ap-as-forall}, we instantiate the
+polymorphic type with some $[[t]]$, and continue. This instantiation is forced
+by the application context. In \rref{ap-as-arrow}, one function of type
+$[[A1->A2]]$ is now being applied to an argument of type $[[A3]]$. So we check
+$[[|-AP A3 <: A1]]$. Then we continue with $[[A2]]$ and the rest application context,
+and return $[[A3->A4]]$ as the result type of the function.
+
+\paragraph{Metatheory.}
+
+Application subtyping is novel in our system, and it enjoys some interesting
+properties. For example, similarly to typing, the application context decides
+the form of the supertype.
+
+\begin{lemma}[$[[ss]]$ Coincides with Subtyping Results]
+  \label{lemma:app-coin-subtyping}
+  If $[[ss|-AP A1<:A2]]$,
+  then for some $[[A3]]$,
+  $[[A2 = ss -> A3]]$.
+\end{lemma}
+
+Therefore we can always use the judgment $[[ss|-AP A1<:ss -> A2]]$, instead of
+$[[ss|-AP A1<:A2]]$. Application subtyping is also reflexive and transitive.
+Interestingly, in those lemmas, if we remove all applications contexts, they are
+exactly the reflexivity and transitivity of traditional subtyping.
+
+\begin{lemma}[Reflexivity of Application Subtyping]
+  $[[ss|-AP ss -> A <: ss -> A]]$.
+\end{lemma}
+
+\begin{lemma}[Transitivity of Application Subtyping]
+  If $[[ss1 |-AP  A1 <: ss1 -> A2]]$,
+  and $[[ss2 |-AP A2 <: ss2 -> A3]]$,
+  then $[[ss2, ss1 |-AP A1 <: ss1 -> ss2 -> A3]]$.
+\end{lemma}
+
+Finally, we can convert between subtyping and application subtyping. We can
+remove the application context and still get a subtyping relation:
+
+\begin{lemma}[$[[ss]][[|-AP]]$ to $[[|-AP]]$]
+  If $[[ss|-AP A1 <: A2]]$,
+  then $[[|-AP A1 <: A2]]$.
+\end{lemma}
+
+Transferring from subtyping to application subtyping will result in a more
+general type.
+
+\begin{lemma}[$[[|-AP]]$ to $[[ss]][[|-AP]]$]
+  If $[[|-AP A1 <: ss -> A2]]$,
+  then for some $[[A3]]$,
+  we have $[[ss |-AP A1 <: ss -> A3]]$,
+  and $[[|-AP A3 <: A2]]$.
+\end{lemma}
+
+This lemma may not seem intuitive at first glance. Consider a concrete example.
+Consider the derivation for $[[|-AP int -> \/a. a <: int -> int]]$:
+%
+  \[
+    \inferrule*[right=\rref*{ap-s-arrow}]{
+      \inferrule*[right=\rref*{ap-s-int}]{\quad}{[[|-AP int <: int]]} \\
+      \inferrule*[right=\rref*{ap-s-forallL}]{
+         \inferrule*[right=\rref*{ap-s-int}]{\quad}{[[|-AP int <: int]]}
+      }{[[|-AP \/a .a <: int]]} \\
+    }{
+      [[|-AP int -> \/a. a <: int -> int]]}
+  \]
+%
+\noindent and for $[[int |-AP int -> \/a.a <: int -> \/a.a]]$:
+%
+  \[
+    \inferrule*[right=\rref*{ap-as-arrow}]{
+      \inferrule*[right=\rref*{ap-s-int}]{\quad}{[[|-AP int <: int]]} \\
+      \inferrule*[right=\rref*{ap-as-empty}]{
+      }{
+        [[|-AP \/a.a <: \/a.a]]
+      }
+    }{
+      [[int |-AP int -> \/a.a <: int -> \/a.a]]
+    }
+  \]
+%
+\noindent The former one, holds because we have
+$[[|-AP \/a.a <: int]]$ in the return type. But in the latter one, after
+$[[int]]$ is consumed from application context, we eventually reach \rref{ap-as-empty},
+which always returns the original type back.
 
 %%% Local Variables:
 %%% mode: latex

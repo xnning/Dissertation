@@ -614,8 +614,8 @@ ss, A3 |-AP A1 [a ~> t] <: A2
 ss, A3 |-AP \/a. A1 <: A2
 
 
-A3 <: A1
-ss |-AP A2 <: A3
+|-AP A3 <: A1
+ss |-AP A2 <: A4
 ------------------------ :: arrow
 ss, A3 |-AP A1 -> A2 <: A3 -> A4
 
