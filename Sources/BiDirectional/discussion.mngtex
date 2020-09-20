@@ -1,0 +1,113 @@
+\section{Combining \Mode and Checking Modes}
+
+\ningning{maybe move to future work}
+
+Although the application mode provides us with alternative design choices in a
+bi-directional type system, a checking mode can still be \textit{easily} added.
+One motivation for the checking mode would be annotated expressions $[[e:A]]$,
+where the type of expressions is known and is therefore used to check
+expressions, as in DK.
+
+Consider adding $[[e:A]]$ for introducing the checking mode for the language.
+Notice that, since the checking mode is stronger than application mode, when
+entering checking mode the application context is no longer useful. Instead we
+use application subtyping to satisfy the application context requirements. A
+possible typing rule for annotation expressions is:
+%
+\[
+  \drule{ap-app-anno}
+\]
+
+\noindent Here, $[[e]]$ is checking using its annotation $[[A1]]$, and then we
+instantiate $[[A1]]$ to $[[B]]$ using subtyping with application context
+$[[ss]]$.
+
+Now we can have a rule set of the checking mode for all expressions, much like
+those checking rules in DK. For example, one useful rule for abstractions in
+checking mode could be \rref{ap-chk-lam}, where the parameter type $[[A1]]$
+serves as the type of $[[x]]$, and typing checks the body with $[[B]]$. Also,
+combined with the information flow, the checking rule for application checks the
+function with the full type.
+%
+\[
+  \drule{ap-chk-lam}
+\]
+
+Moreover, combined with the information flow, the checked rule for application
+checks the function with the full type.
+%
+\[
+  \drule{ap-chk-app}
+\]
+
+
+Note that adding expression annotations might bring convenience for programmers,
+since annotations can be more freely placed in a program. For example,
+$[[(\x. x 1) : (int -> int) -> int]]$ becomes valid.
+However this does not add expressive power, since programs that are typeable
+under expression annotations, would remain typeable after moving the annotations
+to bindings. For example the previous program is equivalent to
+$[[(\x:int->int. x 1)]]$.
+
+This discussion is a sketch. We have not defined the corresponding declarative
+system nor algorithm. However we believe that the addition of a checked mode
+will \textit{not} bring surprises to the meta-theory.
+
+\section{Additional Constructs}
+\label{sec:AP:pairs}
+
+In this section, we show that the application mode is compatible with other
+constructs, by discussing how to add support for pairs in the language. A
+similar methodology would apply to other constructs like sum types, data types,
+if-then-else expressions and so on.
+
+The introduction rule for pairs must be in the inference mode with an empty
+application context. Also, the subtyping rule for pairs is as expected.
+%
+\begin{mathpar}
+  \drule{ap-inf-pair}
+  \and
+  \drule{ap-s-pair}
+\end{mathpar}
+
+The application mode can apply to the elimination constructs of pairs. If one
+component of the pair is a function, for example, $[[fst (\x. x, 1) 2]]$, then
+it is possible to have a judgment with a non-empty application context.
+Therefore, we can use the application subtyping to account for the application
+contexts:
+%
+\begin{mathpar}
+  \drule{ap-app-fst} \\ \drule{ap-app-snd}
+\end{mathpar}
+
+However, in polymorphic type systems, we need to take the subsumption rule into
+consideration. For example, in the expression $[[(\x:\/a. (a, b). fst x)]]$,
+$[[fst]]$ is applied to a polymorphic type. Interestingly, instead of a
+non-deterministic subsumption rule, having polymorphic types actually leads to a
+simpler solution. According to the philosophy of the application mode, the types
+of the arguments always flow into the functions. Therefore, instead of regarding
+$[[fst e]]$ as an expression form, where $[[e]]$ is itself an argument, we could
+regard $[[fst]]$ as a function on its own, whose type is $[[\/ a. \/ b. (a, b) ->
+a]]$. Then as in the variable case, we use the subtyping rule to deal with
+application contexts. Thus the typing rules for $[[fst]]$ and $[[snd]]$ can be
+modeled as:
+% 
+\begin{mathpar}
+  \drule{ap-app-fst-var} \and \drule{ap-app-snd-var}
+\end{mathpar}
+
+Note that another way to model those two rules would be to simply have an
+initial typing environment $[[dd]]_{init} \equiv [[fst : \/a. \/b. (a, b) ->
+a]], [[snd : \/a. \/b. (a, b) -> b]]$. In this case the elimination of pairs be
+dealt directly by the rule for variables.
+
+An extended version of the calculus extended with rules for pairs
+(\rref{ap-inf-pair}, \rref{ap-s-pair}, \rref{ap-app-fst-var} and
+\rref{ap-app-snd-var}), has been formally studied. All the theorems presented
+before hold with the extension of pairs.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

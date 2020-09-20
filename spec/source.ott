@@ -57,6 +57,7 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4
   | b @ \/ a . A   :: S :: blue_all {{ tex [[\/]] {\color{blue} [[a]]} . [[A]] }}
   | S ( A )        :: S :: subst2
   | ss -> A        ::   :: sctx_type
+  | ( A , B )      ::   :: pair
 
 % Mono Types
 
@@ -186,6 +187,7 @@ atyp_scastable, asc {{ tex \mathbb{S} }} :: 'atyp_scastable_' ::=
 
 dexp, e :: 'dtrm_' ::=
   | 1                ::   :: one
+  | 2                ::   :: two
   | x                ::   :: var
   | id               ::   :: id {{ tex \mathsf{id} }}
   | n                ::   :: lit
@@ -207,6 +209,8 @@ dexp, e :: 'dtrm_' ::=
   | e : A            :: S :: anno
   | ( e1 , e2 )      ::   :: pair
   | 'a'              ::   :: a
+  | fst              ::   :: fst
+  | snd              ::   :: snd
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -317,6 +321,8 @@ terminals :: 'terminals_' ::=
   | ~       :: :: consist {{ tex \sim }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
   | let     :: :: let     {{ tex \mathbf{let} }}
+  | fst     :: :: fst     {{ tex \mathbf{fst} }}
+  | snd     :: :: snd     {{ tex \mathbf{snd} }}
   | int     :: :: int     {{ tex \mathsf{Int} }}
   | nat     :: :: nat     {{ tex \mathsf{Nat} }}
   | bool     :: :: bool     {{ tex \mathsf{Bool} }}
@@ -388,7 +394,6 @@ formula :: formula_ ::=
   | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
   | varset1 notin varset2     :: :: notin_varset
   | ma notin fv ( GG )     :: :: mafv {{ tex [[ma]] \notin \textsc{fv} ( [[GG]] ) }}
-  | x notin fv ( GG )     :: :: xfv {{ tex [[x]] \notin \textsc{fv} ( [[GG]] ) }}
   | aA1 = aA2             :: :: eq
   | dd |- e : A           :: :: typ
   | dd |- e => A           :: :: typ_inf
@@ -627,6 +632,11 @@ a notin fv(A1)
 |-AP A1 <: A2 ~~> ef
 ----------------- :: forallR
 |-AP A1 <: \/ a. A2 ~~> \x:A1. /\a. ef x
+
+|-AP A1 <: C ~~> ef1
+|-AP B <: D ~~> ef2
+----------------------- :: pair
+|-AP (A1, B) <: (C, D) ~~> ef3
 
 defn
 
@@ -989,6 +999,11 @@ dd ; ss |-AP e => A ~~> es  ::  :: ap_app :: 'ap_app_'
 {{ tex [[dd]] ; [[ss]] [[|-AP]] [[e]] [[=>]] [[A]] \transto{[[~~>]] [[es]]} }}
 by
 
+dd |-AP e <= A1
+ss |-AP A1 <: B
+------------------------ :: anno
+dd;ss |-AP e : A1 => B ~~> es
+
 (x : A1) in dd
 ss |-AP A1 <: A2 ~~> ef
 --------------------------- :: var
@@ -1012,6 +1027,25 @@ dd ; ss, A2 |-AP e1 => A2 -> A3 ~~> es1
 ------------------------------- :: app
 dd ; ss |-AP e1 e2 => A3 ~~> es1 (/\ </ai//i/>. es2)
 
+
+dd |-AP e => (A1, B)
+ss |-AP A1 <: C
+------------------------ :: fst
+dd ; ss |-AP fst e => C ~~> es
+
+dd |-AP e => (A1, B)
+ss |-AP B <: C
+------------------------ :: snd
+dd ; ss |-AP snd e => C ~~> es
+
+ss |-AP \/a.\/b. (a, b) -> a <: A
+------------------------ :: fst_var
+dd ; ss |-AP fst => A ~~> es
+
+ss |-AP \/a.\/b. (a, b) -> b <: A
+------------------------ :: snd_var
+dd ; ss |-AP snd => A ~~> es
+
 defn
 
 dd |-gen A1 = A2 ::  :: ap_gen :: 'ap_gen' {{ tex [[dd]]_{gen} ([[A1]]) = [[A2]] }} by
@@ -1034,9 +1068,24 @@ dd , x: A1 |-AP e => A2 ~~> es
 --------------------------- :: lamann
 dd  |-AP \x: A1. e => A1 -> A2 ~~> \x:A1.es
 
+dd |-AP e1 => A1
+dd |-AP e2 => B
+--------------------------- :: pair
+dd |-AP (e1, e2) => (A1, B) ~~> es
+
 defn
 
-dd ; ss |-AP e <= A  ::  :: ap_chk :: 'ap_chk_' by
+dd |-AP e <= A  ::  :: ap_chk :: 'ap_chk_' by
+
+dd, x : A1 |-AP e <= B
+-------------------------- :: lam
+dd |-AP \x.e <= A1 -> B
+
+
+dd |-AP e2 => A1
+dd |-AP e1 <= A1 -> B
+--------------------- :: app
+dd |-AP e1 e2 <= B
 
 defn
 

@@ -211,6 +211,9 @@ We then prove that our translation actually generates a \textit{unique} target:
   then $[[|es1| =nid |es2|]]$.
 \end{lemma}
 
+% don't show the translation results after this section
+\renewcommand{\transto}[1]{}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
