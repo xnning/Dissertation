@@ -42,7 +42,7 @@ Since Pierce and Turner's work, various other authors have proved the
 effectiveness of bidirectional type checking in several other settings,
 including many different systems with subtyping
 \citep{davies:intersection,dunfield:tridirectional}, systems with dependent
-types \citep{asperti:bi:dependent,coquand:algorithm,loh:tutorial,Xi:dependent},
+types \citep{asperti:bi:dependent,coquand:algorithm,loh:tutorial,xi:dependent},
 etc.
 
 In particular, bidirectional type checking has also been combined with HM-style
