@@ -1,4 +1,4 @@
-\section{Combining \Mode and Checking Modes}
+\section{Combining  Application and Checking Modes}
 
 \ningning{maybe move to future work}
 
@@ -105,6 +105,90 @@ An extended version of the calculus extended with rules for pairs
 (\rref{ap-inf-pair}, \rref{ap-s-pair}, \rref{ap-app-fst-var} and
 \rref{ap-app-snd-var}), has been formally studied. All the theorems presented
 before hold with the extension of pairs.
+
+\section{More Expressive Type Applications}
+
+The design choice of propagating arguments to functions was subject to
+consideration in the original work on local type inference
+\citep{pierce:local}, but was rejected due to possible non-determinism
+introduced by explicit type applications:
+
+\begin{quote}
+  \emph{``It is possible, of course, to come up with examples where it would be
+    beneficial to synthesize the argument types first and then use the resulting
+    information to avoid type annotations in the function part of an application
+    expression....Unfortunately this refinement does not help infer the type of
+    polymorphic functions. For example, we cannot uniquely determine the type of
+    $x$ in the expression $(\mathbf{fun}[X](x) ~ e) ~ [ [[int]] ] ~
+    3$.''}
+\end{quote}
+
+As a response to this challenge, we also present an application of the
+application mode to a variant of System F \citep{esop2018:arguments}. The
+development of the calculus shows that the \mode mode can actually work well
+with calculi with explicit type applications. Here we explain the key ideas of
+the design of the system, but refer to \cite{esop2018:arguments} for more
+details.
+
+To explain the new design, consider the expression:
+%
+\[
+  \Lambda [[a]]. [[(\x :a . x + 1)]]~[[int]]
+\]
+
+\noindent which is not typeable in the traditional type system for System F. In
+System F the lambda abstractions do not account for the context of possible
+function applications. Therefore when type checking the inner body of the lambda
+abstraction, the expression $[[x+1]]$ is ill-typed, because all that is known is
+that $[[x]]$ has the (abstract) type $[[a]]$.
+
+If we are allowed to propagate type information from arguments to functions,
+then we can verify that $[[a = int]]$ and $[[x+1]]$ is well-typed. The key
+insight in the new type system is to use application contexts to track type
+equalities induced by type applications. This enables us to type check
+expressions such as the body of the lambda above ($[[x+1]]$). Therefore, back to
+the problematic expression $(\mathbf{fun}[X](x) ~ e) ~ [ [[int]] ] ~ 3$, the type of
+$[[x]]$ can be inferred as either $X$ or $[[int]]$ since they are actually
+equivalent.
+
+\paragraph{Sugar for Type Synonyms.}
+
+In the same way that we can regard $[[let]]$ expressions as syntactic sugar, in
+the new type system we further \textit{gain built-in type synonyms for free}. A
+\textit{type synonym} is a new name for an existing type. Type synonyms are
+common in languages such as Haskell. In our calculus a simple form of type
+synonyms can be desugared as follows:
+%
+\[
+\mathbf{type}~[[a = A]]~\mathbf{in}~[[e]] [[~~>]] (\Lambda [[a]]. [[e]]) [[A]]
+\]
+%
+One practical benefit of such syntactic sugar is that it enables a direct
+encoding of a System F-like language with declarations (including
+type-synonyms). Although declarations are often viewed as a routine extension to
+a calculus, and are not formally studied, they are highly relevant in practice.
+Therefore, a more realistic formalization of a programming language should
+directly account for declarations. By providing a way to encode declarations,
+our new calculus enables a simple way to formalize declarations.
+
+\paragraph{Type Abstraction.}
+
+The type equalities introduced by type applications may seem like we are
+breaking System F type abstraction. However, we argue that \textit{type
+  abstraction} is still supported by our System F variant. For example:
+%
+\[
+  \mathbf{let}~ inc = \Lambda a. [[\x:a. x + 1]]  ~\mathbf{in}~ inc~ [[int]]~[[1]]
+\]
+%
+\noindent (after desugaring) does \textit{not} type-check, as in a System-F like
+language. In our type system lambda abstractions that are immediatelly applied
+to an argument, and unapplied lambda abstractions behave differently. Unapplied
+lambda abstractions are just like System F abstractions and retain type
+abstraction. The example above illustrates this. In contrast the typeable
+example $(\Lambda [[a]]. [[\x:a. x + 1]])~[[int]]$, which uses a lambda
+abstraction directly applied to an argument, can be regarded as the desugared
+expression for $\mathbf{type}~[[a = int]]~\mathbf{in}~[[\x:a. x + 1]]$.
 
 
 \section{Dependent Type Systems}
