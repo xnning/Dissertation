@@ -1,4 +1,5 @@
 \section{Type Inference Algorithm}
+\label{sec:AP:algorithm}
 
 Even though our specification is syntax-directed, it does not directly lead to
 an algorithm, because there are still many guesses in the system, such as in

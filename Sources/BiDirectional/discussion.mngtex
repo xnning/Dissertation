@@ -1,4 +1,6 @@
-\section{Combining  Application and Checking Modes}
+\section{Discussion}
+
+\subsection{Combining  Application and Checking Modes}
 
 \ningning{maybe move to future work}
 
@@ -53,7 +55,7 @@ This discussion is a sketch. We have not defined the corresponding declarative
 system nor algorithm. However we believe that the addition of a checked mode
 will \textit{not} bring surprises to the meta-theory.
 
-\section{Additional Constructs}
+\subsection{Additional Constructs}
 \label{sec:AP:pairs}
 
 In this section, we show that the application mode is compatible with other
@@ -106,7 +108,8 @@ An extended version of the calculus extended with rules for pairs
 \rref{ap-app-snd-var}), has been formally studied. All the theorems presented
 before hold with the extension of pairs.
 
-\section{More Expressive Type Applications}
+\subsection{More Expressive Type Applications}
+\label{sec:AP:typeapplication}
 
 The design choice of propagating arguments to functions was subject to
 consideration in the original work on local type inference
@@ -144,12 +147,37 @@ that $[[x]]$ has the (abstract) type $[[a]]$.
 
 If we are allowed to propagate type information from arguments to functions,
 then we can verify that $[[a = int]]$ and $[[x+1]]$ is well-typed. The key
-insight in the new type system is to use application contexts to track type
-equalities induced by type applications. This enables us to type check
-expressions such as the body of the lambda above ($[[x+1]]$). Therefore, back to
-the problematic expression $(\mathbf{fun}[X](x) ~ e) ~ [ [[int]] ] ~ 3$, the type of
-$[[x]]$ can be inferred as either $X$ or $[[int]]$ since they are actually
-equivalent.
+insight in the new type system is to use contexts to track type equalities
+induced by type applications. This enables us to type check expressions such as
+the body of the lambda above ($[[x+1]]$). The key rules for type abstractions
+and type applications are:
+%
+\begin{mathpar}
+  \inferrule*[right=ap-app-tapp]{
+    [[dd]] ; [[ss]], [ [ [[dd]] ] [[A1]] ] [[|-AP]] [[e]] [[=>]] [[B]]
+  }{
+    [[dd]] ; [[ss]] [[|-AP]] [[e]]~[[A1]] [[=>]] [[B]]
+  }
+\and
+  \inferrule*[right=ap-app-tlam]{
+    [[dd]], [[a = A1]]; [[ss]] [[|-AP]] [[e]] [[=>]] [[B]]
+  }{
+    [[dd]] ; [[ss]], [ [[A1]] ] [[|-AP]] [[/\]] [[a]] . [[e]] [[=>]] [[B]]
+  }
+\end{mathpar}
+%
+For type applications, \rref{ap-app-tapp} stores the type argument $[[A1]]$ into
+the application context. Since $[[dd]]$ tracks type equalities, we apply
+$[[dd]]$ as a type substitution to $[[A1]]$ (i.e., $[ [[dd]] ] [[A1]]$)
+Moreover, to distinguish between type arguments and types of term arguments, we
+put type arguments in brackets (i.e., $[ [ [[dd]] ] [[A1]] ]$). For type
+abstractions (\rref{ap-app-tlam}), if the application context is non-empty, we
+put a new type equality between the type variable $[[a]]$ and the type argument
+$[[A1]]$ into the context.
+
+Now, back to the problematic expression $(\mathbf{fun}[X](x) ~ e) ~ [
+[[int]] ] ~ 3$, the type of $[[x]]$ can be inferred as either $X$ or $[[int]]$
+since they are actually equivalent.
 
 \paragraph{Sugar for Type Synonyms.}
 
@@ -191,7 +219,7 @@ abstraction directly applied to an argument, can be regarded as the desugared
 expression for $\mathbf{type}~[[a = int]]~\mathbf{in}~[[\x:a. x + 1]]$.
 
 
-\section{Dependent Type Systems}
+\subsection{Dependent Type Systems}
 \label{subsec:dep-type}
 
 \ningning{maybe move to future work}
@@ -214,14 +242,29 @@ normally requires some additional complexity
 \citep{severi:dependent:definitions}.
 
 
-TODO:
-
-We believe that the same technique presented in Section~ TODO can be adapted
-into a dependently typed language to enable a $[[let]]$ encoding. In a dependent
-type system with unified syntax for terms and types, we can combine the two
-forms in the typing context ($[[x: A]]$ and $[[a = A]]$) into a unified form
-$[[x]] = [[e]] : [[A]]$. Based on the new form, we design the typing rules for
-applications and lambda abstractions:
+We believe that the same technique presented in \Cref{sec:AP:typeapplication}
+can be adapted into a dependently typed language to enable a $[[let]]$ encoding.
+In a dependent type system with unified syntax for terms and types, we can
+combine the two forms in the typing context, i.e., $[[x: A]]$ and $[[a = A]]$,
+into a unified form $[[x]] = [[e]] : [[A]]$. Then we can combine two application
+rules \rref{ap-app-app} and \rref{ap-app-tapp} into \rref{ap-app-dapp}, and also
+two abstraction rules \rref{ap-app-lam} and \rref{ap-app-tlam} into
+\rref{ap-app-dlam}.
+%
+\begin{mathpar}
+  \inferrule*[right=ap-app-dapp]{
+    [[dd|-AP e2 => A1]] \\
+    [[dd]] ; [[ss]], [[e2]]:[[A1]] [[|-AP]] [[e1]] [[=>]] [[B]]
+  }{
+    [[dd;ss|-AP e1 e2 => B]]
+  }
+  \and
+  \inferrule*[right=ap-app-dlam]{
+    [[dd]], [[x]] = [[e1 : A1]]; [[ss]] [[|-AP]] [[e]] [[=>]] [[B]]
+  }{
+    [[dd]] ; [[ss]], [[e1]] : [[A1]]  [[|-AP]] [[\x.e]] [[=>]] [[B]]
+}
+\end{mathpar}
 
 
 With such rules it would be possible to handle declarations easily in dependent

@@ -3,6 +3,18 @@
 \label{chap:BiDirectional}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+This section first presents a declarative, \emph{syntax-directed} type system,
+System \ap,
+for a lambda calculus with implicit higher-ranked polymorphism. The interesting
+aspects about the new type system are: 1) the typing rules, which employ a
+combination of inference and a so-called \textit{\mode} modes; 2) the novel
+subtyping relation under an application context. Later, we prove our type system
+is type-safe by a type directed translation to System F in
+\Cref{sec:AP:translation}. An algorithmic type system is discussed in
+\Cref{sec:AP:algorithm}.
+
+
+
 \input{Gen/BiDirectional/introduction}
 \input{Gen/BiDirectional/typesystem}
 \input{Gen/BiDirectional/translation}

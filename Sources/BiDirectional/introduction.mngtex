@@ -1,7 +1,5 @@
 \section{Introduction and Motivation}
 
-name \ap
-
 \subsection{Revisiting Bidirectional Type Checking}
 
 Traditional type checking rules can be heavyweight on annotations, in the sense
