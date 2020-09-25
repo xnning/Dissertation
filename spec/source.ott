@@ -58,6 +58,7 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4
   | S ( A )        :: S :: subst2
   | ss -> A        ::   :: sctx_type
   | ( A , B )      ::   :: pair
+  | { l1 : A1 , .. , ln : An  }  ::   :: record
 
 % Mono Types
 
@@ -376,6 +377,7 @@ terminals :: 'terminals_' ::=
 
 formula :: formula_ ::=
   | judgement             :: :: judgement
+  | formula1 .. formulan            ::   :: dots
   | dd |- e => A          :: :: ap_inf_introduction
   | dd ; ss |- e => A     :: :: ap_app_introduction
   | |- A1 <: A2           :: :: ap_sub_introduction
@@ -435,6 +437,66 @@ subrules
   asc <:: agc
   pv <:: pe
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FOB
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+FOb :: 'FOb_' ::=
+
+defn
+
+A ~ B ::  :: consist :: consist_ by
+
+
+------- :: refl
+A ~ A
+
+
+------------- :: unknownR
+A ~ unknown
+
+------------- :: unknownL
+unknown ~ A
+
+
+A1 ~ C
+B ~ D
+-------------------- :: arrow
+A1 -> B ~ C -> D
+
+</ Ai ~ Ai' // i />
+-------------------------------------------------- :: rcd
+{ </ li : Ai // i />  }   ~ { </ li : Ai' // i /> }
+
+
+defn
+
+A <: B ::  :: subtyping :: s_ by
+
+-------------------- :: int
+int <: int
+
+-------------------- :: bool
+bool <: bool
+
+-------------------- :: float
+float <: float
+
+-------------------- :: intfloat
+int <: float
+
+C <: A1
+B <: D
+-------------------- :: arrow
+A1 -> B <: C -> D
+
+-------------------- :: unknown
+unknown <: unknown
+
+</ Ai <: Ai' // i />
+-------------------------------------------------- :: rcd
+{ </ li : Ai // i />  }   <: { </ li : Ai' // i /> }
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

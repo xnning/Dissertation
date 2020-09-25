@@ -1,0 +1,36 @@
+\section{Introduction and Motivation}
+
+\subsection{Background: Gradual Typing}
+
+\begin{figure}
+
+  \renewcommand\ottaltinferrule[4]{
+    \inferrule*
+    {#3}
+    {#4}
+  }
+  \drules[FOb-s]{$ [[ A <: B ]] $}{Subtyping}{int,bool,float,intfloat,arrow,rcd,unknown}
+
+  \drules[FOb-consist]{$ [[ A ~ B ]] $}{Type Consistency}{refl, unknownR,
+    unknownL, arrow, rcd}
+
+  \caption{Subtyping and type consistency in \obb}
+  \label{fig:objects}
+\end{figure}
+
+\citet{siek2007gradual} developed a gradual type system for object-oriented
+languages that they call \obb. Central to gradual typing is the concept of
+\emph{consistency} (written $[[~]]$) between gradual types, which are types
+that may involve the unknown type $[[unknown]]$. The intuition is that consistency
+relaxes the structure of a type system to tolerate unknown positions in a
+gradual type. They also defined the subtyping relation in a way that static type
+safety is preserved. Their key insight is that the unknown type $[[unknown]]$ is
+neutral to subtyping, with only $[[ unknown <: unknown  ]]$. Both relations are
+defined in \Cref{fig:objects}.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
