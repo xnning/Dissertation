@@ -15,7 +15,7 @@
     unknownL, arrow, rcd}
 
   \caption{Subtyping and type consistency in \obb}
-  \label{fig:objects}
+  \label{fig:gradual:objects}
 \end{figure}
 
 \citet{siek2007gradual} developed a gradual type system for object-oriented
@@ -26,7 +26,7 @@ relaxes the structure of a type system to tolerate unknown positions in a
 gradual type. They also defined the subtyping relation in a way that static type
 safety is preserved. Their key insight is that the unknown type $[[unknown]]$ is
 neutral to subtyping, with only $[[ unknown <: unknown  ]]$. Both relations are
-defined in \Cref{fig:objects}.
+defined in \Cref{fig:gradual:objects}.
 
 A primary contribution of their work is to show that consistency and subtyping
 are orthogonal. However, the orthogonality of consistency and subtyping does not

@@ -350,6 +350,7 @@ terminals :: 'terminals_' ::=
   | |-DK    :: :: turnstile3 {{ tex \vdash^\mathit{DK} }}
   | |-AP    :: :: turnstile4 {{ tex \vdash^\mathit{AP} }}
   | |-F     :: :: turnstileF {{ tex \vdash^\mathit{F} }}
+  | |-G     :: :: turnstileG {{ tex \vdash^\mathit{G} }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -529,10 +530,10 @@ b@(gc) ~ unknown
 unknown ~ b@(gc)
 
 
-A1 ~ B1
-A2 ~ B2
+A1 ~ C
+B ~ D
 -------------------- :: arrow
-A1 -> A2 ~ B1 -> B2
+A1 -> B ~ C -> D
 
 A ~ B
 ------------------ :: forall
@@ -571,35 +572,35 @@ dd |-OL \/ a. A
 
 defn
 
-dd |- A ::  :: dwft :: d_ by
+dd |-G A ::  :: dwft :: gpc_d_ by
 
 --------- :: int
-dd |- int
+dd |-G int
 
 
 --------- :: unknown
-dd |- unknown
+dd |-G unknown
 
 
 -------------- :: static
-dd |- static
+dd |-G static
 
 -------------- :: gradual
-dd |- gradual
+dd |-G gradual
 
 
 a in dd
 -------- :: tvar
-dd |- a
+dd |-G a
 
-dd |- A
-dd |- B
+dd |-G A
+dd |-G B
 -------------- :: arrow
-dd |- A -> B
+dd |-G A -> B
 
-dd, a |- A
+dd, a |-G A
 -------------- :: forall
-dd |- \/ a. A
+dd |-G \/ a. A
 
 defn
 
@@ -609,7 +610,7 @@ dd ok :: :: ol_well_formed_tctx :: 'ol_cwf_' {{ tex [[dd]] \ [[ok]] }} by
 empty ok
 
 dd ok
-dd |- A
+dd |-OL A
 ------------------------- :: var
 dd , x : A ok
 
@@ -723,76 +724,76 @@ ss, A3 |-AP A1 -> A2 <: A3 -> A4 ~~> \x:A1->A2.\y:A3. ef2 (x (ef1 y))
 
 defn
 
-dd |- A <: B ::  :: dsubtyping :: s_ by
+dd |-G A <: B ::  :: dsubtyping :: gpc_s_ by
 
 
-dd, a |- A <: B
+dd, a |-G A <: B
 ----------------- :: forallR
-dd |- A <: \/ a. B
+dd |-G A <: \/ a. B
 
 
-dd |- t
-dd |- A [a ~> t] <: B
+dd |-G t
+dd |-G A [a ~> t] <: B
 ----------------- :: forallL
-dd |- \/ a. A <: B
+dd |-G \/ a. A <: B
 
 
-dd |- r @ (t)
-dd |- A [r @ (a) ~> r @ (t) ] <: B
+dd |-G r @ (t)
+dd |-G A [r @ (a) ~> r @ (t) ] <: B
 ------------------------ :: forallLr
-dd |- r @ \/ a. A <: B
+dd |-G r @ \/ a. A <: B
 
-dd |- b @ (t)
-dd |- A [b @ (a) ~> b @ (t) ] <: B
+dd |-G b @ (t)
+dd |-G A [b @ (a) ~> b @ (t) ] <: B
 ------------------------ :: forallLb
-dd |- b @ \/ a. A <: B
+dd |-G b @ \/ a. A <: B
 
 
 a in dd
 -------------------- :: tvar
-dd |- a <: a
+dd |-G a <: a
 
 
 r@(a) in dd
 -------------------- :: tvarr
-dd |- r@(a) <: r@(a)
+dd |-G r@(a) <: r@(a)
 
 b@(a) in dd
 -------------------- :: tvarb
-dd |- b@(a) <: b@(a)
+dd |-G b@(a) <: b@(a)
 
 
 -------------------- :: int
-dd |- int <: int
+dd |-G int <: int
 
 
 -------------------- :: intr
-dd |- r@(int) <: r@(int)
+dd |-G r@(int) <: r@(int)
 
 -------------------- :: intb
-dd |- b@(int) <: b@(int)
+dd |-G b@(int) <: b@(int)
 
-dd |- B1 <: A1
-dd |- A2 <: B2
+dd |-G C <: A1
+dd |-G B <: D
 ---------------------------- :: arrow
-dd |- A1 -> A2 <: B1 -> B2
+dd |-G A1 -> B <: C -> D
 
 
 --------------------------- :: unknown
-dd |- unknown <: unknown
+dd |-G unknown <: unknown
 
 
 --------------------------- :: unknownb
-dd |- b@(unknown) <: b@(unknown)
+dd |-G b@(unknown) <: b@(unknown)
 
 --------------------------- :: spar
-dd |- r@(static) <: r@(static)
+dd |-G r@(static) <: r@(static)
 
 --------------------------- :: gparr
-dd |- r@(gradual) <: r@(gradual)
+dd |-G r@(gradual) <: r@(gradual)
 
 --------------------------- :: gparb
-dd |- b@(gradual) <: b@(gradual)
+dd |-G b@(gradual) <: b@(gradual)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL CONSISTENT SUBTYPING
@@ -803,56 +804,49 @@ DConSub :: '' ::=
 
 defn
 
-dd |- A <~ B ::  :: dconsub :: cs_ by
+dd |-G A <~ B ::  :: dconsub :: cs_ by
 
 
-dd, a |- A <~ B
+dd, a |-G A <~ B
 ----------------- :: forallR
-dd |- A <~ \/ a. B
+dd |-G A <~ \/ a. B
 
-dd |- t
-dd |- A [a ~> t] <~ B
+dd |-G t
+dd |-G A [a ~> t] <~ B
 ----------------- :: forallL
-dd |- \/ a. A <~ B
+dd |-G \/ a. A <~ B
 
-dd |- B1 <~ A1
-dd |- A2 <~ B2
+dd |-G B1 <~ A1
+dd |-G A2 <~ B2
 ---------------------------- :: arrow
-dd |- A1 -> A2 <~ B1 -> B2
+dd |-G A1 -> A2 <~ B1 -> B2
 
 a in dd
 -------------------- :: tvar
-dd |- a <~ a
+dd |-G a <~ a
 
 -------------------- :: int
-dd |- int <~ int
+dd |-G int <~ int
 
 
 --------------------------- :: unknownL
-dd |- unknown <~ A
+dd |-G unknown <~ A
 
 --------------------------- :: unknownR
-dd |- A <~ unknown
+dd |-G A <~ unknown
 
 
 --------------------------- :: unknownLL
-dd |- unknown <~ gc
+dd |-G unknown <~ gc
 
 --------------------------- :: unknownRR
-dd |- gc <~ unknown
+dd |-G gc <~ unknown
 
 --------------------------- :: spar
-dd |- static <~ static
+dd |-G static <~ static
 
 --------------------------- :: gpar
-dd |- gradual <~ gradual
-
-
-% dd |- A <: A'
-% A' ~ B'
-% dd |- B' <: B
-% --------------------------- :: spec
-% dd |- A <~ B
+dd |-G gradual <~ gradual
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -977,7 +971,7 @@ dd |-OL e1 e2 : A2
 
 
 dd |-OL e : A1
-dd |- A1 <: A2
+dd |-OL A1 <: A2
 --------------------------- :: sub
 dd |-OL e : A2
 

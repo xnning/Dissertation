@@ -1,0 +1,433 @@
+\section{Revisiting Consistent Subtyping}
+\label{sec:gradual:exploration}
+
+In this section we explore the design space of consistent subtyping. We start
+with the definitions of consistency and subtyping for polymorphic types, and
+compare with some relevant work. We then discuss the design decisions involved
+in our new definition of consistent subtyping, and justify the new definition by
+demonstrating its equivalence with that of \citet{siek2007gradual} and the AGT
+approach~\citep{garcia:abstracting} on simple types.
+
+The syntax of types is given at the top of \Cref{fig:gradual:decl:subtyping}.
+Types $[[A]]$ are either the integer type $[[int]]$, type variables $[[a]]$,
+functions types $[[A1 -> B]]$, universal quantification $[[ \/a . A ]]$, or the
+unknown type $[[unknown]]$. Note that monotypes $[[t]]$ contain all types other
+than the universal quantifier and the unknown type $[[unknown]]$. We will
+discuss this restriction when we present the subtyping rules. Contexts $[[dd]]$
+are \emph{ordered} lists of type variable declarations and term variables.
+
+\subsection{Consistency and Subtyping}
+\label{sub:gradual:consistency-subtyping}
+
+We start by giving the definitions of consistency and subtyping for polymorphic
+types, and comparing our definitions with the compatibility relation by
+\citet{amal:blame} and type consistency by \citet{yuu2017poly}.
+
+\begin{figure}
+  \centering
+    \begin{tabular}{lrcl} \toprule
+      Types & $[[A]]$ & $\Coloneqq$ & $[[int]] \mid [[a]] \mid [[A1 -> B]] \mid [[\/ a. A]] \mid [[unknown]]$ \\
+      Monotypes & $[[t]]$ & $\Coloneqq$ & $ [[int]] \mid [[a]] \mid [[t1 -> t2]] $ \\
+      Contexts & $[[dd]]$ & $\Coloneqq$ & $ [[empty]]  \mid [[dd , x : A]]  \mid [[dd, a]]$ \\
+      \bottomrule
+    \end{tabular}
+
+\renewcommand\ottaltinferrule[4]{\inferrule* {#3} {#4}}
+
+    \drules[dconsist]{$ [[ A ~ B ]] $}{Type Consistency}{refl, unknownR, unknownL, arrow, forall}
+
+\renewcommand\ottaltinferrule[4]{\inferrule*[right=\scriptsize{#1}] {#3} {#4}}
+    \drules[gpc-s]{$ [[dd |-G A <: B ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR, unknown}
+
+\renewcommand\ottaltinferrule[4]{\inferrule* {#3} {#4}}
+    \drules[gpc-d]{$[[ dd |-G A ]]$}{Well-formedness of types}{int, unknown,
+      tvar, arrow, forall}
+
+  \caption{Syntax of types, consistency, subtyping, well-formedness of types in the declarative GPC.}
+  \label{fig:gradual:decl:subtyping}
+\end{figure}
+
+\paragraph{Consistency.}
+
+The key observation here is that consistency is mostly a structural relation,
+except that the unknown type $\unknown$ can be regarded as any type. In other
+words, consistency is an equivalence relation lifted from static types to
+gradual types~\citep{garcia:abstracting}. Following this observation, we
+naturally extend the definition from \Cref{fig:gradual:objects} with polymorphic
+types, as shown in the middle of \Cref{fig:gradual:decl:subtyping}. In
+particular a polymorphic type $[[ \/a . A]]$ is consistent with another
+polymorphic type $[[ \/a. B ]]$ if $[[A]]$ is consistent with $[[B]]$.
+
+\paragraph{Subtyping.}
+
+We express the fact that one type is a polymorphic generalization of another by
+means of the subtyping judgment $[[ dd |-G A <: B ]]$. Compared with the
+subtyping rules of \citet{odersky:putting} in \Cref{fig:OL:static}, the
+only addition is the neutral subtyping of $[[unknown]]$. Notice that, in
+\rref{gpc-s-forallL}, the universal quantifier is only allowed to be instantiated
+with a \emph{monotype}. The judgment $[[ dd |-G A ]]$ checks whether all the type
+variables in $[[A]]$ are bound in the context $[[dd]]$. According to the syntax
+in \Cref{fig:gradual:decl:subtyping}, monotypes do not include the unknown type
+$[[unknown]]$. This is because if we were to allow the unknown type to be used
+for instantiation, we could have $[[ \/a . a -> a <: unknown -> unknown ]]$ by
+instantiating $[[a]]$ with $[[unknown]]$. Since $[[ unknown -> unknown ]]$ is
+consistent with any functions $[[ A1 -> B ]]$, for instance, $[[ int -> bool ]]$,
+this means that we could provide an expression of type $[[ \/a . a -> a ]]$ to a
+function where the input type is supposed to be $[[ int -> bool ]]$. However, as
+we know, $[[ \/a . a -> a ]]$ is definitely not compatible with $[[ int -> bool
+]]$. Indeed, this does not hold in any polymorphic type systems without gradual
+typing. So the gradual type system should not accept it either. (This is the
+\emph{conservative extension} property that will be made precise in
+\Cref{sec:criteria}.)
+
+
+Importantly there is a subtle distinction between a type variable and the
+unknown type, although they both represent a kind of ``arbitrary'' type. The
+unknown type stands for the absence of type information: it could be \emph{any
+  type} at \emph{any instance}. Therefore, the unknown type is consistent with
+any type, and additional type-checks have to be performed at runtime. On the
+other hand, a type variable indicates \emph{parametricity}.
+In other words, a
+type variable can only be instantiated to a single type. For example, in the
+type $[[ \/a . a -> a ]]$, the two occurrences of $[[a]]$ represent an arbitrary but
+single type (e.g., $[[ int -> int  ]]$, $[[ bool -> bool ]]$), while $[[unknown -> unknown]]$
+could be an arbitrary function (e.g., $[[ int -> bool  ]]$) at runtime.
+
+\paragraph{Comparison with Other Relations.}
+
+In other polymorphic gradual calculi, consistency and subtyping are often mixed
+up to some extent. In \pbc~\citep{amal:blame}, the compatibility relation
+for polymorphic types is defined as follows:
+%
+\begin{mathpar}
+  \inferrule*[right=Comp-AllR]{
+      [[A1]] \prec [[B]]
+    }{
+      [[A1]] \prec [[\/a. B]]
+    }
+  \and
+  \inferrule*[right=Comp-AllL]{
+      [[A1 [a~>unknown] ]] \prec [[B]]
+    }{
+      [[\/a. A1]] \prec [[B]]
+    }
+\end{mathpar}
+
+Notice that, in \rref{Comp-AllL}, the universal quantifier is \emph{always}
+instantiated to $[[unknown]]$. However, this way, \pbc allows $[[\/a . a -> a]] \prec [[int -> bool]]$,
+which as we discussed before might not be what we
+expect. Indeed \pbc relies on sophisticated runtime checks to rule out such
+instances of the compatibility relation a posteriori.
+
+\citet{yuu2017poly} introduced the so-called \emph{quasi-polymorphic} types
+for types that may be used where a $\forall$-type is expected, which is
+important for their purpose of conservativity over System F. Their type
+consistency relation, involving polymorphism, is defined as
+follows\footnote{This is a simplified version. These two rules are presented in
+  Section~3.1 in their paper as one of the key ideas of the design of type
+  consistency, which are later amended with \emph{labels}.}:
+%
+\begin{mathpar}
+  \inferrule{[[A ~ B]] }{[[ \/a . A ~ \/a . B  ]]}
+  \and
+  \inferrule{ [[A ~ B]] \\ [[B]] \neq [[\/a. B']] \\ [[unknown]] \in \mathsf{Types}([[B]])  }{ [[\/a. A ~ B]]   }
+\end{mathpar}
+%
+Compared with our consistency definition in \Cref{fig:gradual:decl:subtyping},
+their first rule is the same as ours. The second rule says that a non
+$\forall$-type can be consistent with a $\forall$-type only if it contains
+$[[unknown]]$. In this way, their type system is able to reject $[[ \/a . a -> a ~ int -> bool  ]]$.
+However, in order to keep conservativity, they also reject
+$[[  \/a. a -> a ~ int -> int ]]$, which is perfectly sensible in their
+setting of explicit polymorphism. However with implicit polymorphism, we
+would expect $[[ \/a. a -> a  ]]$ to be related with $[[int -> int]]$,
+since $[[a]]$ can be instantiated to $[[int]]$.
+
+Nonetheless, when it comes to interactions between dynamically typed and
+polymorphically typed terms, both relations allow $[[ \/a. a -> int  ]]$
+to be related with $[[ unknown -> int ]]$ for example, which in our view, is a kind of
+(implicit) polymorphic subtyping combined with type consistency, and
+that should be derivable by the more primitive notions in the type system
+(instead of inventing new relations). One of our design principles is that
+subtyping and consistency are \emph{orthogonal}, and can be naturally
+superimposed, echoing the opinion of \citet{siek2007gradual}.
+
+\subsection{Towards Consistent Subtyping}
+\label{sec:gradual:towards-conssub}
+
+With the definitions of consistency and subtyping, the question now is how to
+compose the two relations so that two types can be compared in a way that takes
+both relations into account.
+
+Unfortunately, the strawman version of consistent subtyping
+(\Cref{def:old-decl-conssub}) does not work well with our definitions of
+consistency and subtyping for polymorphic types. Consider two types: $[[ (\/a. a
+-> int) -> int ]]$, and $[[ (unknown -> int) -> int ]]$. The first type can only
+reach the second type in one way (first by applying consistency, then
+subtyping), but not the other way, as shown in \Cref{fig:example:a}. We use
+$\emptyset$ to mean that we cannot find such a type. Similarly, there are
+situations where the first type can only reach the second type by the other way
+(first applying subtyping, and then consistency), as shown in
+\Cref{fig:example:b}.
+
+\begin{small}
+\begin{figure}[t]
+  \begin{subfigure}[b]{.65\linewidth}
+    \centering
+      \begin{tikzpicture}
+        \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=4em,minimum width=2em]
+        {
+          \emptyset & [[(unknown -> int) -> int]]  \\
+          [[(\/a. a -> nat) -> nat]] & [[(\/a. unknown -> nat) -> nat]] \\};
+
+        \path[-stealth]
+        (m-2-1) edge node [left] {$[[<:]]$} (m-1-1)
+        (m-2-2) edge node [left] {$[[<:]]$} (m-1-2);
+
+        \draw
+        (m-1-1) edge node [above] {$[[~]]$} (m-1-2)
+        (m-2-1) edge node [below] {$[[~]]$} (m-2-2);
+      \end{tikzpicture}
+      \caption{}
+      \label{fig:example:a}
+  \end{subfigure}
+  \begin{subfigure}[b]{.35\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=4em,minimum width=2em]
+      {
+        [[int -> int]] & [[int -> unknown]]  \\
+        [[\/a.a]] & \emptyset \\};
+
+      \path[-stealth]
+      (m-2-1) edge node [left] {$[[<:]]$} (m-1-1)
+      (m-2-2) edge node [left] {$[[<:]]$} (m-1-2);
+
+      \draw
+      (m-1-1) edge node [above] {$[[~]]$} (m-1-2)
+      (m-2-1) edge node [below] {$[[~]]$} (m-2-2);
+    \end{tikzpicture}
+    \caption{}
+    \label{fig:example:b}
+  \end{subfigure}
+  \begin{subfigure}[b]{.8\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=1em,minimum width=2em]
+      {
+        \emptyset &
+        [[(((unknown -> int) -> int) -> bool) -> (int -> unknown)]] \\
+      [[(((\/a.a -> int) -> int) -> bool) -> (\/a.a)]]
+         &
+        \emptyset \\};
+
+      \path[-stealth]
+      (m-2-1) edge node [left] {$[[<:]]$} (m-1-1)
+      (m-2-2) edge node [left] {$[[<:]]$} (m-1-2);
+
+      \draw
+      (m-1-1) edge node [above] {$[[~]]$} (m-1-2)
+      (m-2-1) edge node [below] {$[[~]]$} (m-2-2);
+    \end{tikzpicture}
+    \caption{}
+    \label{fig:example:c}
+  \end{subfigure}
+  \caption{Examples that break the original definition of consistent subtyping.}
+  \label{fig:example}
+\end{figure}
+\end{small}
+
+What is worse, if those two examples are composed in a way that those types all
+appear co-variantly, then the resulting types cannot reach each other in either
+way. For example, \Cref{fig:example:c} shows two such types by putting a
+$[[bool]]$ type in the middle, and neither definition of consistent subtyping
+works.
+
+\paragraph{Observations on Consistent Subtyping Based on Information Propagation.}
+
+In order to develop a correct definition of consistent subtyping for polymorphic
+types, we need to understand how consistent subtyping works. We first review two
+important properties of subtyping: (1) subtyping induces the subsumption rule:
+if $[[ A1 <: B ]]$, then an expression of type $[[A1]]$ can be used where
+$[[B]]$ is expected; (2) subtyping is transitive: if $[[ A1 <: B ]]$, and $[[B
+<: C]]$, then $[[A1 <: C]]$. Though consistent subtyping takes the unknown type
+into consideration, the subsumption rule should also apply: if $[[ A1 <~ B ]]$,
+then an expression of type $[[A1]]$ can also be used where $[[B]]$ is expected,
+given that there might be some information lost by consistency. A crucial
+difference from subtyping is that consistent subtyping is \emph{not} transitive
+because information can only be lost once (otherwise, any two types are a
+consistent subtype of each other). Now consider a situation where we have both
+$[[ A1 <: B ]]$, and $[[ B <~ C ]]$, this means that $[[A1]]$ can be used where
+$[[B]]$ is expected, and $[[B]]$ can be used where $[[C]]$ is expected, with
+possibly some loss of information. In other words, we should expect that
+$[[A1]]$ can be used where $[[C]]$ is expected, since there is at most one-time
+loss of information.
+
+\begin{observation}
+  If $[[C <~ B]]$, and $[[B <: A1]]$, then $[[C <~ A1]]$.
+\end{observation}
+
+This is reflected in \Cref{fig:obser:a}. A symmetrical observation is given in
+\Cref{fig:obser:b}:
+
+\begin{observation}
+  If $[[C <~ B]]$, and $[[B <: A]]$, then $[[C <~ A]]$.
+\end{observation}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{.4\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=4em,minimum width=2em]
+      {
+        [[A']] & [[C]] \\
+        [[B]]   & [[A'']] \\
+        [[A1]] & \\};
+
+      \path[-stealth]
+      (m-3-1) edge node [left] {$[[<:]]$} (m-2-1)
+      (m-2-2) edge node [left] {$[[<:]]$} (m-1-2)
+      (m-2-1) edge node [left] {$[[<:]]$} (m-1-1);
+
+      \draw
+      (m-2-1) edge node [below] {$[[~]]$} (m-2-2)
+      (m-1-1) edge node [above] {$[[~]]$} (m-1-2);
+
+      \draw [dashed, ->]
+      (m-2-1) edge node [above] {$[[<~]]$} (m-1-2);
+
+      \path [dashed, ->, out=0, in=0, looseness=2]
+      (m-3-1) edge node [right] {$[[<~]]$} (m-1-2);
+    \end{tikzpicture}
+    \caption{}
+    \label{fig:obser:a}
+  \end{subfigure}
+  \centering
+  \begin{subfigure}[b]{.4\linewidth}
+    \centering
+    \begin{tikzpicture}
+      \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=4em,minimum width=2em]
+      {
+        & [[A1]] \\
+        [[A']] & [[B]] \\
+        [[C]]   & [[A'']] \\};
+
+      \path[-stealth]
+      (m-3-1) edge node [left] {$[[<:]]$} (m-2-1)
+      (m-3-2) edge node [left] {$[[<:]]$} (m-2-2)
+      (m-2-2) edge node [left] {$[[<:]]$} (m-1-2);
+
+      \draw
+      (m-2-1) edge node [above] {$[[~]]$} (m-2-2)
+      (m-3-1) edge node [below] {$[[~]]$} (m-3-2);
+
+      \draw [dashed, ->]
+      (m-3-1) edge node [above] {$[[<~]]$} (m-2-2);
+
+      \path [dashed, ->, out=135, in=180, looseness=2]
+      (m-3-1) edge node [left] {$[[<~]]$} (m-1-2);
+    \end{tikzpicture}
+    \caption{}
+    \label{fig:obser:b}
+  \end{subfigure}
+  \caption{Observations of consistent subtyping}
+  \label{fig:obser}
+\end{figure}
+
+
+From the above observations, we see what the problem is with the original
+definition. In \cref{fig:obser:a}, if $[[B]]$ can reach $[[C]]$ by $[[A']]$,
+then by subtyping transitivity, $[[A1]]$ can reach $[[C]]$ by $[[A']]$. However,
+if $[[B]]$ can only reach $[[C]]$ by $[[A'']]$, then $[[A]]$ cannot reach
+$[[C]]$ through the original definition. A similar problem is shown in
+\cref{fig:obser:b}.
+
+It turns out that these two problems can be fixed using the same strategy:
+instead of taking one-step subtyping and one-step consistency, our definition of
+consistent subtyping allows types to take \emph{one-step subtyping, one-step
+  consistency, and one more step subtyping}. Specifically, $[[A1 <: B]] [[~]]
+[[A'']] [[<:]] [[C]] $ (in \Cref{fig:obser:a}) and $[[C <: A']] [[~]] [[B]]
+[[<:]] [[A]]$ (in \Cref{fig:obser:b}) have the same relation chain: subtyping,
+consistency, and subtyping.
+
+\paragraph{Definition of Consistent subtyping.} From the above discussion, we
+are ready to modify \cref{def:old-decl-conssub}, and adapt it to our
+notation\footnote{For readers who are familiar with category theory, this
+  defines consistent subtyping as the least subtyping bimodule extending
+  consistency.}:
+
+\begin{definition}[Consistent Subtyping]
+  \label{def:decl-conssub}
+  $[[dd |-G A1 <~ B]] $ if and only if  $ [[dd |-G A1 <: A']]$, $[[  A' ~ A''  ]]$ and $[[ dd |-G B' <: B ]]$ for some $[[A']]$ and $[[A'']]$.
+\end{definition}
+\noindent With \Cref{def:decl-conssub}, \Cref{fig:example:c:fix}
+illustrates the correct relation chain for the broken example shown in
+\Cref{fig:example:c}.
+
+At first sight, \Cref{def:decl-conssub} seems worse than the original: we need
+to guess \emph{two} types! It turns out that \Cref{def:decl-conssub} is a
+generalization of \Cref{def:old-decl-conssub}, and they are equivalent in the
+system of \citet{siek2007gradual}. However, more generally,
+\Cref{def:decl-conssub} is compatible with polymorphic types.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{.4\linewidth}
+  \begin{tikzpicture}
+    \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=6em,minimum width=2em]
+    {
+      [[B]] &
+      [[C]]
+      \\
+      [[A1]]
+      &
+      [[D]]  \\
+      };
+
+    \path[-stealth]
+    (m-2-1) edge node [left] {$[[<:]]$} (m-1-1)
+    (m-1-2) edge node [left] {$[[<:]]$} (m-2-2);
+    \path[dashed, ->, out=315, in=225, looseness=0.45]
+    (m-2-1) edge node [above] {$[[<~]]$} (m-2-2);
+
+    \draw
+    (m-1-1) edge node [above] {$[[~]]$} (m-1-2);
+  \end{tikzpicture}
+  \end{subfigure}
+  \begin{subfigure}[b]{.4\linewidth}
+  \begin{align*}
+  [[A1]] &= [[(((\/a . a -> int) -> int) -> bool) -> (\/a . a)]] \\
+  [[B]] &= [[(((\/a.a -> int) -> int) -> bool) -> (int -> int)]] \\
+  [[C]] &= [[(((\/a. unknown -> int) -> int) -> bool) -> (int -> unknown)]] \\
+  [[D]] &= [[(((unknown -> int) -> int) -> bool) -> (int -> unknown)]]
+  \end{align*}
+  \end{subfigure}
+  \caption{Example that is fixed by the new definition of consistent subtyping.}
+  \label{fig:example:c:fix}
+\end{figure}
+
+
+\begin{proposition}[Generalization of Declarative Consistent Subtyping]\leavevmode
+  \label{prop:subsumes}
+  \begin{itemize}
+  \item \Cref{def:decl-conssub} subsumes
+    \Cref{def:old-decl-conssub}.
+    \\In \Cref{def:decl-conssub},
+    by choosing $[[A'' = B]]$, we have $[[A1 <: A']]$ and $[[A' ~ B]]$;
+    by choosing $[[A' = A1]]$, we have $[[A1 ~ A'']]$, and $[[A'' <: B]]$.
+  \item \Cref{def:old-decl-conssub} is equivalent to
+    \Cref{def:decl-conssub} in the system of \citeauthor{siek2007gradual}.
+    \\If $[[A1 <: A']]$, $[[A' ~ A'']]$, and $[[A'' <: B]]$,
+    by \Cref{def:old-decl-conssub},
+    $[[A1 ~ C]]$, $[[C <: A'']]$ for some $[[C]]$.
+    By subtyping transitivity, $[[C <: B]]$.
+    So $[[A1 <~ B]]$ by $[[A1 ~ C]]$ and $[[C <: B]]$.
+  \end{itemize}
+\end{proposition}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
