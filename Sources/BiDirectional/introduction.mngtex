@@ -245,7 +245,7 @@ bidirectional type systems. In this chapter, we focus on integrating the
 application mode into a bidirectional type system with higher-rank types. Our
 paper~\citep{esop2018:arguments} includes another application to System F.
 
-Consider again the motivation example used in \Cref{chap:OL}:
+Consider again the motivation example used in \Cref{sec:OL}:
 
 \begin{lstlisting}
 (\f. (f 1, f 'a')) (\x. x)

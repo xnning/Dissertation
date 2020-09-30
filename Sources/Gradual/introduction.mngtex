@@ -9,9 +9,9 @@
     {#3}
     {#4}
   }
-  \drules[FOb-s]{$ [[ A <: B ]] $}{Subtyping}{int,bool,float,intfloat,arrow,rcd,unknown}
+  \drules[FOb-s]{$ [[ A1 <: B ]] $}{Subtyping}{int,bool,float,intfloat,arrow,rcd,unknown}
 
-  \drules[FOb-consist]{$ [[ A ~ B ]] $}{Type Consistency}{refl, unknownR,
+  \drules[FOb-consist]{$ [[ A1 ~ B ]] $}{Type Consistency}{refl, unknownR,
     unknownL, arrow, rcd}
 
   \caption{Subtyping and type consistency in \obb}
@@ -28,6 +28,242 @@ safety is preserved. Their key insight is that the unknown type $[[unknown]]$ is
 neutral to subtyping, with only $[[ unknown <: unknown  ]]$. Both relations are
 defined in \Cref{fig:objects}.
 
+A primary contribution of their work is to show that consistency and subtyping
+are orthogonal. However, the orthogonality of consistency and subtyping does not
+lead to a deterministic relation. Thus \citeauthor{siek2007gradual} defined
+\emph{consistent subtyping} (written $[[<~]]$) based on a \emph{restriction
+  operator}, written $\mask {[[A1]]} {[[B]]}$ that ``masks off'' the parts of type $[[A1]]$ that
+are unknown in type $[[B]]$. For example,
+
+\begin{center}
+  \begin{tabular}{lcl}
+  $\mask {[[int -> int]]} {[[bool -> bool]]}  $ &  $=$ & $[[int -> unknown]]$ \\
+  $\mask {[[bool->unknown]]} {[[int -> int]]} $ &  $=$ & $ {[[bool -> unknown]]}$
+  \end{tabular}
+\end{center}
+
+The definition of the restriction operator is given below:
+
+\begin{small}
+\begin{align*}
+  & \mask {[[A]]} {[[A']]} =  \kw{case}~([[A]], [[A']])~\kw{of}  \\
+              & \mid (\_, [[unknown]]) \Rightarrow [[unknown]] \\
+              & \mid ([[A1 -> B]] , [[A1' -> B']])  \Rightarrow  \mask {[[A1]]} {[[A1']]} \to \mask {[[B]]} {[[B']]} \\
+              & \mid ([[ [l1:A1,...,ln:An] ]] , [[ [l1:A1',...,lm:Am'] ]]) \kw{if}~n \leq m \Rightarrow
+                [ [[l1]] : \mask {[[A1]]} {[[A1']]}, ..., [[ln]] : \mask {[[An]]} {[[An']]}]\\
+              &\mid ([[ [l1:A1,...,ln:An] ]] , [[ [l1:A1',...,lm:Am'] ]]) \kw{if}~n > m \Rightarrow
+                [ [[l1]]: \mask {[[A1]]} {[[A1']]}, ..., [[lm]] : \mask {[[Am]]} {[[Am']]},...,[[ln]]:[[An]] ]\\
+              & \mid (\_, \_) \Rightarrow [[A]]
+\end{align*}
+\end{small}
+
+With the restriction operator, consistent subtyping is simply defined as:
+
+\begin{definition}[Algorithmic Consistent Subtyping of \citet{siek2007gradual}] \label{def:algo-old-decl-conssub}
+  $[[A1 <~ B]] \equiv \mask {[[A1]]} {[[B]]} [[<:]] \mask {[[B]]} {[[A1]]}$.
+\end{definition}
+
+Later they show a proposition that consistent subtyping is equivalent to two
+declarative definitions, which we refer to as the strawman for \emph{declarative}
+consistent subtyping because it servers as a good guideline on superimposing
+consistency and subtyping. Both definitions are non-deterministic because of
+the intermediate type $[[C]]$.
+
+\begin{definition}[Strawman for Declarative Consistent Subtyping] \label{def:old-decl-conssub}
+  The following two are equivalent:
+  \begin{enumerate}
+  \item $[[A1 <~ B]]$ if and only if $[[A1 ~ C]]$ and $[[C <: B]]$ for some $[[C]]$.
+  \item $[[A1 <~ B]]$ if and only if $[[A1 <: C]]$ and $[[C ~ B]]$ for some $[[C]]$.
+  \end{enumerate}
+\end{definition}
+
+In our later discussion, it will always be clear which definition we are referring
+to. For example, we focus more on \cref{def:old-decl-conssub} in
+\cref{subsec:towards-conssub}, and more on \cref{def:algo-old-decl-conssub} in
+\cref{subsec:conssub-wo-exist}.
+
+\subsection{Motivation: Gradually Typed Higher-Rank Polymorphism}
+\label{sec:gradual:motivation}
+
+Our work combines implicit (higher-rank) polymorphism with gradual typing. As
+is well known, a gradually typed language supports both fully static and fully
+dynamic checking of program properties, as well as the continuum between these
+two extremes. It also offers programmers fine-grained control over the
+static-to-dynamic spectrum, i.e., a program can be evolved by introducing more
+or less precise types as needed~\citep{garcia:abstracting}.
+
+Haskell is a language renowned for its advanced type system, but it does not
+feature gradual typing. Of particular interest to us is its support for implicit
+higher-rank polymorphism, which is supported via explicit type annotations. In
+Haskell some programs that are safe at run-time may be rejected due to the
+conservativity of the type system. For example, consider again the example from
+\Cref{sec:OL}:
+
+\begin{lstlisting}
+(\f. (f 1, f 'a')) (\x. x)
+\end{lstlisting}
+
+This program is rejected by Haskell's type checker because Haskell implements
+the HM rule that a lambda-bound argument (such as \lstinline{f}) can only have a
+monotype, i.e., the type checker can only assign \lstinline{f} the type
+\lstinline{Int -> Int}, or \lstinline{Char -> Char}, but not
+\lstinline$foralla. a -> a$. Finding such manual polymorphic annotations can
+be non-trivial, especially when the program scales up and the annotation is long
+and complicated.
+
+Instead of rejecting the program outright, due to missing type annotations,
+gradual typing provides a simple alternative by giving \lstinline$f$ the unknown
+type $[[unknown]]$. With this type the same program type-checks and produces
+\lstinline$(1, 'a')$. By running the program, programmers can gain more insight
+about its run-time behaviour. Then, with this insight, they can also give
+\lstinline$f$ a more precise type (\lstinline$foralla. a -> a$) a posteriori so
+that the program continues to type-check via implicit polymorphism and also
+grants more static safety. In this paper, we envision such a language that
+combines the benefits of both implicit higher-rank polymorphism and gradual
+typing.
+
+\subsection{Application: Efficient (Partly) Typed Encodings of ADTs}
+
+We illustrate two concrete applications of gradually typed higher-rank
+polymorphism related to algebraic datatypes. The first application shows how
+gradual typing helps in defining Scott encodings of algebraic
+datatypes~\citep{curry1958combinatory, parigot1992recursive}, which are
+impossible to encode in plain System F. The second application shows how gradual
+typing makes it easy to model and use heterogeneous containers.
+
+Our calculus does not provide built-in support for algebraic datatypes (ADTs).
+Nevertheless, the calculus is expressive enough to support efficient
+function-based encodings of (optionally polymorphic) ADTs\footnote{In a type
+  system with impure features, such as non-termination or exceptions, the
+  encoded types can have valid inhabitants with side-effects, which means we
+  only get the \textit{lazy} version of those datatypes.}. This offers an
+immediate way to model algebraic datatypes in our calculus without requiring
+extensions to our calculus or, more importantly, to its target---the polymorphic
+blame calculus. While we believe that such extensions are possible, they would
+likely require non-trivial extensions to the polymorphic blame calculus. Thus
+the alternative of being able to model algebraic datatypes without extending
+\pbc is appealing. The encoding also paves the way to provide built-in support
+for algebraic datatypes in the source language, while elaborating them via the
+encoding into \pbc.
+
+\paragraph{Church and Scott Encodings.}
+
+It is well-known that polymorphic calculi such as System F can encode datatypes
+via Church encodings. However these encodings have well-known drawbacks. In
+particular, some operations are hard to define, and they can have a time
+complexity that is greater than that of the corresponding functions for built-in
+algebraic datatypes. A good example is the definition of the predecessor
+function for Church numerals~\citep{church1941calculi}. Its definition requires
+significant ingenuity (while it is trivial with built-in algebraic datatypes),
+and it has \emph{linear} time complexity (versus the \emph{constant} time
+complexity for a definition using built-in algebraic datatypes).
+
+An alternative to Church encodings are the so-called Scott
+encodings~\citep{curry1958combinatory}. They address the two drawbacks of Church
+encodings: they allow simple definitions that directly correspond to programs
+implemented with built-in algebraic datatypes, and those definitions have the same time
+complexity to programs using algebraic datatypes.
+
+Unfortunately, Scott encodings, or more precisely, their typed
+variant~\citep{parigot1992recursive}, cannot be expressed in System F: in the
+general case they require recursive types, which System F does not support.
+However, with gradual typing, we can remove the need for recursive types, thus
+enabling Scott encodings in our calculus.
+
+\paragraph{A Scott Encoding of Parametric Lists}
+Consider for instance the typed
+Scott encoding of parametric lists in a system with implicit polymorphism:
+\begin{align*}
+   [[ List a ]] &\triangleq [[  mu L . \/b. b -> (a -> L -> b) -> b       ]] \\
+   [[nil]] &\triangleq [[  fold [ List a ] (\m . \c . m ): \/ a . List a    ]] \\
+   [[cons]] & \triangleq [[ \x . \xs . fold [List a]  (\m . \c. c x xs) :  \/a . a -> List a -> List a  ]]
+\end{align*}
+This encoding requires both polymorphic and recursive types\footnote{Here we use
+iso-recursive types, but equi-recursive types can be used too.}.
+Like System F, our calculus
+only supports the former, but not the latter. Nevertheless, gradual types still
+allow us to use the Scott encoding in a partially typed fashion.
+The trick is to omit the recursive type binder $\mu L$ and replace the recursive
+occurrence of $L$ by the unknown type $[[unknown]]$:
+\begin{align*}
+   [[ Listu a  ]] &\triangleq [[\/ b. b -> (a -> unknown -> b) -> b]]
+\end{align*}
+As a consequence, we need to replace the term-level witnesses of the
+iso-recursion by explicit type annotations to respectively forget or recover the type structure of
+the recursive occurrences:
+\begin{align*}
+  [[ fold [Listu a] ]] & \triangleq [[\x . x : (\/b . b -> (a -> Listu a -> b) -> b) -> Listu a  ]] \\
+  [[ unfold [Listu a] ]] & \triangleq [[ \x . x : Listu a -> (\/b . b -> (a -> Listu a -> b) -> b)     ]]
+\end{align*}
+With the reinterpretation of $[[fold]]$ and $[[unfold]]$ as functions instead of
+built-in primitives, we have exactly the same definitions of $[[nilu]]$ and
+$[[consu]]$.
+
+Note that when we elaborate our calculus into the polymorphic blame calculus, the above
+type annotations give rise to explicit casts. For
+instance, after elaboration $[[ fold [Listu a] e   ]]$ results in the cast
+$ [[< (\/b . b -> (a -> Listu a -> b) -> b) `-> Listu a > pe]] $ where $[[pe]]$ is the elaboration of $[[e]]$.
+
+In order to perform recursive traversals on lists, e.g., to compute their
+length, we need a fixpoint combinator like the Y combinator. Unfortunately, this combinator
+cannot be assigned a type in the simply typed lambda calculus or System F.
+Yet, we can still provide a gradual typing for it in our system.
+\begin{align*}
+[[fix]] &\triangleq [[  \ f . (\x : unknown . f (x x)) (\x : unknown . f (x x)) : \/ a. (a -> a) -> a ]]
+\end{align*}
+This allows us for instance to compute the length of a list.
+\begin{align*}
+\mathsf{length} &\triangleq [[  fix ( \len . \l . zerou (\xs . succu (len xs)))  ]]
+\end{align*}
+Here $[[ zerou : natu  ]]$ and $[[ succu : natu -> natu    ]]$
+are the encodings of the constructors for natural numbers $[[ natu
+]]$. In practice,
+for performance reasons, we could extend our
+language with a $\mathbf{letrec}$ construct in a standard way to
+support general recursion, instead of defining a fixpoint combinator.
+
+Observe that the gradual typing of lists still enforces that all elements in the
+list are of the same type. For instance, a heterogeneous list like $[[ consu
+zerou (consu trueu nilu) ]]$, is rejected because $[[ zerou : natu ]]$ and $[[
+trueu : boolu ]]$ have different types.
+
+\paragraph{Heterogeneous Containers.}
+
+Heterogeneous containers are datatypes that can store data of different types,
+which is very useful in various scenarios. One typical application is that an
+XML element is heterogeneously typed. Moreover, the result of a SQL query
+contains heterogeneous rows.
+
+In statically typed languages, there are several ways to obtain heterogeneous
+lists. For example, in Haskell, one option is to use \emph{dynamic types}.
+Haskell's library \textbf{Data.Dynamic} provides the special type
+\textbf{Dynamic} along with its injection \textbf{toDyn} and projection
+\textbf{fromDyn}. The drawback is that the code is littered with \textbf{toDyn}
+and \textbf{fromDyn}, which obscures the program logic. One can also use the
+\textsc{HList} library \citep{kiselyov2004strongly}, which provides strongly
+typed data structures for heterogeneous collections. The library requires
+several Haskell extensions, such as multi-parameter
+classes~\citep{jones1997type} and functional dependencies~\citep{jones2000type}.
+With fake dependent types~\citep{mcbride2002faking}, heterogeneous vectors are
+also possible with type-level constructors.
+
+In our type system, with explicit type annotations that set the element types to
+the unknown type we can disable the homogeneous typing discipline for the
+elements and get gradually typed heterogeneous lists\footnote{This argument is
+  based on the extended type system in \cref{sec:advanced-extension}.}. Such
+gradually typed heterogeneous lists are akin to Haskell's approach with Dynamic
+types, but much more convenient to use since no injections and projections are
+needed, and the $[[unknown]]$ type is built-in and natural to use.
+
+An example of such gradually typed heterogeneous collections is:
+\[
+  l \triangleq [[consu (zerou : unknown) (consu (trueu : unknown) nilu)]]
+\]
+Here we annotate each element with type annotation $\unknown$ and the type
+system is happy to type-check that $[[ l : Listu unknown ]]$.
+Note that we are being meticulous about the syntax, but with proper
+implementation of the source language, we could write more succinct programs
+akin to Haskell's syntax, such as \lstinline{[0, True]}.
 
 %%% Local Variables:
 %%% mode: latex

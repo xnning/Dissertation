@@ -1,9 +1,9 @@
 metavar typvar, a {{ tex a }}, b {{tex b}}, L ::=
 metavar kindvar, Xa {{ tex \widehat{\alpha} }}, Xb {{ tex \widehat{\beta} }} ::=
 
-metavar expvar, x, y, f, g, m, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
+metavar expvar, x, y, f, g, m, nn {{ tex n }}, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
 
-indexvar index, i, j, n ::=
+indexvar index, i, j, n, m ::=
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL TYPE
@@ -58,7 +58,7 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4
   | S ( A )        :: S :: subst2
   | ss -> A        ::   :: sctx_type
   | ( A , B )      ::   :: pair
-  | { l1 : A1 , .. , ln : An  }  ::   :: record
+  | [ l1 : A1 , .. , ln : An  ]  ::   :: record
 
 % Mono Types
 
@@ -467,7 +467,7 @@ A1 -> B ~ C -> D
 
 </ Ai ~ Ai' // i />
 -------------------------------------------------- :: rcd
-{ </ li : Ai // i />  }   ~ { </ li : Ai' // i /> }
+[ </ li : Ai // i />  ]   ~ [ </ li : Ai' // i /> ]
 
 
 defn
@@ -496,7 +496,7 @@ unknown <: unknown
 
 </ Ai <: Ai' // i />
 -------------------------------------------------- :: rcd
-{ </ li : Ai // i />  }   <: { </ li : Ai' // i /> }
+[ </ li : Ai // i />  ]   <: [ </ li : Ai' // i /> ]
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
