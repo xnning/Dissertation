@@ -807,19 +807,19 @@ defn
 dd |-G A <~ B ::  :: dconsub :: cs_ by
 
 
-dd, a |-G A <~ B
+dd, a |-G A1 <~ B
 ----------------- :: forallR
-dd |-G A <~ \/ a. B
+dd |-G A1 <~ \/ a. B
 
 dd |-G t
-dd |-G A [a ~> t] <~ B
+dd |-G A1 [a ~> t] <~ B
 ----------------- :: forallL
-dd |-G \/ a. A <~ B
+dd |-G \/ a. A1 <~ B
 
-dd |-G B1 <~ A1
-dd |-G A2 <~ B2
+dd |-G C <~ A1
+dd |-G B <~ D
 ---------------------------- :: arrow
-dd |-G A1 -> A2 <~ B1 -> B2
+dd |-G A1 -> B <~ C -> D
 
 a in dd
 -------------------- :: tvar
@@ -884,7 +884,7 @@ dd |- \x. e : t -> B ~~> \x:t. pe
 dd |- e1 : A ~~> pe1
 dd |- A |> A1 -> A2
 dd |- e2 : A3 ~~> pe2
-dd |- A3 <~ A1
+dd |-G A3 <~ A1
 ------------------------------- :: app
 dd |- e1 e2 : A2 ~~> (< A `-> A1 -> A2 > pe1) (<A3 `-> A1> pe2)
 
@@ -1240,7 +1240,7 @@ defn
 dd |- A |> B ::  :: dmatching :: m_ by
 
 
-dd |- t
+dd |-G t
 dd |- A [a ~> t] |> A1 -> A2
 -------------------------------- :: forall
 dd |- \/ a . A |> A1 -> A2

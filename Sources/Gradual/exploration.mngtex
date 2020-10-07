@@ -359,7 +359,7 @@ notation\footnote{For readers who are familiar with category theory, this
 
 \begin{definition}[Consistent Subtyping]
   \label{def:decl-conssub}
-  $[[dd |-G A1 <~ B]] $ if and only if  $ [[dd |-G A1 <: A']]$, $[[  A' ~ A''  ]]$ and $[[ dd |-G B' <: B ]]$ for some $[[A']]$ and $[[A'']]$.
+  $[[dd |-G A1 <~ B]] $ if and only if  $ [[dd |-G A1 <: A']]$, $[[  A' ~ A''  ]]$ and $[[ dd |-G A'' <: B ]]$ for some $[[A']]$ and $[[A'']]$.
 \end{definition}
 \noindent With \Cref{def:decl-conssub}, \Cref{fig:example:c:fix}
 illustrates the correct relation chain for the broken example shown in
@@ -425,6 +425,224 @@ system of \citet{siek2007gradual}. However, more generally,
     So $[[A1 <~ B]]$ by $[[A1 ~ C]]$ and $[[C <: B]]$.
   \end{itemize}
 \end{proposition}
+
+\subsection{Abstracting Gradual Typing}
+\label{sec:gradual:agt}
+
+\citet{garcia:abstracting} presented a new foundation for gradual typing that
+they call the \emph{Abstracting Gradual Typing} (AGT) approach. In the AGT
+approach, gradual types are interpreted as sets of static types, where static
+types refer to types containing no unknown types. In this interpretation,
+predicates and functions on static types can then be lifted to apply to gradual
+types. Central to their approach is the so-called \emph{concretization}
+function. For simple types, a concretization $\gamma$ from gradual types to a
+set of static types is defined as follows:
+
+\begin{definition}[Concretization]
+  \label{def:concret}
+  \begin{mathpar}
+    \gamma([[int]]) = \{[[int]]\} \\
+    \gamma([[A1 -> B]]) = \{[[A1' -> B']] \mid [[A1']] \in \gamma([[A1]]), [[B']] \in \gamma([[B]])\} \\
+    \gamma([[unknown]]) = \{\text{All static types}\}
+  \end{mathpar}
+\end{definition}
+
+Based on the concretization function, subtyping between static types can be
+lifted to gradual types, resulting in the consistent subtyping relation:
+\begin{definition}[Consistent Subtyping in AGT]
+  \label{def:agt-conssub}
+  $[[A1]] \agtconssub [[B]]$ if and only if $[[A1' <: B']]$ for some \emph{static types} $[[A1']]$ and $[[B']]$ such that
+  $[[A1']] \in \gamma([[A1]])$ and $[[B']] \in \gamma([[B]])$.
+\end{definition}
+
+Later they proved that this definition of consistent subtyping coincides with
+that of \cref{def:old-decl-conssub}. By \cref{prop:subsumes}, we can directly
+conclude that our definition coincides with AGT:
+
+\begin{corollary}[Equivalence to AGT on Simple Types]
+  \label{lemma:coincide-agt}
+  $[[A1 <~ B]]$ if and only if $[[A1]] \agtconssub [[B]]$.
+\end{corollary}
+
+However, AGT does not show how to deal with polymorphism (e.g. the
+interpretation of type variables) yet. Still, as noted by
+\citet{garcia:abstracting}, it is a promising line of future work for AGT, and
+the question remains whether our definition would coincide with it.
+
+Another note related to AGT is that the definition is later adopted by
+\citet{castagna2017gradual} in a gradual type system with union and intersection
+types, where the static types $[[A1']], [[B']]$ in Definition~\ref{def:agt-conssub} can
+be algorithmically computed by also accounting for top and bottom types.
+
+\subsection{Directed Consistency}
+
+\emph{Directed consistency}~\citep{Jafery:2017:SUR:3093333.3009865} is defined
+in terms of precision and subtyping:
+
+\[
+  \inferrule{
+    [[A1']] \lessp [[A1]]
+    \\ [[A1 <: B]]
+    \\ [[B']] \lessp [[B]]
+  }{
+    [[A1' <~ B']]
+  }
+\]
+
+The judgment $[[A1]] \lessp [[B]]$ is read ``$[[A1]]$ is less precise than
+$[[B]]$''.\footnote{\citeauthor{Jafery:2017:SUR:3093333.3009865} actually read
+  $[[A1]] \lessp [[B]]$ as ``$[[A1]]$ is \emph{more precise} than $[[B]]$''. We,
+  however, use the ``less precise'' notation (which is also adopted by
+  \citet{cimini2016gradualizer} ) throughout the paper. The full rules can be
+  found in \Cref{fig:gradual:lessp}.} In their setting, precision is first
+defined for type constructors and then lifted to gradual types, and subtyping is
+defined for gradual types. If we interpret this definition from the AGT point of
+view, finding a more precise static type has the same effect as concretization.
+Namely, $[[A1']] \lessp [[A1]]$ implies $[[A1]] \in \gamma([[A1']])$ and $[[B']]
+\lessp [[B]]$ implies $[[B]] \in \gamma([[B']])$ if $[[A1]]$ and $[[B]]$ are
+static types. Therefore we consider this definition as AGT-style. From this
+perspective, this definition naturally coincides with \cref{def:agt-conssub},
+and by \cref{lemma:coincide-agt}, it coincides with \cref{def:decl-conssub}.
+
+The value of their definition is that consistent subtyping is derived
+compositionally from \emph{gradual subtyping} and \emph{precision}.
+Arguably, gradual types play a role in both definitions, which is different from
+\cref{def:decl-conssub} where subtyping is neutral to unknown types. Still, the
+definition is interesting as it takes precision into consideration, rather than
+consistency. Then a question arises as to \emph{how are consistency and
+  precision related}.
+
+
+\paragraph{Consistency and Precision.}
+
+Precision is a partial order (anti-symmetric and transitive), while consistency
+is symmetric but not transitive. Recall that consistency is in fact an
+equivalence relation lifted from static types to gradual
+types~\citep{garcia:abstracting}, which embodies the key role of gradual types
+in typing. Therefore defining consistency independently is straightforward, and
+it is theoretically viable to validate the definition of consistency directly.
+On the other hand, precision is usually connected with the gradual criteria
+\citep{siek:criteria}, and finding a correct partial order that adheres to the
+criteria is not always an easy task. For example, \citet{yuu2017poly} argued
+that term precision for gradual System F is actually nontrivial, leaving the
+gradual guarantee of the semantics as a conjecture. Thus precision can be
+difficult to extend to more sophisticated type systems, e.g. dependent types.
+
+Nonetheless, in our system, precision and consistency can be related by the
+following lemma:
+
+\begin{lemma}[Consistency and Precision]\leavevmode
+  \label{lemma:consistency-precision}
+  \begin{itemize}
+  \item If $[[A1 ~ B]]$,
+    then there exists (static) $[[C]]$,
+    such that $[[A1]] \lessp [[C]]$,
+    and $[[B]] \lessp [[C]]$.
+  \item If for some (static) $[[C]]$,
+    we have $[[A1]] \lessp [[C]]$,
+    and $[[B]] \lessp [[C]]$,
+    then we have $[[A1]] ~ [[B]]$.
+  \end{itemize}
+\end{lemma}
+
+
+\subsection{Consistent Subtyping Without Existentials}
+\label{sec:gradual:conssub-wo-exist}
+
+\Cref{def:decl-conssub} serves as a fine specification of how consistent
+subtyping should behave in general. But it is inherently non-deterministic
+because of the two intermediate types $[[A']]$ and $[[A'']]$. As
+\cref{def:algo-old-decl-conssub}, we need a combined relation to directly
+compare two types. A natural attempt is to try to extend the restriction
+operator for polymorphic types. Unfortunately, as we show below, this does not
+work. However it is possible to devise an equivalent inductive definition
+instead.
+
+
+\paragraph{Attempt to Extend the Restriction Operator.}
+
+Suppose that we try to extend \cref{def:algo-old-decl-conssub} to account for polymorphic
+types. The original restriction operator is structural, meaning that it works
+for types of similar structures. But for polymorphic types, two input types
+could have different structures due to universal quantifiers, e.g, $[[ \/a. a -> int  ]]$
+and $[[ (int -> unknown) -> int ]]$. If we try to mask the first type
+using the second, it seems hard to maintain the information that $a$ should be
+instantiated to a function while ensuring that the return type is masked. There
+seems to be no satisfactory way to extend the restriction operator in order to
+support this kind of non-structural masking.
+
+
+\paragraph{Interpretation of the Restriction Operator and Consistent Subtyping.}
+If the restriction operator cannot be extended naturally, it is useful to
+take a step back and revisit what the restriction operator actually does. For
+consistent subtyping, two input types could have unknown types in different
+positions, but we only care about the known parts. What the restriction
+operator does is (1) erase the type information in one type if the corresponding
+position in the other type is the unknown type; and (2) compare the resulting types
+using the normal subtyping relation. The example below shows the
+masking-off procedure for the types $[[ int -> unknown -> bool  ]]$ and $[[int -> int -> unknown]]$.
+Since the known parts have the relation that $[[ int -> unknown -> unknown <: int -> unknown -> unknown ]]$, we conclude that
+$[[ int -> unknown -> bool <~ int -> int -> unknown  ]]$.
+%
+\begin{center}
+  \begin{tikzpicture}
+    \tikzstyle{column 5}=[anchor=base west, nodes={font=\tiny}]
+    \matrix (m) [matrix of math nodes,row sep=0.5em,column sep=0em,minimum width=2em]
+    {
+      \nat \to & \unknown & \to & \bool & \mid \nat \to \nat \to \unknown &
+      = \nat \to \unknown \to \unknown
+      \\
+      \nat \to & \nat & \to & \unknown & \mid \nat \to \unknown \to \bool &
+      = \nat \to \unknown \to \unknown \\};
+
+    \path[-stealth, ->, out=0, in=0]
+    (m-1-6) edge node [right] {$\tsub$} (m-2-6);
+
+    \draw
+    (m-1-2.north west) rectangle (m-2-2.south east)
+    (m-1-4.north west) rectangle (m-2-4.south east);
+  \end{tikzpicture}
+\end{center}
+%
+Here differences of the types in boxes are erased because of the restriction
+operator. Now if we compare the types in boxes directly instead of through the
+lens of the restriction operator, we can observe that the \emph{consistent
+  subtyping relation always holds between the unknown type and an arbitrary
+  type.} We can interpret this observation directly from
+\Cref{def:decl-conssub}: the unknown type is neutral to subtyping ($[[ unknown
+<: unknown ]]$), the unknown type is consistent with any type ($[[unknown ~
+A]]$), and subtyping is reflexive ($[[A <: A]]$). Therefore, \emph{the unknown
+  type is a consistent subtype of any type ($[[ unknown <~ A ]]$), and vice
+  versa ($[[ A <~ unknown ]]$).} Note that this interpretation provides a
+general recipe for lifting a (static) subtyping relation to a (gradual)
+consistent subtyping relation, as discussed below.
+
+\paragraph{Defining Consistent Subtyping Directly.}
+
+From the above discussion, we can define the consistent subtyping relation
+directly, \emph{without} resorting to subtyping or consistency at all. The key
+idea is that we replace $[[<:]]$ with $[[<~]]$ in
+\Cref{fig:decl:subtyping}, get rid of \rref{s-unknown} and add two
+extra rules concerning $[[unknown]]$, resulting in the rules of consistent
+subtyping in \Cref{fig:decl:conssub}. Of particular interest are the rules
+\rref*{cs-unknownL} and \rref*{cs-unknownR}, both of which correspond to what we
+just said: the unknown type is a consistent subtype of any type, and vice versa.
+
+\begin{figure}
+  \begin{small}
+    \drules[cs]{$ [[dd |-G A1 <~ B ]] $}{Consistent Subtyping}{tvar, int, arrow, forallR, forallL, unknownL, unknownR}
+  \end{small}
+  \caption{Consistent Subtyping for implicit polymorphism.}
+  \label{fig:decl:conssub}
+\end{figure}
+
+From now on, we use the symbol $[[<~]]$ to refer to the consistent subtyping
+relation in \Cref{fig:decl:conssub}. What is more, we can prove that the two definitions
+are equivalent.
+
+\begin{theorem}   \label{lemma:properties-conssub}
+  $[[dd |-G A1 <~ B]]  \Leftrightarrow [[ dd |-G A1 <: A'  ]]$, $[[ A' ~ A'' ]]$, $[[ dd |-G A'' <: B   ]]$ for some $A', A''$.
+\end{theorem}
 
 %%% Local Variables:
 %%% mode: latex
