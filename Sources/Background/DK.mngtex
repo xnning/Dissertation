@@ -186,12 +186,10 @@ Essentially, they both make sure that the expression being applied has an arrow
 type $[[A1 -> A2]]$, and then check the argument against $[[A1]]$.
 
 We prefer the presentation of \rref{dk-inf-app} with matching, as matching is a
-simple and standalone process whose purpose is clear. In contrast, it is
+simple and independent process whose purpose is clear. In contrast, it is
 relatively less comprehensible with \rref{dk-inf-app2} and the application
 judgment, where all three forms of the judgment (inference, checking,
 application) are mutually dependent.
-% Variants of matching are also used in future systems (\Cref{part:gradual} and
-% \Cref{part:dependentTypes}).
 
 \paragraph{Subtyping.} DK shares the same subtyping relation as of OL. We thus
 omit the definition and use $[[dd |-DK A1 <: A2]]$ to denote the subtyping

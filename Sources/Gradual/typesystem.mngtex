@@ -1,0 +1,73 @@
+\section{Gradually Typed Implicit Polymorphism}
+\label{sec:gradual:type-system}
+
+In \Cref{sec:gradual:exploration} we introduced our consistent subtyping
+relation that accommodates polymorphic types. In this section we continue with
+the development by giving a declarative type system for predicative implicit
+polymorphism, \gpc, that employs the consistent subtyping relation. The
+declarative system itself is already quite interesting as it is equipped with
+both higher-rank polymorphism and the unknown type.
+
+The syntax of expressions in the declarative system is given at the top of
+\Cref{fig:gradual:decl-typing}. The definition of expressions are the same as of
+OL in \Cref{fig:OL}. Meta-variable $[[e]]$ ranges over expressions. Expressions
+include variables $[[x]]$, integers $[[n]]$, annotated lambda abstractions $[[\x
+: A . e]]$, un-annotated lambda abstractions $[[\x . e]]$, applications $[[e1
+e2]]$, and let expressions $[[let x = e1 in e2]]$.
+
+\subsection{Typing in Detail}
+
+\Cref{fig:gradual:decl-typing} gives the typing rules for our declarative system
+(the reader is advised to ignore the gray-shaded parts for now). \Rref{gpc-var}
+extracts the type of the variable from the typing context. \Rref{gpc-int} always
+infers integer types. \Rref{gpc-lamann} puts $[[x]]$ with type annotation
+$[[A]]$ into the context, and continues type checking the body $[[e]]$.
+\Rref{gpc-lam} assigns a monotype $[[t]]$ to $[[x]]$, and continues type
+checking the body $[[e]]$. Gradual types and polymorphic types are introduced
+via explicit annotations. \Rref{gpc-gen} puts a fresh type variable $[[a]]$ into
+the type context and generalizes the typing result $[[A]]$ to $[[ \/a. A ]]$.
+\Rref{gpc-let} infers the type $[[A]]$ of $[[e1]]$, then puts $[[x]] : [[A]]$ in the
+context to infer the type of $[[e2]]$. \Rref{gpc-app} first infers the type of
+$e_1$, then the matching judgment $[[ dd |-G A |> A1 -> A2 ]]$ extracts the
+domain type $[[A1]]$ and the codomain type $[[A2]]$ from type $[[A]]$. The type
+$[[A3]]$ of the argument $[[e2]]$ is then compared with $[[A1]]$ using the
+consistent subtyping judgment.
+
+\begin{figure}
+    \begin{center}
+    \begin{tabular}{lrcl} \toprule
+        Expressions &  $[[e]]$   & $\Coloneqq$ & $[[x]]  \mid [[n]]  \mid [[\x : A . e]] \mid [[ \x . e ]] \mid [[e1 e2]] \mid [[ let x = e1 in e2  ]]$ \\ \bottomrule
+      \end{tabular}
+    \end{center}
+
+    \drules[gpc]{$ [[dd |-G e : A ~~> pe]] $}{Typing}{var, int, gen, lamann, lam, let, app}
+
+    \drules[gpc-m]{$ [[dd |-G A |> A1 -> A2]] $}{Matching}{forall, arr, unknown}
+  \caption{Declarative typing of \gpc}
+  \label{fig:gradual:decl-typing}
+\end{figure}
+
+\paragraph{Matching.}
+
+The matching judgment of \citet{siek:criteria} is extended to polymorphic types
+naturally, resulting in $[[ dd|-G A |> A1 -> A2 ]]$. Note that the matching
+rules generalize that of DK in \Cref{fig:DK:static} with the unknown type. In
+\rref{gpc-m-forall}, a monotype $[[t]]$ is guessed to instantiate the universal
+quantifier $[[a]]$. If $[[A]]$ is a polymorphic type, the judgment works by
+guessing instantiations until it reaches an arrow type. \Rref{gpc-m-arr} returns
+the domain type $[[A1]]$ and range type $[[A2]]$ as expected. If the input is
+$[[unknown]]$, then \rref{gpc-m-unknown} returns $[[unknown]]$ as both the type
+for the domain and the range.
+
+Note that in GPC, matching saves us from having a subsumption rule
+(\rref{ol-sub} in \cref{fig:OL:static}). The subsumption rule is incompatible
+with consistent subtyping, since the latter is not transitive. A discussion of a
+subsumption rule based on normal subtyping can be found in
+\Cref{sub:gradual:variant}.
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

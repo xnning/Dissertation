@@ -858,41 +858,41 @@ DTyping :: '' ::=
 
 defn
 
-dd |- e : A ~~> pe ::  :: dtyping :: '' {{ tex [[dd]] [[|-]] [[e]] : [[A]] \transto{[[~~>]] [[pe]]} }}
+dd |-G e : A ~~> pe ::  :: dtyping :: 'gpc_' {{ tex [[dd]] [[|-G]] [[e]] : [[A]] \transto{[[~~>]] [[pe]]} }}
 by
 
 
 (x : A) in dd
 --------------------------- :: var
-dd |- x : A ~~> x
+dd |-G x : A ~~> x
 
 --------------------------- :: int
-dd |- n : int ~~> n
+dd |-G n : int ~~> n
 
-dd, a |- e : A ~~> pe
+dd, a |-G e : A ~~> pe
 --------------------------- :: gen
-dd |- e : \/ a. A ~~> /\a. pe
+dd |-G e : \/ a. A ~~> /\a. pe
 
-dd, x: A |- e : B ~~> pe
+dd, x: A |-G e : B ~~> pe
 --------------------------- :: lamann
-dd |- \x: A. e : A -> B ~~> \x:A. pe
+dd |-G \x: A. e : A -> B ~~> \x:A. pe
 
-dd, x: t |- e : B ~~> pe
+dd, x: t |-G e : B ~~> pe
 --------------------------- :: lam
-dd |- \x. e : t -> B ~~> \x:t. pe
+dd |-G \x. e : t -> B ~~> \x:t. pe
 
-dd |- e1 : A ~~> pe1
-dd |- A |> A1 -> A2
-dd |- e2 : A3 ~~> pe2
+dd |-G e1 : A ~~> pe1
+dd |-G A |> A1 -> A2
+dd |-G e2 : A3 ~~> pe2
 dd |-G A3 <~ A1
 ------------------------------- :: app
-dd |- e1 e2 : A2 ~~> (< A `-> A1 -> A2 > pe1) (<A3 `-> A1> pe2)
+dd |-G e1 e2 : A2 ~~> (< A `-> A1 -> A2 > pe1) (<A3 `-> A1> pe2)
 
 
-dd |- e1 : A ~~> pe1
-dd, x : A |- e2 : B ~~> pe2
+dd |-G e1 : A ~~> pe1
+dd, x : A |-G e2 : B ~~> pe2
 --------------------------------------------------- :: let
-dd |- let x = e1 in e2 : B ~~>  (\x : A . pe2) pe1
+dd |-G let x = e1 in e2 : B ~~>  (\x : A . pe2) pe1
 
 defn
 
@@ -1237,21 +1237,21 @@ dd |-DK A1 -> A2 |> A1 -> A2
 
 defn
 
-dd |- A |> B ::  :: dmatching :: m_ by
+dd |-G A |> B ::  :: dmatching :: gpc_m_ by
 
 
 dd |-G t
-dd |- A [a ~> t] |> A1 -> A2
+dd |-G A [a ~> t] |> A1 -> A2
 -------------------------------- :: forall
-dd |- \/ a . A |> A1 -> A2
+dd |-G \/ a . A |> A1 -> A2
 
 
 -------------------------- :: arr
-dd |- A1 -> A2 |> A1 -> A2
+dd |-G A1 -> A2 |> A1 -> A2
 
 
 -------------------------------------- :: unknown
-dd |- unknown |> unknown -> unknown
+dd |-G unknown |> unknown -> unknown
 
 
 
