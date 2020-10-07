@@ -641,7 +641,7 @@ relation in \Cref{fig:decl:conssub}. What is more, we can prove that the two def
 are equivalent.
 
 \begin{theorem}   \label{lemma:properties-conssub}
-  $[[dd |-G A1 <~ B]]  \Leftrightarrow [[ dd |-G A1 <: A'  ]]$, $[[ A' ~ A'' ]]$, $[[ dd |-G A'' <: B   ]]$ for some $A', A''$.
+  $[[dd |-G A1 <~ B]]  \Leftrightarrow [[ dd |-G A1 <: A'  ]]$, $[[ A' ~ A'' ]]$, $[[ dd |-G A'' <: B   ]]$ for some $[[A']], [[A'']]$.
 \end{theorem}
 
 %%% Local Variables:
