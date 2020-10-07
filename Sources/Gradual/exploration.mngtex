@@ -622,22 +622,22 @@ consistent subtyping relation, as discussed below.
 From the above discussion, we can define the consistent subtyping relation
 directly, \emph{without} resorting to subtyping or consistency at all. The key
 idea is that we replace $[[<:]]$ with $[[<~]]$ in
-\Cref{fig:decl:subtyping}, get rid of \rref{s-unknown} and add two
+\Cref{fig:gradual:decl:subtyping}, get rid of \rref{gpc-s-unknown} and add two
 extra rules concerning $[[unknown]]$, resulting in the rules of consistent
-subtyping in \Cref{fig:decl:conssub}. Of particular interest are the rules
-\rref*{cs-unknownL} and \rref*{cs-unknownR}, both of which correspond to what we
+subtyping in \Cref{fig:gradual:decl:conssub}. Of particular interest are the rules
+\rref*{gpc-cs-unknownL} and \rref*{gpc-cs-unknownR}, both of which correspond to what we
 just said: the unknown type is a consistent subtype of any type, and vice versa.
 
 \begin{figure}
   \begin{small}
-    \drules[cs]{$ [[dd |-G A1 <~ B ]] $}{Consistent Subtyping}{tvar, int, arrow, forallR, forallL, unknownL, unknownR}
+    \drules[gpc-cs]{$ [[dd |-G A1 <~ B ]] $}{Consistent Subtyping}{tvar, int, arrow, forallR, forallL, unknownL, unknownR}
   \end{small}
   \caption{Consistent Subtyping for implicit polymorphism.}
-  \label{fig:decl:conssub}
+  \label{fig:gradual:decl:conssub}
 \end{figure}
 
 From now on, we use the symbol $[[<~]]$ to refer to the consistent subtyping
-relation in \Cref{fig:decl:conssub}. What is more, we can prove that the two definitions
+relation in \Cref{fig:gradual:decl:conssub}. What is more, we can prove that the two definitions
 are equivalent.
 
 \begin{theorem}   \label{lemma:properties-conssub}

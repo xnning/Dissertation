@@ -804,7 +804,7 @@ DConSub :: '' ::=
 
 defn
 
-dd |-G A <~ B ::  :: dconsub :: cs_ by
+dd |-G A <~ B ::  :: dconsub :: gpc_cs_ by
 
 
 dd, a |-G A1 <~ B
