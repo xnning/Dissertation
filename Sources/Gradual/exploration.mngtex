@@ -43,7 +43,7 @@ types, and comparing our definitions with the compatibility relation by
     \drules[gpc-d]{$[[ dd |-G A ]]$}{Well-formedness of types}{int, unknown,
       tvar, arrow, forall}
 
-  \caption{Syntax of types, consistency, subtyping, well-formedness of types in the declarative GPC.}
+  \caption{Syntax of types, consistency, subtyping and well-formedness of types in declarative GPC.}
   \label{fig:gradual:decl:subtyping}
 \end{figure}
 

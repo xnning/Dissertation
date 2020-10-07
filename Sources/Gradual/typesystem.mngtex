@@ -43,7 +43,7 @@ consistent subtyping judgment.
     \drules[gpc]{$ [[dd |-G e : A ~~> pe]] $}{Typing}{var, int, gen, lamann, lam, let, app}
 
     \drules[gpc-m]{$ [[dd |-G A |> A1 -> A2]] $}{Matching}{forall, arr, unknown}
-  \caption{Declarative typing of \gpc}
+  \caption{Syntax of expressions and declarative typing of declarative \gpc}
   \label{fig:gradual:decl-typing}
 \end{figure}
 
