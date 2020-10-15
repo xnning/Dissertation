@@ -33,6 +33,7 @@ domain type $[[A1]]$ and the codomain type $[[A2]]$ from type $[[A]]$. The type
 $[[A3]]$ of the argument $[[e2]]$ is then compared with $[[A1]]$ using the
 consistent subtyping judgment.
 
+\renewcommand{\transto}[2][gray!40]{\colorbox{#1}{$\displaystyle#2$}}
 \begin{figure}
     \begin{center}
     \begin{tabular}{lrcl} \toprule
@@ -65,6 +66,188 @@ with consistent subtyping, since the latter is not transitive. A discussion of a
 subsumption rule based on normal subtyping can be found in
 \Cref{sub:gradual:variant}.
 
+\subsection{Type-directed Translation}
+\label{sec:type:trans}
+
+We give the dynamic semantics of our language by translating it to \pbc\citep{amal:blame}. Below
+we show a subset of the terms in \pbc that are used in the translation:
+\begin{center}
+  \begin{tabular}{lrcl} \toprule
+    \pbc Terms &  $[[pe]]$   & $\Coloneqq$ & $[[x]] \mid [[n]] \mid [[\x : A . pe]] \mid [[/\a . pe]] \mid [[pe1 pe2]] \mid [[ < A `-> B > pe  ]] $ \\ \bottomrule
+  \end{tabular}
+\end{center}
+A cast $[[ < A1 `-> B > pe  ]]$ converts the value of term $[[pe]]$ from type $[[A1]]$ to type $[[B]]$.
+A cast from $[[A1]]$ to $[[B]]$ is permitted only if the types are \emph{compatible},
+written $[[A1 `-> B]]$, as briefly mentioned in
+\Cref{bsec:gradual:consistency-subtyping}. The syntax of types in \pbc is the
+same as ours.
+
+The translation is given in the gray-shaded parts in
+\Cref{fig:gradual:decl-typing}. The only interesting case here is to insert
+explicit casts in the application rule. Note that there is no need to translate
+matching or consistent subtyping. Instead we insert the source and target types
+of a cast directly in the translated expressions, thanks to the following two
+lemmas:
+
+\begin{lemma}[$[[|>]]$ to $[[`->]]$]
+  \label{lemma:comp-match}
+  If $[[ dd |-G A |> A1 -> A2  ]]$, then $[[A `-> A1 -> A2]]$.
+\end{lemma}
+
+\begin{lemma}[$[[<~]]$ to $[[`->]]$]
+  \label{lemma:comp-conssub}
+  If $[[  dd |-G A <~ B ]]$, then $[[A `-> B]]$.
+\end{lemma}
+
+In order to show the correctness of the translation, we prove that our
+translation always produces well-typed expressions in \pbc. By
+\cref{lemma:comp-match,lemma:comp-conssub}, we have the following theorem:
+
+\begin{theorem}[Type Safety]
+  \label{lemma:type-safety}
+  If $[[ dd |-G e : A ~~> pe   ]]$, then $[[ dd |- pe : A ]]$.
+\end{theorem}
+
+\paragraph{Parametricity.}
+
+An important semantic property of polymorphic types is \emph{relational
+  parametricity}~\citep{reynolds1983types}. The parametricity property says that
+all instances of a polymorphic function should behave \emph{uniformly}. A
+classic example is a function with the type $[[ \/a . a -> a ]]$. The
+parametricity property guarantees that a value of this type must be either the
+identity function (i.e., $[[ \x. x ]]$) or the undefined function (one which
+never returns a value). However, with the addition of the unknown type
+$[[unknown]]$, careful measures are to be taken to ensure parametricity. Our
+translation target \pbc is taken from \citet{amal:blame}, where relational
+parametricity is enforced by dynamic sealing~\citep{matthews2008parametric,
+  Neis:2009:NP:1596550.1596572}, but there is no rigorous proof. Later,
+\citet{amal:blame} imposed a syntactic restriction on terms of \pbc, where
+all type abstractions must have \emph{values} as their body. With this
+invariant, they proved that the restricted \pbc satisfies relational
+parametricity. It remains to see if our translation process can be adjusted to
+target restricted \pbc. One possibility is to impose similar restriction to the
+\rref{gpc-gen}:
+%
+\[
+  \inferrule*[right={gpc-gen2}]{
+    [[dd, a |-G e : A ~~> pv]]
+  }{
+    [[dd |-G e : \/ a. A ~~> /\a. pv]]
+  }
+\]
+%
+where we only generate type abstractions if the inner body is a value. However,
+the type system with this rule is a weaker calculus, which is not a conservative
+extension of the OL type system.
+
+\paragraph{Ambiguity from Casts.}
+
+The translation does not always produce a unique target expression. This is
+because when guessing some monotype $[[t]]$ in \rref{gpc-m-forall} and \rref{gpc-cs-forallL}, we
+could have many choices, which inevitably leads to different types. This is
+usually not a problem for (non-gradual) System F-like
+systems~\citep{practical:inference,DK}
+because they adopt a type-erasure semantics~\citep{pierce2002types}. However, in our case, the choice of monotypes may
+affect the runtime behaviour of translated programs, since they could appear
+inside the explicit casts. For instance, the following example shows two possible
+translations for the same source expression $[[ (\x : unknown . f x) ]] : [[unknown -> int]]$,
+where the type of $f$ is instantiated to $[[ int -> int ]]$ and $[[ bool -> int ]]$, respectively:
+%
+\begin{align*}
+  f: [[\/a.a -> int]] &[[|-G]] [[(\x:unknown. f x): unknown -> int]] \\
+                      &[[~~>]] ([[\x:unknown. (<\/a.a -> int `-> int -> int> f)]] ~
+                               (\hlmath{[[<unknown `-> int>]]}~[[x]]))
+  \\
+  f: [[\/a.a -> int]] &[[|-G]] [[(\x:unknown. f x) : unknown -> int]] \\
+                      &[[~~>]] ([[\x:unknown. (<\/a.a -> int `-> bool -> int> f)]]) ~
+                               (\hlmath{[[<unknown `-> bool>]]}~[[x]]))
+\end{align*}
+%
+If we apply $[[ \x : unknown . f x ]]$ to $3$, which is fine since the function
+can take any input, the first translation runs smoothly in \pbc, while the
+second one will raise a cast error ($[[int]]$ cannot be cast to $[[bool]]$).
+Similarly, if we apply it to $[[true]]$, then the second succeeds while the
+first fails. The culprit lies in the highlighted parts where the instantiation
+of $[[a]]$ appears in the explicit cast. More generally, any choice introduces
+an explicit cast to that type in the translation, which causes a runtime cast
+error if the function is applied to a value whose type does not match the
+guessed type. Note that this does not compromise the type safety of the
+translated expressions, since cast errors are part of the type safety
+guarantees.
+
+The semantic discrepancy is due to the guessing nature of the \emph{declarative}
+system. As far as the static semantics is concerned, both $[[ int -> int  ]]$ and
+$[[ bool -> int ]]$ are equally acceptable. But this is not the case at runtime.
+The astute reader may have found that the \emph{only} appropriate choice is to
+instantiate the type of $[[f]]$ to $[[ unknown -> int ]]$ in the matching judgment. However, as specified by
+\rref{gpc-m-forall} in \Cref{fig:gradual:decl-typing}, we can only instantiate type variables
+to monotypes, but $[[unknown]]$ is \emph{not} a monotype! We will get back to
+this issue in \Cref{sec:gradual:advanced-extension}.
+
+
+\paragraph{Coherence.}
+
+The ambiguity of translation seems to imply that the declarative system is
+\emph{incoherent}. A semantics is coherent if distinct typing derivations of
+the same typing judgment possess the same meaning~\citep{Reynolds_coherence}. We
+argue that the declarative system is \emph{coherent up to cast errors} in the
+sense that a well-typed program produces a unique value, or results in a cast
+error. In the above example, suppose $f$ is defined as $[[(\x .1)]]$, then
+whatever the translation might be, applying $([[ \x : unknown . f x ]])$ to $3$
+either results in a cast error, or produces $1$, nothing else.
+
+
+We defined contextual equivalence \citep{morris1969lambda} to formally
+characterize that two open expressions have the same behavior. The definition of
+contextual equivalence requires a notion of well-typed expression contexts
+$[[C]]$, written $ [[ CC : (dd |- A) ~~> (dd' |- A') ]] $. The definitions of
+contexts and context typing are standard and thus omitted. As is common, we
+first define contextual approximation. In our setting, we need to
+relax the notion of
+contextual approximation of \pbc~\citep{amal:blame} to also take into
+consideration of cast errors. We write $[[dd]] \vdash
+\ctxappro{[[pe1]]}{[[pe2]]}{[[A]]}$ to say that $[[pe2]]$ mimics the behaviour
+of $[[pe1]]$ at type $[[A]]$ in the sense that whenever a program containing
+$[[pe1]]$ reduces to an integer, replacing it with $[[pe2]]$ either reduces to
+the same integer, or emits a cast error.
+% or if it diverges, replacing it with $[[pe2]]$ either diverges or emits a cast error.
+We restrict the program results
+to integers to eliminate the role of types in values. If it is not an integer,
+it is always possible to embed it into another context that reduces to an
+integer. Then we write $[[dd]] \vdash \ctxeq{[[pe1]]}{[[pe2]]}{[[A]]}$ to say
+$[[pe1]]$ and $[[pe2]]$ are contextually equivalent, that is, they approximate
+each other.
+
+\begin{definition}[Contextual Approximation and Equivalence up to Cast Errors] \leavevmode
+  \label{conj:coher}
+  \begin{center}
+    \begin{tabular}{lll}
+      $[[dd]] \vdash \ctxappro{[[pe1]]}{[[pe2]]}{[[A]]}$ & $\defeq$ & $[[ dd |- pe1 : A  ]] \land [[dd |- pe2 : A ]] \ \land $ \\
+                                                         & & for all $\mathcal{C}.\, [[ CC : (dd |- A) ~~> (empty |- int) ]] \Longrightarrow$ \\
+                                                         & &  $\quad \mathcal{C}\{ [[pe1]] \}   \Downarrow [[n]] \Longrightarrow (\mathcal{C} \{ [[ pe2 ]]  \}  \reduce [[n]] \lor \mathcal{C} \{ [[ pe2 ]]  \}  \reduce \blamev) $ \\
+      $[[dd]] \vdash \ctxeq{[[pe1]]}{[[pe2]]}{[[A]]}$ & $\defeq$ & $ [[dd]] \vdash \ctxappro{[[pe1]]}{[[pe2]]}{[[A]]} \land [[dd]] \vdash \ctxappro{[[pe2]]}{[[pe1]]}{[[A]]}$
+    \end{tabular}
+  \end{center}
+\end{definition}
+
+Before presenting the formal definition of coherence, first we observe that after erasing types
+and casts, all translations of the same expression are exactly the same. This is easy to see by
+examining each elaboration rule. We use $[[ \ pe \]]$ to denote an expression in \pbc after erasure.
+
+\begin{restatable}[]{lemma}{lemmaerase} \label{lemma:erase}
+  If $[[ dd |-G e : A ~~> pe1 ]]$, and $[[ dd |-G e : A ~~> pe2 ]]$,
+  then $[[ \ pe1 \ ]] \aeq [[ \ pe2 \ ]]$.
+\end{restatable}
+
+Second, at runtime, the only role of types and casts is to emit cast errors caused
+
+by type mismatch. Therefore, By \cref{lemma:erase} coherence follows as a corollary:
+\begin{restatable}[Coherence up to cast errors]{lemma}{lemmacoherence}
+  \label{lemma:coherence:up}
+  For any expression $[[e]]$
+  such that $[[ dd |-G e : A ~~> pe1    ]]$ and $[[ dd |-G e : A ~~> pe2    ]]$, we have
+  $[[ dd ]] \vdash \ctxeq{[[pe1]]}{[[pe2]]}{[[A]]} $.
+\end{restatable}
 
 %%% Local Variables:
 %%% mode: latex

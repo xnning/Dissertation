@@ -199,6 +199,7 @@ dexp, e :: 'dtrm_' ::=
   | zerou            :: :: zero {{ tex \mathsf{zero}_\unknown }}
   | succu            :: :: succu {{ tex \mathsf{succ}_\unknown }}
   | trueu            :: :: trueu {{ tex \mathsf{true}_\unknown }}
+  | true             :: :: true  {{ tex \mathsf{true} }}
   | fold [ A ]       ::   :: fold  {{ tex [[fold]]_{[[A]]} }}
   | unfold [ A ]       ::   :: unfold  {{ tex [[unfold]]_{[[A]]} }}
   | \ x . e          ::   :: abs
@@ -301,6 +302,7 @@ fexp, es {{tex s}}, ef {{tex f}} :: 'ftrm_' ::=
 pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }} :: 'ptrm_' ::=
   | 1              ::   :: one
   | x              ::   :: var
+  | f              ::   :: f
   | n              ::   :: lit
   | \ x : A . pe   ::   :: absann
   | pe1 pe2        ::   :: app
@@ -424,6 +426,8 @@ formula :: formula_ ::=
   | aA1 <~ aA2 :: :: algo
   | A1 = A2    ::  :: typ_eq
   | avs1 = avs2 ::  :: avs_eq
+  | A `-> B   :: :: cast
+  | < A `-> B >   :: :: cast2
 
 
 subrules
