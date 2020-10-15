@@ -155,7 +155,7 @@ return type $[[A]]$ is then generalized over $[[a]]$, returning $[[\/a. A]]$.
 
 The subsumption \rref{ol-sub} is crucial for OL, which allows an expression of
 type $[[A1]]$ to have type $[[A2]]$ with $[[A1]]$ being a subtype of $[[A2]]$
-($[[dd |- A1 <: A2]]$). Note that the instantiation \rref{hm-inst} in HM is a
+($[[dd |-OL A1 <: A2]]$). Note that the instantiation \rref{hm-inst} in HM is a
 special case of \rref{ol-sub}, as we have $[[\/ </ ai // i /> . t <: t [ </ ai
 ~> ti // i /> ] ]]$ by applying \rref{hm-s-forallL} repeatedly.
 

@@ -189,6 +189,7 @@ atyp_scastable, asc {{ tex \mathbb{S} }} :: 'atyp_scastable_' ::=
 dexp, e :: 'dtrm_' ::=
   | 1                ::   :: one
   | 2                ::   :: two
+  | 3                ::   :: three
   | x                ::   :: var
   | id               ::   :: id {{ tex \mathsf{id} }}
   | n                ::   :: lit
@@ -376,6 +377,7 @@ terminals :: 'terminals_' ::=
   | ==>     :: :: reduce {{ tex \Downarrow }}
   | <:      :: :: subtype {{ tex <: }}
   | =nid    :: :: etaid {{ tex =_{\eta id} }}
+  | <<=     :: :: tless  {{ tex \sqsubseteq }}
 
 
 formula :: formula_ ::=
@@ -414,9 +416,6 @@ formula :: formula_ ::=
   | || pe ||e             :: :: size_e {{ tex \llbracket [[pe]] \rrbracket_\mathcal{E} }}
   | || pe ||s             :: :: size_s {{ tex \llbracket [[pe]] \rrbracket_\mathcal{S} }}
   | || pe ||g             :: :: size_g {{ tex \llbracket [[pe]] \rrbracket_\mathcal{G} }}
-  | e <<= e'   :: :: eless  {{ tex [[e]] \sqsubseteq [[e']] }}
-  | A <<= B   :: :: tless  {{ tex [[A]] \sqsubseteq [[B]] }}
-  | pe <<= pe'   :: :: peless  {{ tex [[pe]] \sqsubseteq [[pe']] }}
   | dd1 | dd2 |- pe1 <<= pe2 :: :: bless {{ tex [[dd1]] \shortmid [[dd2]] \vdash [[pe1]] \sqsubseteq^\mathit{B} [[pe2]] }}
   | aA <~~ evar    :: :: inst
   | evar <~~ aA    :: :: inst2
@@ -428,6 +427,7 @@ formula :: formula_ ::=
   | avs1 = avs2 ::  :: avs_eq
   | A `-> B   :: :: cast
   | < A `-> B >   :: :: cast2
+  | dd |-G e : A  ::  :: dtyping_without
 
 
 subrules
@@ -1802,3 +1802,82 @@ GG  --> DD , sa = at
 GG --> DD
 ------------------------------------- :: addSolveG
 GG  --> DD , ga = atc
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% LESS PRECISE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+Lessp :: '' ::=
+
+defn
+
+A <<= B :: :: type :: 'gpc_l_' by
+
+----------------- :: unknown
+unknown <<= A
+
+
+----------------- :: int
+int <<= int
+
+A1 <<= A3
+A2 <<= A4
+----------------- :: arrow
+A1 -> A2 <<= A3 -> A4
+
+----------------- :: tvar
+a <<= a
+
+A1 <<= A2
+----------------- :: forall
+\/a. A1 <<= \/a. A2
+
+defn
+
+e1 <<= e2 :: :: expr :: 'gpc_le_' by
+
+
+--------------- :: refl
+e <<= e
+
+A1 <<= A2
+e1 <<= e2
+--------------- :: lamann
+\x:A1. e1 <<= \x:A2.e2
+
+e1 <<= e3
+e2 <<= e4
+--------------- :: app
+e1 e2 <<= e3 e4
+
+defn
+
+pe1 <<= pe2 :: :: pbc :: 'b_le_' by
+
+
+--------------- :: var
+x <<= x
+
+--------------- :: nat
+n <<= n
+
+A1 <<= A2
+pe1 <<= pe2
+--------------- :: lamann
+\x:A1. pe1 <<= \x:A2. pe2
+
+pe1 <<= pe2
+--------------- :: tabs
+/\a. pe1 <<= /\a. pe2
+
+pe1 <<= pe3
+pe2 <<= pe4
+--------------- :: app
+pe1 pe2 <<= pe3 pe4
+
+A1 <<= A3
+A2 <<= A4
+pe1 <<= pe2
+--------------- :: cast
+<A1 `-> A2> pe1 <<= <A3 `-> A4> pe2
