@@ -1,0 +1,200 @@
+\section{Algorithmic Type System}
+\label{sec:gradual:algorithm}
+
+In this section we give a bidirectional account of the algorithmic type system
+that implements the declarative specification. The algorithm is largely inspired
+by the algorithmic bidirectional system of DK \citet{DK}. However our
+algorithmic system differs from theirs in three aspects: (1) the addition of the
+unknown type $\unknown$; (2) the use of the matching judgment; and 3) the
+approach of \emph{gradual inference only producing static
+  types}~\citep{garcia2015principal}. We then prove that our algorithm is both
+sound and complete with respect to the declarative type system. We also provide
+an implementation.
+
+\paragraph{Algorithmic Contexts.}
+
+\begin{figure}
+  \centering
+    \begin{tabular}{lrcl} \toprule
+      Expressions & $[[ae]]$ & \syndef & $[[x]] \mid [[n]] \mid [[ \x : aA . ae ]]  \mid  [[\x . ae]] \mid [[ae1 ae2]] \mid [[ae : aA]] \mid [[ let x = ae1 in ae2  ]] $ \\
+      Types & $[[aA]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] \mid [[unknown]] $ \\
+      Monotypes & $[[at]], [[as]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at -> as]] $ \\
+      Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , x : aA]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]] \mid [[ GG , mevar]] $ \\
+      Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , x : aA]] \mid [[OO , a]] \mid [[OO, evar = at]] \mid [[ OO, mevar]]   $ \\ \bottomrule
+    \end{tabular}
+
+    \drules[gpc-ad]{$ [[GG |- aA ]] $}{Well-formedness of types}{int, unknown, tvar, evar, solved, arrow, forall}
+
+    \drules[gpc-wf]{$ [[ |- GG ]] $}{Well-formedness of algorithmic contexts}{empty, var, tvar, evar, solved, marker}
+  \caption{Syntax and well-formedness of the algorithmic \gpc}
+  \label{fig:gradual:algo-syntax}
+\end{figure}
+
+The top of \Cref{fig:gradual:algo-syntax} shows the syntax of the algorithmic
+system. A noticeable difference are the algorithmic contexts $[[GG]]$, which are
+represented as an \emph{ordered} list containing declarations of type variables
+$[[a]]$ and term variables $[[x : aA]]$. Unlike declarative contexts,
+algorithmic contexts also contain declarations of existential type variables
+$[[evar]]$, which can be either unsolved (written $[[evar]]$) or solved to some
+monotype (written $[[evar = at]]$). Finally, algorithmic contexts include a
+\textit{marker} $[[ mevar ]]$ (read ``marker $[[evar]]$'' ), which is used to
+delineate existential variables created by the algorithm. We will have more to
+say about markers when we examine the rules. Complete contexts $[[OO]]$ are the
+same as contexts, except that they contain no unsolved variables.
+
+Apart from expressions in the declarative system, we add annotated expressions
+$[[ ae : aA ]]$. The well-formedness judgments for types and contexts are shown
+in \Cref{fig:gradual:algo-syntax}.
+
+\paragraph{Notational convenience.}
+
+Following DK system, we use contexts as substitutions on types. We write $[[
+[GG]aA ]]$ to mean $[[GG]]$ applied as a substitution to type $[[aA]]$. We also
+use a hole notation, which is useful when manipulating contexts by inserting and
+replacing declarations in the middle. The hole notation is used extensively in
+proving soundness and completeness. For example, $[[GG]] [ [[TT]] ]$ means
+$[[GG]]$ has the form $[[GL]], [[TT]], [[GR]]$; if we have $[[ GG[evar] ]] =
+[[(GL, evar, GR)]]$, then $[[ GG[evar = at] ]] = [[(GL, evar = at, GR)]] $.
+Occasionally, we will see a context with two \emph{ordered} holes, e.g., $[[GG]]
+= [[ GG0[TT1][TT2] ]]$ means $[[GG]]$ has the form $[[ GL, TT1, GM, TT2, GR ]]$.
+
+\paragraph{Input and output contexts.}
+
+The algorithmic system, compared with the declarative system, includes similar
+judgment forms, except that we replace the declarative context $[[dd]]$ with an
+algorithmic context $[[GG]]$ (the \emph{input context}), and add an \emph{output
+  context} $[[DD]]$ after a backward turnstile, e.g., $[[ GG |- aA1 <~ aA2 -| DD
+]]$ is the judgment form for the algorithmic consistent subtyping. All
+algorithmic rules manipulate input and output contexts in a way that is
+consistent with the notion of \emph{context extension}, which will be described
+in \Cref{sec:gradual:ctxt:extension}.
+
+We start with the explanation of the algorithmic consistent subtyping as it
+involves manipulating existential type variables explicitly (and solving them if
+possible).
+
+
+\subsection{Algorithmic Consistent Subtyping}
+\label{sec:gradual:algo:subtype}
+
+\begin{figure}
+  \centering
+
+    \drules[gpc-as]{$ [[GG |- aA <~ aB -| DD ]] $}{Under input context $[[GG]]$, $[[aA]]$ is a consistent subtype of $[[aB]]$, with output context $[[DD]]$}{tvar, int, evar, unknownL, unknownR, arrow, forallR, forallL,  instL, instR}
+
+  \caption{Algorithmic consistent subtyping}
+  \label{fig:gradual:algo:subtype}
+\end{figure}
+
+\Cref{fig:gradual:algo:subtype} presents the rules of algorithmic consistent
+subtyping $[[GG |- aA1 <~ aA2 -| DD ]]$, which says that under input context
+$[[GG]]$, $[[aA1]]$ is a consistent subtype of $[[aA2]]$, with output context
+$[[DD]]$. The first five rules do not manipulate contexts, but illustrate how
+contexts are propagated.
+
+\Rref{gpc-as-tvar} and \rref{gpc-as-int} do not involve existential variables, so the
+output contexts remain unchanged. \Rref{gpc-as-evar} says that any unsolved
+existential variable is a consistent subtype of itself. The output is still the
+same as the input context as the rule gives no clue as to what is the solution
+of that existential variable. \Rref{gpc-as-unknownL,as-unknownR} are the
+counterparts of \rref{gpc-cs-unknownL} and \rref{gpc-cs-unknownR}.
+
+
+\Rref{gpc-as-arrow} is a natural extension of its declarative counterpart. The
+output context of the first premise is used by the second premise, and the
+output context of the second premise is the output context of the conclusion.
+Note that we do not simply check $[[ aA2 <~ aA4 ]]$, but apply $[[TT]]$ (the input
+context of the second premise) to both types (e.g., $[[ [TT]aA2 ]]$). This is to
+maintain an important invariant: whenever $[[ GG |- aA1 <~ aA2 -| DD ]]$ holds,
+the types $[[aA1]]$ and $[[aA2]]$ are fully applied under input context $[[GG]]$
+(they contain no existential variables already solved in $[[GG]]$). The same
+invariant applies to every algorithmic judgment.
+
+
+\Rref{gpc-as-forallR}, similar to the declarative \rref{gpc-cs-forallR}, adds
+$[[a]]$ to the input context. Note that the output context of the premise allows
+additional existential variables to appear after the type variable $[[a]]$, in a
+trailing context $[[TT]]$. These existential variables could depend on $[[a]]$;
+since $[[a]]$ goes out of scope in the conclusion, we need to drop them from the
+concluding output, resulting in $[[DD]]$. The next rule is essential to
+eliminating the guessing work. Instead of guessing a monotype $[[t]]$ out of
+thin air, \rref{gpc-as-forallL} generates a fresh existential variable $[[evar]]$,
+and replaces $[[a]]$ with $[[evar]]$ in the body $[[aA]]$. The new existential
+variable $[[evar]]$ is then added to the input context, just before the marker
+$[[mevar]]$. The output context ($[[ DD, mevar, TT ]]$) allows additional
+existential variables to appear after $[[mevar]]$ in $[[TT]]$. For the same
+reasons as in \rref{gpc-as-forallR}, we drop them from the output context. A central
+idea behind these two rules is that we defer the decision of picking a monotype
+for a type variable, and hope that it could be solved later when we have more
+information at hand. As a side note, when both types are universal quantifiers,
+then either \rref{gpc-as-forallR} or \rref{gpc-as-forallL} could be tried. In practice,
+one can apply \rref{gpc-as-forallR} eagerly as it is invertible.
+
+The last two rules (\rref{gpc-as-instL} and \rref{gpc-as-instR}) are specific to the
+algorithm, thus having no counterparts in the declarative version. They both
+check consistent subtyping with an unsolved existential variable on one side and
+an arbitrary type on the other side. Apart from checking that the existential
+variable does not occur in the type $[[A]]$, both rules do not directly solve the
+existential variables, but leave the real work to the instantiation judgment.
+
+\subsection{Instantiation}
+\label{sec:gradual:algo:instantiate}
+
+
+\begin{figure}
+  \centering
+    \drules[gpc-instl]{$ [[ GG |- evar <~~ aA -| DD   ]] $}{Under input context $[[GG]]$, instantiate $[[evar]]$ such that $[[evar <~ aA]]$, with output context $[[DD]]$}{solve, solveU, reach, forallR, arr}
+
+    \drules[gpc-instr]{$ [[ GG |- aA <~~ evar -| DD   ]] $}{Under input context $[[GG]]$, instantiate $[[evar]]$ such that $[[aA <~ evar]]$, with output context $[[DD]]$}{solve, solveU, reach, forallL, arr}
+
+  \caption{Algorithmic instantiation}
+  \label{fig:gradual:algo:instantiate}
+\end{figure}
+
+
+Two symmetric judgments $[[ GG |- evar <~~ aA -| DD ]]$ and $[[ GG |- aA <~~
+evar -| DD ]]$ defined in \cref{fig:gradual:algo:instantiate} instantiate
+unsolved existential variables. They read ``under input context $[[GG]]$,
+instantiate $[[evar]]$ to a consistent subtype (or supertype) of $[[aA]]$, with
+output context $[[DD]]$''. The judgments are extended naturally from DK system,
+whose original inspiration comes from \citet{cardelli1993implementation}. Since
+these two judgments are mutually defined, we discuss them together.
+
+\Rref{gpc-instl-solve} is the simplest one -- when an existential variable meets a
+monotype -- where we simply set the solution of $[[evar]]$ to the monotype
+$[[at]]$ in the output context. We also need to check that the monotype $[[at]]$
+is well-formed under the prefix context $[[GG]]$.
+
+\Rref{gpc-instl-solveU} is similar to \rref{gpc-as-unknownR} in that we put no
+constraint\footnote{As we will see in \cref{sec:gradual:advanced-extension}
+  where we present a more refined system, the ``no constraint'' statement is not
+  entirely true. } on $[[evar]]$ when it meets the unknown type $[[unknown]]$.
+This design decision reflects the point that type inference only produces static
+types~\citep{garcia:principal}.
+
+\Rref{gpc-instl-reach} deals with the situation where two existential variables
+meet. Recall that $[[ GG[evar][evarb]  ]]$ denotes a context where some unsolved existential
+variable $[[evar]]$ is declared before $[[evarb]]$. In this situation, the only logical
+thing we can do is to set the solution of one existential variable to the other
+one, depending on which one is declared before. For example, in the output
+context of \rref{gpc-instl-reach}, we have $[[evarb]] = [[evar]]$ because in the input
+context, $[[evar]]$ is declared before $[[evarb]]$.
+
+\Rref{gpc-instl-forallR} is the instantiation version of \rref{gpc-as-forallR}.
+Since our system is predicative, $[[evar]]$ cannot be instantiated to $[[\/b.
+aA]]$, but we can decompose $[[ \/b. aA ]]$ in the same way as in
+\rref{gpc-as-forallR}. \Rref{gpc-instr-forallL} is the instantiation version of
+\rref{gpc-as-forallL}.
+
+\Rref{gpc-instl-arr} applies when $[[evar]]$ meets an arrow type. It follows
+that the solution must also be an arrow type. This is why, in the first premise,
+we generate two fresh existential variables $[[evar1]]$ and $[[evar2]]$, and
+insert them just before $[[evar]]$ in the input context, so that we can solve
+$[[evar]]$ to $[[ evar1 -> evar2 ]]$. Note that the first premise $[[ aA1 <~~
+evar1 ]]$ switches to the other instantiation judgment.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

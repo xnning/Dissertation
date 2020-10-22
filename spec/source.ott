@@ -96,11 +96,11 @@ dtyp_castable, gc  {{ tex \mathbb{C} }}  :: 'dtyp_castable_' ::=
 
 % Existential variable
 
-evar {{ tex \widehat{a} }}, evarb {{ tex \widehat{b} }} :: 'evar_' ::=
-  | sa :: :: evar {{ tex \widehat{a}_{S} }}
-  | ga :: :: gevar {{ tex \widehat{a}_{G} }}
-  | sb :: :: evarb {{ tex \widehat{b}_{S} }}
-  | gb :: :: gevarb {{ tex \widehat{b}_{G} }}
+evar {{ tex \widehat{\alpha} }}, evarb {{ tex \widehat{\beta} }} :: 'evar_' ::=
+  | sa :: :: evar {{ tex \widehat{\alpha}_{S} }}
+  | ga :: :: gevar {{ tex \widehat{\alpha}_{G} }}
+  | sb :: :: evarb {{ tex \widehat{\beta}_{S} }}
+  | gb :: :: gevarb {{ tex \widehat{\beta}_{G} }}
   | Xa :: :: xa
 
 
@@ -1264,7 +1264,7 @@ dd |-G unknown |> unknown -> unknown
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 defns
-Wfc :: '' ::=
+Wfc :: 'gpc_' ::=
 
 defn
 
@@ -1315,7 +1315,7 @@ mevar notin fv(GG)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 defns
-AWft :: '' ::=
+AWft :: 'gpc_' ::=
 
 defn
 
@@ -1365,7 +1365,7 @@ GG |- \/ a. aA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 defns
-AConSub :: '' ::=
+AConSub :: 'gpc_' ::=
 
 defn
 
@@ -1386,25 +1386,25 @@ GG[evar] |- evar <~ evar -| GG[evar]
 GG |- int <~ int -| GG
 
 
-GG |- aB1 <~ aA1 -| TT
-TT |- [TT] aA2 <~ [TT] aB2 -| DD
+GG |- aA3 <~ aA1 -| TT
+TT |- [TT] aA2 <~ [TT] aA4 -| DD
 ----------------------------------------- :: arrow
-GG |- aA1 -> aA2 <~ aB1 -> aB2 -| DD
+GG |- aA1 -> aA2 <~ aA3 -> aA4 -| DD
 
 
-GG, a |- aA <~ aB -| DD, a, TT
+GG, a |- aA1 <~ aA2 -| DD, a, TT
 ----------------------------- :: forallR
-GG |- aA <~ \/ a. aB -| DD
+GG |- aA1 <~ \/ a. aA2 -| DD
 
 
-GG, mevar, evar |- aA [a ~> evar] <~ aB -| DD, mevar, TT
+GG, mevar, evar |- aA1 [a ~> evar] <~ aA2 -| DD, mevar, TT
 ------------------------------ :: forallL
-GG |- \/ a. aA <~ aB -| DD
+GG |- \/ a. aA1 <~ aA2 -| DD
 
 
-GG, msa, sa |- aA [a ~> sa] <~ aB -| DD, msa, TT
+GG, msa, sa |- aA1 [a ~> sa] <~ aA2 -| DD, msa, TT
 ------------------------------ :: forallLL
-GG |- \/ a. aA <~ aB -| DD
+GG |- \/ a. aA1 <~ aA2 -| DD
 
 
 --------------------------- :: spar
@@ -1447,7 +1447,7 @@ GG[evar] |-  aA <~ evar -| DD
 
 
 defns
-AInst :: '' ::=
+AInst :: 'gpc_' ::=
 
 defn
 
@@ -1511,9 +1511,9 @@ GG[evar] |- evar <~~ aA1 -> aA2 -| DD
 
 
 
-GG[evar] , b |- evar <~~ aB -| DD , b , TT
+GG[evar] , b |- evar <~~ aA -| DD , b , TT
 --------------------------------------- :: forallR
-GG[evar] |- evar <~~ \/b . aB -| DD
+GG[evar] |- evar <~~ \/b . aA -| DD
 
 
 
@@ -1574,14 +1574,14 @@ TT |- [TT]aA2 <~~ evar2  -| DD
 GG[evar] |- aA1 -> aA2  <~~ evar -| DD
 
 
-GG[evar] , mevarb, evarb |- aB[b ~> evarb] <~~ evar -| DD, mevarb, TT
+GG[evar] , mevarb, evarb |- aA[b ~> evarb] <~~ evar -| DD, mevarb, TT
 -------------------------------------------------- :: forallL
-GG[evar] |- \/b . aB <~~ evar -| DD
+GG[evar] |- \/b . aA <~~ evar -| DD
 
 
-GG[evar] , msb, sb |- aB[b ~> sb] <~~ evar -| DD, msb, TT
+GG[evar] , msb, sb |- aA[b ~> sb] <~~ evar -| DD, msb, TT
 -------------------------------------------------- :: forallLL
-GG[evar] |- \/b . aB <~~ evar -| DD
+GG[evar] |- \/b . aA <~~ evar -| DD
 
 
 
