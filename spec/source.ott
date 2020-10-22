@@ -1590,7 +1590,7 @@ GG[evar] |- \/b . aA <~~ evar -| DD
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 defns
-ATyping :: '' ::=
+ATyping :: 'gpc_' ::=
 
 defn
 
@@ -1666,15 +1666,15 @@ GG |- ae <= \/ a. aA -| DD
 
 
 
-GG, x : aA |- ae <= aB -| DD, x : aA, TT
+GG, x : aA1 |- ae <= aA2 -| DD, x : aA1, TT
 ------------------------------------ :: lam
-GG |- \x. ae <= aA -> aB  -| DD
+GG |- \x. ae <= aA1 -> aA2  -| DD
 
 
-GG |- ae => aA -| TT
-TT |- [TT]aA <~ [TT]aB -| DD
+GG |- ae => aA1 -| TT
+TT |- [TT]aA1 <~ [TT]aA2 -| DD
 ------------------------------------ :: sub
-GG |- ae <= aB -| DD
+GG |- ae <= aA2 -| DD
 
 
 GG |- ae1 => aA -| TT
@@ -1690,7 +1690,7 @@ GG |- let x = ae1 in ae2 <= aB -| DD
 
 
 defns
-AMatching :: '' ::=
+AMatching :: 'gpc_' ::=
 
 defn
 

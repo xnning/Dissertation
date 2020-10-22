@@ -193,6 +193,74 @@ insert them just before $[[evar]]$ in the input context, so that we can solve
 $[[evar]]$ to $[[ evar1 -> evar2 ]]$. Note that the first premise $[[ aA1 <~~
 evar1 ]]$ switches to the other instantiation judgment.
 
+\subsection{Algorithmic Typing}
+\label{sec:gradual:algo:typing}
+
+\begin{figure}
+  \centering
+    \drules[gpc-inf]{$ [[ GG |- ae => aA -| DD ]] $}{Under input context $[[GG]]$, $[[ae]]$ infers output type $[[aA]]$, with output context $[[DD]]$}{var, int, anno, lamann, lam, let, app}
+
+    \drules[gpc-chk]{$ [[ GG |- ae <= aA -| DD ]] $}{Under input context $[[GG]]$, $[[ae]]$ checks against input type $[[aA]]$, with output context $[[DD]]$}{lam, gen, sub}
+
+    \drules[gpc-am]{$ [[ GG |- aA |> aA1 -> aA2 -| DD ]] $}{Under input context $[[GG]]$, $[[aA]]$ matches output type $[[aA1 -> aA2]]$, with output context $[[DD]]$}{forall, arr, unknown, var}
+
+  \caption{Algorithmic typing}
+  \label{fig:gradual:algo:typing}
+\end{figure}
+
+We now turn to the algorithmic typing rules in \Cref{fig:gradual:algo:typing}.
+Because general type inference for System F is
+undecidable~\citep{F:undecidable}, our algorithmic system uses bidirectional
+type checking to accommodate (first-class) polymorphism. Traditionally, two
+modes are employed in bidirectional systems: the checking mode $[[ GG |- ae <=
+aA -| TT ]]$, which takes a term $[[ae]]$ and a type $[[aA]]$ as input, and
+ensures that the term $[[ae]]$ checks against $[[aA]]$; the inference mode $[[
+GG |- ae => aA -| TT ]]$, which takes a term $[[ae]]$ and produces a type
+$[[aA]]$. We first discuss rules in the inference mode.
+
+\Rref{gpc-inf-var} and \rref{gpc-inf-int} do not generate any new information
+and simply propagate the input context. \Rref{gpc-inf-anno} is standard, switching
+to the checking mode in the premise.
+
+In \rref{gpc-inf-lamann}, we generate a fresh existential variable $[[evarb]]$
+for the function codomain, and check the function body against $[[evarb]]$. Note
+that it is tempting to write $[[ GG, x : aA |- ae => aA2 -| DD, x : aA, TT ]]$ as
+the premise (in the hope of better matching its declarative counterpart
+\rref{gpc-lamann}), which has a subtle consequence. Consider the expression $[[ \x :
+int. \y . y ]]$. Under the new premise, this is untypable because of $[[ empty
+|- \x : int. \y . y => int -> evar -> evar -| empty ]]$ where $[[evar]]$ is not
+found in the output context. This explains why we put $[[evarb]]$ \emph{before}
+$ [[ x : aA ]] $ so that it remains in the output context $[[DD]]$.
+\Rref{gpc-inf-lam}, which corresponds to \rref{gpc-lam}, one of the guessing rules, is
+similar to \rref{gpc-inf-lamann}. As with the other algorithmic rules that eliminate
+guessing, we create new existential variables $[[evar]]$ (for function domain)
+and $[[evarb]]$ (for function codomain) and check the function body against
+$[[evarb]]$. \Rref{gpc-inf-let} is similar to \rref{gpc-inf-lamann}.
+
+\paragraph{Algorithmic Matching.}
+
+\Rref{gpc-inf-app} deserves attention. It relies on the algorithmic matching
+judgment $[[ GG |- aA |> aA1 -> aA2 -| DD ]]$. The matching judgment
+algorithmically synthesizes an arrow type from an arbitrary type.
+\Rref{gpc-am-forall} replaces $a$ with a fresh existential variable $[[evar]]$,
+thus eliminating guessing. \Rref{gpc-am-arr} and \rref{gpc-am-unknown} correspond directly to
+the declarative rules. \Rref{gpc-am-var}, which has no corresponding declarative
+version, is similar to \rref{gpc-instl-arr}/\rref*{gpc-instr-arr}: we create
+$[[evar1]]$ and $[[evar2]]$ and solve $[[evar]] $ to $ [[evar1 -> evar2]]$ in
+the output context.
+
+Back to the \rref{gpc-inf-app}. This rule first infers the type of $[[e1]]$,
+producing an output context $[[TT1]]$. Then it applies $[[TT1]]$ to $A$ and goes
+into the matching judgment, which delivers an arrow type $[[aA1 -> aA2]]$ and
+another output context $[[TT2]]$. $[[TT2]]$ is used as the input context when
+checking $[[e2]]$ against $[[ [TT2]aA1 ]]$, where we go into the checking mode.
+
+
+Rules in the checking mode are quite standard. \Rref{gpc-chk-lam} checks against
+$[[aA1 -> aA2]]$. \Rref{gpc-chk-gen}, like the declarative \rref{gpc-gen}, adds a
+type variable $[[a]]$ to the input context. \Rref{gpc-chk-sub} uses the
+algorithmic consistent subtyping judgment.
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
