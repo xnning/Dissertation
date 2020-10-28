@@ -80,7 +80,7 @@ possible).
 \begin{figure}
   \centering
 
-    \drules[gpc-as]{$ [[GG |-G aA <~ aB -| DD ]] $}{Under input context $[[GG]]$, $[[aA]]$ is a consistent subtype of $[[aB]]$, with output context $[[DD]]$}{tvar, int, evar, unknownL, unknownR, arrow, forallR, forallL,  instL, instR}
+    \drules[gpc-as]{$ [[GG |-G aA1 <~ aA2 -| DD ]] $}{Under input context $[[GG]]$, $[[aA1]]$ is a consistent subtype of $[[aA2]]$, with output context $[[DD]]$}{tvar, int, evar, unknownL, unknownR, arrow, forallR, forallL,  instL, instR}
 
   \caption{Algorithmic consistent subtyping}
   \label{fig:gradual:algo:subtype}
@@ -260,6 +260,118 @@ Rules in the checking mode are quite standard. \Rref{gpc-chk-lam} checks against
 $[[aA1 -> aA2]]$. \Rref{gpc-chk-gen}, like the declarative \rref{gpc-gen}, adds a
 type variable $[[a]]$ to the input context. \Rref{gpc-chk-sub} uses the
 algorithmic consistent subtyping judgment.
+
+\subsection{Decidability}
+
+Our algorithmic system is decidable. It is not at all obvious to see why this is
+the case, as many rules are not strictly structural (e.g., many rules have $[[
+[GG]aA ]]$ in the premises). This implies that we need a more sophisticated
+measure to support the argument. Since the typing rules (\Cref{fig:gradual:algo:typing})
+depend on the consistent subtyping rules (\Cref{fig:gradual:algo:subtype}), which in
+turn depends on the instantiation rules (\Cref{fig:gradual:algo:instantiate}), to show
+the decidability of the typing judgment, we need to show that the instantiation
+and consistent subtyping judgments are decidable. The proof strategy mostly
+follows that of the DK system. Here only highlights of the proofs are given.
+
+\paragraph{Decidability of Instantiation}
+
+The basic idea is that we need to show $[[aA]]$ in the instantiation judgments
+$[[GG |-G evar <~~ aA -| DD ]]$ and $[[GG |-G aA <~~ evar -| DD]]$ always gets
+smaller. Most of the rules are structural and thus easy to verify (e.g.,
+\rref{instl-forallR}); the non-trivial cases are \rref{instl-arr} and \rref{instr-arr}
+where context applications appear in the premises. The key observation there is
+that the instantiation rules preserve the size of (substituted) types. The
+formal statement of decidability of instantiation needs a few pre-conditions:
+assuming $[[evar]]$ is unsolved in the input context $[[GG]]$, that $[[aA]]$ is
+well-formed under the context $[[GG]]$, that $[[aA]]$ is fully applied under the
+input context $[[GG]]$ ($[[ [GG]aA ]] = [[aA]]$), and that $[[evar]]$ does not
+occur in $[[aA]]$. Those conditions are actually met when instantiation is
+invoked: \rref{chk-sub} applies the input context, and the subtyping rules apply
+input context when needed.
+
+\begin{restatable}[Decidability of Instantiation]{theorem}{decInstan}
+  If $[[GG]]  = [[ GG0[evar]  ]]  $ and $[[  GG |-G aA  ]]$ such that $[[ [GG]aA  ]] = [[aA]]$ and $[[ evar notin fv(aA)   ]]$ then:
+  \begin{enumerate}
+  \item Either there exists $[[DD]]$ such that $[[GG |-G evar <~~ aA -| DD]]$, or not.
+  \item Either there exists $[[DD]]$ such that $[[GG |-G aA <~~ evar -| DD]]$, or not.
+  \end{enumerate}
+\end{restatable}
+
+\paragraph{Decidability of Algorithmic Consistent Subtyping}
+
+Proving decidability of the algorithmic consistent subtyping is a bit more
+involved, as the induction measure consists of several parts.
+We measure the judgment $[[GG |-G aA1 <~ aA2 -| DD]]$ lexicographically by
+\begin{enumerate}[(M1)]
+\item the number of $\forall$-quantifiers in $[[aA1]]$ and $[[aA2]]$;
+\item \hl{the number of unknown types in $[[aA1]]$ and $[[aA2]]$;}
+\item $| \textsc{unsolved}([[GG]]) |$: the number of unsolved existential
+  variables in $[[GG]]$;
+\item $| [[GG |-G aA1]] | + | [[GG |-G aA2]]   |$.
+\end{enumerate}
+Notice that because of our gradual setting, we also need to measure the number
+of unknown types (M2). This is a key difference from the DK system.
+We refer the reader to \cref{app:decidable} for more details.
+For (M4), we
+use \emph{contextual size}---the size of well-formed types under certain
+contexts, which penalizes solved variables (*).
+
+\begin{definition}[Contextual Size] \leavevmode
+  \begin{center}
+    \begin{tabular}{llll}
+      $|  [[GG |-G int]] |$     &=&  $1$ \\
+      $|  [[GG |-G unknown]]    |$  &=&  $1$ \\
+      $|  [[GG |-G a ]]  |$    &=&  $1$ \\
+      $|  [[GG |-G evar]]  |$    &=&  $1$ \\
+      $|  [[ GG[evar = at] |-G evar ]] |$    &=&  $1 + | [[  GG[evar = at] |-G at   ]]   | $ & $(*)$ \\
+      $|  [[ GG |-G \/a . aA ]] |$    &=&  $1 + | [[  GG, a |-G aA ]]   | $ \\
+      $|  [[ GG |-G aA1 -> aA2 ]] |$    &=&  $1 + | [[  GG |-G aA1 ]]   | + | [[ GG |-G aA2 ]] | $ \\
+    \end{tabular}
+  \end{center}
+\end{definition}
+
+\begin{restatable}[Decidability of Algorithmic Consistent Subtyping]{theorem}{decsubtype} \label{thm:decsubtype}
+  Given a context $[[GG]]$ and types $[[aA1]]$, $[[aA2]]$
+  such that $[[GG |-G aA1]]$ and $[[ GG |-G aA2 ]]$
+  and $[[  [GG]aA1  ]] = [[aA1]]$ and $[[ [GG]aA2 ]] = [[aA2]]$,
+  it is decidable whether there exists $[[DD]]$ such that $[[ GG |-G aA1 <~ aA2 -| DD    ]]$.
+\end{restatable}
+
+\paragraph{Decidability of Algorithmic Typing}
+
+Similar to proving decidability of algorithmic consistent subtyping, the key is
+to come up with a correct measure. Since the typing rules depend on the matching
+judgment, we first show decidability of the algorithmic matching.
+
+\begin{restatable}[Decidability of Algorithmic Matching]{lemma}{decmatch} \label{lemma:decmatch}%
+  Given a context $[[GG]]$ and a type $[[aA]]$ it is decidable whether there
+  exist types $[[aA1]]$, $[[aA2]]$ and a context $[[DD]]$ such that $[[ GG |-G aA |> aA1 -> aA2 -| DD ]]$.
+\end{restatable}
+
+Now we are ready to show decidability of typing. The proof is obtained by
+induction on the lexicographically ordered triple: size of $[[ae]]$, typing
+judgment (where the inference mode $[[=>]]$ is considered smaller than the
+checking mode $[[<=]]$) and contextual size.
+\begin{center}
+  \begin{tabular}{lllll}
+    \multirow{2}{*}{$ \Big \langle$} & \multirow{2}{*}{$[[ae]],$} & $[[=>]]$ & \multirow{2}{*}{$| [[GG |-G aA]] |$} & \multirow{2}{*}{$\Big \rangle$} \\
+                                     &                    & $[[<=]],$ &  &
+  \end{tabular}
+\end{center}
+The above measure is much simpler than the corresponding one in the DK system,
+where they also need to consider the application judgment together with the
+inference and checking judgments. This shows another benefit (besides the
+independence from typing) of adopting the matching judgment.
+
+\begin{restatable}[Decidability of Algorithmic Typing]{theorem}{dectyping} \leavevmode
+  \begin{enumerate}
+  \item Inference: Given  a context $[[GG]]$ and a term $[[ae]]$, it is decidable whether
+    there exist a type $[[aA]]$ and a context $[[DD]]$ such that $[[GG |-G ae => aA -| DD]]$.
+  \item Checking: Given a context $[[GG]]$, a term $[[ae]]$ and a type $[[aA]]$
+    such that $[[GG |-G aA]]$, it is decidable whether there exists a context
+    $[[DD]]$ such that $[[  GG |-G ae <= aA -| DD  ]]$.
+  \end{enumerate}
+\end{restatable}
 
 %%% Local Variables:
 %%% mode: latex
