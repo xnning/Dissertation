@@ -373,6 +373,103 @@ independence from typing) of adopting the matching judgment.
   \end{enumerate}
 \end{restatable}
 
+\section{Soundness and Completeness}
+\label{sec:gradual:sound:complete}
+
+To be confident that our algorithmic type system and the declarative type system
+agree with each other, we need to prove that the algorithmic rules are sound and
+complete with respect to the declarative specification. Before we give the
+formal statements of the soundness and completeness theorems, we need a
+meta-theoretical device, called \emph{context extension}~\citep{DK}, to capture a
+notion of information increase from input contexts to output contexts.
+
+A context extension judgment $[[ GG --> DD ]]$ reads ``$[[GG]]$ is extended
+by $[[DD]]$''. Intuitively, this judgment says that $[[DD]]$ has at least as
+much information as $[[GG]]$: some unsolved existential variables in $[[GG]]$
+may be solved in $[[DD]]$. The full inductive definition can be found
+\Cref{fig:gradual:ctxt-extension}.
+
+\begin{figure}
+  \centering
+
+  \begin{small}
+    \drules[gpc-ext]{$ [[ GG --> DD  ]] $}{Context extension}{id, var, tvar, evar, solved, solve, add, addSolve, marker}
+  \end{small}
+
+
+  \caption{Context extension}
+  \label{fig:gradual:ctxt-extension}
+\end{figure}
+
+\subsection{Soundness}
+
+Roughly speaking, soundness of the algorithmic system says that given a
+derivation of an algorithmic judgment with input context $[[GG]]$, output
+context $[[DD]]$, and a complete context $[[OO]]$ that extends $[[DD]]$,
+applying $[[OO]]$ throughout the given algorithmic judgment should yield a
+derivable declarative judgment. For example, let us consider an algorithmic
+typing judgment $[[ empty |-G \x . x => evar -> evar -| evar ]]$, and any
+complete context, say, $[[OO]] = ([[ evar = int ]])$, then applying $[[OO]]$ to
+the above judgment yields $[[ empty |-G \x . x : int -> int ]]$, which is
+derivable in the declarative system.
+
+However there is one complication: applying $[[OO]]$ to the algorithmic
+expression does not necessarily yield a typable declarative expression. For
+example, by \rref{gpc-chk-lam} we have $[[ \x .x ]] \Leftarrow [[ (\/a. a -> a) ->
+(\/a. a -> a) ]] $, but $[[ \x . x]]$ itself cannot have type $[[ (\/a. a -> a)
+-> (\/a. a -> a) ]]$ in the declarative system. To circumvent that, we add an
+annotation to the lambda abstraction, resulting in $[[ \x : (\/a . a -> a) . x
+]]$, which is typeable in the declarative system with the same type. To relate
+$[[ \x . x ]]$ and $[[ \x : (\/a. a -> a) . x ]]$, we erase all annotations on
+both expressions.
+\begin{definition}[Type annotation erasure] The erasure function is denoted as
+  $|\cdot|$, and defined as follows:
+  \begin{center}
+    \begin{tabular}{p{5cm}l}
+      $[[|x| = x ]]$         & $[[|n| = n ]]$\\
+      $[[|\x:A.e| = \x.|e| ]]$ & $[[|\x.e| = \x.|e|]]$\\
+      $[[|e1 e2| = |e1| |e2| ]]$        & $[[|e : A | = |e|]]$
+    \end{tabular}
+  \end{center}
+\end{definition}
+
+\begin{restatable}[Instantiation Soundness]{theorem}{instsoundness} \label{thm:inst_soundness}%
+  Given $[[ DD --> OO ]]$ and $[[ [GG]aA = aA ]]$ and  $[[evar notin fv(aA)]]$:
+
+  \begin{enumerate}
+  \item If $[[GG |-G evar <~~  aA -| DD ]]$ then $[[  [OO]DD |-G [OO]evar <~ [OO]aA  ]] $.
+  \item If $[[GG |-G aA <~~ evar -| DD ]]$ then $[[  [OO]DD |-G [OO]aA <~ [OO]evar  ]] $.
+  \end{enumerate}
+\end{restatable}
+
+Notice that the declarative judgment uses $[[ [OO]DD   ]]$, an
+operation that applies a complete context $[[OO]]$ to the algorithmic context
+$[[DD]]$, essentially plugging in all known solutions and removing all
+declarations of existential variables (both solved and unsolved), resulting in a
+declarative context.
+
+With instantiation soundness, next we show that the algorithmic consistent
+subtyping is sound:
+
+\begin{restatable}[Soundness of Algorithmic Consistent Subtyping]{theorem}{subsoundness} \label{thm:sub_soundness}%
+  If $[[  GG |-G aA <~ aB -| DD ]]$ where $[[ [GG]aA = aA  ]]$ and $[[  [GG] aB = aB  ]]$ and $[[  DD --> OO ]]$ then
+  $[[  [OO]DD |-G [OO]aA <~ [OO]aB   ]]$.
+\end{restatable}
+
+Finally the soundness theorem of algorithmic typing is:
+
+\begin{restatable}[Soundness of Algorithmic Typing]{theorem}{typingsoundness} \label{thm:type_sound}%
+  Given $[[DD --> OO]]$:
+  \begin{enumerate}
+  \item If $[[  GG |-G ae => aA -| DD  ]]$
+    then $\exists [[e']]$ such that $ [[  [OO]DD |-G e' : [OO] aA  ]]   $
+    and $[[|ae|]] = [[|e'|]]$.
+  \item If $[[  GG |-G ae <= aA -| DD  ]]$
+    then $\exists [[e']]$ such that $ [[  [OO]DD |-G e' : [OO] aA  ]]   $
+    and $[[|ae|]] = [[|e'|]]$.
+  \end{enumerate}
+\end{restatable}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
