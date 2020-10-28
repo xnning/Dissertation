@@ -452,8 +452,8 @@ With instantiation soundness, next we show that the algorithmic consistent
 subtyping is sound:
 
 \begin{restatable}[Soundness of Algorithmic Consistent Subtyping]{theorem}{subsoundness} \label{thm:sub_soundness}%
-  If $[[  GG |-G aA <~ aB -| DD ]]$ where $[[ [GG]aA = aA  ]]$ and $[[  [GG] aB = aB  ]]$ and $[[  DD --> OO ]]$ then
-  $[[  [OO]DD |-G [OO]aA <~ [OO]aB   ]]$.
+  If $[[  GG |-G aA1 <~ aA2 -| DD ]]$ where $[[ [GG]aA1 = aA1  ]]$ and $[[  [GG] aA2 = aA2  ]]$ and $[[  DD --> OO ]]$ then
+  $[[  [OO]DD |-G [OO]aA1 <~ [OO]aA2   ]]$.
 \end{restatable}
 
 Finally the soundness theorem of algorithmic typing is:
@@ -468,6 +468,53 @@ Finally the soundness theorem of algorithmic typing is:
     then $\exists [[e']]$ such that $ [[  [OO]DD |-G e' : [OO] aA  ]]   $
     and $[[|ae|]] = [[|e'|]]$.
   \end{enumerate}
+\end{restatable}
+
+\subsection{Completeness}
+
+Completeness of the algorithmic system is the reverse of soundness: given a
+declarative judgment of the form $[[ [OO]GG ]] [[|-G]] [ [[OO]] ] \dots $,
+we want to get an algorithmic derivation of $[[GG]] [[|-G]] \dots [[-|]] [[DD]]$.
+It turns out that completeness is a bit trickier to state in that the
+algorithmic rules generate existential variables on the fly, so $[[DD]]$ could
+contain unsolved existential variables that are not found in $[[GG]]$, nor in
+$[[OO]]$. Therefore the completeness proof must produce another complete context
+$[[OO']]$ that extends both the output context $[[DD]]$, and the given complete
+context $[[OO]]$. As with soundness, we need erasure to relate both expressions.
+
+\begin{restatable}[Instantiation Completeness]{theorem}{instcomplete} \label{thm:inst_complete}
+  Given $[[GG --> OO]]$ and $[[aA = [GG]aA]]$ and $[[evar]] \notin \textsc{unsolved}([[GG]]) $ and $[[  evar notin fv(aA)  ]]$:
+  \begin{enumerate}
+  \item If $[[ [OO]GG |-G [OO] evar <~ [OO]aA   ]]$ then there are $[[DD]], [[OO']]$ such that $[[OO --> OO']]$
+    and $[[DD --> OO']]$ and $[[GG |-G evar <~~ aA -| DD]]$.
+  \item If $[[ [OO]GG |-G [OO]aA  <~ [OO] evar  ]]$ then there are $[[DD]], [[OO']]$ such that $[[OO --> OO']]$
+    and $[[DD --> OO']]$ and $[[GG |-G aA <~~ evar -| DD]]$.
+  \end{enumerate}
+\end{restatable}
+
+Next is the completeness of consistent subtyping:
+
+\begin{restatable}[Generalized Completeness of Consistent Subtyping]{theorem}{subcomplete} \label{thm:sub_completeness}
+  If $[[ GG --> OO  ]]$ and $[[ GG |-G aA1  ]]$ and $[[ GG |-G aA2  ]]$ and $[[  [OO]GG |-G [OO]aA1 <~ [OO]aA2  ]]$ then
+  there exist $[[DD]]$ and $[[OO']]$ such that $[[DD --> OO']]$ and $[[OO --> OO']]$ and $[[  GG |-G [GG]aA1 <~ [GG]aA2 -| DD ]]$.
+\end{restatable}
+
+We prove that the algorithmic matching is complete with respect to the
+declarative matching:
+
+\begin{restatable}[Matching Completeness]{theorem}{matchcomplete} \label{thm:match_complete}%
+  Given $[[ GG --> OO  ]]$ and $[[ GG |-G aA  ]]$, if
+  $[[ [OO]GG |-G [OO]aA |> A1 -> A2  ]]$
+  then there exist $[[DD]]$, $[[OO']]$, $[[aA1']]$ and $[[aA2']]$ such that $[[ GG |-G [GG]aA |> aA1' -> aA2' -| DD   ]]$
+  and $[[ DD --> OO'  ]]$ and $[[ OO --> OO'  ]]$ and $[[A1]] = [[ [OO']aA1'  ]]$ and $[[A2]] = [[ [OO']aA2'  ]]$.
+\end{restatable}
+
+Finally here is the completeness theorem of the algorithmic typing:
+
+\begin{restatable}[Completeness of Algorithmic Typing]{theorem}{typingcomplete}
+  \label{thm:type_complete}
+  Given $[[GG --> OO]]$ and $[[GG |-G aA]]$, if $[[ [OO]GG |-G e : A ]]$ then there exist $[[DD]]$, $[[OO']]$, $[[aA']]$ and $[[ae']]$
+  such that $[[DD --> OO']]$ and $[[OO --> OO']]$ and $[[  GG |-G ae' => aA' -| DD  ]]$ and $[[A]] = [[ [OO']aA'  ]]$ and $[[|e|]] = [[|ae'|]]$.
 \end{restatable}
 
 %%% Local Variables:
