@@ -1,0 +1,56 @@
+\section{Simple Extensions and Variants}
+\label{sec:gradual:discussion}
+
+This section considers two simple variations on the presented system.
+The first variation extends the system with a top type, while the
+second variation considers a more declarative formulation using a
+subsumption rule.
+
+\subsection{Top Types}
+\label{sec:gradual:extension-top}
+
+We argued that our definition of consistent subtyping (\Cref{def:decl-conssub})
+generalizes the original definition by \citet{siek2007gradual}. We have shown
+its applicability to polymorphic types, for which \citet{siek2007gradual}
+approach cannot be extended naturally. To strengthen our argument, we show how
+to extend our approach to $[[top]]$ types, which is also not supported by
+\citet{siek2007gradual} approach.
+
+\paragraph{Consistent Subtyping with $\top$.}
+
+In order to preserve the orthogonality between subtyping and consistency, we
+require $[[top]]$ to be a common supertype of all static types, as shown in
+\rref{gpc-s-top}. This rule might seem strange at first glance, since even if we
+remove the requirement $[[A]]~\mathsf{static}$, the rule still seems reasonable.
+However, an important point is that, because of the orthogonality between
+subtyping and consistency, subtyping itself should not contain a potential
+information loss! Therefore, subtyping instances such as $[[unknown <: top]]$
+are not allowed. For consistency, we add the rule that $[[top]]$ is consistent with
+$[[top]]$, which is actually included in the original reflexive rule $[[A ~ A]]$.
+For consistent subtyping, every type is a consistent subtype of $[[top]]$, for
+example, $[[nat -> unknown <~ top]]$.
+
+\begin{mathpar}
+  \renewcommand\ottaltinferrule[4]{\inferrule* {#3} {#4}}
+  \inferrule*[right=\scriptsize{gpc-s-top}]
+  { [[A]]~\mathsf{static}}
+  {[[ dd |-G A <: top ]]}
+  \and
+  \ottdruledconsistXXtop{}
+  \and
+  \renewcommand\ottaltinferrule[4]{\inferrule*[right=\scriptsize{#1}] {#3} {#4}}
+  \ottdrulegpcXXcsXXtop{}
+\end{mathpar}
+It is easy to verify that \Cref{def:decl-conssub} is still equivalent to that in
+\Cref{fig:gradual:decl:conssub} extended with \rref{gpc-cs-top}. That is,
+\Cref{lemma:properties-conssub} holds:
+\begin{restatable}[Extension with $[[top]]$]{proposition}{proptop}
+  \label{prop:top}
+  $[[dd |-G A1 <~ B]]  \Leftrightarrow [[ dd |-G A1 <: A'  ]]$, $[[ A' ~ A'' ]]$, $[[ dd |-G A'' <: B   ]]$ for some $[[A']], [[A'']]$.
+\end{restatable}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

@@ -357,7 +357,7 @@ guarantee. For instance:
 \end{mathpar}
 The left one evaluates to $[[1]]$, whereas its less precise version (right) will give
 a cast error if $[[a]]$ is instantiated to $[[bool]]$ for example.
-In \cref{sec:gradual:advanced-extension}, we will present an extension of the declarative system
+In \Cref{sec:gradual:advanced-extension}, we will present an extension of the declarative system
 that will alleviate the issue.
 
 %%% Local Variables:

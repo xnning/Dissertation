@@ -35,6 +35,7 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4
   | float          ::   :: float
   | bool           ::   :: bool
   | boolu          ::   :: boolu {{ tex \mathsf{Bool}_\unknown }}
+  | top            ::   :: top
   | a              ::   :: tvar
   | A -> B         ::   :: arrow
   | \/ varset . A  ::   :: all
@@ -332,7 +333,8 @@ terminals :: 'terminals_' ::=
   | snd     :: :: snd     {{ tex \mathbf{snd} }}
   | int     :: :: int     {{ tex \mathsf{Int} }}
   | nat     :: :: nat     {{ tex \mathsf{Nat} }}
-  | bool     :: :: bool     {{ tex \mathsf{Bool} }}
+  | bool    :: :: bool    {{ tex \mathsf{Bool} }}
+  | top     :: :: top     {{ tex \top }}
   | float     :: :: float     {{ tex \mathsf{Float} }}
   | notin    ::  :: notin {{ tex \notin       }}
   | fv       ::  :: fv {{ tex \textsc{fv}  }}
@@ -521,6 +523,9 @@ A ~ B ::  :: dconsist :: dconsist_ by
 
 ------- :: refl
 A ~ A
+
+------- :: top
+top ~ top
 
 
 ------------- :: unknownR
@@ -813,6 +818,8 @@ defn
 
 dd |-G A <~ B ::  :: dconsub :: gpc_cs_ by
 
+---------------- :: top
+dd |-G A <~ top
 
 dd, a |-G A1 <~ B
 ----------------- :: forallR
