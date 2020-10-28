@@ -23,9 +23,9 @@ an implementation.
       Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , x : aA]] \mid [[OO , a]] \mid [[OO, evar = at]] \mid [[ OO, mevar]]   $ \\ \bottomrule
     \end{tabular}
 
-    \drules[gpc-ad]{$ [[GG |- aA ]] $}{Well-formedness of types}{int, unknown, tvar, evar, solved, arrow, forall}
+    \drules[gpc-ad]{$ [[GG |-G aA ]] $}{Well-formedness of types}{int, unknown, tvar, evar, solved, arrow, forall}
 
-    \drules[gpc-wf]{$ [[ |- GG ]] $}{Well-formedness of algorithmic contexts}{empty, var, tvar, evar, solved, marker}
+    \drules[gpc-wf]{$ [[ |-G GG ]] $}{Well-formedness of algorithmic contexts}{empty, var, tvar, evar, solved, marker}
   \caption{Syntax and well-formedness of the algorithmic \gpc}
   \label{fig:gradual:algo-syntax}
 \end{figure}
@@ -63,7 +63,7 @@ Occasionally, we will see a context with two \emph{ordered} holes, e.g., $[[GG]]
 The algorithmic system, compared with the declarative system, includes similar
 judgment forms, except that we replace the declarative context $[[dd]]$ with an
 algorithmic context $[[GG]]$ (the \emph{input context}), and add an \emph{output
-  context} $[[DD]]$ after a backward turnstile, e.g., $[[ GG |- aA1 <~ aA2 -| DD
+  context} $[[DD]]$ after a backward turnstile, e.g., $[[ GG |-G aA1 <~ aA2 -| DD
 ]]$ is the judgment form for the algorithmic consistent subtyping. All
 algorithmic rules manipulate input and output contexts in a way that is
 consistent with the notion of \emph{context extension}, which will be described
@@ -80,14 +80,14 @@ possible).
 \begin{figure}
   \centering
 
-    \drules[gpc-as]{$ [[GG |- aA <~ aB -| DD ]] $}{Under input context $[[GG]]$, $[[aA]]$ is a consistent subtype of $[[aB]]$, with output context $[[DD]]$}{tvar, int, evar, unknownL, unknownR, arrow, forallR, forallL,  instL, instR}
+    \drules[gpc-as]{$ [[GG |-G aA <~ aB -| DD ]] $}{Under input context $[[GG]]$, $[[aA]]$ is a consistent subtype of $[[aB]]$, with output context $[[DD]]$}{tvar, int, evar, unknownL, unknownR, arrow, forallR, forallL,  instL, instR}
 
   \caption{Algorithmic consistent subtyping}
   \label{fig:gradual:algo:subtype}
 \end{figure}
 
 \Cref{fig:gradual:algo:subtype} presents the rules of algorithmic consistent
-subtyping $[[GG |- aA1 <~ aA2 -| DD ]]$, which says that under input context
+subtyping $[[GG |-G aA1 <~ aA2 -| DD ]]$, which says that under input context
 $[[GG]]$, $[[aA1]]$ is a consistent subtype of $[[aA2]]$, with output context
 $[[DD]]$. The first five rules do not manipulate contexts, but illustrate how
 contexts are propagated.
@@ -105,7 +105,7 @@ output context of the first premise is used by the second premise, and the
 output context of the second premise is the output context of the conclusion.
 Note that we do not simply check $[[ aA2 <~ aA4 ]]$, but apply $[[TT]]$ (the input
 context of the second premise) to both types (e.g., $[[ [TT]aA2 ]]$). This is to
-maintain an important invariant: whenever $[[ GG |- aA1 <~ aA2 -| DD ]]$ holds,
+maintain an important invariant: whenever $[[ GG |-G aA1 <~ aA2 -| DD ]]$ holds,
 the types $[[aA1]]$ and $[[aA2]]$ are fully applied under input context $[[GG]]$
 (they contain no existential variables already solved in $[[GG]]$). The same
 invariant applies to every algorithmic judgment.
@@ -143,16 +143,16 @@ existential variables, but leave the real work to the instantiation judgment.
 
 \begin{figure}
   \centering
-    \drules[gpc-instl]{$ [[ GG |- evar <~~ aA -| DD   ]] $}{Under input context $[[GG]]$, instantiate $[[evar]]$ such that $[[evar <~ aA]]$, with output context $[[DD]]$}{solve, solveU, reach, forallR, arr}
+    \drules[gpc-instl]{$ [[ GG |-G evar <~~ aA -| DD   ]] $}{Under input context $[[GG]]$, instantiate $[[evar]]$ such that $[[evar <~ aA]]$, with output context $[[DD]]$}{solve, solveU, reach, forallR, arr}
 
-    \drules[gpc-instr]{$ [[ GG |- aA <~~ evar -| DD   ]] $}{Under input context $[[GG]]$, instantiate $[[evar]]$ such that $[[aA <~ evar]]$, with output context $[[DD]]$}{solve, solveU, reach, forallL, arr}
+    \drules[gpc-instr]{$ [[ GG |-G aA <~~ evar -| DD   ]] $}{Under input context $[[GG]]$, instantiate $[[evar]]$ such that $[[aA <~ evar]]$, with output context $[[DD]]$}{solve, solveU, reach, forallL, arr}
 
   \caption{Algorithmic instantiation}
   \label{fig:gradual:algo:instantiate}
 \end{figure}
 
 
-Two symmetric judgments $[[ GG |- evar <~~ aA -| DD ]]$ and $[[ GG |- aA <~~
+Two symmetric judgments $[[ GG |-G evar <~~ aA -| DD ]]$ and $[[ GG |-G aA <~~
 evar -| DD ]]$ defined in \cref{fig:gradual:algo:instantiate} instantiate
 unsolved existential variables. They read ``under input context $[[GG]]$,
 instantiate $[[evar]]$ to a consistent subtype (or supertype) of $[[aA]]$, with
@@ -198,11 +198,11 @@ evar1 ]]$ switches to the other instantiation judgment.
 
 \begin{figure}
   \centering
-    \drules[gpc-inf]{$ [[ GG |- ae => aA -| DD ]] $}{Under input context $[[GG]]$, $[[ae]]$ infers output type $[[aA]]$, with output context $[[DD]]$}{var, int, anno, lamann, lam, let, app}
+    \drules[gpc-inf]{$ [[ GG |-G ae => aA -| DD ]] $}{Under input context $[[GG]]$, $[[ae]]$ infers output type $[[aA]]$, with output context $[[DD]]$}{var, int, anno, lamann, lam, let, app}
 
-    \drules[gpc-chk]{$ [[ GG |- ae <= aA -| DD ]] $}{Under input context $[[GG]]$, $[[ae]]$ checks against input type $[[aA]]$, with output context $[[DD]]$}{lam, gen, sub}
+    \drules[gpc-chk]{$ [[ GG |-G ae <= aA -| DD ]] $}{Under input context $[[GG]]$, $[[ae]]$ checks against input type $[[aA]]$, with output context $[[DD]]$}{lam, gen, sub}
 
-    \drules[gpc-am]{$ [[ GG |- aA |> aA1 -> aA2 -| DD ]] $}{Under input context $[[GG]]$, $[[aA]]$ matches output type $[[aA1 -> aA2]]$, with output context $[[DD]]$}{forall, arr, unknown, var}
+    \drules[gpc-am]{$ [[ GG |-G aA |> aA1 -> aA2 -| DD ]] $}{Under input context $[[GG]]$, $[[aA]]$ matches output type $[[aA1 -> aA2]]$, with output context $[[DD]]$}{forall, arr, unknown, var}
 
   \caption{Algorithmic typing}
   \label{fig:gradual:algo:typing}
@@ -212,10 +212,10 @@ We now turn to the algorithmic typing rules in \Cref{fig:gradual:algo:typing}.
 Because general type inference for System F is
 undecidable~\citep{F:undecidable}, our algorithmic system uses bidirectional
 type checking to accommodate (first-class) polymorphism. Traditionally, two
-modes are employed in bidirectional systems: the checking mode $[[ GG |- ae <=
+modes are employed in bidirectional systems: the checking mode $[[ GG |-G ae <=
 aA -| TT ]]$, which takes a term $[[ae]]$ and a type $[[aA]]$ as input, and
 ensures that the term $[[ae]]$ checks against $[[aA]]$; the inference mode $[[
-GG |- ae => aA -| TT ]]$, which takes a term $[[ae]]$ and produces a type
+GG |-G ae => aA -| TT ]]$, which takes a term $[[ae]]$ and produces a type
 $[[aA]]$. We first discuss rules in the inference mode.
 
 \Rref{gpc-inf-var} and \rref{gpc-inf-int} do not generate any new information
@@ -224,11 +224,11 @@ to the checking mode in the premise.
 
 In \rref{gpc-inf-lamann}, we generate a fresh existential variable $[[evarb]]$
 for the function codomain, and check the function body against $[[evarb]]$. Note
-that it is tempting to write $[[ GG, x : aA |- ae => aA2 -| DD, x : aA, TT ]]$ as
+that it is tempting to write $[[ GG, x : aA |-G ae => aA2 -| DD, x : aA, TT ]]$ as
 the premise (in the hope of better matching its declarative counterpart
 \rref{gpc-lamann}), which has a subtle consequence. Consider the expression $[[ \x :
 int. \y . y ]]$. Under the new premise, this is untypable because of $[[ empty
-|- \x : int. \y . y => int -> evar -> evar -| empty ]]$ where $[[evar]]$ is not
+|-G \x : int. \y . y => int -> evar -> evar -| empty ]]$ where $[[evar]]$ is not
 found in the output context. This explains why we put $[[evarb]]$ \emph{before}
 $ [[ x : aA ]] $ so that it remains in the output context $[[DD]]$.
 \Rref{gpc-inf-lam}, which corresponds to \rref{gpc-lam}, one of the guessing rules, is
@@ -240,7 +240,7 @@ $[[evarb]]$. \Rref{gpc-inf-let} is similar to \rref{gpc-inf-lamann}.
 \paragraph{Algorithmic Matching.}
 
 \Rref{gpc-inf-app} deserves attention. It relies on the algorithmic matching
-judgment $[[ GG |- aA |> aA1 -> aA2 -| DD ]]$. The matching judgment
+judgment $[[ GG |-G aA |> aA1 -> aA2 -| DD ]]$. The matching judgment
 algorithmically synthesizes an arrow type from an arbitrary type.
 \Rref{gpc-am-forall} replaces $a$ with a fresh existential variable $[[evar]]$,
 thus eliminating guessing. \Rref{gpc-am-arr} and \rref{gpc-am-unknown} correspond directly to
