@@ -358,6 +358,7 @@ terminals :: 'terminals_' ::=
   | |-AP    :: :: turnstile4 {{ tex \vdash^\mathit{AP} }}
   | |-F     :: :: turnstileF {{ tex \vdash^\mathit{F} }}
   | |-G     :: :: turnstileG {{ tex \vdash^\mathit{G} }}
+  | |-Gm    :: :: turnstilem {{ tex \vdash^\mathit{G}_{m} }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -433,6 +434,7 @@ formula :: formula_ ::=
   | A `-> B   :: :: cast
   | < A `-> B >   :: :: cast2
   | dd |-G e : A  ::  :: dtyping_without
+  | dd |-Gm e : A  ::  :: dtyping_m
 
 
 subrules

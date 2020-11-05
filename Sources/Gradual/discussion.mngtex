@@ -49,6 +49,191 @@ It is easy to verify that \Cref{def:decl-conssub} is still equivalent to that in
   $[[dd |-G A1 <~ B]]  \Leftrightarrow [[ dd |-G A1 <: A'  ]]$, $[[ A' ~ A'' ]]$, $[[ dd |-G A'' <: B   ]]$ for some $[[A']], [[A'']]$.
 \end{restatable}
 
+We extend the definition of concretization (\cref{def:concret}) with $[[top]]$
+by adding another equation $\gamma([[top]]) = \{[[top]]\}$. Note that
+\citet{castagna2017gradual} also have this equation in their calculus. It is
+easy to verify that \cref{lemma:coincide-agt} still holds:
+
+\begin{restatable}[Equivalent to AGT on $\top$]{proposition}{propagttop}
+  \label{prop:agt-top}
+  $[[A1 <~ B]]$ if and only if $[[A1]] \agtconssub [[B]]$.
+\end{restatable}
+
+\paragraph{\citeauthor{siek2007gradual}'s Definition of Consistent Subtyping Does Not Work for $\top$.}
+
+As with the analysis in \cref{sec:gradual:towards-conssub}, $[[nat -> unknown <~
+top]]$ only holds when we first apply consistency, then subtyping. However we
+cannot find a type $[[A]]$ such that $[[nat -> unknown <: A ]]$ and $[[A ~ top]]$.
+The following diagram depicts the situation:
+
+\begin{center}
+  \begin{tikzpicture}
+    \matrix (m) [matrix of math nodes,row sep=3em,column sep=4em,minimum width=2em]
+    {
+      \emptyset & [[top]] \\
+      [[nat -> unknown]] &
+      [[nat -> nat]] \\};
+
+    \path[-stealth]
+    (m-2-1) edge node [left] {$[[<:]]$} (m-1-1)
+    (m-2-2) edge node [left] {$[[<:]]$} (m-1-2);
+
+    \draw
+    (m-1-1) edge node [above] {$[[~]]$} (m-1-2)
+    (m-2-1) edge node [below] {$[[~]]$} (m-2-2);
+  \end{tikzpicture}
+\end{center}
+
+\noindent Additionally we have a similar problem in
+extending the restriction operator: \emph{non-structural} masking between
+$[[int -> unknown]]$ and $[[top]]$ cannot be easily achieved.
+
+Note that both the top and universally quantified types can be seen as special
+cases of intersection types. Indeed, top is the intersection of the empty set,
+while a universally quantified type is the intersection of the infinite set of
+its instantiations \citep{davies:intersection}. Recall from
+\cref{sec:gradual:agt} that \citet{castagna2017gradual} shows that consistent
+subtyping from AGT works well for intersection types, and our definition
+coincides with AGT (\cref{lemma:coincide-agt} and \cref{prop:agt-top}). We thus
+believe that our definition is compatible with conventional binary intersection
+types as well. Yet, a rigorous formalization would be needed to substantiate
+this belief.
+
+\subsection{A More Declarative Type System}
+\label{sec:gradual:variant}
+
+In \cref{sec:gradual:type-system} we present our declarative system in terms of the
+matching and consistent subtyping judgments. The rationale behind this design
+choice is that the resulting declarative system combines subtyping and type
+consistency in the application rule, thus making it easier to design an
+algorithmic system accordingly. Still, one may wonder if it is possible to
+design a more declarative specification. For example, even though we mentioned
+that the subsumption rule is incompatible with consistent subtyping, it might be
+possible to accommodate a subsumption rule for normal subtyping (instead of
+consistent subtyping). In this section, we discuss an alternative for the
+design of the declarative system.
+
+\paragraph{Wrong Design}
+A naive design that does not work is to replace \rref{gpc-app} in
+\Cref{fig:gradual:decl-typing} with the following two rules:
+
+\begin{mathpar}
+  \inferrule*[lab=gpc-v-sub]{
+    [[dd |-G e : A]]
+    \\ [[A <: B]]
+  }{
+    [[dd |-G e : B]]
+  }
+
+  \inferrule*[lab=gpc-v-app1]{
+    [[dd |-G e1 : A]]
+    \\ [[dd |-G e2 : A1]]
+    \\ [[A ~ A1 -> A2]]
+  }{
+    [[dd |-G e1 e2 : A2]]
+  }
+\end{mathpar}
+
+\Rref{gpc-v-sub} is the standard subsumption rule: if an expression $[[e]]$ has
+type $[[A]]$, then it can be assigned some type $[[B]]$ that is a supertype of $[[A]]$.
+\Rref{gpc-v-app1} first infers that $[[e1]]$ has type $[[A]]$, and $[[e2]]$ has type $[[A1]]$,
+then it finds some $[[A2]]$ so that $[[A]]$ is consistent with $[[A1 -> A2]]$.
+
+There would be two obvious benefits of this variant if it did work:
+firstly this approach closely resembles
+the traditional declarative type systems for calculi with subtyping; secondly it
+saves us from discussing various forms of $[[A]]$ in \rref{gpc-v-app1}, leaving the job
+to the consistency judgment.
+
+The design is wrong because of the information loss caused by the choice of
+$[[A2]]$ in \rref{gpc-v-app1}. Suppose we have $[[dd]] [[|-G]] \mathsf{plus} : [[nat ->
+nat -> nat]]$, then we can apply it to $1$ to get
+\[
+  \inferrule*[right=gpc-v-app1]{[[dd]] [[|-G]] \mathsf{plus} : [[nat -> nat -> nat]]
+    \\ [[dd |-G 1 : nat]]
+    \\ [[nat -> nat -> nat ~ nat -> unknown -> nat]]}
+  {[[dd]] [[|-]] \mathsf{plus}~1 : [[unknown -> nat]]}
+\]
+
+Further applying it to $[[true]]$ we get
+
+\[
+  \inferrule*[right=gpc-v-app1]
+  {[[dd]] [[|-G]] \mathsf{plus}~1 : [[unknown -> nat]]
+    \\ [[dd |-G true : bool]]
+    \\ [[unknown -> nat ~ bool -> nat]]}
+  {[[dd]] [[|-]] \mathsf{plus}~1~[[true]] : [[nat]]}
+\]
+which is obviously wrong! The type consistency
+in \rref{gpc-v-app1} causes information loss for both the argument type $[[A1]]$ and
+the return type $[[A2]]$. The problem is that information of $[[A2]]$ can get lost again if it
+appears in further applications.
+The moral of the story is that we should be very
+careful when using type consistency. We hypothesize that it is inevitable to do
+case analysis for the type of the function in an application (i.e., $[[A]]$ in
+\rref{gpc-v-app1}).
+
+\paragraph{Proper Declarative Design}
+
+The proper design refines the first variant by using a matching judgment to
+carefully distinguish two cases for the typing result of $[[e1]]$ in
+\rref{gpc-v-app1}: (1) when it is an arrow type, and (2) when it is an unknown
+type. This variant replaces \rref{gpc-app} in \Cref{fig:gradual:decl-typing} with the
+following rules:
+
+\begin{mathpar}
+  \inferrule*[lab=gpc-v-sub]{
+    [[dd |-G e : A]]
+    \\ [[A <: B]]
+  }{
+    [[dd |-G e : B]]
+  }
+  \and
+  \inferrule*[lab=gpc-v-app2]{
+    [[dd |-G e : A]]
+    \\ [[dd |-G A |> A1 -> A2]]
+    \\ [[dd |-G e2 : A3]]
+    \\ [[A1 ~ A3]]
+  }{
+    [[dd |-G e1 e2 : A2]]
+  }
+  \and
+  \inferrule{
+  }{
+    [[dd |-G A1 -> A2 |> A1 -> A2]]
+  }
+  \and
+  \inferrule{
+  }{
+    [[dd |-G unknown |> unknown -> unknown]]
+  }
+\end{mathpar}
+
+\Rref{gpc-v-sub} is the same as in the first variant. In \rref{gpc-v-app2}, we
+infer that $[[e1]]$ has type $[[A]]$, and use the matching judgment to get an
+arrow type $[[A1 -> A2]]$. Then we need to ensure that the argument type
+$[[A3]]$ is \emph{consistent with} (rather than a consistent subtype of)
+$[[A1]]$, and use $[[A2]]$ as the result type of the application. The matching
+judgment only deals with two cases, as polymorphic types are handled by
+\rref{gpc-v-sub}. These rules are closely related to the ones in
+\citet{siek2006gradual} and \citet{siek2007gradual}.
+
+The more declarative nature of this system also implies that it is highly non-syntax-directed,
+and it does not offer any insight into combining subtyping and
+consistency. We have proved in Coq the following lemmas to establish soundness
+and completeness of this system with respect to our original system (to avoid
+ambiguity, we use the notation $[[|-Gm]]$ to indicate the more declarative
+version):
+
+\begin{lemma}[Completeness of $[[|-Gm]]$]
+  If $[[dd |-G e : A]]$, then $[[dd |-Gm e : A]]$.
+\end{lemma}
+
+\begin{lemma}[Soundness of $[[|-Gm]]$]
+  If $[[dd |-Gm e : A]]$, then there exists some $B$,
+  such that $[[dd|-G e : B]]$ and $[[dd|-G B <: A]]$.
+\end{lemma}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
