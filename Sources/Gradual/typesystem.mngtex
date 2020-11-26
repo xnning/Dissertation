@@ -67,7 +67,7 @@ subsumption rule based on normal subtyping can be found in
 \Cref{sub:gradual:variant}.
 
 \subsection{Type-directed Translation}
-\label{sec:type:trans}
+\label{sec:gradual:type:trans}
 
 We give the dynamic semantics of our language by translating it to \pbc\citep{amal:blame}. Below
 we show a subset of the terms in \pbc that are used in the translation:
@@ -250,7 +250,7 @@ by type mismatch. Therefore, By \cref{lemma:erase} coherence follows as a coroll
 \end{restatable}
 
 \subsection{Correctness Criteria}
-\label{sec:criteria}
+\label{sec:gradual:criteria}
 
 \citet{siek:criteria} present a set of properties, the \emph{refined criteria},
 that a well-designed gradual typing calculus must have. Among all the criteria,

@@ -1,0 +1,32 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\chapter{Restoring the Dynamic Gradual Guarantee with Type Parameters}
+\label{chap:Dynamic}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+In \Cref{sec:gradual:type:trans} we have seen an example where a single source expression could
+produce two different target expressions with different runtime behaviors. As we
+explained, this is due to the guessing nature of the declarative system, and,
+from the (source) typing point of view, no guessed type is particularly better than 
+any other. As a consequence, this breaks the dynamic gradual guarantee as discussed in \cref{sec:gradual:criteria}.
+
+To alleviate this situation, we introduce \textit{static type parameters}, which
+are placeholders for monotypes, and \textit{gradual type parameters}, which are
+placeholders for monotypes that are consistent with the unknown type. The
+concept of static type parameters and gradual type parameters in the context of
+gradual typing was first introduced by \citet{garcia:principal}, and later
+played a central role in the work of \citet{yuu2017poly}. In our type system,
+type parameters mainly help capture the notion of \textit{representative
+  translations}, and should not appear in a source program.
+With them we are able to recast the dynamic gradual guarantee in terms
+of representative translations, and to prove that every well-typed source expression
+possesses at least one representative translation. With a
+coherence conjecture regarding representative translations, the dynamic gradual
+guarantee of our extended source language now can be reduced to that of \pbc,
+which, at the time of writing, is still an open question. TODO: not open anymore?
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Thesis"
+%%% org-ref-default-bibliography: "../Thesis.bib"
+%%% End:
