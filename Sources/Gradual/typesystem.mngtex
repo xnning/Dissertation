@@ -163,7 +163,7 @@ where the type of $f$ is instantiated to $[[ int -> int ]]$ and $[[ bool -> int 
                                (\hlmath{[[<unknown `-> bool>]]}~[[x]]))
 \end{align*}
 %
-If we apply $[[ \x : unknown . f x ]]$ to $3$, which is fine since the function
+If we apply $[[ \x:unknown. f x ]]$ to $3$, which is fine since the function
 can take any input, the first translation runs smoothly in \pbc, while the
 second one will raise a cast error ($[[int]]$ cannot be cast to $[[bool]]$).
 Similarly, if we apply it to $[[true]]$, then the second succeeds while the
@@ -334,7 +334,7 @@ is given at the bottom of \Cref{fig:gradual:lessp}.
 \paragraph{The Dynamic Gradual Guarantee.}
 
 Besides the static criteria, there is also a criterion concerning the dynamic
-semantics, known as \emph{the dynamic gradual guarantee}~\citep{siek2015refined}.
+semantics, known as \emph{the dynamic gradual guarantee}~\citep{siek:criteria}.
 
 \begin{definition}[Dynamic Gradual Guarantee]
   Suppose $[[ e' <<= e ]]$, and $ [[ empty |-G e : A ~~> pe]] $ and

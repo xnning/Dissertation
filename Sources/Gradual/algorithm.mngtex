@@ -3,11 +3,11 @@
 
 In this section we give a bidirectional account of the algorithmic type system
 that implements the declarative specification. The algorithm is largely inspired
-by the algorithmic bidirectional system of DK \citet{DK}. However our
+by the algorithmic bidirectional system of DK \citep{DK}. However our
 algorithmic system differs from theirs in three aspects: (1) the addition of the
 unknown type $\unknown$; (2) the use of the matching judgment; and 3) the
 approach of \emph{gradual inference only producing static
-  types}~\citep{garcia2015principal}. We then prove that our algorithm is both
+  types}~\citep{garcia:principal}. We then prove that our algorithm is both
 sound and complete with respect to the declarative type system. We also provide
 an implementation.
 
@@ -273,7 +273,7 @@ the decidability of the typing judgment, we need to show that the instantiation
 and consistent subtyping judgments are decidable. The proof strategy mostly
 follows that of the DK system. Here only highlights of the proofs are given.
 
-\paragraph{Decidability of Instantiation}
+\paragraph{Decidability of Instantiation.}
 
 The basic idea is that we need to show $[[aA]]$ in the instantiation judgments
 $[[GG |-G evar <~~ aA -| DD ]]$ and $[[GG |-G aA <~~ evar -| DD]]$ always gets
@@ -297,7 +297,7 @@ input context when needed.
   \end{enumerate}
 \end{restatable}
 
-\paragraph{Decidability of Algorithmic Consistent Subtyping}
+\paragraph{Decidability of Algorithmic Consistent Subtyping.}
 
 Proving decidability of the algorithmic consistent subtyping is a bit more
 involved, as the induction measure consists of several parts.
@@ -311,10 +311,9 @@ We measure the judgment $[[GG |-G aA1 <~ aA2 -| DD]]$ lexicographically by
 \end{enumerate}
 Notice that because of our gradual setting, we also need to measure the number
 of unknown types (M2). This is a key difference from the DK system.
-We refer the reader to \cref{app:decidable} for more details.
 For (M4), we
 use \emph{contextual size}---the size of well-formed types under certain
-contexts, which penalizes solved variables (*).
+contexts, which penalizes solved variables $(*)$.
 
 \begin{definition}[Contextual Size] \leavevmode
   \begin{center}
@@ -337,7 +336,7 @@ contexts, which penalizes solved variables (*).
   it is decidable whether there exists $[[DD]]$ such that $[[ GG |-G aA1 <~ aA2 -| DD    ]]$.
 \end{restatable}
 
-\paragraph{Decidability of Algorithmic Typing}
+\paragraph{Decidability of Algorithmic Typing.}
 
 Similar to proving decidability of algorithmic consistent subtyping, the key is
 to come up with a correct measure. Since the typing rules depend on the matching

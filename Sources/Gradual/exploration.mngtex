@@ -353,9 +353,10 @@ consistency, and subtyping.
 
 \paragraph{Definition of Consistent subtyping.} From the above discussion, we
 are ready to modify \cref{def:old-decl-conssub}, and adapt it to our
-notation\footnote{For readers who are familiar with category theory, this
-  defines consistent subtyping as the least subtyping bimodule extending
-  consistency.}:
+notation:
+% \footnote{For readers who are familiar with category theory, this
+%   defines consistent subtyping as the least subtyping bimodule extending
+%   consistency.}:
 
 \begin{definition}[Consistent Subtyping]
   \label{def:decl-conssub}
@@ -438,13 +439,15 @@ types. Central to their approach is the so-called \emph{concretization}
 function. For simple types, a concretization $\gamma$ from gradual types to a
 set of static types is defined as follows:
 
-\begin{definition}[Concretization]
+\begin{definition}[Concretization]\leavevmode
   \label{def:concret}
-  \begin{mathpar}
-    \gamma([[int]]) = \{[[int]]\} \\
-    \gamma([[A1 -> B]]) = \{[[A1' -> B']] \mid [[A1']] \in \gamma([[A1]]), [[B']] \in \gamma([[B]])\} \\
-    \gamma([[unknown]]) = \{\text{All static types}\}
-  \end{mathpar}
+  \begin{center}
+    \begin{tabular}{lll}
+    $\gamma([[int]])     $& = & $\{[[int]]\}$ \\
+    $\gamma([[A1 -> B]]) $& = & $\{[[A1' -> B']] \mid [[A1']] \in \gamma([[A1]]), [[B']] \in \gamma([[B]])\}$ \\
+    $\gamma([[unknown]]) $& = & $\{\text{All static types}\}$
+    \end{tabular}
+  \end{center}
 \end{definition}
 
 Based on the concretization function, subtyping between static types can be
@@ -478,7 +481,7 @@ be algorithmically computed by also accounting for top and bottom types.
 
 \emph{Directed consistency}~\citep{Jafery:2017:SUR:3093333.3009865} is defined
 in terms of precision and subtyping:
-
+%
 \[
   \inferrule{
     [[A1']] \lessp [[A1]]

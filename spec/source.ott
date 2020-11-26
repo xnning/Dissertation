@@ -107,8 +107,8 @@ evar {{ tex \widehat{\alpha} }}, evarb {{ tex \widehat{\beta} }} :: 'evar_' ::=
 
 % marker
 ma :: 'ma_' ::=
-  | mevar :: :: mevar   {{ tex \blacktriangleright_{ \widehat{a} } }}
-  | mevarb :: :: mevarb   {{ tex \blacktriangleright_{ \widehat{b} } }}
+  | mevar :: :: mevar   {{ tex \blacktriangleright_{ \widehat{\alpha} } }}
+  | mevarb :: :: mevarb   {{ tex \blacktriangleright_{ \widehat{\beta} } }}
   | msa :: :: msa  {{ tex \blacktriangleright_{ \widehat{a}_S } }}
   | msb :: :: msb  {{ tex \blacktriangleright_{ \widehat{b}_S } }}
 

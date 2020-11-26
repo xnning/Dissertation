@@ -113,7 +113,7 @@ possible to accommodate a subsumption rule for normal subtyping (instead of
 consistent subtyping). In this section, we discuss an alternative for the
 design of the declarative system.
 
-\paragraph{Wrong Design}
+\paragraph{Wrong Design.}
 A naive design that does not work is to replace \rref{gpc-app} in
 \Cref{fig:gradual:decl-typing} with the following two rules:
 
@@ -173,7 +173,7 @@ careful when using type consistency. We hypothesize that it is inevitable to do
 case analysis for the type of the function in an application (i.e., $[[A]]$ in
 \rref{gpc-v-app1}).
 
-\paragraph{Proper Declarative Design}
+\paragraph{Proper Declarative Design.}
 
 The proper design refines the first variant by using a matching judgment to
 carefully distinguish two cases for the typing result of $[[e1]]$ in
