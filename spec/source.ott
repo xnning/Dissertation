@@ -206,7 +206,7 @@ dexp, e :: 'dtrm_' ::=
   | unfold [ A ]       ::   :: unfold  {{ tex [[unfold]]_{[[A]]} }}
   | \ x . e          ::   :: abs
   | \ x : A . e      ::   :: absan
-  | e1 e2            ::   :: app
+  | e1 e2            ::   :: app {{ tex [[e1]]~[[e2]] }}
   | let x = e1 in e2 ::   :: let
   | let x : A = e1 in e2 ::   :: letann
   | ( e )            :: S :: paren
@@ -228,7 +228,7 @@ aexp, ae {{ tex e }} :: 'atrm_' ::=
   | n                  ::   :: lit
   | \ x . ae           ::   :: abs
   | \ x : aA . ae      ::   :: absan
-  | ae1 ae2            ::   :: app
+  | ae1 ae2            ::   :: app {{ tex [[ae1]]~[[ae2]] }}
   | ae : aA            ::   :: anno
   | let x = ae1 in ae2 ::   :: let
   | ( ae )             :: S :: paren
@@ -309,7 +309,7 @@ pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }} :: 'ptrm_' ::=
   | f              ::   :: f
   | n              ::   :: lit
   | \ x : A . pe   ::   :: absann
-  | pe1 pe2        ::   :: app
+  | pe1 pe2        ::   :: app {{ tex [[pe1]]~[[pe2]] }}
   | /\ a . pe      ::   :: tabs
   | < A `-> B > pe ::   :: cast
   | ( pe )         :: S :: paren
