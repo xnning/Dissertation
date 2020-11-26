@@ -2,8 +2,6 @@
 
 \subsection{Combining  Application and Checking Modes}
 
-\ningning{maybe move to future work}
-
 Although the application mode provides us with alternative design choices in a
 bi-directional type system, a checking mode can still be \textit{easily} added.
 One motivation for the checking mode would be annotated expressions $[[e:A]]$,
@@ -222,7 +220,7 @@ expression for $\mathbf{type}~[[a = int]]~\mathbf{in}~[[\x:a. x + 1]]$.
 \subsection{Dependent Type Systems}
 \label{subsec:dep-type}
 
-\ningning{maybe move to future work}
+\ningning{Move to future work.}
 
 One remark about the application mode is that the same idea is possibly
 applicable to systems with advanced features, where type inference is

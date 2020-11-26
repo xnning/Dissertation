@@ -57,7 +57,7 @@ explicit instantiation.
 \end{figure}
 
 The type-directed translation of subtyping is shown in
-\Cref{fig:AP:subtrans}. The translation follows the subtyping relations from
+\Cref{fig:AP:sub:trans}. The translation follows the subtyping relations from
 \Cref{fig:AP:static}, but adds a new component. The judgment $[[|-AP A1 <: A2
 ~~> ef]]$ is read as: if $[[|-AP A1 <: B]]$ holds, it can be translated to a
 coercion function $[[ef]]$ in System F. The coercion function produced by

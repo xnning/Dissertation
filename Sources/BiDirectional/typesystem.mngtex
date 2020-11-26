@@ -1,4 +1,5 @@
 \section{Declarative System}
+\label{sec:AP:declarative}
 
 This section first presents the declarative, \emph{syntax-directed}
 specification of \ap. The interesting aspects about the new type system
@@ -106,8 +107,8 @@ continues with the rest of the application context. This is possible, because
 the expression $[[\x. e]]$ is being applied to an argument of type $[[A1]]$, which
 is the type at the top of the application context stack.
 
-For lambda abstraction with annotations $[[\x:A1. e]]$, if the and the
-application context has $[[A2]]$, then \rref{ap-app-lamann} first checks that
+For lambda abstraction with annotations $[[\x:A1. e]]$, if the
+application context has type $[[A2]]$, then \rref{ap-app-lamann} first checks that
 $[[A2]]$ is a subtype of $[[A1]]$ before putting $[[x:A1]]$ in the typing
 context. However, note that it is always possible to remove annotations in an
 abstraction if it has been applied to some arguments.
@@ -155,7 +156,7 @@ e2]]$) to $[[(\x. e2) e1]]$, we have the following derivation:
 
 \noindent The type $[[A2]]$ is now pushed into application context in
 \rref{ap-app-app}, and then assigned to $[[x]]$ in \rref{ap-app-lam}. Comparing
-this with the typing derivations for let expressions, we now have same
+this with the typing derivations for let expressions, we now have the same
 preconditions. Thus we can see that the rules in \Cref{fig:AP:static} are
 sufficient to express an HM-style polymorphic let construct.
 

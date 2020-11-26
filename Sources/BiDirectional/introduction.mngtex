@@ -152,7 +152,7 @@ of expressions that can be applied, and they should have application mode rules.
 However literals or pairs cannot be applied and should have inference rules. For
 example, type checking pairs would simply have the inference mode.
 Nevertheless elimination rules of pairs could have non-empty application
-contexts (see Section TODO for details). In the application mode,
+contexts (see \Cref{sec:AP:pairs} for details). In the application mode,
 arguments are always inferred first in applications and propagated through
 application contexts. An empty application context means that an expression is
 not being applied to anything, which allows us to model the inference mode as a
