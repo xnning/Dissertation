@@ -1,3 +1,5 @@
+\DeclareMathSymbol{\qm}{\mathalpha}{operators}{"3F}
+
 % General
 \newcommand{\code}[1]{\texttt {#1}}
 \newcommand{\highlight}[1]{\colorbox{yellow}{#1}}
@@ -6,7 +8,7 @@
 \newcommand{\turns}{\vdash}
 
 % PL
-\newcommand{\unknown}{\star}
+\newcommand{\unknown}{\mathit{\qm}}
 \newcommand{\subst}[2]{\lbrack #1 / #2 \rbrack}
 \newcommand{\concatOp}{+\kern-1.3ex+\kern0.8ex}  % http://tex.stackexchange.com/a/4195/73122
 \newcommand{\mask}[2]{{#1}|_{#2}}

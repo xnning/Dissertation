@@ -348,7 +348,7 @@ terminals :: 'terminals_' ::=
   | fold      :: :: fold   {{ tex \mathbf{fold} }}
   | unfold      :: :: unfold   {{ tex \mathbf{unfold} }}
   | .       :: :: dot     {{ tex .\, }}
-  | unknown :: :: unknown {{ tex \star }}
+  | unknown :: :: unknown {{ tex \mathit{\qm} }}
   | question ::  :: question {{ tex \mathit{?} }}
   | empty   :: :: empty   {{ tex \bullet }}
   | |-      :: :: turnstile {{ tex \vdash }}
