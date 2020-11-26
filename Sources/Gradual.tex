@@ -10,13 +10,14 @@ types \`a la System F also induce a subtyping relation that relates
 polymorphic types to their instantiations. However
 \citeauthor{siek2007gradual}'s definition is not adequate for polymorphic
 subtyping.
-
 This section first proposes a generalization of consistent subtyping
 (\Cref{sec:gradual:exploration}) that is adequate for polymorphic subtyping, and
 subsumes the original definition by \citeauthor{siek2007gradual}. The new
 definition of consistent subtyping provides novel insights with respect to
 previous polymorphic gradual type systems, which did not employ consistent
-subtyping. We then present \gpc, a gradually typed calculus for implicit
+subtyping.
+
+We then present \gpc, a gradually typed calculus for implicit
 higher-rank polymorphism that uses our new notion of consistent subtyping. We
 develop both declarative (\Cref{sec:gradual:type-system}) and bi-directional
 algorithmic versions (\Cref{sec:gradual:algorithm}) for the type system. The

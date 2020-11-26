@@ -84,6 +84,7 @@ signature using checking mode in bi-directional type checking.
 \end{figure}
 
 \subsection{Declarative System}
+\label{sec:DK:declarative}
 
 \paragraph{Syntax.}
 

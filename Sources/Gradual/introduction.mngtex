@@ -170,7 +170,7 @@ general case they require recursive types, which System F does not support.
 However, with gradual typing, we can remove the need for recursive types, thus
 enabling Scott encodings in our calculus.
 
-\paragraph{A Scott Encoding of Parametric Lists}
+\paragraph{A Scott Encoding of Parametric Lists.}
 Consider for instance the typed
 Scott encoding of parametric lists in a system with implicit polymorphism:
 \begin{align*}
