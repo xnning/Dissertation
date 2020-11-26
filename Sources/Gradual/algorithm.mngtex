@@ -373,8 +373,8 @@ independence from typing) of adopting the matching judgment.
   \end{enumerate}
 \end{restatable}
 
-\section{Soundness and Completeness}
-\label{sec:gradual:sound:complete}
+\subsection{Context Extension}
+\label{sec:gradual:ctxt:extension}
 
 To be confident that our algorithmic type system and the declarative type system
 agree with each other, we need to prove that the algorithmic rules are sound and
@@ -383,8 +383,6 @@ formal statements of the soundness and completeness theorems, we need a
 meta-theoretical device, called \emph{context extension}~\citep{DK}, to capture a
 notion of information increase from input contexts to output contexts.
 
-\subsection{Context Extension}
-\label{sec:gradual:ctxt:extension}
 
 A context extension judgment $[[ GG --> DD ]]$ reads ``$[[GG]]$ is extended
 by $[[DD]]$''. Intuitively, this judgment says that $[[DD]]$ has at least as
