@@ -1,0 +1,279 @@
+
+\section{Declarative Type System}
+\label{sec:type-param}
+
+The new syntax of types is given at the top of \Cref{fig:gradual:exd:type}, with
+the differences highlighted. In addition to the types of
+\Cref{fig:gradual:decl:subtyping}, we add \emph{static type parameters}
+$[[static]]$, and \emph{gradual type parameters} $[[gradual]]$. Both kinds of
+type parameters are monotypes. The addition of type parameters, however, leads
+to two new syntactic categories of types. \emph{Castable types} $[[gc]]$
+represent types that can be cast from or to $[[unknown]]$. It includes all
+types, except those that contain static type parameters. \emph{Castable
+monotypes} $[[tc]]$ are those castable types that are also monotypes.
+
+\begin{figure}[t]
+  \centering
+  \begin{small}
+    \begin{tabular}{lrcl} \toprule
+      Types & $[[A]], [[B]]$ & \syndef & $[[int]] \mid [[a]] \mid [[A -> B]] \mid [[\/ a. A]] \mid [[unknown]] \mid \hlmath{[[static]] \mid [[gradual]]} $ \\
+      Monotypes & $[[t]], [[s]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[t -> s]] \mid \hlmath{[[static]] \mid [[gradual]]}$ \\
+      \hl{Castable Types} & $[[gc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[gc1 -> gc2]] \mid [[\/ a. gc]] \mid [[unknown]] \mid [[gradual]] $ \\
+      \hl{Castable Monotypes} & $[[tc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[tc1 -> tc2]] \mid [[gradual]]$ \\
+
+      \bottomrule
+    \end{tabular}
+
+    \begin{drulepar}[gpc-cs]{$ [[dd |-G A <~ B ]] $}{Consistent Subtyping}{}
+      \drule{tvar}
+      \drule{int}
+      \drule{arrow}
+      \drule{forallR}
+      \drule{forallL}
+      \hlmath{\drule{unknownLL}} \and
+      \hlmath{\drule{unknownRR}} \and
+      \hlmath{\drule{spar}} \and
+      \hlmath{\drule{gpar}}
+    \end{drulepar}
+  \end{small}
+  \caption{Syntax of types, and consistent subtyping in the extended declarative
+  system.}
+  \label{fig:gradual:exd:type}
+\end{figure}
+
+
+\paragraph{Consistent Subtyping.}
+
+The new definition of consistent subtyping is given at the bottom of
+\Cref{fig:gradual:exd:type}, again with the differences highlighted. Now the
+unknown type is only a consistent subtype of all castable types, rather than of
+all types (\rref{gpc-cs-unknownLL}), and vice versa (\rref{gpc-cs-unknownRR}). Moreover,
+the static type parameter $[[static]]$ is a consistent subtype of itself
+(\rref{gpc-cs-spar}), and similarly for the gradual type parameter (\rref{gpc-cs-gpar}).
+From this definition it follows immediately that $[[unknown]]$ is incomparable
+with types that contain static type parameters $[[static]]$, such as $[[static
+-> int]]$.
+
+\paragraph{Typing and Translation.}
+
+Given these extensions to types and consistent subtyping, the typing process
+remains the same as in \Cref{fig:gradual:decl-typing}. To account for the
+changes in the translation, if we extend \pbc with type parameters as in
+\citet{garcia:principal}, then the translation remains the same as well.
+
+\section{Substitutions and Representative Translations}
+
+As we mentioned, type parameters serve as placeholders for monotypes. As a
+consequence, wherever a type parameter is used, any \emph{suitable} monotype
+could appear just as well. To formalize this observation, we define substitutions for type
+parameters as follows:
+
+\begin{definition}[Substitution] Substitutions for type parameters are defined as:
+  \begin{enumerate}
+    \item Let $\ssubst : [[static]] \to [[t]]$ be a total function mapping static type
+      parameters to monotypes. 
+    \item Let $\gsubst : [[gradual]] \to [[tc]]$ be a total function mapping gradual type
+      parameters to castable monotypes.
+    \item Let $\psubst = \gsubst \cup \ssubst$ be a union of $\ssubst$ and $\gsubst$ mapping static and gradual
+      type parameters accordingly.
+  \end{enumerate}
+\end{definition}
+\noindent Note that since $[[gradual]]$ might be compared with $[[unknown]]$, only
+castable monotypes are suitable substitutes, whereas $[[static]]$
+can be replaced by any monotypes. Therefore, we can substitute $[[gradual]]$ for $[[static]]$,
+but not the other way around.
+
+
+Let us go back to our example and its two translations in
+\Cref{sec:gradual:type:trans}. The problem with those translations is that
+neither $[[int -> int]]$ nor $[[bool -> int]]$ is general enough. With type
+parameters, however, we can state a more \textit{general} translation that
+covers both through substitution:
+%
+\begin{align*}
+  [[f : \/a. a -> int]]   &[[|-G]] [[(\x:unknown. f x) ]]
+                          : [[unknown -> int]] \\
+                          &[[~~>]]  ([[\x:unknown. (<\/a.a -> int `-> gradual -> int > f)]] (\hlmath{\cast{[[unknown]]}{[[gradual]]}} [[x]]))
+\end{align*}
+%
+The advantage of type parameters is that they help reasoning about the dynamic
+semantics. Now we are not limited to a particular choice, such as $[[int ->
+int]]$ or $[[bool -> int]]$, which might or might not emit a cast error at
+runtime. Instead we have a general choice $[[gradual -> int]]$.
+
+What does the more general choice with type parameters tell us? First, we know
+that in this case, there is no concrete constraint on $[[a]]$, so we can
+instantiate it with a type parameter. Second, the fact that the general choice
+uses $[[gradual]]$ rather than $[[static]]$ indicates that any chosen
+instantiation needs to be a castable type. It follows that any concrete
+instantiation will have an impact on the runtime behavior; therefore it is best
+to instantiate $[[a]]$ with $[[unknown]]$. However, type inference cannot
+instantiate $[[a]]$ with $[[unknown]]$, and substitution cannot replace
+$[[gradual]]$ with $[[unknown]]$ either. This means that we need a syntactic
+refinement process of the translated programs in order to replace type
+parameters with allowed gradual types.
+
+\paragraph{Syntactic Refinement.}
+
+We define syntactic refinement of the translated expressions as follows. As
+$[[static]]$ denotes no constraints at all, substituting it with any monotype
+would work. Here we arbitrarily use $[[int]]$. We interpret
+$[[gradual]]$ as $[[unknown]]$ since any monotype could possibly lead to a cast
+error.
+
+\begin{definition}[Syntactic Refinement] The syntactic refinement of a
+  translated expression $[[pe]]$ is denoted by $\erasetp s$, and defined as follows:
+  \begin{center}
+  \begin{tabular}{lll} \toprule
+    $[[erase [int] ]]$      & $=$ & $[[int]]$ \\
+    $[[erase [a] ]]$        & $=$ & $[[a]]$ \\
+    $[[erase [A1 -> A2] ]]$ & $=$ & $[[ erase [A1] -> erase [A2] ]]$ \\
+    $[[erase [\/a. A] ]]$   & $=$ & $[[ \/a. erase [A] ]]$ \\
+    $[[erase [unknown] ]]$  & $=$ & $[[ unknown ]]$ \\
+    $[[erase [static] ]]$   & $=$ & $[[ int ]]$ \\
+    $[[erase [gradual] ]]$  & $=$ & $[[ unknown ]]$ \\  \bottomrule
+  \end{tabular}
+  \end{center}
+\end{definition}
+
+\noindent Applying the syntactic refinement to the translated
+expression, we get
+%
+\[
+  (\lambda [[x:unknown]]. (\cast{[[\/a. a -> int]]}{\hlmath{[[unknown]]} [[->]] [[int]]} [[f]]) (\cast{[[unknown]]}{\hlmath{[[unknown]]}} [[x]]))
+\]
+% 
+where two $[[gradual]]$ are refined by $[[unknown]]$ as highlighted.
+It is easy to verify that both applying this expression to $3$ and to
+$\mathit{true}$ now results in a translation that evaluates to
+a value.
+
+\paragraph{Representative Translations.}
+
+To decide whether one translation is more general than the other, we define a preorder
+between translations.
+
+\begin{definition}[Translation Pre-order]
+  Suppose $[[dd |-G e : A ~~> pe1]]$ and $[[dd |-G e : A ~~> pe2]]$,
+  we define $[[pe1]] \leq [[pe2]]$ to mean $[[pe2]] \aeq [[S(pe1)]]$ for
+  some $[[S]]$.
+\end{definition}
+
+\begin{restatable}[]{proposition}{propparalpha}
+  \label{prop:parameter:alpha}
+  If $[[ pe1 ]] \leq [[pe2]]$ and $[[ pe2 ]] \leq [[pe1]]$, then $[[pe1]]$ and
+  $[[pe2]]$ are $\alpha$-equivalent (i.e., equivalent up to renaming of type parameters).
+\end{restatable}
+
+The preorder between translations gives rise to a notion of
+what we call \textit{representative translations}:
+
+\begin{definition}[Representative Translation]
+  A translation $[[pe]]$ is said to be a representative translation of a typing
+  derivation $[[dd |-G e : A ~~> pe]]$ if and only if for any other translation
+  $[[dd |-G e : A ~~> pe']]$ such that $[[pe']] \leq [[pe]]$, we have $[[pe]]
+  \leq [[pe']]$. From now on we use $[[rpe]]$ to denote a representative
+  translation.
+\end{definition}
+
+An important property of representative translations, which we conjecture for
+the lack of rigorous proof, is that if there exists any translation of an
+expression that (after syntactic refinement) can reduce to a value, so can a
+representative translation of that expression. Conversely, if a
+representative translation runs into a blame, then no translation of that
+expression can reduce to a value.
+
+\begin{conjecture}[Property of Representative Translations]\label{lemma:repr}
+  For any expression $[[e]]$ such that $[[ dd |-G e : A ~~> pe ]]$ and $[[ dd |-G e : A ~~> rpe ]]$ and
+  $\forall [[CC]].\, [[CC : (dd |- A) ~~> (empty |- int) ]]   $, we have
+  \begin{itemize}
+  \item If $  [[CC]] \{  \erasetp{[[pe]]} \}  [[==>]] [[n]]$, then $ [[CC]] \{   \erasetp{[[rpe]]}   \} [[==>]] [[n]]$.
+  \item If $[[CC]] \{ \erasetp {[[rpe]]}   \} [[==>]] [[blame]]$, then $ [[CC]] \{ \erasetp {[[pe]]} \}  [[==>]] [[blame]]$.
+  \end{itemize}
+\end{conjecture}
+
+Given this conjecture, we can state a stricter coherence property (without the
+``up to casts'' part) between any two representative translations. We first
+strengthen \Cref{conj:coher} following \citet{amal:blame}:
+
+\begin{definition}[Contextual Approximation \`a la \citet{amal:blame}] \leavevmode
+  \begin{center}
+    \begin{tabular}{lll}
+      $[[dd]] \vdash \ctxappro{[[pe1]]}{[[pe2]]}{[[A]]}$ & $\defeq$ & $[[ dd |- pe1 : A  ]] \land [[dd |- pe2 : A ]] \ \land $ \\
+                                                         & & for all $\mathcal{C}.\, [[ CC : (dd |- A) ~~> (empty |- int) ]] \Longrightarrow$ \\
+                                                         & &  $\quad (\mathcal{C}\{ \erasetp{[[pe1]]} \}   \Downarrow [[n]] \Longrightarrow  \mathcal{C} \{ \erasetp{[[ pe2 ]]}  \}  \reduce [[n]]) \ \land$ \\
+                                                         & & $\quad (\mathcal{C} \{ \erasetp{[[ pe1 ]]} \} \reduce \blamev \Longrightarrow \mathcal{C} \{ \erasetp{[[ pe2 ]]}  \}  \reduce \blamev)$
+
+    \end{tabular}
+  \end{center}
+\end{definition}
+
+The only difference is that now when a program containing $[[pe1]]$ reduces to a
+value, so does one containing $[[pe2]]$.
+
+From \cref{lemma:repr}, it follows that coherence holds between two
+representative translations of the same expression.
+
+\begin{corollary}[Coherence for Representative Translations]
+  For any expression $[[e]]$
+  such that $[[ dd |-G e : A ~~> rpe1    ]]$ and $[[ dd |-G e : A ~~> rpe2    ]]$, we have
+  $[[ dd ]] \vdash \ctxeq{[[rpe1]]}{[[rpe2]]}{[[A]]} $.
+\end{corollary}
+
+We have proved that for every typing derivation, at least one representative translation exists.
+
+\begin{restatable}[Representative Translation for Typing]{lemma}{lemmareptyping}
+  \label{lemma:rep:typing}
+  For any typing derivation $[[dd |-G e : A]]$ there exists at least one
+  representative translation $r$ such that $[[dd |-G e : A ~~> rpe]]$.
+\end{restatable}
+
+For our example,
+$([[\x:unknown. (<\/a.a -> int `-> gradual -> int > f) (<unknown `-> gradual> x)]])$
+is a representative translation, while the other two are not.
+
+\section{Dynamic Gradual Guarantee, Reloaded}
+
+Given the above propositions, we are ready to revisit the dynamic gradual
+guarantee. The nice thing about representative translations is that the
+dynamic gradual guarantee of our source language is essentially that of \pbc,
+our target language. However, the dynamic gradual guarantee for \pbc is still an
+open question. According to \citet{yuu2017poly}, the difficulty lies in the
+definition of term precision that preserves the semantics. We leave it here as a
+conjecture as well. From a declarative point of view, we cannot prevent the
+system from picking undesirable instantiations, but we know that some choices
+are better than the others, so we can restrict the discussion of dynamic gradual
+guarantee to representative translations.
+
+\begin{conjecture}[Dynamic Gradual Guarantee in terms of Representative Translations]
+  Suppose $e' \lessp e$,
+  \begin{enumerate}
+  \item If $[[empty |-G e : A ~~> rpe]]$, $\erasetp {r} \Downarrow v$,
+    then for some $[[B]]$ and $r'$, we have $[[ empty |-G e' : B ~~> rpe']]$,
+    and $[[B <<= A]]$,
+    and $\erasetp {r'} \Downarrow v'$,
+    and $v' \lessp v$.
+  \item If $[[empty |-G e' : B ~~> rpe']]$, $\erasetp {r'} \Downarrow v'$,
+    then for some $[[A]]$ and $[[rpe]]$, we have $ [[empty |-G e : A ~~> rpe]]$,
+    and $[[B <<= A]]$. Moreover,
+    $\erasetp r \Downarrow v$ and $v' \lessp v$,
+    or $\erasetp r \Downarrow \blamev$.
+  \end{enumerate}
+\end{conjecture}
+
+For the example in \Cref{sec:gradual:criteria}, now we know that the representative
+translation of the right one will evaluate to $1$ as well.
+\begin{mathpar}
+  [[(\f:\/a.a->int. \x:int. f x) (\x:int. 1) 3]]
+  \and
+  [[(\f:\/a.a->int. \x:int. f x) (\x:unknown. 1) 3]]
+\end{mathpar}
+
+More importantly, in what follows, we show that our extended algorithm is able
+to find those representative translations.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

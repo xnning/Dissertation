@@ -60,6 +60,7 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4
   | ss -> A        ::   :: sctx_type
   | ( A , B )      ::   :: pair
   | [ l1 : A1 , .. , ln : An  ]  ::   :: record
+  | erase [ A ]    ::  :: erasetp {{ tex \lceil{[[A]]}\rceil }}
 
 % Mono Types
 
