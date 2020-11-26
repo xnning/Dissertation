@@ -89,7 +89,7 @@ $[[A1]]$ is more \textit{general} than $[[A2]]$: for any instantiation of
 $[[A2]]$, we can find an instantiation of $[[A1]]$ to make two types match.
 \Rref{hm-s-refl} is simply reflexive for monotypes. \Rref{hm-s-forallR} has a
 polymorphic type $[[\/a. A2]]$ on the right hand side. In order to prove the
-subtyping relation for \textit{all} possible instantiation of $[[a]]$, we
+subtyping relation for \textit{all} possible instantiations of $[[a]]$, we
 \textit{skolemize} $[[a]]$, by making sure $[[a]]$ does not appear in $[[A1]]$
 (up to $\alpha$-renaming). In this case, if $[[A1]]$ is still a subtype of
 $[[A2]]$, we are sure then whatever $[[a]]$ can be instantiated to, $[[A1]]$ can
@@ -129,8 +129,10 @@ and there are still many guesses in the system, such as in \rref{hm-lam}.
 \paragraph{Syntax-directed System.}
 
 A type system is \textit{syntax-directed}, if the typing rules are completely
-driven by the parser. However, in \Cref{fig:HM}, the rule for generalization
-(\rref{hm-gen}) and instantiation (\rref{hm-inst}) can be applied anywhere.
+driven by the syntax of expressions; in other words, there is exactly one typing
+rule for each syntactic form of expressions. However, in \Cref{fig:HM}, the rule
+for generalization (\rref{hm-gen}) and instantiation (\rref{hm-inst}) can be
+applied anywhere.
 
 A syntax-directed presentation of HM can be easily derived. In particular, from the
 typing rules we observe that, except for fetching a variable from the context

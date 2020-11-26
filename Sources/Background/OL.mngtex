@@ -98,7 +98,7 @@ observe the following differences.
 
 First, expressions $[[e]]$ include not only unannotated lambda abstractions
 $[[\x. e]]$, but also annotated lambda abstractions $[[\x : A . e]]$, where the
-type annotation $[[A]]$ is a polymorphic type. Thus unlike HM, the argument
+type annotation $[[A]]$ can be a polymorphic type. Thus unlike HM, the argument
 type for a function is not limited to a monotype.
 
 Second, the polymorphic types $[[A]]$ now include the integer type $[[int]]$,
@@ -114,8 +114,7 @@ instead, it explicitly checks that type variables are fresh with respect to a
 context or a type when needed. Here we include type variables in contexts, as it
 sets us well for the Dunfield-Krishnaswami type system to be introduced in the
 next section. Moreover, it provides a complete view of possible formalisms of
-contexts in a type system with generalization. As before, we assume all items in
-a context are distinct.
+contexts in a type system with generalization.
 
 Now since the context tracks type variables, we define the notion of
 \textit{well-formedness} of types, given in \Cref{fig:OL:wf}. For a type to be

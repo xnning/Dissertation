@@ -3,7 +3,7 @@
 
 Both HM and OL derive only monotypes for unannotated lambda abstractions. OL
 improves on HM by allowing polymorphic lambda abstractions but requires the
-polymorphic type annotations are given explicitly. The Dunfield-Krishnaswami
+polymorphic type annotations to be given explicitly. The Dunfield-Krishnaswami
 type system \citep{DK}, hereafter refered to as DK, give a
 \textit{bidirectional} account of higher-rank polymorphism, where type
 information can be propagated through the syntax tree. Therefore, it is possible
@@ -22,10 +22,11 @@ a long time. It was popularized by Pierce and Turner's work on local type
 inference \citep{pierce:local}. Local type inference was introduced as an
 alternative to HM type systems, which could easily deal with polymorphic
 languages with subtyping. The key idea in local type inference is simple.
+The "local" in local type inference comes from the fact that:
 
 \begin{quote}
 \textit{
-  ``... are local in the sense that missing annotations are recovered using
+  ``... missing annotations are recovered using
   only information from adjacent nodes in the syntax tree, without long-distance
   constraints such as unification variables.''}
 \end{quote}
@@ -84,22 +85,22 @@ signature using checking mode in bi-directional type checking.
 
 \subsection{Declarative System}
 
-\subsubsection{Syntax}
+\paragraph{Syntax.}
 
 The syntax of the DK is given in \Cref{fig:DK}. Comparing to OL, only the
 definition of expressions slightly differs. First, the expressions $e$ in DK
-have no let expressions. \cite{DK} omitted let-binding from the formal
+have no let expressions. \cite{DK} omitted let-bindings from the formal
 development, but argued that restoring let-bindings is easy, as long as they get
 no special treatment incompatible with substitution (e.g., a syntax-directed HM
 does polymorphic generalization only at let-bindings). Second, DK has annotated
-expressions $[[e:A]]$, in which the type annotation can be propagated inward the
+expressions $[[e:A]]$, in which the type annotation can be propagated into the
 expression, as we will see shortly.
 
 The definitions of types and contexts are the same as in OL. Thus, DK also shares
 the same well-formedness definition as in OL (\Cref{fig:OL:wf}). We thus omit the
 definitions, but use $[[dd |-DK A]]$ to denote the corresponding judgment in DK.
 
-\subsubsection{Type System}
+\paragraph{Type System.}
 
 \begin{figure}
   \drules[dk-inf]{$ [[dd |-DK e => A ]] $}{Type Inference}{var, int,lam, app, anno}
