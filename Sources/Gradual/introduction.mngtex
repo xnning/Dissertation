@@ -79,8 +79,8 @@ the intermediate type $[[C]]$.
 
 In our later discussion, it will always be clear which definition we are referring
 to. For example, we focus more on \cref{def:old-decl-conssub} in
-\cref{subsec:towards-conssub}, and more on \cref{def:algo-old-decl-conssub} in
-\cref{subsec:conssub-wo-exist}.
+\cref{sec:gradual:towards-conssub}, and more on \cref{def:algo-old-decl-conssub} in
+\cref{sec:gradual:conssub-wo-exist}.
 
 \subsection{Motivation: Gradually Typed Higher-Rank Polymorphism}
 \label{sec:gradual:motivation}
@@ -250,7 +250,7 @@ also possible with type-level constructors.
 In our type system, with explicit type annotations that set the element types to
 the unknown type we can disable the homogeneous typing discipline for the
 elements and get gradually typed heterogeneous lists\footnote{This argument is
-  based on the extended type system in \cref{sec:advanced-extension}.}. Such
+  based on the extended type system in \Cref{chap:Dynamic}.}. Such
 gradually typed heterogeneous lists are akin to Haskell's approach with Dynamic
 types, but much more convenient to use since no injections and projections are
 needed, and the $[[unknown]]$ type is built-in and natural to use.

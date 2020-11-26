@@ -166,7 +166,7 @@ $[[at]]$ in the output context. We also need to check that the monotype $[[at]]$
 is well-formed under the prefix context $[[GG]]$.
 
 \Rref{gpc-instl-solveU} is similar to \rref{gpc-as-unknownR} in that we put no
-constraint\footnote{As we will see in \Cref{sec:gradual:advanced-extension}
+constraint\footnote{As we will see in \Cref{chap:Dynamic}
   where we present a more refined system, the ``no constraint'' statement is not
   entirely true. } on $[[evar]]$ when it meets the unknown type $[[unknown]]$.
 This design decision reflects the point that type inference only produces static
@@ -382,6 +382,9 @@ complete with respect to the declarative specification. Before we give the
 formal statements of the soundness and completeness theorems, we need a
 meta-theoretical device, called \emph{context extension}~\citep{DK}, to capture a
 notion of information increase from input contexts to output contexts.
+
+\subsection{Context Extension}
+\label{sec:gradual:ctxt:extension}
 
 A context extension judgment $[[ GG --> DD ]]$ reads ``$[[GG]]$ is extended
 by $[[DD]]$''. Intuitively, this judgment says that $[[DD]]$ has at least as

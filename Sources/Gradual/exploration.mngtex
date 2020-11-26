@@ -17,7 +17,7 @@ discuss this restriction when we present the subtyping rules. Contexts $[[dd]]$
 are \emph{ordered} lists of type variable declarations and term variables.
 
 \subsection{Consistency and Subtyping}
-\label{sub:gradual:consistency-subtyping}
+\label{sec:gradual:consistency-subtyping}
 
 We start by giving the definitions of consistency and subtyping for polymorphic
 types, and comparing our definitions with the compatibility relation by
@@ -78,7 +78,7 @@ we know, $[[ \/a . a -> a ]]$ is definitely not compatible with $[[ int -> bool
 ]]$. Indeed, this does not hold in any polymorphic type systems without gradual
 typing. So the gradual type system should not accept it either. (This is the
 \emph{conservative extension} property that will be made precise in
-\Cref{sec:criteria}.)
+\Cref{sec:gradual:criteria}.)
 
 
 Importantly there is a subtle distinction between a type variable and the

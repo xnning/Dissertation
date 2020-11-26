@@ -64,7 +64,7 @@ Note that in GPC, matching saves us from having a subsumption rule
 (\rref{ol-sub} in \cref{fig:OL:static}). The subsumption rule is incompatible
 with consistent subtyping, since the latter is not transitive. A discussion of a
 subsumption rule based on normal subtyping can be found in
-\Cref{sub:gradual:variant}.
+\Cref{sec:gradual:variant}.
 
 \subsection{Type-directed Translation}
 \label{sec:gradual:type:trans}
@@ -79,7 +79,7 @@ we show a subset of the terms in \pbc that are used in the translation:
 A cast $[[ < A1 `-> B > pe  ]]$ converts the value of term $[[pe]]$ from type $[[A1]]$ to type $[[B]]$.
 A cast from $[[A1]]$ to $[[B]]$ is permitted only if the types are \emph{compatible},
 written $[[A1 `-> B]]$, as briefly mentioned in
-\Cref{bsec:gradual:consistency-subtyping}. The syntax of types in \pbc is the
+\Cref{sec:gradual:consistency-subtyping}. The syntax of types in \pbc is the
 same as ours.
 
 The translation is given in the gray-shaded parts in
@@ -182,7 +182,7 @@ The astute reader may have found that the \emph{only} appropriate choice is to
 instantiate the type of $[[f]]$ to $[[ unknown -> int ]]$ in the matching judgment. However, as specified by
 \rref{gpc-m-forall} in \Cref{fig:gradual:decl-typing}, we can only instantiate type variables
 to monotypes, but $[[unknown]]$ is \emph{not} a monotype! We will get back to
-this issue in \Cref{sec:gradual:advanced-extension}.
+this issue in \Cref{chap:Dynamic}.
 
 
 \paragraph{Coherence.}
@@ -357,7 +357,7 @@ guarantee. For instance:
 \end{mathpar}
 The left one evaluates to $[[1]]$, whereas its less precise version (right) will give
 a cast error if $[[a]]$ is instantiated to $[[bool]]$ for example.
-In \Cref{sec:gradual:advanced-extension}, we will present an extension of the declarative system
+In \Cref{chap:Dynamic}, we will present an extension of the declarative system
 that will alleviate the issue.
 
 %%% Local Variables:
