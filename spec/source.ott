@@ -244,6 +244,7 @@ aexp, ae {{ tex e }} :: 'atrm_' ::=
 dctx, dd {{ tex \Psi}} :: 'dctx_' ::=
   | empty       ::   :: empty
   | dd , x : A  ::   :: cons_var
+  | dd , f : A  ::   :: cons_var_f
   | dd , a      ::   :: cons_tvar
   | [ OO ] DD     :: S :: ctx_subst
 

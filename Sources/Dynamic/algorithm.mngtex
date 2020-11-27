@@ -1,0 +1,234 @@
+\section{Extended Algorithmic Type System}
+\label{sec:gradual:exd-algo}
+
+\begin{figure}
+  \centering
+    \begin{tabular}{lrcl} \toprule
+      Types & $[[aA]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] \mid [[unknown]] \mid \hlmath{[[static]] \mid [[gradual]]} $ \\
+      Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] \mid \hlmath{[[static]] \mid [[gradual]]}$ \\
+      \hl{Existential variables} & $[[evar]]$ & \syndef & $[[sa]]  \mid [[ga]]  $   \\
+      \hl{Castable Types} & $[[agc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[agc1 -> agc2]] \mid [[\/ a. agc]] \mid [[unknown]] \mid [[gradual]] $ \\
+      \hl{Castable Monotypes} & $[[atc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[atc1 -> atc2]] \mid [[gradual]]$ \\
+      Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , x : aA]] \mid [[GG , a]] \mid [[GG , evar]]  \mid \hlmath{[[GG, sa = at]] \mid [[GG, ga = atc]]} \mid [[ GG, mevar ]] $ \\
+      Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , x : aA]] \mid [[OO , a]] \mid \hlmath{[[OO, sa = at]] \mid [[OO, ga = atc]]} \mid [[OO, mevar]] $ \\
+      \bottomrule
+    \end{tabular}
+  \caption{Syntax of types, contexts and consistent subtyping in the extended algorithmic system.}
+  \label{fig:gradual:exd:algo:type}
+\end{figure}
+
+
+To understand the design choices involved in the new algorithmic system, we
+consider the following algorithmic typing example:
+%
+\[
+  f: [[ \/a .  a -> int  ]], x : [[unknown]] [[|-G]] [[ f x ]] : [[int]]  \dashv
+  f : [[\/a . a -> int]], x : [[unknown]], [[evar]]
+\]
+%
+Compared with the declarative typing, where we have many choices (e.g., $[[int
+-> int]]$, $[[bool -> int]]$, and so on) to instantiate $[[\/ a. a -> int]]$,
+the algorithm computes the instantiation $[[ evar -> int ]]$ with $[[evar]]$
+unsolved in the output context. What can we know from the algorithmic typing?
+First we know that, here $[[evar]]$ is \textit{not constrained} by the typing
+problem. Second, and more importantly, $[[evar]]$ has been compared with an
+unknown type (when typing $([[ f x ]])$). Therefore, it is possible to make a
+more refined distinction between different kinds of existential variables. The
+first kind of existential variables are those that indeed have no constraints at
+all, as they do not affect the dynamic semantics; while the second kind (as in
+this example) are those where the only constraint is that \textit{the variable
+  was once compared with an unknown type}~\citep{garcia:principal}.
+
+The syntax of types is shown in \Cref{fig:gradual:exd:algo:type}. A notable
+difference, apart from the addition of static and gradual parameters, is that we
+further split existential variables $[[evar]]$ into static existential variables
+$[[ sa ]]$ and gradual existential variables $[[ga]]$. Depending on whether an
+existential variable has been compared with $[[unknown]]$ or not, its solution
+space changes. More specifically, static existential variables can be solved to
+a monotype $[[at]]$, whereas gradual existential variables can only be solved to
+a castable monotype $[[atc]]$, as can be seen in the changes of algorithmic
+contexts and complete contexts. As a result, the typing result for the above
+example now becomes
+%
+\[
+  f: [[ \/a .  a -> int  ]], x : [[unknown]] [[|-G]] [[ f x ]] : [[int]]  \dashv f : [[\/a . a -> int]], x : [[unknown]], \hlmath{[[ga]]}
+\]
+since we can solve any unconstrained $[[ga]]$ to $[[gradual]]$, it is easy to
+verify that the resulting translation is indeed a representative translation.
+
+Our extended algorithm is novel in the following aspects. We naturally extend
+the concept of existential variables~\citep{DK} to deal with comparisons between
+existential variables and unknown types. Unlike \citet{garcia:principal}, where
+they use an extra set to store types that have been compared with unknown types,
+our two kinds of existential variables emphasize the type distinction better,
+and correspond more closely to the two kinds of type parameters, as we can solve
+$[[sa]]$ to $ [[static]]$ and $[[ga]] $ to $ [[gradual]]$.
+
+\subsection{Extended Algorithmic Consistent Subtyping}
+
+\begin{figure}
+  \centering
+  \begin{small}
+    \begin{drulepar}[gpc-as]{$ [[GG |-G aA1 <~ aA2 -| DD ]] $}{Algorithmic Consistent Subtyping}
+      \drule{tvar}
+      \drule{int}
+      \drule{evar} \and
+      \hlmath{\drule{spar}} \and
+      \hlmath{\drule{gpar}} \and
+      \hlmath{\drule{unknownLL}}
+      \hlmath{\drule{unknownRR}} \and
+      \drule{arrow}
+      \drule{forallR} \and
+      \hlmath{\drule{forallLL}} \and
+      \drule{instL}
+      \drule{instR}
+    \end{drulepar}
+  \end{small}
+  \caption{Extended algorithmic consistent subtyping}
+  \label{fig:gradual:exd:algo:sub}
+\end{figure}
+
+
+While the changes in the syntax seem negligible, the addition of static and
+gradual type parameters changes the algorithmic judgments in a significant way.
+We first discuss the algorithmic consistent subtyping, which is shown in
+\Cref{fig:gradual:exd:algo:sub}. For notational convenience, when static and
+gradual existential variables have the same rule form, we compress them into one
+rule. For example, \rref{gpc-as-evar} is really two rules $[[ GG[sa] |-G sa <~
+sa -| GG[sa] ]]$ and $[[ GG[ga] |-G ga <~ ga -| GG[ga] ]]$; same for
+\rref{gpc-as-instL,gpc-as-instR}.
+
+
+\Rref{gpc-as-spar,gpc-as-gpar} are direct analogies of \rref{gpc-cs-spar,gpc-cs-gpar}. Though
+looking simple, \rref{gpc-as-unknownLL,gpc-as-unknownRR} deserve much explanation. To
+understand what the output context $[[ [agc]GG ]]$ is for, let us first see why
+this seemingly intuitive rule $[[ GG |-G unknown <~ agc -| GG ]]$ (like
+\rref{gpc-as-unknownL} in the original algorithmic system) is wrong. Consider the
+judgment $[[ sa |-G unknown <~ sa -> sa -| sa ]]$, which seems fine. If this
+holds, then -- since $[[sa]]$ is unsolved in the output context -- we can solve
+it to $[[ static ]]$ for example (recall that $[[sa]]$ can be solved to some
+monotype), resulting in $[[ unknown <~ static -> static ]]$. However, this is in
+direct conflict with \rref{gpc-cs-unknownLL} in the declarative system precisely
+because $[[ static -> static ]]$ is not a castable type! A possible solution
+would be to transform all static existential variables to gradual existential
+variables within $[[agc]]$ whenever it is being compared to $[[ unknown ]]$:
+while $[[ sa |-G unknown <~ sa -> sa -| sa ]]$ does not hold, $[[ ga |-G unknown
+<~ ga -> ga -| ga ]]$ does. While substituting static existential variables with
+gradual existential variables seems to be intuitively correct, it is rather hard
+to formulate---not only do we need to perform substitution in $[[agc]]$, we also
+need to substitute accordingly in both the input and output contexts in order to
+ensure that no existential variables become unbound. However, making such changes is
+at odds with the interpretation of input contexts: they are ``input'', which
+evolve into output contexts with more variables solved. Therefore, in line with
+the use of input contexts, a simple solution is to generate a
+new gradual existential variable and solve the static existential variable to it
+in the output context, without touching $[[agc]]$ at all. So we have
+$[[ sa |-G unknown <~ sa -> sa -| ga, sa = ga ]]$.
+
+Based on the above discussion, the following defines $[[ [aA]GG ]]$:
+
+\begin{definition}$[[ [aA]GG ]]$ is defined inductively as follows  \label{def:contamination} %
+  \begin{center}
+    \begin{tabular}{llll} \toprule
+    $[[ [aA] empty    ]]$ & = &  $[[empty]]$  & \\
+    $[[ [aA] (GG, x : aA)  ]]$ &=& $[[ [aA] GG , x : aA     ]]$ & \\
+    $[[ [aA] (GG, a)  ]]$ &=& $[[ [aA] GG , a     ]]$ & \\
+    $[[ [aA] (GG, sa)  ]]$ &=& $[[ [aA] GG , ga , sa = ga  ]]$  & if $[[sa]]$ occurs in $[[aA]]$     \\
+    $[[ [aA] (GG, sa)  ]]$ &=& $[[ [aA] GG , sa     ]]$     & if $[[sa]]$ does not occur in $[[aA]]$  \\
+    $[[ [aA] (GG, ga)  ]]$ &=& $[[ [aA] GG , ga     ]]$ & \\
+    $[[ [aA] (GG, evar = at)  ]]$ &=& $[[ [aA] GG , evar = at     ]]$ & \\
+    $[[ [aA] (GG, mevar)  ]]$ &=& $[[ [aA] GG , mevar     ]]$ & \\ \bottomrule
+    \end{tabular}
+  \end{center}
+\end{definition}
+\noindent $[[ [aA]GG ]]$ solves all static existential variables found within $[[aA]]$ to fresh
+gradual existential variables in $[[GG]]$. Notice the case for $[[ [aA] (GG, sa)]]$
+is exactly what we have just described.
+
+\Rref{gpc-as-forallLL} is slightly different from \rref{gpc-as-forallL} in the original
+algorithmic system in that we replace $[[a]]$ with a new static existential
+variable $[[sa]]$. Note that $[[sa]]$ might be solved to a gradual existential
+variable later. The rest of the rules are the same as those in the original system.
+
+\begin{figure}
+  \centering
+
+   \begin{drulepar}[gpc-instl]{$ [[ GG |-G evar <~~ aA -| DD   ]] $}{Instantiation I}
+     \hlmath{\drule{solveS}} \and
+     \hlmath{\drule{solveG}} \and
+     \hlmath{\drule{solveUS}} \and
+     \hlmath{\drule{solveUG}} \and
+     \hlmath{\drule{reachSGOne}} \and
+     \hlmath{\drule{reachSGTwo}} \and
+     \hlmath{\drule{reachOther}} \and
+     \drule{forallR}
+     \drule{arr}
+   \end{drulepar}
+
+   \begin{drulepar}[gpc-instr]{$ [[ GG |-G aA <~~ evar -| DD   ]] $}{Instantiation II, excerpt}
+     \hlmath{\drule{forallLL}}
+   \end{drulepar}
+
+  \caption{Instantiation in the extended algorithmic system}
+  \label{fig:gradual:exd:inst}
+
+\end{figure}
+
+\subsection{Extended Instantiation}
+
+The instantiation judgments shown in \Cref{fig:gradual:exd:inst} also change
+significantly. The complication comes from the fact that now we have two different
+kinds of existential variables, and the relative order they appear in the
+context affects their solutions.
+
+
+\Rref{gpc-instl-solveS, gpc-instl-solveG} are the refinement to
+\rref{gpc-instl-solve} in the original system. The next two rules deal with
+situations where one side is an existential variable and the other side is an
+unknown type. \Rref{gpc-instl-solveUS} is a special case of
+\rref{gpc-as-unknownRR} where we create a new gradual existential variable
+$[[ga]]$ and set the solution of $[[sa]]$ to be $[[ga]]$ in the output context.
+\Rref{gpc-instl-solveUG} is the same as \rref{gpc-instl-solveU} in the original
+system and simply propagates the input context. The next two rules
+\rref*{gpc-instl-reachSG1,gpc-instl-reachSG2} are a bit involved, but they both
+answer to the same question: how to solve a gradual existential variable when it
+is declared after some static existential variable. More concretely, in
+\rref{gpc-instl-reachSG1}, we feel that we need to solve $[[gb]]$ to another
+existential variable. However, simply setting $[[ gb = sa]]$ and leaving
+$[[sa]]$ untouched in the output context is wrong. The reason is that $[[gb]]$
+could be a gradual existential variable created by
+\rref{gpc-as-unknownLL}/\rref*{gpc-as-unknownRR} and solving $[[gb]]$ to a
+static existential variable would result in the same problem as we have
+discussed. Instead, we create another new gradual existential variable $[[ga]]$
+and set the solutions of both $[[sa]]$ and $[[gb]]$ to it; similarly in
+\rref{gpc-instl-reachSG2}. \Rref{gpc-instl-reachOther} deals with the other
+cases (e.g., $[[ sa <~~ sb ]]$, $[[ ga <~~ gb ]]$ and so on). In those cases, we
+employ the same strategy as in the original system.
+
+As for the other instantiation judgment, most of the rules are symmetric and
+thus omitted. The only interesting rule is \rref*{gpc-instr-forallLL}, which is
+similar to what we did for \rref{gpc-as-forallLL}.
+
+\subsection{Algorithmic Typing and Metatheory}
+
+Fortunately, the changes in the algorithmic bidirectional system are minimal: we
+replace every existential variable with a static existential variable.
+Furthermore, we proved that the extended algorithmic system is sound and
+complete with respect to the extended declarative system.
+
+\paragraph{Do We Really Need Type Parameters in the Algorithmic System?}
+
+As we mentioned earlier, type parameters in the declarative system are merely an
+analysis tool, and in practice, type parameters are inaccessible to
+programmers. For the sake of proving soundness and completeness, we have to
+endow the algorithmic system with type parameters. However, the algorithmic
+system already has static and gradual existential variables, which can serve the same
+purpose. In that regard, we could directly solve every \textit{unsolved} static and
+gradual existential variable in the output context to $[[int]]$ and
+$[[unknown]]$, respectively.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
