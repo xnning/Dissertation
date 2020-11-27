@@ -264,6 +264,8 @@ Instead of calling it a \textit{representative} translation, we can say it is a
 \textit{principal} translation. Of course the above is only a sketch; we have
 not defined the corresponding rules, nor studied metatheory.
 
+\ningning{This chapter turns out to be pretty short. I guess it's OK?}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
