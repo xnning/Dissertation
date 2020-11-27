@@ -227,6 +227,43 @@ purpose. In that regard, we could directly solve every \textit{unsolved} static 
 gradual existential variable in the output context to $[[int]]$ and
 $[[unknown]]$, respectively.
 
+\subsection{Restricted Generalization}
+
+In \Cref{sec:gradual:type:trans}, we discussed the issue that the translation produces
+multiple target expressions due to the different choices for instantiations, and
+those translations have different dynamic semantics. Besides that, there is
+another cause for multiple translations: redundant generalization during
+translation by \rref{gen}. Consider the simple expression $[[(\x:int. x) 1]]$,
+the following shows two possible translations:
+\begin{align*}
+  [[empty |- (\x : int . x) 1 : int ]] &[[~~>]] [[ (\x : int . x) (<int `-> int> 1)]]
+  \\
+  [[empty |- (\x : int . x) 1 : int ]] &[[~~>]]  [[ (\x : int . x) (<\/ a. int `-> int> (/\ a. 1))]]
+\end{align*}
+%
+The difference comes from the fact that in the second translation, we apply
+\rref{gen} while typing $1$ to get $[[empty |- 1 : \/ a. int]]$. As a consequence, the translation of $1$
+is accompanied by a cast from $[[\/ a. int]]$ to $[[int]]$ since the former is a
+consistent subtype of the latter. This difference is harmless, because obviously
+these two expressions will reduce to the same value in \pbc, thus preserving
+coherence (up to cast error). While it is not going to break coherence,
+it does result in multiple representative translations for one
+expression (e.g., the above two translations are both the representative translations).
+
+There are several ways to make the translation process more deterministic. For
+example, we can restrict generalization to happen only in let expressions and
+require let expressions to include annotations, as $[[ let x : A = e1 in e2 ]]$.
+Another feasible option would be to give a declarative, bidirectional system as
+the specification (instead of the type assignment one), in the same spirit of DK
+\citep{DK}. Then we can restrict generalization to be performed through
+annotations in checking mode.
+
+With restricted generalization, we hypothesize that now each expression has exactly
+one representative translation (up to renaming of fresh type parameters).
+Instead of calling it a \textit{representative} translation, we can say it is a
+\textit{principal} translation. Of course the above is only a sketch; we have
+not defined the corresponding rules, nor studied metatheory.
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
