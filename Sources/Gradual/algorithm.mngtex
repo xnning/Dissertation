@@ -18,7 +18,7 @@ an implementation.
     \begin{tabular}{lrcl} \toprule
       Expressions & $[[ae]]$ & \syndef & $[[x]] \mid [[n]] \mid [[ \x : aA . ae ]]  \mid  [[\x . ae]] \mid [[ae1 ae2]] \mid [[ae : aA]] \mid [[ let x = ae1 in ae2  ]] $ \\
       Types & $[[aA]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] \mid [[unknown]] $ \\
-      Monotypes & $[[at]], [[as]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at -> as]] $ \\
+      Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] $ \\
       Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , x : aA]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]] \mid [[ GG , mevar]] $ \\
       Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , x : aA]] \mid [[OO , a]] \mid [[OO, evar = at]] \mid [[ OO, mevar]]   $ \\ \bottomrule
     \end{tabular}
