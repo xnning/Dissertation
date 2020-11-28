@@ -1,0 +1,17 @@
+\section{Unification for Monotypes}
+
+\begin{figure}
+  \drules[pr]{$ [[DD |-pr (evar) at1 ~~> at2 -| TT]] $}{Promotion}{int,tvar,evarL,evarR}
+\end{figure}
+
+\section{Subtyping for Higher-Rank Polymorphism}
+
+\begin{figure}
+  \drules[p-pr]{$ [[DD |-pr pm (evar) aA1 ~~> at -| TT]] $}{Polymorphic Promotion}{forallL,forallR,arrow,mono}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

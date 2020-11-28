@@ -1,0 +1,18 @@
+\section{Introduction}
+
+
+- overlapping between \rref{gpc-as-instR}, \rref{gpc-as-forallR}. etc.
+- overlapping between two instantiations
+
+Sections
+- Unification for Higher-Rank Polymorphism
+  + talk about modes
+
+- Application
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

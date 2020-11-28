@@ -17,6 +17,11 @@ mode :: 'mode_' ::=
   | =>       ::  :: infer {{ tex \Rightarrow }}
   | <=       ::  :: check {{ tex \Leftarrow }}
 
+prmode, pm {{ tex \pm }} :: 'prmode_'  ::=
+  | +       ::  :: postive  {{ tex + }}
+  | -       ::  :: negative {{ tex - }}
+  | - pm    ::  :: negate   {{ tex - [[pm]] }}
+
 varset, avs  :: 'varset_' ::=
   | a                        ::  :: a
   | x                        ::  :: x {{ tex x }}
@@ -361,6 +366,7 @@ terminals :: 'terminals_' ::=
   | |-F     :: :: turnstileF {{ tex \vdash^\mathit{F} }}
   | |-G     :: :: turnstileG {{ tex \vdash^\mathit{G} }}
   | |-Gm    :: :: turnstilem {{ tex \vdash^\mathit{G}_{m} }}
+  | |-pr    :: :: turnstilepr {{ tex \vdash^{\mathit{pr} } }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -1895,3 +1901,53 @@ A2 <<= A4
 pe1 <<= pe2
 --------------- :: cast
 <A1 `-> A2> pe1 <<= <A3 `-> A4> pe2
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Promotion
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+
+promotion :: '' ::=
+
+defn
+
+DD |-pr ( evar ) aA ~~> aB -| TT ::  :: promotion :: 'pr_'
+{{ tex [[DD]] [[|-pr]]_{[[evar]]} [[aA]] [[~~>]] [[aB]] [[-|]] [[TT]] }}
+by
+
+-------------------------- :: int
+DD |-pr (evar) int ~~> int -| DD
+
+-------------------------- :: tvar
+DD |-pr (evar) a ~~> a -| DD
+
+-------------------------- :: evarL
+DD[evarb][evar] |-pr (evar) evarb ~~> evarb -| DD[evarb][evar]
+
+-------------------------- :: evarR
+DD[evar][evarb] |-pr (evar) evarb ~~> evarb1 -| DD[evarb1,evar][evarb]
+
+defn
+
+DD |-pr pm ( evar ) aA ~~> aB -| TT ::  :: sprpromotion :: 'p_pr_'
+{{ tex [[DD]] \vdash^{\!\![[pm]]\mathit{pr} }_{[[evar]]} [[aA]] [[~~>]] [[aB]] [[-|]] [[TT]] }}
+by
+
+DD[evarb,evar] |-pr+ (evar) aA[a ~> evarb] ~~> at -| TT
+-------------------------- :: forallL
+DD[evar] |-pr+ (evar) \/a. aA ~~> at -| TT
+
+a notin fv ( DD )
+DD |-pr- (evar) aA ~~> at -| TT
+-------------------------- :: forallR
+DD |-pr- (evar) \/a. aA ~~> at -| TT
+
+DD |-pr (evar) at1 ~~> at2 -| TT
+-------------------------- :: mono
+DD |-pr pm (evar) at1 ~~> at2 -| TT
+
+DD  |-pr -pm (evar) aA1 ~~> at1 -| TT1
+TT1 |-pr  pm (evar) [TT1] aA2  ~~> at2 -| TT
+-------------------------- :: arrow
+DD |-pr pm (evar) aA1 -> aA2 ~~> at1 -> at2 -| TT
