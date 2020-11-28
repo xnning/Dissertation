@@ -1,12 +1,26 @@
 \section{Unification for Monotypes}
 
 \begin{figure}
+  \centering
+  \begin{tabular}{lrcl} \toprule
+    Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] $ \\
+    Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
+    Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , a]] \mid [[OO, evar = at]]  $ \\ \bottomrule
+  \end{tabular}
   \drules[pr]{$ [[DD |-pr (evar) at1 ~~> at2 -| TT]] $}{Promotion}{int,tvar,evarL,evarR}
+  \drules[u]{$ [[DD |-u at1 ~= at2 -| TT]] $}{Unification}{refl,arrow,evarL,evarR}
 \end{figure}
 
 \section{Subtyping for Higher-Rank Polymorphism}
 
 \begin{figure}
+  \centering
+  \begin{tabular}{lrcl} \toprule
+    Types & $[[aA]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]]  $ \\
+    Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] $ \\
+    Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
+    Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , a]] \mid [[OO, evar = at]]  $ \\ \bottomrule
+  \end{tabular}
   \drules[p-pr]{$ [[DD |-pr pm (evar) aA1 ~~> at -| TT]] $}{Polymorphic Promotion}{forallL,forallR,arrow,mono}
 \end{figure}
 

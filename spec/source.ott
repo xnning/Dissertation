@@ -334,6 +334,7 @@ pvalue, pv {{ tex v }} :: 'pvalue_' ::=
 terminals :: 'terminals_' ::=
   | ok      :: :: ok {{ tex \mathsf{ok} }}
   | ~       :: :: consist {{ tex \sim }}
+  | ~=      :: :: approx {{ tex \approx }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
   | let     :: :: let     {{ tex \mathbf{let} }}
   | fst     :: :: fst     {{ tex \mathbf{fst} }}
@@ -366,7 +367,8 @@ terminals :: 'terminals_' ::=
   | |-F     :: :: turnstileF {{ tex \vdash^\mathit{F} }}
   | |-G     :: :: turnstileG {{ tex \vdash^\mathit{G} }}
   | |-Gm    :: :: turnstilem {{ tex \vdash^\mathit{G}_{m} }}
-  | |-pr    :: :: turnstilepr {{ tex \vdash^{\mathit{pr} } }}
+  | |-pr    :: :: turnstilepr {{ tex \vdash^{\!\!\mathsf{pr} } }}
+  | |-u     :: :: turnstileu {{ tex \vdash^{\!\!\mathsf{u} } }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -1912,42 +1914,65 @@ promotion :: '' ::=
 
 defn
 
-DD |-pr ( evar ) aA ~~> aB -| TT ::  :: promotion :: 'pr_'
-{{ tex [[DD]] [[|-pr]]_{[[evar]]} [[aA]] [[~~>]] [[aB]] [[-|]] [[TT]] }}
+DD |-pr ( evar ) at1 ~~> at2 -| TT ::  :: promotion :: 'pr_'
+{{ tex [[DD]] [[|-pr]]_{[[evar]]} [[at1]] [[~~>]] [[at2]] [[-|]] [[TT]] }}
 by
 
 -------------------------- :: int
-DD |-pr (evar) int ~~> int -| DD
+GG |-pr (evar) int ~~> int -| GG
 
 -------------------------- :: tvar
-DD |-pr (evar) a ~~> a -| DD
+GG[a][evar] |-pr (evar) a ~~> a -| GG[a][evar]
 
 -------------------------- :: evarL
-DD[evarb][evar] |-pr (evar) evarb ~~> evarb -| DD[evarb][evar]
+GG[evarb][evar] |-pr (evar) evarb ~~> evarb -| GG[evarb][evar]
 
 -------------------------- :: evarR
-DD[evar][evarb] |-pr (evar) evarb ~~> evarb1 -| DD[evarb1,evar][evarb]
+GG[evar][evarb] |-pr (evar) evarb ~~> evarb1 -| GG[evarb1,evar][evarb]
 
 defn
 
-DD |-pr pm ( evar ) aA ~~> aB -| TT ::  :: sprpromotion :: 'p_pr_'
-{{ tex [[DD]] \vdash^{\!\![[pm]]\mathit{pr} }_{[[evar]]} [[aA]] [[~~>]] [[aB]] [[-|]] [[TT]] }}
+GG |-pr pm ( evar ) aA ~~> at -| DD ::  :: sprpromotion :: 'p_pr_'
+{{ tex [[GG]] \vdash^{\!\![[pm]]\mathsf{pr} }_{[[evar]]} [[aA]] [[~~>]] [[at]] [[-|]] [[DD]] }}
 by
 
-DD[evarb,evar] |-pr+ (evar) aA[a ~> evarb] ~~> at -| TT
+GG[evarb,evar] |-pr+ (evar) aA[a ~> evarb] ~~> at -| DD
 -------------------------- :: forallL
-DD[evar] |-pr+ (evar) \/a. aA ~~> at -| TT
+GG[evar] |-pr+ (evar) \/a. aA ~~> at -| DD
 
-a notin fv ( DD )
-DD |-pr- (evar) aA ~~> at -| TT
+a notin fv ( GG )
+GG |-pr- (evar) aA ~~> at -| DD
 -------------------------- :: forallR
-DD |-pr- (evar) \/a. aA ~~> at -| TT
+GG |-pr- (evar) \/a. aA ~~> at -| DD
 
-DD |-pr (evar) at1 ~~> at2 -| TT
+GG |-pr (evar) at1 ~~> at2 -| DD
 -------------------------- :: mono
-DD |-pr pm (evar) at1 ~~> at2 -| TT
+GG |-pr pm (evar) at1 ~~> at2 -| DD
 
-DD  |-pr -pm (evar) aA1 ~~> at1 -| TT1
-TT1 |-pr  pm (evar) [TT1] aA2  ~~> at2 -| TT
+GG  |-pr -pm (evar) aA1 ~~> at1 -| TT
+TT |-pr  pm (evar) [TT] aA2  ~~> at2 -| DD
 -------------------------- :: arrow
-DD |-pr pm (evar) aA1 -> aA2 ~~> at1 -> at2 -| TT
+GG |-pr pm (evar) aA1 -> aA2 ~~> at1 -> at2 -| DD
+
+defn
+
+GG |-u at1 ~= at2 -| DD ::  :: unification :: 'u_'
+{{ tex [[GG]] [[|-u]] [[at1]] [[~=]] [[at2]] [[-|]] [[DD]] }}
+by
+
+------------------ :: refl
+GG |-u at ~= at -| GG
+
+
+GG |-u at1 ~= at3 -| TT
+TT |-u [TT]at2 ~= [TT]at4 -| DD
+------------------ :: arrow
+GG |-u at1 -> at2 ~= at3 -> at4 -| DD
+
+GG |-pr (evar) at1 ~~> at2 -| DD[evar]
+------------------ :: evarL
+GG |-u evar ~= at1 -| DD[evar=at2]
+
+GG |-pr (evar) at1 ~~> at2 -| DD[evar]
+------------------ :: evarR
+GG |-u at1 ~= evar -| DD[evar=at2]
