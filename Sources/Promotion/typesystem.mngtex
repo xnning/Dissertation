@@ -1,4 +1,4 @@
-\section{Unification for Monotypes}
+\section{Promotion for Unification}
 
 \begin{figure}
   \centering
@@ -11,7 +11,7 @@
   \drules[u]{$ [[DD |-u at1 ~= at2 -| TT]] $}{Unification}{refl,arrow,evarL,evarR}
 \end{figure}
 
-\section{Subtyping for Higher-Rank Polymorphism}
+\section{Polymorphism Promotion for Subtyping}
 
 \begin{figure}
   \centering
