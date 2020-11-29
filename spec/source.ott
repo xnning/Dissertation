@@ -17,7 +17,7 @@ mode :: 'mode_' ::=
   | =>       ::  :: infer {{ tex \Rightarrow }}
   | <=       ::  :: check {{ tex \Leftarrow }}
 
-prmode, pm {{ tex \pm }} :: 'prmode_'  ::=
+prmode, pm {{ tex \otimes }} :: 'prmode_'  ::=
   | +       ::  :: postive  {{ tex + }}
   | -       ::  :: negative {{ tex - }}
   | - pm    ::  :: negate   {{ tex - [[pm]] }}
@@ -29,6 +29,7 @@ varset, avs  :: 'varset_' ::=
   | fv ( dd )                ::  :: fv_dd
   | fv ( GG )                ::  :: fv_gg
   | fv ( A )                 ::  :: fv_A
+  | fv ( aA )                ::  :: fv_aA
   | fv ( ef )                ::  :: fv_ef
   | avs set                  ::  :: a_set {{ tex \overbar{[[avs]]} }}
   | avs1 - avs2              ::  :: minus {{ tex [[avs1]] - [[avs2]] }}
@@ -369,6 +370,7 @@ terminals :: 'terminals_' ::=
   | |-Gm    :: :: turnstilem {{ tex \vdash^\mathit{G}_{m} }}
   | |-pr    :: :: turnstilepr {{ tex \vdash^{\!\!\mathsf{pr} } }}
   | |-u     :: :: turnstileu {{ tex \vdash^{\!\!\mathsf{u} } }}
+  | |-sub   :: :: turnstilesub {{ tex \vdash^{\!\!\mathsf{sub} } }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
@@ -1933,14 +1935,14 @@ GG[evar][evarb] |-pr (evar) evarb ~~> evarb1 -| GG[evarb1,evar][evarb]
 defn
 
 GG |-pr pm ( evar ) aA ~~> at -| DD ::  :: sprpromotion :: 'p_pr_'
-{{ tex [[GG]] \vdash^{\!\![[pm]]\mathsf{pr} }_{[[evar]]} [[aA]] [[~~>]] [[at]] [[-|]] [[DD]] }}
+{{ tex [[GG]] \vdash^{\!\![[pm]]}_{[[evar]]} [[aA]] [[~~>]] [[at]] [[-|]] [[DD]] }}
 by
 
 GG[evarb,evar] |-pr+ (evar) aA[a ~> evarb] ~~> at -| DD
 -------------------------- :: forallL
 GG[evar] |-pr+ (evar) \/a. aA ~~> at -| DD
 
-a notin fv ( GG )
+a notin fv ( aA )
 GG |-pr- (evar) aA ~~> at -| DD
 -------------------------- :: forallR
 GG |-pr- (evar) \/a. aA ~~> at -| DD
@@ -1976,3 +1978,46 @@ GG |-u evar ~= at1 -| DD[evar=at2]
 GG |-pr (evar) at1 ~~> at2 -| DD[evar]
 ------------------ :: evarR
 GG |-u at1 ~= evar -| DD[evar=at2]
+
+defn
+
+GG |-sub aA1 <~ aA2 -| DD ::  :: subtyping :: 's_'
+{{ tex [[GG]] [[|-sub]] [[aA1]] [[<~]] [[aA2]] [[-|]] [[DD]] }}
+by
+
+
+-------------------------- :: tvar
+GG[a] |-sub a <~ a -| GG[a]
+
+
+
+-------------------------- :: evar
+GG[evar] |-sub evar <~ evar -| GG[evar]
+
+
+-------------------- :: int
+GG |-sub int <~ int -| GG
+
+
+GG |-sub aA3 <~ aA1 -| TT
+TT |-sub [TT] aA2 <~ [TT] aA4 -| DD
+----------------------------------------- :: arrow
+GG |-sub aA1 -> aA2 <~ aA3 -> aA4 -| DD
+
+
+GG, a |-sub aA1 <~ aA2 -| DD, a, TT
+----------------------------- :: forallR
+GG |-sub aA1 <~ \/ a. aA2 -| DD
+
+
+GG, mevar, evar |-sub aA1 [a ~> evar] <~ aA2 -| DD, mevar, TT
+------------------------------ :: forallL
+GG |-sub \/ a. aA1 <~ aA2 -| DD
+
+GG[evar] |-pr - (evar) aA ~~> at -| DD[evar]
+---------------------------------- :: instL
+GG[evar] |-sub  evar <~ aA -| DD[evar=at]
+
+GG[evar] |-pr + (evar) aA ~~> at -| DD[evar]
+---------------------------------- :: instR
+GG[evar] |-sub  aA <~ evar -| DD[evar=at]
