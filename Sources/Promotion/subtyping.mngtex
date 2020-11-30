@@ -9,6 +9,7 @@
     Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , a]] \mid [[OO, evar = at]]  $ \\
     Promotion Modes  & $[[pm]]$ & \syndef & $[[+]] \mid [[-]]  $ \\ \bottomrule
   \end{tabular}
+  \drules[pr]{$ [[DD |-pr (evar) at1 ~~> at2 -| TT]] $}{Promotion}{tvar}
   \drules[p-pr]{$ [[DD |-pr pm (evar) aA1 ~~> at -| TT]] $}{Polymorphic Promotion}{forallL,forallR,arrow,mono}
   \drules[s]{$ [[GG |-sub aA1 <~ aA2 -| DD]] $}{Subtyping}{tvar,int,evar,arrow,forallR,forallL,instL,instR}
 \end{figure}

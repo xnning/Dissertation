@@ -280,6 +280,7 @@ actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \
   | GG [ evar1 , evar2 = at ]                      :: S :: ctx_etvar_solve2
   | GG [ evar1 , evar2 , evar3 = at ]              :: S :: ctx_etvar_solve3
   | GG [ evar1 = at1 , evar2 = at2 , evar3 = at3 ] :: S :: ctx_etvar_solve4
+  | GG [ evar1 = at1 , evar2 = at2 ]               :: S :: ctx_etvar_solve5
   | GG , a , DD                                    :: S :: middle
   | GG , x : aA , DD                               :: S :: middle2
   | GG , evar , DD                                 :: S :: middle3
@@ -442,6 +443,7 @@ formula :: formula_ ::=
   | e1 = e2       ::  :: expr_eq
   | aA1 <~ aA2 :: :: algo
   | A1 = A2    ::  :: typ_eq
+  | DD1 = DD2    ::  :: DD_eq
   | avs1 = avs2 ::  :: avs_eq
   | A `-> B   :: :: cast
   | < A `-> B >   :: :: cast2
@@ -1925,6 +1927,11 @@ GG |-pr (evar) int ~~> int -| GG
 
 -------------------------- :: tvar
 GG[a][evar] |-pr (evar) a ~~> a -| GG[a][evar]
+
+GG |-pr (evar) at1 ~~> at3 -| TT
+TT |-pr (evar) [TT]at2 ~~> at4 -| DD
+-------------------------- :: arrow
+GG |-pr (evar) at1 -> at2 ~~> at3 -> at4 -| DD
 
 -------------------------- :: evarL
 GG[evarb][evar] |-pr (evar) evarb ~~> evarb -| GG[evarb][evar]

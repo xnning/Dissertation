@@ -1,15 +1,81 @@
 \section{Introduction}
 
 
-- overlapping between \rref{gpc-as-instR}, \rref{gpc-as-forallR}. etc.
-- overlapping between two instantiations
+% - overlapping between \rref{gpc-as-instR}, \rref{gpc-as-forallR}. etc.
+% - overlapping between two instantiations
 
-Sections
-- Unification for Higher-Rank Polymorphism
-  + talk about modes
+\subsection{Unification in Ordered Contexts}
 
-- Application
+Consider unifying $[[at1]] [[<~~]] [[at2]]$. When $[[at1 = evar]]$, we cannot
+simply set $[[evar]]$ to $[[at2]]$, as $[[at2]]$ might include variables bound
+to the right of $[[evar]]$. The way \gpc (following DK) tackles this is to first
+solve $[[evar]]$ by a solution which has the same form as $[[at2]]$, but whose
+components are fresh existential variables. Then, it decomposes $[[at2]]$ into
+components. Now it can recursively unify each existential variable with the
+corresponding component, until the new existential variable can be solved by the
+corresponding component or, when both sides are existential variables, solves
+the one that appears later in the context by the one that appear earlier.
 
+Specifically, considering instantiating $[[GG]] [[|-G]] [[evar]] [[<~~]]
+[[evarb1 -> evarb2 ]]$ in \gpc:
+
+\noindent$[[GG]]  = [[evar, evarb1, evarb2]]$\\
+$[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb1, evarb2]]$
+\begin{mathpar}
+  \inferrule*[right=\rref*{gpc-instl-arr}]{
+    \inferrule*[lab=\rref*{gpc-instl-reach}]{ }
+      {[[DD |-G evar1 <~~ evarb1 -| DD[evarb1 = evar1] ]]}
+    \qquad
+    \inferrule*[lab=\rref*{gpc-instr-reach}]{
+    }{[[DD[evarb1 = evar1] |-G evarb2 <~~ evar2 -| DD[evarb1=evar1, evarb2=evar2] ]]}
+  }{
+    [[GG |-G evar <~~ evarb1 -> evarb2 -| DD1[evarb1 = evar1, evarb2 = evarb2]  ]]
+  }
+\end{mathpar}
+
+\noindent First, the variable $[[evar]]$ is solved by an arrow type $[[evar1 ->
+evar2]]$. Then the two variables $[[evar1]]$ and $[[evar2]]$ are unified with
+the components of the function, $[[evarb1]]$ and $[[evarb2]]$, respectively. Now
+we can solve $[[evarb1=evar]]$ and $[[evarb2 = evar]]$.
+
+While the approach works well for \gpc, it has two drawbacks. First,
+instantiation rules in \gpc are duplicated, in order to deal with both the case
+where the existential variable appears on the left and the case where it appears
+on the right. For example, \rref{gpc-instl-solve} and \rref{gpc-instr-solve} are
+exactly the same, except for the position the existential variable appears:
+
+\begin{mathpar}
+  \drule{gpc-instl-solve} \and \drule{gpc-instr-solve}
+\end{mathpar}
+
+Second, while decomposing type structures works for function types, it might not
+work easily for more complicated types, e.g., dependent types. Consider a
+dependent type $\Pi [[a]]: [[at1]]. [[at2]]$. Following \rref{gpc-instl-arr}, we might
+design something like:
+
+\begin{mathpar}
+  \inferrule{
+    [[ GG[evar1,evar2,evar = evar1 -> evar2] ]] \vdash [[at1]] [[<~~]] [[evar1]] [[-|]] [[TT]]
+    \quad
+    [[TT, a]] \vdash [[ [TT]evar2 ]] [[<~~]] [[at2]] [[-|]] [[ DD1, a, DD2 ]]
+  }{
+    [[ GG[evar]  ]] \vdash [[evar]] [[<~~]] \Pi  [[a]]:[[at1]]. [[at2]] [[-|]] [[DD1]]
+  }
+\end{mathpar}
+
+\noindent Unfortunately, the rule is wrong. First, as in a dependent type,
+$[[at2]]$ may refer to $[[a]]$, and thus $[[evar2]]$ should be able to refer to
+$[[a]]$ as well. However in the current design, $[[a]]$ is out of the scope of
+$[[evar2]]$ as $[[a]]$ is added to the context after $[[evar2]]$. The reader
+might think we could fix this by moving $[[x]]$ to the front of $[[evar2]]$. But
+then we cannot discard $[[a]]$ in the final output context anymore, as there are
+still valid (unsolved) existential variables in the context after $[[a]]$.
+Retaining $[[a]]$ in the context is not right either, as it will allow future
+existential variables to refer to $[[a]]$, which should be out of the scope of
+their scope!
+
+
+\subsection{Promotion}
 
 %%% Local Variables:
 %%% mode: latex
