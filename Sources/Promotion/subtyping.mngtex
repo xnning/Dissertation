@@ -1,16 +1,3 @@
-\section{Promotion for Unification}
-
-\begin{figure}
-  \centering
-  \begin{tabular}{lrcl} \toprule
-    Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] $ \\
-    Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
-    Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , a]] \mid [[OO, evar = at]]  $ \\ \bottomrule
-  \end{tabular}
-  \drules[pr]{$ [[DD |-pr (evar) at1 ~~> at2 -| TT]] $}{Promotion}{int,tvar,evarL,evarR}
-  \drules[u]{$ [[DD |-u at1 ~= at2 -| TT]] $}{Unification}{refl,arrow,evarL,evarR}
-\end{figure}
-
 \section{Polymorphism Promotion for Subtyping}
 
 \begin{figure}
