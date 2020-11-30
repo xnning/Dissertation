@@ -49,9 +49,9 @@ exactly the same, except for the position the existential variable appears:
 \end{mathpar}
 
 Second, while decomposing type structures works for function types, it might not
-work easily for more complicated types, e.g., dependent types. Consider a
-dependent type $\Pi [[a]]: [[at1]]. [[at2]]$. Following \rref{gpc-instl-arr}, we might
-design something like:
+work easily for more complicated types, e.g., dependent types. Consider unifying
+$[[evar]]$ with a dependent type $\Pi [[a]]: [[at1]]. [[at2]]$. Following
+\rref{gpc-instl-arr}, we might design something like:
 
 \begin{mathpar}
   \inferrule{
@@ -71,8 +71,7 @@ might think we could fix this by moving $[[x]]$ to the front of $[[evar2]]$. But
 then we cannot discard $[[a]]$ in the final output context anymore, as there are
 still valid (unsolved) existential variables in the context after $[[a]]$.
 Retaining $[[a]]$ in the context is not right either, as it will allow future
-existential variables to refer to $[[a]]$, which should be out of the scope of
-their scope!
+existential variables to refer to $[[a]]$, which should be out of their scope!
 
 
 \subsection{Promotion}
