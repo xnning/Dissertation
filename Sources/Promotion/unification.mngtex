@@ -69,7 +69,7 @@ property, as the $[[evarb = evar]]$ case exactly corresponds to the
 ``occurs-check'' in a more typical presentation of unification. By preventing
 promoting $[[evar]]$ to the left of $[[evar]]$, we prevent the possibility of an
 infinite substitution when applying an algorithmic context. Note that
-\rref{u-refl} solves the case $[[evar ~= evar]]$.
+\rref{u-refl} solves the case $[[evar]] [[~=]] [[evar]]$.
 
 
 

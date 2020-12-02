@@ -6,46 +6,46 @@
 
 \subsection{Working with Ordered Contexts}
 
-Consider instantiating $[[at1]] [[<~~]] [[at2]]$. When $[[at1 = evar]]$, we
-cannot simply set $[[evar]]$ to $[[at2]]$, as $[[at2]]$ might include variables
-bound to the right of $[[evar]]$. The way \gpc (following DK) handles this is to
-first solve $[[evar]]$ by a solution which has the same form as $[[at2]]$, but
-whose components are fresh existential variables. Then it recursively
-instantiates each existential variable with the corresponding component in
-$[[at2]]$, until the new existential variable can be solved by the corresponding
-component or, when both sides are existential variables, solves the one that
-appears later in the context by the one that appear earlier.
+Consider instantiating $[[evar]] [[<~~]] [[at2]]$. We cannot simply set
+$[[evar]]$ to $[[at2]]$, as $[[at2]]$ might include variables bound to the right
+of $[[evar]]$. The way \gpc (following DK) handles this is to first solve
+$[[evar]]$ by a solution which has the same form as $[[at2]]$, but whose
+components are fresh existential variables. Then it recursively instantiates
+each existential variable with the corresponding component in $[[at2]]$, until
+the new existential variable can be solved by the corresponding component or,
+when both sides are existential variables, solves the one that appears later in
+the context by the one that appear earlier.
 
-Specifically, considering instantiating $[[GG]] [[|-G]] [[evar]] [[<~~]]
-[[evarb1 -> evarb2 ]]$ in \gpc:
+Specifically, consider the derivation of $[[GG]] [[|-G]] [[evar]] [[<~~]]
+[[evarb -> int ]]$ in \gpc:
 
-\noindent$[[GG]]  = [[evar, evarb1, evarb2]]$\\
-$[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb1, evarb2]]$
+\noindent$[[GG]]  = [[evar, evarb]]$\\
+$[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb]]$
 \begin{mathpar}
   \inferrule*[right=\rref*{gpc-instl-arr}]{
     \inferrule*[lab=\rref*{gpc-instl-reach}]{ }
-      {[[DD |-G evar1 <~~ evarb1 -| DD[evarb1 = evar1] ]]}
+      {[[DD |-G evarb <~~ evar1 -| DD[evarb = evar1] ]]}
     \qquad
     \inferrule*[lab=\rref*{gpc-instr-reach}]{
-    }{[[DD[evarb1 = evar1] |-G evarb2 <~~ evar2 -| DD[evarb1=evar1, evarb2=evar2] ]]}
+    }{[[DD[evarb = evar1] |-G evar2 <~~ int -| DD[evar2=int][evarb=evar1] ]]}
   }{
-    [[GG |-G evar <~~ evarb1 -> evarb2 -| DD1[evarb1 = evar1, evarb2 = evarb2]  ]]
+    [[GG |-G evar <~~ evarb -> int -| DD1[evar2=int][evarb = evar1]  ]]
   }
 \end{mathpar}
 
 \noindent First, the variable $[[evar]]$ is solved by an arrow type $[[evar1 ->
 evar2]]$. Then the two variables $[[evar1]]$ and $[[evar2]]$ are instantiated with
-the components of the function, $[[evarb1]]$ and $[[evarb2]]$, respectively,
-resulting in $[[evarb1=evar]]$ and $[[evarb2 = evar]]$.
+the components of the function, $[[evarb]]$ and $[[int]]$, respectively,
+resulting in $[[evarb1=evar]]$ and $[[evar2 = int]]$.
 
 While the approach works well for \gpc, it has two drawbacks. First,
 instantiation rules in \gpc are duplicated, in order to deal with both the case
-where the existential variable appears on the left and the case where it appears
-on the right. For example, \rref{gpc-instl-solve} and \rref{gpc-instr-solve} are
-exactly the same, except for the position the existential variable appears:
+where the existential variable appears on the left (\rref{gpc-instl-*}) and the
+case where it appears on the right (\rref{gpc-instl-*}). For example,
+\rref{gpc-instl-arr} is simply symmetric to \rref{gpc-instr-arr}:
 
 \begin{mathpar}
-  \drule{gpc-instl-solve} \and \drule{gpc-instr-solve}
+\drule{gpc-instl-arr} \and \drule{gpc-instr-arr}
 \end{mathpar}
 
 Second, while decomposing type structures works for function types, it might not
@@ -71,14 +71,89 @@ might think we could fix this by moving $[[x]]$ to the front of $[[evar2]]$. But
 then we cannot discard $[[a]]$ in the final output context anymore, as there are
 still valid (unsolved) existential variables (e.g., $[[evar2]]$) in the context
 after $[[a]]$, and might refer to $[[a]]$. Retaining $[[a]]$ in the context is
-not right either, as it would accidentally allow fresh existential variables
+not sound either, as it would accidentally allow fresh existential variables
 created in the future to refer to it.
 
 
 \subsection{Promotion}
 
-We propose the \textit{promotion} process, which moves existential variables
-around without decomposing 
+We propose the \textit{promotion} process, which helps resolve the dependency
+problem. The crucial observation of promotion is that \textit{the relative order
+  between unification variables does not matter for solving a constraint}. In
+particular, consider again the example $[[evarb, evar]] [[|-G]] [[evar]] [[<~~]]
+[[evarb -> int]]$. We cannot set $[[evar = evarb -> int ]]$, as this is
+ill-scoped. However, the constraint is solvable, and we have seen one solution
+context as $[[evar1,evar2=int,evar=evar1->evar2, evarb=evar1]]$. By substituting
+$[[evar2=int]]$, we get a simpler solution context as $[[evar1,
+evar=evar1->int,evarb=evar1]]$. In other words, although $[[evarb -> int]]$
+contains an out-of-scope variable $[[evarb]]$, we can solve the constraint by
+introducing a fresh in-scope variable $[[evar1]]$ and setting
+$[[evarb=evar1]]$. Then we can directly set $[[evar = evar1 -> int]]$.
+
+The promotion process captures this observation. At a high level, promoting
+$[[at]]$ in terms of $[[evar]]$ looks for free existential variables in
+$[[at]]$, and solves those out-of-scope existential variables in $[[at]]$ with
+fresh ones added before $[[evar]]$, such that existential variables in promoted
+$[[at]]$ are all in the scope of $[[evar]]$.
+
+\paragraph{Unification for Simply Typed Lambda Calculus.}
+
+As a first illustration of the utility of the promotion process, we recast the
+unification process for simply typed lambda calculus (STLC) using ordered
+algorithmic contexts with the promotion process. This system illustrates the key
+idea of promotion.
+
+\subsection{Polymorphic Promotion}
+
+So far we have only discussed about promoting monotypes, but what about
+polymorphic types? In particular, in \gpc, we have two instantiation rules for
+polymorphic types, \rref{gpc-instl-forallR} and \rref{gpc-instr-forallL}:
+
+\begin{mathpar}
+\drule{gpc-instl-forallR} \and \drule{gpc-instr-forallL}
+\end{mathpar}
+
+There are two main challenges for promoting polymorphic types. The first
+challenge is that even if we promote all existential variables in the
+polymorphic type, we still cannot set it directly to $[[evar]]$ as $[[evar]]$ stands
+for a monotype. Second, unlike \rref{gpc-instl-arr} and the symmetric
+\rref{gpc-instr-arr}, these two rules work in significantly different ways, and
+thus there is no obvious relation that would work for both cases.
+
+We propose \textit{polymorphic promotion}, which solves these two challenges by
+incorporating \textit{promotion mode}, which can either be \textit{positive} or
+\textit{negative}. Specifically, the positive mode indicates that we would
+promote a polymorphic type into a monotype, so that the polymorphic type would
+be a \textit{subtype} of the monotype, while the negative mode indicates that
+the monotype should be a \textit{subtype} of polymorphic type.
+
+Let's consider the positive mode first. Consider promoting the polymorphic type
+$[[\/a. a -> a]]$ in terms of $[[evar]]$ under the postive mode. As the type is
+a subtype of lots of monotypes, e.g., $[[int -> int]]$ and $[[bool -> bool]]$,
+we can simply generate a fresh $[[evarb]]$, and solve $[[evar = (a -> a) [a ~>
+evarb] ]] = [[evarb -> evarb]]$. This corresponds to \rref{gpc-instr-forallL},
+except that for promotion, $[[evarb]]$ will be added before $[[evar]]$ and there
+is no need to create a marker or to discard the context after $[[evarb]]$.
+
+On the other hand, promoting a polymorphic type under the negative mode is more
+tricky. Specifically, how can we promote $[[\/a. a -> a]]$ into a monotype
+$[[at]]$ such that the $[[at]]$ is a subtype $[[\/a. a -> a]]$? Never, according
+to definition of subtyping. In general, we cannot promote a polymorphic type
+$[[\/a. aA]]$ under the negative mode to be a monotype $[[at]]$ that is a
+subtype of $[[\/a.aA]]$. But there is one special case: if $[[a notin fv(aA)]]$,
+and if $[[aA]]$ can be promoted to $[[at]]$, then we can promote $[[\/a. aA]]$
+to $[[at]]$. For example, we can promote $[[\/a. int -> int]]$ to $[[int ->
+int]]$, with $[[int -> int]] [[<~]] [[\/a. int -> int]]$.
+
+\paragraph{Polymorphic Promotion for Subtyping.}
+
+We illustrate polymorphic promotion by recasting the subtyping relation in
+algorithmic DK, which is essentially \gpc without unknown types. The system can
+be naturally extended to include unknown types.
+
+
+
+
 
 %%% Local Variables:
 %%% mode: latex
