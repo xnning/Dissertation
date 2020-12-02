@@ -145,6 +145,10 @@ and if $[[aA]]$ can be promoted to $[[at]]$, then we can promote $[[\/a. aA]]$
 to $[[at]]$. For example, we can promote $[[\/a. int -> int]]$ to $[[int ->
 int]]$, with $[[int -> int]] [[<~]] [[\/a. int -> int]]$.
 
+When promoting a function type, the mode switches. This corresponds to the
+subtyping rule: function type are contravariant on codomains, and are covariant
+on domains. For example, TODO: addan example.
+
 \paragraph{Polymorphic Promotion for Subtyping.}
 
 We illustrate polymorphic promotion by recasting the subtyping relation in

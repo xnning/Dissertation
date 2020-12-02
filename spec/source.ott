@@ -371,6 +371,7 @@ terminals :: 'terminals_' ::=
   | |-Gm    :: :: turnstilem {{ tex \vdash^\mathit{G}_{m} }}
   | |-pr    :: :: turnstilepr {{ tex \vdash^{\!\!\mathsf{pr} } }}
   | |-u     :: :: turnstileu {{ tex \vdash^{\!\!\mathsf{u} } }}
+  | |-wf    :: :: turnstilewf {{ tex \vdash^{\!\!\mathsf{wf} } }}
   | |-sub   :: :: turnstilesub {{ tex \vdash^{\!\!\mathsf{sub} } }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
@@ -416,6 +417,7 @@ formula :: formula_ ::=
   | ( x : A ) in dd       :: :: bind_var {{ tex ( [[x]] : [[A]] ) \in [[dd]] }}
   | ( x : aA ) in GG      :: :: bind_var2 {{ tex ( [[x]] : [[aA]] ) \in [[GG]] }}
   | evar in fv ( aA )     :: :: fv {{ tex [[evar]] \in \textsc{fv} ( [[aA]] ) }}
+  | evar in GG            :: :: evargg {{ tex [[evar]] \in  [[GG]]  }}
   | evar notin fv ( aA )  :: :: nfv {{ tex [[evar]] \notin \textsc{fv} ( [[aA]] ) }}
   | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
   | varset1 notin varset2     :: :: notin_varset
@@ -1965,13 +1967,30 @@ GG |-pr pm (evar) aA1 -> aA2 ~~> at1 -> at2 -| DD
 
 defn
 
+GG |-wf at ::  :: wellformedness :: 'wf_'
+{{ tex [[GG]] [[|-wf]] [[at]] }}
+by
+
+-------------- :: int
+GG |-wf int
+
+GG |-wf at1
+GG |-wf at2
+--------------------- :: arrow
+GG |-wf at1 -> at2
+
+evar in GG
+--------------------- :: evar
+GG |-wf evar
+
+defn
+
 GG |-u at1 ~= at2 -| DD ::  :: unification :: 'u_'
 {{ tex [[GG]] [[|-u]] [[at1]] [[~=]] [[at2]] [[-|]] [[DD]] }}
 by
 
 ------------------ :: refl
 GG |-u at ~= at -| GG
-
 
 GG |-u at1 ~= at3 -| TT
 TT |-u [TT]at2 ~= [TT]at4 -| DD

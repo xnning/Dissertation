@@ -26,6 +26,7 @@ variables.
     Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
     Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO, evar = at]]  $ \\ \bottomrule
   \end{tabular}
+  \drules[wf]{$ [[GG |-wf at]] $}{Well-formedness}{int, arrow, evar}
   \drules[u]{$ [[GG |-u at1 ~= at2 -| DD]] $}{Unification}{refl, arrow, evarL, evarR}
   \drules[pr]{$ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $}{Promotion}{int, arrow, evarL, evarR}
   \caption{Types, contexts, unification and promotion of algorithmic STLC}
@@ -72,11 +73,43 @@ infinite substitution when applying an algorithmic context. Note that
 \rref{u-refl} solves the case $[[evar]] [[~=]] [[evar]]$.
 
 
-
-
-
-
 \subsection{Soundness and Completeness}
+
+\begin{restatable}[Soundness of Promotion]{theorem}{prsound} \label{thm:pr_soundness}%
+  If $[[  GG |-pr (evar) at1 ~~> at2 -| DD ]]$,
+  and $[[DD = DD1, evar, DD2]]$,
+  then $[[DD1 |-wf at2]]$,
+  and $[[ [DD]at1 = [DD ]at2 ]]$.
+\end{restatable}
+
+\begin{restatable}[Soundness of Unification]{theorem}{prunifsound} \label{thm:pr_unif_soundness}%
+  If $[[ GG |-u at1 ~= at2 -| DD ]]$,
+  then $[[ [DD]at1 = [DD ]at2 ]]$.
+\end{restatable}
+
+\begin{restatable}[Completeness of Promotion]{theorem}{prcomplete} \label{thm:pr_complete}%
+  Given $[[ GG --> OO  ]]$,
+  and $[[ GG |-wf evar  ]]$,
+  and $[[ GG |-wf at ]]$,
+  and $[[ [GG]evar = evar ]]$,
+  and $[[ [GG]at = at ]]$,
+  if $[[evar notin fv(at)]]$,
+  there exist $[[at2]]$, $[[DD]]$ and $[[OO']]$ such that
+  $[[GG --> OO']]$ and $[[OO --> OO']]$
+  and $[[  GG |-pr (evar) at ~~> at2 -| DD ]]$.
+\end{restatable}
+
+\begin{restatable}[Completeness of Unification]{theorem}{prunifcomplete} \label{thm:pr_unif_complete}%
+  Given $[[ GG --> OO  ]]$,
+  and $[[ GG |-wf at1  ]]$,
+  and $[[ GG |-wf at2 ]]$,
+  and $[[ [GG]at1 = at1 ]]$,
+  and $[[ [GG]at2 = at2 ]]$,
+  if $[[ [OO]at1 = [OO]at2 ]]$,
+  there exist $[[DD]]$ and $[[OO']]$ such that
+  $[[GG --> OO']]$ and $[[OO --> OO']]$
+  and $[[  GG |-u at1 ~= at2 -| DD ]]$.
+\end{restatable}
 
 
 %%% Local Variables:
