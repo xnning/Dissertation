@@ -26,27 +26,50 @@ variables.
     Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
     Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO, evar = at]]  $ \\ \bottomrule
   \end{tabular}
-  \drules[u]{$ [[DD |-u at1 ~= at2 -| TT]] $}{Unification}{refl, arrow, evarL, evarR}
-  \drules[pr]{$ [[DD |-pr (evar) at1 ~~> at2 -| TT]] $}{Promotion}{int, arrow, evarL, evarR}
+  \drules[u]{$ [[GG |-u at1 ~= at2 -| DD]] $}{Unification}{refl, arrow, evarL, evarR}
+  \drules[pr]{$ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $}{Promotion}{int, arrow, evarL, evarR}
   \caption{Types, contexts, unification and promotion of algorithmic STLC}
   \label{fig:pr:algo}
 \end{figure}
 
 The syntax of the algorithmic system is given in \Cref{fig:pr:algo}. Following
-the DK system \citep{DK} and \gpc, algorithmic monotypes include
-existential type variables $[[evar]]$. Algorithmic contexts also contain
-declarations of existential type variables, unsolved ($[[evar]]$) or solved
-($[[evar=at]]$). Complete contexts $[[OO]]$ contain only solved variables.
+the DK system \citep{DK} and \gpc, algorithmic monotypes include existential
+type variables $[[evar]]$. Algorithmic contexts also contain declarations of
+existential type variables, unsolved ($[[evar]]$) or solved ($[[evar=at]]$).
+Complete contexts $[[OO]]$ contain only solved variables.
 
 \paragraph{Unification.}
 
-\Cref{fig:pr:algo} defines the unification process. \Rref{u-refl} is our base
-case, and \rref{u-arrow} unifies the components of the arrow types. When
-unifying $[[evar]] [[~=]] [[at1 ]]$ (\rref{a-evarL}), we cannot simply set
-$[[evar]]$ to $[[at1]]$, as $[[at1]]$ might include variables bound to the right
-of $[[evar]]$. Instead, we need to \textit{promote} $[[at1]]$.
+\Cref{fig:pr:algo} defines the unification process. The judgment $[[GG |-u at1
+~= at2 -| DD]]$ reads as under input context $[[GG]]$, unify $[[at1]]$ with
+$[[at2]]$, resulting in output context $[[DD]]$. \Rref{u-refl} is our base case,
+and \rref{u-arrow} unifies the components of the arrow types. When unifying
+$[[evar]] [[~=]] [[at1]]$ (\rref{u-evarL}), we cannot simply set $[[evar]]$ to
+$[[at1]]$, as $[[at1]]$ might include variables bound to the right of
+$[[evar]]$. Instead, we need to \textit{promote} $[[at1]]$. After promoting
+$[[at1]]$ to $[[at2]]$, we can directly set $[[evar = at2]]$. \Rref{u-varR}
+deals with the case when $[[evar]]$ appears on the right.
 
 \paragraph{Promotion.}
+
+The promotion relation $ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $ given at the
+bottom of \Cref{fig:pr:algo} reads that, under input context $[[DD]]$, we
+promote the type $[[at1]]$, yielding $[[at2]]$, so that $[[at2]]$ is well-formed
+in the prefix context of $[[evar]]$, while retaining $[[ [DD]at1 = [DD] at2 ]]$.
+At a high-level, $[[|-pr]]$ looks for free variables in $[[at1]]$. Integers are
+always well-formed (\rref{pr-int}). Promoting a function recursively promotes
+its components (\rref{pr-arrow}). Variables bound to the left of $[[evar]]$ in
+$[[GG]]$ are unaffected (\rref{pr-evarL}), as they are already well-formed. In
+\rref{pr-evarR}, a unification variable $[[evarb]]$ bound to the right of
+$[[evar]]$ in $[[GG]]$ is replaced by a fresh variable introduced to
+$[[evar]]$'s left. Promotion is a partial operation, as it requires $[[evarb]]$
+either to be to the right or to the left of $[[evar]]$. There is yet another
+possibility: if $[[evarb = evar]]$, then no rule applies. This is a desired
+property, as the $[[evarb = evar]]$ case exactly corresponds to the
+``occurs-check'' in a more typical presentation of unification. By preventing
+promoting $[[evar]]$ to the left of $[[evar]]$, we prevent the possibility of an
+infinite substitution when applying an algorithmic context. Note that
+\rref{u-refl} solves the case $[[evar ~= evar]]$.
 
 
 
