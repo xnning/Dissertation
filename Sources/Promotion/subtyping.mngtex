@@ -159,6 +159,14 @@ promote $[[a]]$.
 
 \subsection{Promoting Gradual Types}
 
+\begin{mathpar}
+\drule{pr-unknown}
+\end{mathpar}
+
+\begin{mathpar}
+\drule{pr-unknownG}
+\end{mathpar}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"

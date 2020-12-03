@@ -1923,12 +1923,18 @@ promotion :: '' ::=
 
 defn
 
-DD |-pr ( evar ) at1 ~~> at2 -| TT ::  :: promotion :: 'pr_'
-{{ tex [[DD]] [[|-pr]]_{[[evar]]} [[at1]] [[~~>]] [[at2]] [[-|]] [[TT]] }}
+DD |-pr ( evar ) aA ~~> at2 -| TT ::  :: promotion :: 'pr_'
+{{ tex [[DD]] [[|-pr]]_{[[evar]]} [[aA]] [[~~>]] [[at2]] [[-|]] [[TT]] }}
 by
 
 -------------------------- :: int
 GG |-pr (evar) int ~~> int -| GG
+
+-------------------------- :: unknown
+GG[evar] |-pr (evar) unknown ~~> evarb -| GG[evarb,evar]
+
+-------------------------- :: unknownG
+GG[evar] |-pr (evar) unknown ~~> gb -| GG[gb,evar]
 
 -------------------------- :: tvar
 GG[a][evar] |-pr (evar) a ~~> a -| GG[a][evar]
