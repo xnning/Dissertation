@@ -1,113 +1,177 @@
-\section{Introduction}
+\section{Introduction and Motivation}
 
 
-% - overlapping between \rref{gpc-as-instR}, \rref{gpc-as-forallR}. etc.
-% - overlapping between two instantiations
+\subsection{Background:Type Inference in Contexts}
 
-\subsection{Working with Ordered Contexts}
+\cite{gundry2010type} models unification and type inference from a general
+perspective of information increase. The problem context is a ML-style
+polymorphic system, based on the invariant that types can only depend on
+bindings appearing earlier in the context. As we have briefly mentioned in
+\Cref{sec:DK}, DK \citep{DK} provides a meta-theoretical foundation for this
+strategy in a bi-directional algorithm for higher-rank polymorphism, which is
+later adopted in \gpc (\Cref{chap:Gradual}).
 
-Consider instantiating $[[evar]] [[<~~]] [[at2]]$. We cannot simply set
-$[[evar]]$ to $[[at2]]$, as $[[at2]]$ might include variables bound to the right
-of $[[evar]]$. The way \gpc (following DK) handles this is to first solve
-$[[evar]]$ by a solution which has the same form as $[[at2]]$, but whose
-components are fresh existential variables. Then it recursively instantiates
-each existential variable with the corresponding component in $[[at2]]$, until
-the new existential variable can be solved by the corresponding component or,
-when both sides are existential variables, solves the one that appears later in
-the context by the one that appear earlier.
 
-Specifically, consider the derivation of $[[GG]] [[|-G]] [[evar]] [[<~~]]
-[[evarb -> int ]]$ in \gpc:
+Besides contexts being ordered, a key insight of the approach lies in how to
+solve existential variables with other types. In particular, it requires to
+resolve the dependency between existential variables. Consider unifying
+$[[evar]]$ with $[[evarb -> int]]$ under context $[[evar, evarb]]$. Here we
+cannot simply set $[[evar]]$ to $[[evarb -> int]]$, as $[[evarb]]$ is out of the
+scope of $[[evar]]$.
 
-\noindent$[[GG]]  = [[evar, evarb]]$\\
-$[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb]]$
+The way \cite{gundry2010type} solve this problem is to examine variables in the
+context from the tail to the head, \textit{moving segments of context to the
+  left if necessary}. The process finishes when the existential variable being
+unified is found. In this case, \cite{gundry2010type} would return a solution
+context $[[evarb, evar = evarb -> int]]$, where $[[evarb]]$ is moved to the
+front of $[[evar]]$. However, while moving type variables around is a feasible
+way to resolve the dependency between existential variables, the unpredictable
+context movements make the information increase hard to formalize and reason
+about. In their system, the information increase of contexts is defined in a
+much semantic way: a context $[[GG1]]$ is more informative than another context
+$[[GG2]]$, if there exists a substitution such that every item in $[[GG2]]$ is,
+after substitution, well-formed under $[[GG1]]$. This semantic definition makes
+it hard to prove meta-theory formally, especially when advanced features are
+involved.
+
+DK \citep{DK} also use ordered contexts as input and output for type inference
+for a higher rank polymorphic type system. Unlike \cite{gundry2010type}, DK does
+it in a more syntactic way. Instead of moving variables to the left in the
+context, in the instantiation rules, they choose to decompose type constructs so
+that unification between existential variables can only happen between single
+variables, which can then be solved by setting the one that appears later to the
+one that appears earlier. In this way, the information increase of contexts,
+i.e., context extension, is formalized in an intuitive and straightforward
+syntactic way, which enables them to prove the meta-theory thoroughly and
+formally.
+
+\gpc adopts the approach from DK, so let us consider how DK works in terms of
+the instantiation rules in \gpc. Specifically, consider the derivation of
+$[[evar, evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int ]]$ in \gpc:
+
+\vspace{2pt}
+\noindent $[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb]]$
+%
 \begin{mathpar}
   \inferrule*[right=\rref*{gpc-instl-arr}]{
     \inferrule*[lab=\rref*{gpc-instl-reach}]{ }
       {[[DD |-G evarb <~~ evar1 -| DD[evarb = evar1] ]]}
     \qquad
-    \inferrule*[lab=\rref*{gpc-instr-reach}]{
+    \inferrule*[lab=\rref*{gpc-instr-solve}]{
     }{[[DD[evarb = evar1] |-G evar2 <~~ int -| DD[evar2=int][evarb=evar1] ]]}
   }{
-    [[GG |-G evar <~~ evarb -> int -| DD1[evar2=int][evarb = evar1]  ]]
+    [[evar, evarb |-G evar <~~ evarb -> int -| DD[evar2=int][evarb = evar1]  ]]
   }
 \end{mathpar}
 
-\noindent First, the variable $[[evar]]$ is solved by an arrow type $[[evar1 ->
-evar2]]$. Then the two variables $[[evar1]]$ and $[[evar2]]$ are instantiated with
-the components of the function, $[[evarb]]$ and $[[int]]$, respectively,
-resulting in $[[evarb1=evar]]$ and $[[evar2 = int]]$.
+\noindent By \rref{gpc-instl-arr}, the variable $[[evar]]$ is solved by an arrow
+type $[[evar1 -> evar2]]$ consisting of two fresh existential variables. The two
+variables $[[evar1]]$ and $[[evar2]]$ are then instantiated with the components
+of the arrow type, $[[evarb]]$ and $[[int]]$, respectively. By
+\rref{gpc-instl-reach}, the variable $[[evarb]]$ is solved by $[[evar1]]$ as
+$[[evar1]]$ appears in the context before $[[evarb]]$, or otherwise we need to
+apply \rref{gpc-instr-reach} instead. The final solution context is
+$[[DD[evar2=int][evarb = evar1] = evar1, evar2=int, evar=evar1->evar2,
+evarb=evar1 ]]$.
 
-While the approach works well for \gpc, it has two drawbacks. First,
-instantiation rules in \gpc are duplicated, in order to deal with both the case
-where the existential variable appears on the left (\rref{gpc-instl-*}) and the
-case where it appears on the right (\rref{gpc-instl-*}). For example,
-\rref{gpc-instl-arr} is simply symmetric to \rref{gpc-instr-arr}:
+\paragraph{Challenges.}
+
+While destructing type constructors works perfectly for DK and \gpc, it has two
+drawbacks. The first drawback of decomposition is that it produces duplication,
+in order to deal with both the case where the existential variable appears on
+the left ($ [[ GG |-G evar <~~ aA -| DD ]] $ in
+\Cref{fig:gradual:algo:instantiate}) and the case where it appears on the right
+($ [[ GG |-G aA <~~ evar -| DD ]] $ in \Cref{fig:gradual:algo:instantiate}). For
+example, \rref{gpc-instl-arr} is simply symmetric to \rref{gpc-instr-arr}:
 
 \begin{mathpar}
 \drule{gpc-instl-arr} \and \drule{gpc-instr-arr}
 \end{mathpar}
 
-Second, while decomposing type structures works for function types, it might not
-work easily for more complicated types, e.g., dependent types. Consider
-instantiating $[[evar]]$ with a dependent type $\Pi [[a]]: [[at1]]. [[at2]]$.
-Following \rref{gpc-instl-arr}, we might design something like:
+\noindent Worse, this kind of “duplication” would scales up with the type
+constructs in the system.
 
-\begin{mathpar}
-  \inferrule{
-    [[ GG[evar1,evar2,evar = evar1 -> evar2] ]] \vdash [[at1]] [[<~~]] [[evar1]] [[-|]] [[TT]]
-    \quad
-    [[TT, a]] \vdash [[ [TT]evar2 ]] [[<~~]] [[at2]] [[-|]] [[ DD1, a, DD2 ]]
-  }{
-    [[ GG[evar]  ]] \vdash [[evar]] [[<~~]] \Pi  [[a]]:[[at1]]. [[at2]] [[-|]] [[DD1]]
-  }
-\end{mathpar}
-
-\noindent Unfortunately, the rule is wrong. First, as in a dependent type,
-$[[at2]]$ may refer to $[[a]]$, and thus $[[evar2]]$ should be able to refer to
-$[[a]]$ as well. However in the current design, $[[a]]$ is out of the scope of
-$[[evar2]]$ as $[[a]]$ is added to the context after $[[evar2]]$. The reader
-might think we could fix this by moving $[[x]]$ to the front of $[[evar2]]$. But
-then we cannot discard $[[a]]$ in the final output context anymore, as there are
-still valid (unsolved) existential variables (e.g., $[[evar2]]$) in the context
-after $[[a]]$, and might refer to $[[a]]$. Retaining $[[a]]$ in the context is
-not sound either, as it would accidentally allow fresh existential variables
-created in the future to refer to it.
+Second, while decomposition works for function types, it might not work easily
+for more complicated types, e.g., dependent types. For example, consider that
+under the context $[[evar, evarb]]$, we want to instantiate $[[evar]]$ with a
+dependent type $\Pi [[a]]: [[evarb]]. [[a]]$. Here because $[[evarb]]$ appears
+after $[[evar]]$, we cannot directly set $[[evar]] = \Pi [[a]] :
+[[evarb]].[[a]]$ which is ill typed. However, if we try to decompose the type
+$\Pi [[a]]: [[evarb]]. [[a]]$, according to rule \rref{gpc-instl-arr}, it is
+obvious that $[[evar2]]$ should be solved by $[[a]]$. In order to make the
+solution well typed, we need to put $[[a]]$ before $[[evar2]]$ into the context.
+However, this means $[[a]]$ will remain in the context, and it is available for
+any later existential variable that should not have access to $[[a]]$. In
+essence, the strategy for simple function types presented in DK does not work
+for dependent function types.
 
 
-\subsection{Promotion}
+\subsection{Our Approach: Type Promotion}
 
 We propose the \textit{promotion} process, which helps resolve the dependency
-problem. The crucial observation of promotion is that \textit{the relative order
-  between unification variables does not matter for solving a constraint}. In
-particular, consider again the example $[[evarb, evar]] [[|-G]] [[evar]] [[<~~]]
-[[evarb -> int]]$. We cannot set $[[evar = evarb -> int ]]$, as this is
-ill-scoped. However, the constraint is solvable, and we have seen one solution
-context as $[[evar1,evar2=int,evar=evar1->evar2, evarb=evar1]]$. By substituting
-$[[evar2=int]]$, we get a simpler solution context as $[[evar1,
-evar=evar1->int,evarb=evar1]]$. In other words, although $[[evarb -> int]]$
-contains an out-of-scope variable $[[evarb]]$, we can solve the constraint by
-introducing a fresh in-scope variable $[[evar1]]$ and setting
-$[[evarb=evar1]]$. Then we can directly set $[[evar = evar1 -> int]]$.
+between existential variables. It combines the advantages of the previous two
+approaches. First, it is a simple and quite predictable process, so that
+information increase can still be modeled as syntactic context extension. Also,
+it will not decompose types, nor cause any duplication.
 
-The promotion process captures this observation. At a high level, promoting
-$[[at]]$ in terms of $[[evar]]$ looks for free existential variables in
-$[[at]]$, and solves those out-of-scope existential variables in $[[at]]$ with
-fresh ones added before $[[evar]]$, such that existential variables in promoted
-$[[at]]$ are all in the scope of $[[evar]]$.
+To understand how promotion works, let us consider again the example $[[ evar,
+evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int]]$. The problem here is that
+$[[evarb]]$ is out of the scope of $[[evar]]$ so we cannot directly set $[[evar
+= evarb -> int ]]$. Therefore, we first promote the type $[[evarb -> int]]$. At
+a high level, the promotion process looks for free existential variables on the
+right hand side, and solves those out-of-scope existential variables with fresh
+existential variables added to the front of $[[evar]]$, such that existential
+variables in the promoted type are all in the scope of $[[evar]]$. In this case,
+we will solve $[[evarb]]$ with a fresh variable $[[evar1]]$, which results in
+the context $[[ evar1, evar, evarb = evar1 ]]$. Notice that $[[evar1]]$ is
+inserted right before $[[evar]]$. Now the instantiation example becomes $[[
+evar1, evar, evarb = evar1]] [[|-G]] [[evar]] [[<~~]] [[evar1 -> int]]$, and
+$[[evar1 -> int]]$ is a valid solution for $[[evar]]$. Therefore, we get a final
+solution context $[[ evar1, evar = evar1 -> int, evarb = evar1]]$. Comparing the
+result with the solution context we get from DK,
+$[[evar1,evar2=int,evar=evar1->evar2, evarb=evar1]]$, it is obvious that these
+two solutions are equivalent up to substitution.
+
+\paragraph{Interpretation of Promotion.}
+
+The approach taken by \cite{gundry2010type}, the approach used by DK, and the
+approach of promotion are all based on the same observation: \textit{the relative
+  order between existential variables does not matter for solving a constraint}.
+
+This seems to go against the design principle that the contexts are ordered.
+However, keeping order is still important for variables whose order matter. For
+instance, for polymorphic types, the order between existential variables
+$[[evar]]$ and type variables $[[a]]$ is important, so we cannot set $[[evar]]$
+to $[[a]]$ under the context $[[(evar, a)]]$ as $[[a]]$ is not in the scope of
+$[[evar]]$.
+
+The promotion process captures precisely this observation. Its task is to “move”
+existential variables to suitable positions in a roundabout way: solving those
+out-of-scope existential variables with fresh existential variables and making
+sure that these new fresh variables appear in a suitable position.
+
+
 
 \paragraph{Unification for Simply Typed Lambda Calculus.}
 
-As a first illustration of the utility of the promotion process, we recast the
-unification process for simply typed lambda calculus (STLC) using ordered
-algorithmic contexts with the promotion process. This system illustrates the key
-idea of promotion.
+As a first illustration of the utility of the promotion process,
+\Cref{sec:pr:unif} recasts the unification process for simply typed lambda
+calculus (STLC) using ordered algorithmic contexts with the promotion process.
+This system illustrates the key idea of promotion.
 
 \subsection{Polymorphic Promotion}
 
-So far we have only discussed about promoting monotypes, but what about
-polymorphic types? In particular, in \gpc, we have two instantiation rules for
-polymorphic types, \rref{gpc-instl-forallR} and \rref{gpc-instr-forallL}:
+Instead of unification, the instantiation relation in DK is actually aiming at
+dealing with the polymorphic subtyping relation between existential variables
+and other types. The difficulty of subtyping is that it needs to take
+unification into account at the same time. For example, given that $[[evar]]$ is
+a subtype of $[[int]]$, the only possible solution is $[[evar = int]]$. Given
+$[[\/a.a -> a]]$ is a subtype $[[evar]]$, then one possible solution can be
+$[[evar = int -> int]]$.
+
+The promotion process we described above only works for unification, but what
+about polymorphic types? In particular, in \gpc, we have two instantiation rules
+for polymorphic types, \rref{gpc-instl-forallR} and \rref{gpc-instr-forallL}:
 
 \begin{mathpar}
 \drule{gpc-instl-forallR} \and \drule{gpc-instr-forallL}
