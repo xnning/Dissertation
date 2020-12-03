@@ -106,7 +106,7 @@ dtyp_castable, gc  {{ tex \mathbb{C} }}  :: 'dtyp_castable_' ::=
 
 % Existential variable
 
-evar {{ tex \widehat{\alpha} }}, evarb {{ tex \widehat{\beta} }} :: 'evar_' ::=
+evar {{ tex \widehat{\alpha} }}, evara {{tex \widehat{\alpha} }}, evarb {{ tex \widehat{\beta} }} :: 'evar_' ::=
   | sa :: :: evar {{ tex \widehat{\alpha}_{S} }}
   | ga :: :: gevar {{ tex \widehat{\alpha}_{G} }}
   | sb :: :: evarb {{ tex \widehat{\beta}_{S} }}

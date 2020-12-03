@@ -31,25 +31,23 @@ about. In their system, the information increase of contexts is defined in a
 much semantic way: a context $[[GG1]]$ is more informative than another context
 $[[GG2]]$, if there exists a substitution such that every item in $[[GG2]]$ is,
 after substitution, well-formed under $[[GG1]]$. This semantic definition makes
-it hard to prove meta-theory formally, especially when advanced features are
+it hard to prove metatheory formally, especially when advanced features are
 involved.
 
-DK \citep{DK} also use ordered contexts as input and output for type inference
+DK \citep{DK} also uses ordered contexts as input and output for type inference
 for a higher rank polymorphic type system. Unlike \cite{gundry2010type}, DK does
-it in a more syntactic way. Instead of moving variables to the left in the
-context, in the instantiation rules, they choose to decompose type constructs so
-that unification between existential variables can only happen between single
-variables, which can then be solved by setting the one that appears later to the
-one that appears earlier. In this way, the information increase of contexts,
-i.e., context extension, is formalized in an intuitive and straightforward
-syntactic way, which enables them to prove the meta-theory thoroughly and
-formally.
+it in a more syntactic way. In its instantiation rules, it decomposes type
+constructs so that unification between existential variables can only happen
+between single variables, which can then be solved by setting the one that
+appears later to the one that appears earlier. This way, the information
+increase of contexts is modeled as \textit{context extension}, with an
+intuitive, straightforward, and syntactic definition, which allows for inductive
+reasoning and structured proofs. This approach is later adopted in \gpc, so let
+us consider how DK works in terms of the instantiation rules in \gpc.
+Specifically, consider the derivation of $[[evar, evarb]] [[|-G]] [[evar]]
+[[<~~]] [[evarb -> int ]]$ in \gpc:
 
-\gpc adopts the approach from DK, so let us consider how DK works in terms of
-the instantiation rules in \gpc. Specifically, consider the derivation of
-$[[evar, evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int ]]$ in \gpc:
-
-\vspace{2pt}
+\vspace{5pt}
 \noindent $[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb]]$
 %
 \begin{mathpar}
@@ -66,53 +64,50 @@ $[[evar, evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int ]]$ in \gpc:
 
 \noindent By \rref{gpc-instl-arr}, the variable $[[evar]]$ is solved by an arrow
 type $[[evar1 -> evar2]]$ consisting of two fresh existential variables. The two
-variables $[[evar1]]$ and $[[evar2]]$ are then instantiated with the components
-of the arrow type, $[[evarb]]$ and $[[int]]$, respectively. By
-\rref{gpc-instl-reach}, the variable $[[evarb]]$ is solved by $[[evar1]]$ as
-$[[evar1]]$ appears in the context before $[[evarb]]$, or otherwise we need to
-apply \rref{gpc-instr-reach} instead. The final solution context is
-$[[DD[evar2=int][evarb = evar1] = evar1, evar2=int, evar=evar1->evar2,
-evarb=evar1 ]]$.
+variables $[[evar1]]$ and $[[evar2]]$ are then instantiated with $[[evarb]]$ and
+$[[int]]$, respectively. By \rref{gpc-instl-reach}, the variable $[[evarb]]$ is
+solved by $[[evar1]]$, as $[[evar1]]$ appears in the context before $[[evarb]]$,
+or otherwise we need to apply \rref{gpc-instr-reach} to set $[[evar1]]$ to
+$[[evarb]]$ instead. The final solution context is $[[DD[evar2=int][evarb =
+evar1] = evar1, evar2=int, evar=evar1->evar2, evarb=evar1 ]]$.
 
 \paragraph{Challenges.}
 
-While destructing type constructors works perfectly for DK and \gpc, it has two
-drawbacks. The first drawback of decomposition is that it produces duplication,
-in order to deal with both the case where the existential variable appears on
-the left ($ [[ GG |-G evar <~~ aA -| DD ]] $ in
-\Cref{fig:gradual:algo:instantiate}) and the case where it appears on the right
+However, while the approach of destructing type construct works perfectly for DK
+and \gpc, it has two drawbacks. The first drawback is that it produces
+duplication, in order to deal with both the case when the existential variable
+appears on the left ($ [[ GG |-G evar <~~ aA -| DD ]] $ in
+\Cref{fig:gradual:algo:instantiate}) and the case when it appears on the right
 ($ [[ GG |-G aA <~~ evar -| DD ]] $ in \Cref{fig:gradual:algo:instantiate}). For
-example, \rref{gpc-instl-arr} is simply symmetric to \rref{gpc-instr-arr}:
+example, \rref{gpc-instl-arr} and \rref{gpc-instr-arr} are symmetric:
 
 \begin{mathpar}
 \drule{gpc-instl-arr} \and \drule{gpc-instr-arr}
 \end{mathpar}
 
-\noindent Worse, this kind of “duplication” would scales up with the type
-constructs in the system.
+\noindent Worse, this kind of ``duplication'' would scale up with the number of
+type constructs in the system.
 
-Second, while decomposition works for function types, it might not work easily
-for more complicated types, e.g., dependent types. For example, consider that
-under the context $[[evar, evarb]]$, we want to instantiate $[[evar]]$ with a
+Second, while decomposition works for function types, it may not work easily for
+more complicated types, e.g., dependent types. For example, consider that under
+the context $[[evar, evarb]]$, we want to instantiate $[[evar]]$ with a
 dependent type $\Pi [[a]]: [[evarb]]. [[a]]$. Here because $[[evarb]]$ appears
 after $[[evar]]$, we cannot directly set $[[evar]] = \Pi [[a]] :
 [[evarb]].[[a]]$ which is ill typed. However, if we try to decompose the type
-$\Pi [[a]]: [[evarb]]. [[a]]$, according to rule \rref{gpc-instl-arr}, it is
-obvious that $[[evar2]]$ should be solved by $[[a]]$. In order to make the
-solution well typed, we need to put $[[a]]$ before $[[evar2]]$ into the context.
+$\Pi [[a]]: [[evarb]]. [[a]]$ like in \rref{gpc-instl-arr}, it is obvious that
+$[[evar2]]$ should be solved by $[[a]]$. In order to make the solution well
+typed, we need to put $[[a]]$ in the front of $[[evar2]]$ in the context.
 However, this means $[[a]]$ will remain in the context, and it is available for
-any later existential variable that should not have access to $[[a]]$. In
-essence, the strategy for simple function types presented in DK does not work
-for dependent function types.
+any later existential variable that should not have access to $[[a]]$.
 
 
 \subsection{Our Approach: Type Promotion}
 
 We propose the \textit{promotion} process, which helps resolve the dependency
-between existential variables. It combines the advantages of the previous two
-approaches. First, it is a simple and quite predictable process, so that
-information increase can still be modeled as syntactic context extension. Also,
-it will not decompose types, nor cause any duplication.
+between existential variables. Promotion combines the advantages of
+\cite{gundry2010type} and DK: it is a simple and predictable process, so that
+information increase can still be modeled as syntactic context extension;
+moreover, it does not cause any duplication.
 
 To understand how promotion works, let us consider again the example $[[ evar,
 evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int]]$. The problem here is that
@@ -122,33 +117,33 @@ a high level, the promotion process looks for free existential variables on the
 right hand side, and solves those out-of-scope existential variables with fresh
 existential variables added to the front of $[[evar]]$, such that existential
 variables in the promoted type are all in the scope of $[[evar]]$. In this case,
-we will solve $[[evarb]]$ with a fresh variable $[[evar1]]$, which results in
-the context $[[ evar1, evar, evarb = evar1 ]]$. Notice that $[[evar1]]$ is
-inserted right before $[[evar]]$. Now the instantiation example becomes $[[
-evar1, evar, evarb = evar1]] [[|-G]] [[evar]] [[<~~]] [[evar1 -> int]]$, and
-$[[evar1 -> int]]$ is a valid solution for $[[evar]]$. Therefore, we get a final
-solution context $[[ evar1, evar = evar1 -> int, evarb = evar1]]$. Comparing the
-result with the solution context we get from DK,
-$[[evar1,evar2=int,evar=evar1->evar2, evarb=evar1]]$, it is obvious that these
+we will solve $[[evarb]]$ with a fresh variable $[[evar1]]$, producing the
+context $[[ evar1, evar, evarb = evar1 ]]$. Notice that $[[evar1]]$ is inserted
+right before $[[evar]]$. Now the instantiation example becomes $[[ evar1, evar,
+evarb = evar1]] [[|-G]] [[evar]] [[<~~]] [[evar1 -> int]]$, and $[[evar1 ->
+int]]$ is a valid solution for $[[evar]]$. Therefore, we get a final solution
+context $[[ evar1, evar = evar1 -> int, evarb = evar1]]$. Comparing the result
+with the solution context we get from DK, i.e.,
+($[[evar1,evar2=int,evar=evar1->evar2, evarb=evar1]]$), it is obvious that these
 two solutions are equivalent up to substitution.
 
 \paragraph{Interpretation of Promotion.}
 
-The approach taken by \cite{gundry2010type}, the approach used by DK, and the
-approach of promotion are all based on the same observation: \textit{the relative
-  order between existential variables does not matter for solving a constraint}.
+The approach taken by \cite{gundry2010type} and the approach used by DK are
+based on the same observation: \textit{the relative order between existential
+  variables does not matter for solving a constraint}. The promotion process
+captures precisely this observation. Its task is to ``move'' existential
+variables to suitable positions \textit{indirectly}, by solving those
+out-of-scope existential variables with fresh in-scope existential variables.
 
 This seems to go against the design principle that the contexts are ordered.
-However, keeping order is still important for variables whose order matter. For
+However, ordering is still important for variables whose order matters. For
 instance, for polymorphic types, the order between existential variables
 $[[evar]]$ and type variables $[[a]]$ is important, so we cannot set $[[evar]]$
 to $[[a]]$ under the context $[[(evar, a)]]$ as $[[a]]$ is not in the scope of
-$[[evar]]$.
+$[[evar]]$. Moreover, ordering rules out invalid cyclic results, e.g., $[[evara
+= evarb -> int]], [[evarb = evara -> int]]$.
 
-The promotion process captures precisely this observation. Its task is to “move”
-existential variables to suitable positions in a roundabout way: solving those
-out-of-scope existential variables with fresh existential variables and making
-sure that these new fresh variables appear in a suitable position.
 
 
 
@@ -161,63 +156,51 @@ This system illustrates the key idea of promotion.
 
 \subsection{Polymorphic Promotion}
 
-Instead of unification, the instantiation relation in DK is actually aiming at
-dealing with the polymorphic subtyping relation between existential variables
-and other types. The difficulty of subtyping is that it needs to take
-unification into account at the same time. For example, given that $[[evar]]$ is
-a subtype of $[[int]]$, the only possible solution is $[[evar = int]]$. Given
-$[[\/a.a -> a]]$ is a subtype $[[evar]]$, then one possible solution can be
-$[[evar = int -> int]]$.
+Instead of unification, the instantiation relation in DK actually deals with the
+polymorphic subtyping relation between existential variables and other types.
+The promotion process we described above only works for unification. In this
+section, we discuss promotion for polymorphic subtyping.
 
-The promotion process we described above only works for unification, but what
-about polymorphic types? In particular, in \gpc, we have two instantiation rules
-for polymorphic types, \rref{gpc-instl-forallR} and \rref{gpc-instr-forallL}:
+The difficulty of subtyping is that it needs to take unification into account at
+the same time. For example, given that $[[evar]]$ is a subtype of $[[int]]$, the
+only possible solution is $[[evar = int]]$. Now consider $[[evar]] [[|-]]
+[[\/a.a -> a]] <: [[evar]]$. how can we promote the polymorphic type into a
+monotype which can serve as a valid solution for $[[evar]]$? One possible answer
+is to set $[[evar = int -> int]]$, or $[[evar]] = [[bool -> bool]]$. In fact,
+the most general solution this subtyping problem is $[[evar = evarb -> evarb]]$
+with fresh $[[evarb]]$. Namely, we remove the universal quantifier and replace
+the variable $[[a]]$ with a fresh existential variable added to the front of
+$[[evar]]$, resulting in the solution context $[[evarb, evara = evarb ->
+evarb]]$.
 
-\begin{mathpar}
-\drule{gpc-instl-forallR} \and \drule{gpc-instr-forallL}
-\end{mathpar}
+From this observation, we extend promotion to \textit{polymorphic promotion},
+which is able to resolve the polymorphic subtyping relation for existential
+variables. Since function types are contravariant in codomains, and covariant in
+domains, polymorphic promotion has two modes, which we call the
+\textit{contravariant mode} and the \textit{covariant mode} respectively,
+according to the position the universal quantifier appears.
 
-There are two main challenges for promoting polymorphic types. The first
-challenge is that even if we promote all existential variables in the
-polymorphic type, we still cannot set it directly to $[[evar]]$ as $[[evar]]$ stands
-for a monotype. Second, unlike \rref{gpc-instl-arr} and the symmetric
-\rref{gpc-instr-arr}, these two rules work in significantly different ways, and
-thus there is no obvious relation that would work for both cases.
+In the contravariant mode, the universal quantifier is replaced by a fresh
+existential variable added to front of the existential variable being solved, as
+in the example above. This corresponds to \rref{gpc-instr-forallL}, except that
+with promotion, the new existential variable $[[evarb]]$ (in
+\rref{gpc-instr-forallL}) will be added directly before $[[evar]]$ and there is
+no need to create a marker or to discard the context after $[[evarb]]$ anymore.
 
-We propose \textit{polymorphic promotion}, which solves these two challenges by
-incorporating \textit{promotion mode}, which can either be \textit{positive} or
-\textit{negative}. Specifically, the positive mode indicates that we would
-promote a polymorphic type into a monotype, so that the polymorphic type would
-be a \textit{subtype} of the monotype, while the negative mode indicates that
-the monotype should be a \textit{subtype} of polymorphic type.
+In covariant mode, the universal quantifier is added to the tail of the context
+as a common type variable. This corresponds to \rref{gpc-instl-forallR}. This
+also means that the new type variable is out of the scope of the existential
+variable being solved, and promotion will succeed if only the variable is not
+used in the body of the polymorphic type. For example, We can never promote
+$[[\/a. a -> a]]$ into a monotype. But $[[\/a. int -> int]]$ can be promoted to
+$[[int -> int]]$.
 
-Let's consider the positive mode first. Consider promoting the polymorphic type
-$[[\/a. a -> a]]$ in terms of $[[evar]]$ under the postive mode. As the type is
-a subtype of lots of monotypes, e.g., $[[int -> int]]$ and $[[bool -> bool]]$,
-we can simply generate a fresh $[[evarb]]$, and solve $[[evar = (a -> a) [a ~>
-evarb] ]] = [[evarb -> evarb]]$. This corresponds to \rref{gpc-instr-forallL},
-except that for promotion, $[[evarb]]$ will be added before $[[evar]]$ and there
-is no need to create a marker or to discard the context after $[[evarb]]$.
-
-On the other hand, promoting a polymorphic type under the negative mode is more
-tricky. Specifically, how can we promote $[[\/a. a -> a]]$ into a monotype
-$[[at]]$ such that the $[[at]]$ is a subtype $[[\/a. a -> a]]$? Never, according
-to definition of subtyping. In general, we cannot promote a polymorphic type
-$[[\/a. aA]]$ under the negative mode to be a monotype $[[at]]$ that is a
-subtype of $[[\/a.aA]]$. But there is one special case: if $[[a notin fv(aA)]]$,
-and if $[[aA]]$ can be promoted to $[[at]]$, then we can promote $[[\/a. aA]]$
-to $[[at]]$. For example, we can promote $[[\/a. int -> int]]$ to $[[int ->
-int]]$, with $[[int -> int]] [[<~]] [[\/a. int -> int]]$.
-
-When promoting a function type, the mode switches. This corresponds to the
-subtyping rule: function type are contravariant on codomains, and are covariant
-on domains. For example, TODO: addan example.
 
 \paragraph{Polymorphic Promotion for Subtyping.}
 
-We illustrate polymorphic promotion by recasting the subtyping relation in
-algorithmic DK. We also discuss how to naturally extend the system to unknown
-types for algorithmic \gpc.
+We illustrate polymorphic promotion by showing that the original instantiation
+relationship in DK can be replaced by our polymorphic promotion process, while
+subtyping remains sound and complete.
 
 
 
