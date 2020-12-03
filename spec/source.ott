@@ -18,9 +18,11 @@ mode :: 'mode_' ::=
   | <=       ::  :: check {{ tex \Leftarrow }}
 
 prmode, pm {{ tex \otimes }} :: 'prmode_'  ::=
-  | +       ::  :: postive  {{ tex + }}
-  | -       ::  :: negative {{ tex - }}
-  | - pm    ::  :: negate   {{ tex - [[pm]] }}
+  | +       ::  :: postive  {{ tex \texttt{+} }}
+  | -       ::  :: negative {{ tex \texttt{-} }}
+  | pminus  ::  :: pminus   {{ tex \texttt{-} }}
+  | - pm    ::  :: negate   {{ tex \texttt{-} [[pm]] }}
+  | ( pm )  ::  :: paren
 
 varset, avs  :: 'varset_' ::=
   | a                        ::  :: a
@@ -451,6 +453,7 @@ formula :: formula_ ::=
   | < A `-> B >   :: :: cast2
   | dd |-G e : A  ::  :: dtyping_without
   | dd |-Gm e : A  ::  :: dtyping_m
+  | dd |-sub A1 <: A2  ::  :: dsub_pr
 
 
 subrules
@@ -1967,8 +1970,8 @@ GG |-pr pm (evar) aA1 -> aA2 ~~> at1 -> at2 -| DD
 
 defn
 
-GG |-wf at ::  :: wellformedness :: 'wf_'
-{{ tex [[GG]] [[|-wf]] [[at]] }}
+GG |-wf aA ::  :: wellformedness :: 'wf_'
+{{ tex [[GG]] [[|-wf]] [[aA]] }}
 by
 
 -------------- :: int
@@ -2007,43 +2010,43 @@ GG |-u at1 ~= evar -| DD[evar=at2]
 
 defn
 
-GG |-sub aA1 <~ aA2 -| DD ::  :: subtyping :: 's_'
-{{ tex [[GG]] [[|-sub]] [[aA1]] [[<~]] [[aA2]] [[-|]] [[DD]] }}
+GG |-sub aA1 <: aA2 -| DD ::  :: subtyping :: 's_'
+{{ tex [[GG]] [[|-sub]] [[aA1]] [[<:]] [[aA2]] [[-|]] [[DD]] }}
 by
 
 
 -------------------------- :: tvar
-GG[a] |-sub a <~ a -| GG[a]
+GG[a] |-sub a <: a -| GG[a]
 
 
 
 -------------------------- :: evar
-GG[evar] |-sub evar <~ evar -| GG[evar]
+GG[evar] |-sub evar <: evar -| GG[evar]
 
 
 -------------------- :: int
-GG |-sub int <~ int -| GG
+GG |-sub int <: int -| GG
 
 
-GG |-sub aA3 <~ aA1 -| TT
-TT |-sub [TT] aA2 <~ [TT] aA4 -| DD
+GG |-sub aA3 <: aA1 -| TT
+TT |-sub [TT] aA2 <: [TT] aA4 -| DD
 ----------------------------------------- :: arrow
-GG |-sub aA1 -> aA2 <~ aA3 -> aA4 -| DD
+GG |-sub aA1 -> aA2 <: aA3 -> aA4 -| DD
 
 
-GG, a |-sub aA1 <~ aA2 -| DD, a, TT
+GG, a |-sub aA1 <: aA2 -| DD, a, TT
 ----------------------------- :: forallR
-GG |-sub aA1 <~ \/ a. aA2 -| DD
+GG |-sub aA1 <: \/ a. aA2 -| DD
 
 
-GG, mevar, evar |-sub aA1 [a ~> evar] <~ aA2 -| DD, mevar, TT
+GG, mevar, evar |-sub aA1 [a ~> evar] <: aA2 -| DD, mevar, TT
 ------------------------------ :: forallL
-GG |-sub \/ a. aA1 <~ aA2 -| DD
+GG |-sub \/ a. aA1 <: aA2 -| DD
 
 GG[evar] |-pr - (evar) aA ~~> at -| DD[evar]
 ---------------------------------- :: instL
-GG[evar] |-sub  evar <~ aA -| DD[evar=at]
+GG[evar] |-sub  evar <: aA -| DD[evar=at]
 
 GG[evar] |-pr + (evar) aA ~~> at -| DD[evar]
 ---------------------------------- :: instR
-GG[evar] |-sub  aA <~ evar -| DD[evar=at]
+GG[evar] |-sub  aA <: evar -| DD[evar=at]

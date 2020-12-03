@@ -152,8 +152,9 @@ on domains. For example, TODO: addan example.
 \paragraph{Polymorphic Promotion for Subtyping.}
 
 We illustrate polymorphic promotion by recasting the subtyping relation in
-algorithmic DK, which is essentially \gpc without unknown types. The system can
-be naturally extended to include unknown types.
+algorithmic DK. We also discuss how to naturally extend the system to unknown
+types for algorithmic \gpc.
+
 
 
 

@@ -483,7 +483,7 @@ $[[OO']]$ that extends both the output context $[[DD]]$, and the given complete
 context $[[OO]]$. As with soundness, we need erasure to relate both expressions.
 
 \begin{restatable}[Instantiation Completeness]{theorem}{instcomplete} \label{thm:inst_complete}
-  Given $[[GG --> OO]]$ and $[[aA = [GG]aA]]$ and $[[evar]] \notin \textsc{unsolved}([[GG]]) $ and $[[  evar notin fv(aA)  ]]$:
+  Given $[[GG --> OO]]$ and $[[aA = [GG]aA]]$ and $[[evar]] \in \textsc{unsolved}([[GG]]) $ and $[[  evar notin fv(aA)  ]]$:
   \begin{enumerate}
   \item If $[[ [OO]GG |-G [OO] evar <~ [OO]aA   ]]$ then there are $[[DD]], [[OO']]$ such that $[[OO --> OO']]$
     and $[[DD --> OO']]$ and $[[GG |-G evar <~~ aA -| DD]]$.

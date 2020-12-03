@@ -1,18 +1,163 @@
 \section{Polymorphic Promotion for Subtyping}
 
+
+\subsection{Declarative System}
+
+The definition of types in DK (\Cref{fig:DK} in \Cref{sec:DK:declarative}) is
+repeated below. Compared to STLC, we have polymorphic types $[[\/a. A]]$ and
+type variables $[[a]]$. Again, we omit the details about expressions since we
+focus on types in this section.
+
+\begin{center}
+    \begin{tabular}{lrcl} \toprule
+      Types & $[[A]] $ & \syndef & $ [[int]] \mid [[a]] \mid  [[A1 -> A2]] \mid [[\/ a. A]] $ \\
+      Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[t1 -> t2]] $ \\
+      Contexts & $[[dd]]$ & \syndef & $[[empty]] \mid [[dd, x : A]] \mid [[dd , a]] $ \\
+      \bottomrule
+    \end{tabular}
+\end{center}
+
+TODO: declarateive subtyping.
+
+
+\subsection{Algorithmic System}
+
 \begin{figure}
   \centering
   \begin{tabular}{lrcl} \toprule
-    Types & $[[aA]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]]  $ \\
+    Types & $[[aA]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] \mid \hlmath{[[evar]]} $ \\
     Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] $ \\
     Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
     Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , a]] \mid [[OO, evar = at]]  $ \\
-    Promotion Modes  & $[[pm]]$ & \syndef & $[[+]] \mid [[-]]  $ \\ \bottomrule
+    Promotion Modes  & $[[pm]]$ & \syndef & $[[+]] \mid [[pminus]] $ \\ \bottomrule
   \end{tabular}
-  \drules[pr]{$ [[DD |-pr (evar) at1 ~~> at2 -| TT]] $}{Promotion}{tvar}
-  \drules[p-pr]{$ [[DD |-pr pm (evar) aA1 ~~> at -| TT]] $}{Polymorphic Promotion}{forallL,forallR,arrow,mono}
-  \drules[s]{$ [[GG |-sub aA1 <~ aA2 -| DD]] $}{Subtyping}{tvar,int,evar,arrow,forallR,forallL,instL,instR}
+  \drules[s]{$ [[GG |-sub aA1 <: aA2 -| DD]] $}{Subtyping}{tvar,int,evar,arrow,forallR,forallL,instL,instR}
+  \drules[p-pr]{$ [[GG |-pr pm (evar) aA ~~> at -| DD]] $}{Polymorphic Promotion}{forallL,forallR,arrow,mono}
+  \drules[pr]{$ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $}{Promotion}{tvar}
+  \caption{Types, contexts, subtyping and (polymorphic) promotion of the algorithmic system}
+  \label{fig:poly-pr:algo}
 \end{figure}
+
+The syntax of the algorithmic system is given in \Cref{fig:poly-pr:algo}. The
+promotion mode $[[pm]]$ is either positive ($[[+]]$) or negative ($[[pminus]]$). We
+can use $[[- pm]]$ to shift the promotion. Specifically,
+%
+\begin{center}
+\begin{tabular}{lll}
+  $[[- (+)]]$ & $=$ & $[[pminus]]$ \\
+  $[[- (-)]]$ & $=$ & $[[+]]$
+\end{tabular}
+\end{center}
+
+\paragraph{Subtyping.}
+
+\Cref{fig:poly-pr:algo} 
+The subtyping judgment $[[GG |-sub aA1 <: aA2 -| DD]]$ reads that, under input
+context $[[GG]]$, type $[[aA1]]$ is a subtype of $[[aA2]]$, with output context
+$[[DD]]$. The rules except the last two are the same as the subtyping rules in
+DK, which are the consistent subtyping rules in algorithmic \gpc
+(\Cref{fig:gradual:algo:instantiate}) without unknown types.
+
+\Rref{s-instL} and \rref{instR} are specific to this system. Recall that in the
+consistent subtyping of \gpc, the consistent subtyping between $[[evar]]$ and
+$[[aA]]$ replies on the instantiation rules, which are duplicated for the case
+when $[[evar]]$ is on the left and the case when it is on the right. Here,
+instead of instantiation, we directly use polymorphic promotion. Specifically,
+\rref{s-instL} uses polymorphic promotion under the negative mode ($[[pminus]]$) and
+\rref{s-instR} uses polymorphic promotion under the positive mode ($[[+]]$). If
+promotion succeeds, we can directly set $[[evar]]$ to the promoted monotype
+$[[at]]$.
+
+\paragraph{Polymorphic promotion.}
+
+Promoting a polymorphic type depends on the promotion mode. Under the positive
+mode, \rref{p-pr-forallL} creates a fresh variable $[[evarb]]$ before
+$[[evar]]$, then recursively promotes the instantiated type $[[aA[a ~> evarb]
+]]$. Under the negative mode, \rref{p-pr-forallR} requires $[[a notin fv(aA)]]$,
+or otherwise the rule would fail to apply. Since $[[a notin fv(aA)]]$, there is
+no need to add it to the context and the rule simply recursively promotes
+$[[aA]]$. \Rref{p-pr-arrow} shifts the mode for codomains, and promotes domains
+under the original domain. When the type to be promoted is a monotype,
+\rref{p-pr-mono} uses the promotion judgment. Note that for a monotype the mode
+does not matter, so \rref{p-pr-mono} applies in both modes.
+
+
+\paragraph{Promotion.}
+
+The promotion judgment is the same as before, except now we have \rref{pr-tvar}
+that promotes a type variable $[[a]]$. Note again that promotion is a partial
+operation, as it requires $[[a]]$ to be the left of $[[evar]]$, since
+\textit{variable orders matter.} For example, the subtyping example $[[ evar,
+a]] [[|-sub]] [[evar]] [[<:]] [[a]] $ is unsolvable, so there is also no way to
+promote $[[a]]$.
+
+
+\subsection{Soundness and Completeness}
+
+\begin{restatable}[Soundness of Promotion]{theorem}{prsoundtwo} \label{thm:pr_soundness_two}%
+  If $[[  GG |-pr (evar) at1 ~~> at2 -| DD ]]$,
+  and $[[DD = DD1, evar, DD2]]$,
+  then $[[DD1 |-wf at2]]$,
+  and $[[ [DD]at1 = [DD ]at2 ]]$.
+\end{restatable}
+
+\begin{restatable}[Soundness of Polymorphic Promotion]{theorem}{prpolysound} \label{thm:pr_poly_soundness} \leavevmode%
+  If $[[  GG |-pr pm (evar) aA ~~> at -| DD ]]$,
+  and $[[DD = DD1, evar, DD2]]$,
+  then $[[DD1 |-wf at2]]$.
+  Moreoever, given $[[DD --> OO]]$,
+  \begin{itemize}
+    \item if $[[pm]] = [[+]]$, then $[[ [OO]GG |-sub [OO] aA <: [OO] at ]]$; and
+    \item if $[[pm]] = [[pminus]]$, then $[[ [OO]GG |-sub [OO] at <: [OO] aA ]]$.
+  \end{itemize}
+\end{restatable}
+
+\begin{restatable}[Soundness of Subtyping]{theorem}{prsoundsub} \label{thm:pr_sub_soundness}%
+  If $[[  GG |-sub aA1 <: aA2 -| DD ]]$,
+  and $[[DD --> OO]]$,
+  then $[[ [OO]GG |-sub [OO] aA1 <: [OO]aA2 ]]$.
+\end{restatable}
+
+\begin{restatable}[Completeness of Promotion]{theorem}{prcompletetwo} \label{thm:pr_complete_two}%
+  Given $[[ GG --> OO  ]]$,
+  and $[[ GG |-wf evar  ]]$,
+  and $[[ GG |-wf at ]]$,
+  and $[[ [GG]evar = evar ]]$,
+  and $[[ [GG]at = at ]]$,
+  if $[[evar notin fv(at)]]$,
+  there exist $[[at2]]$, $[[DD]]$ and $[[OO']]$ such that
+  $[[GG --> OO']]$ and $[[OO --> OO']]$
+  and $[[  GG |-pr (evar) at ~~> at2 -| DD ]]$.
+\end{restatable}
+
+\begin{restatable}[Completeness of Polymorphic Promotion]{theorem}{prpolycomplete} \label{thm:pr_poly_complete}%
+  Given $[[ GG --> OO  ]]$,
+  and $[[ GG |-wf evar  ]]$,
+  and $[[ GG |-wf aA ]]$,
+  and $[[ [GG]evar = evar ]]$,
+  and $[[ [GG]at = aA ]]$,
+  and $[[evar notin fv(aA)]]$,
+  \begin{itemize}
+    \item if $[[ [OO]GG |-sub [OO]evar <: [OO]aA ]]$,
+          then there exist $[[at]]$, $[[DD]]$ and $[[OO']]$
+          such that $[[ GG |-pr - (evar) aA ~~> at -| DD ]]$; and
+    \item if $[[ [OO]GG |-sub [OO]aA <: [OO]evar ]]$,
+          then there exist $[[at]]$, $[[DD]]$ and $[[OO']]$
+          such that $[[ GG |-pr + (evar) aA ~~> at -| DD ]]$.
+  \end{itemize}
+\end{restatable}
+
+\begin{restatable}[Completeness of Subtyping]{theorem}{prsubcomplete} \label{thm:pr_sub_complete}%
+  Given $[[ GG --> OO  ]]$,
+  and $[[ GG |-wf aA1  ]]$,
+  and $[[ GG |-wf aA2 ]]$,
+  if $[[ [OO]GG |-sub [OO]at1 <: [OO]at2 ]]$,
+  there exist $[[DD]]$ and $[[OO']]$ such that
+  $[[DD --> OO']]$ and $[[OO --> OO']]$
+  and $[[  GG |-sub [GG]aA1 <: [GG]aA2 -| DD ]]$.
+\end{restatable}
+
+\subsection{Promoting Gradual Types}
 
 %%% Local Variables:
 %%% mode: latex
