@@ -2,6 +2,7 @@
 
 
 \subsection{Background:Type Inference in Contexts}
+\label{sec:pr:background}
 
 \cite{gundry2010type} models unification and type inference from a general
 perspective of information increase. The problem context is a ML-style

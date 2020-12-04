@@ -1,10 +1,15 @@
 \section{Unification for Simply Typed Lambda Calculus}
 \label{sec:pr:unif}
 
+This section first introduces simple typed lambda calculus, and then present the
+novel unification algorithm that uses the promotion mechanism.
+
 \subsection{Declarative System}
 
-The definition of types of STLC is given below. We have only monotypes, which
-includes the integer type $[[int]]$ and functions $[[at1 -> at2]]$.
+The definition of types in STLC is given below. We have only monotypes $[[t]]$,
+which includes the integer type $[[int]]$ and function types $[[at1 -> at2]]$.
+In this section, we focus on the unification process. Hence, we do not elaborate
+the details of expressions' syntax or typing rules.
 
 \begin{center}
   \begin{tabular}{lrcl} \toprule
@@ -12,10 +17,6 @@ includes the integer type $[[int]]$ and functions $[[at1 -> at2]]$.
   \end{tabular}
 \end{center}
 
-In this section, we focus on the unification process. Hence, we do not elaborate
-the details of expressions' syntax or typing rules. There is no declarative
-contexts, as STLC does not have polymorphic types and thus does not track type
-variables.
 
 \subsection{Algorithmic System}
 
@@ -27,7 +28,7 @@ variables.
     Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
     Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO, evar = at]]  $ \\ \bottomrule
   \end{tabular}
-  \drules[wf]{$ [[GG |-wf at]] $}{Well-formedness}{int, arrow, evar}
+  % \drules[wf]{$ [[GG |-wf at]] $}{Well-formedness}{int, arrow, evar}
   \drules[u]{$ [[GG |-u at1 ~= at2 -| DD]] $}{Unification}{refl, arrow, evarL, evarR}
   \drules[pr]{$ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $}{Promotion}{int, arrow, evarL, evarR}
   \caption{Types, contexts, unification and promotion of algorithmic STLC}
@@ -35,28 +36,32 @@ variables.
 \end{figure}
 
 The syntax of the algorithmic system is given in \Cref{fig:pr:algo}. Following
-the DK system \citep{DK} and \gpc, algorithmic monotypes include existential
-type variables $[[evar]]$. Algorithmic contexts also contain declarations of
-existential type variables, unsolved ($[[evar]]$) or solved ($[[evar=at]]$).
-Complete contexts $[[OO]]$ contain only solved variables.
+DK \citep{DK} and \gpc, algorithmic monotypes include existential type variables
+$[[evar]]$. Algorithmic contexts also contain declarations of existential type
+variables, either unsolved ($[[evar]]$) or solved ($[[evar=at]]$). Complete
+contexts $[[OO]]$ contain only solved variables. We use the judgment $[[GG |-wf
+at]]$ to indicate that all existential variables in $[[at]]$ are well-scoped.
+Its definition is standard and thus omitted. We also use $[[GG --> DD]]$ for
+context extension, whose definition is essentially a simplified version of the
+one in \gpc (\Cref{sec:gradual:ctxt:extension}).
 
 \paragraph{Unification.}
 
 \Cref{fig:pr:algo} defines the unification process. The judgment $[[GG |-u at1
-~= at2 -| DD]]$ reads as under input context $[[GG]]$, unify $[[at1]]$ with
-$[[at2]]$, resulting in output context $[[DD]]$. \Rref{u-refl} is our base case,
-and \rref{u-arrow} unifies the components of the arrow types. When unifying
-$[[evar]] [[~=]] [[at1]]$ (\rref{u-evarL}), we cannot simply set $[[evar]]$ to
-$[[at1]]$, as $[[at1]]$ might include variables bound to the right of
-$[[evar]]$. Instead, we need to \textit{promote} $[[at1]]$. After promoting
-$[[at1]]$ to $[[at2]]$, we can directly set $[[evar = at2]]$. \Rref{u-varR}
-deals with the case when $[[evar]]$ appears on the right.
+~= at2 -| DD]]$ reads that under the input context $[[GG]]$, unifying $[[at1]]$
+with $[[at2]]$ results in the output context $[[DD]]$. \Rref{u-refl} is our base
+case, and \rref{u-arrow} unifies the components of the arrow types. When
+unifying $[[evar]] [[~=]] [[at1]]$ (\rref{u-evarL}), we cannot simply set
+$[[evar]]$ to $[[at1]]$, as $[[at1]]$ might include variables bound to the right
+of $[[evar]]$. Instead, we need to \textit{promote} ($[[|-pr]]$) $[[at1]]$.
+After promoting $[[at1]]$ to $[[at2]]$, we can directly set $[[evar = at2]]$.
+\Rref{u-varR} deals with the case when $[[evar]]$ appears on the right.
 
 \paragraph{Promotion.}
 
 The promotion relation $ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $ given at the
-bottom of \Cref{fig:pr:algo} reads that, under input context $[[DD]]$, we
-promote the type $[[at1]]$, yielding $[[at2]]$, so that $[[at2]]$ is well-formed
+bottom of \Cref{fig:pr:algo} reads that under the input context $[[DD]]$,
+promoting type $[[at1]]$ yields type $[[at2]]$, so that $[[at2]]$ is well-formed
 in the prefix context of $[[evar]]$, while retaining $[[ [DD]at1 = [DD] at2 ]]$.
 At a high-level, $[[|-pr]]$ looks for free variables in $[[at1]]$. Integers are
 always well-formed (\rref{pr-int}). Promoting a function recursively promotes
@@ -71,22 +76,55 @@ property, as the $[[evarb = evar]]$ case exactly corresponds to the
 ``occurs-check'' in a more typical presentation of unification. By preventing
 promoting $[[evar]]$ to the left of $[[evar]]$, we prevent the possibility of an
 infinite substitution when applying an algorithmic context. Note that
-\rref{u-refl} solves the case $[[evar]] [[~=]] [[evar]]$.
+\rref{u-refl} solves the unification case $[[evar]] [[~=]] [[evar]]$.
+
+\paragraph{Example.}
+
+Below we give the derivation of $[[evar, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb
+-> int ]]$ discussed in \Cref{sec:pr:background}.
+
+%
+\begin{mathpar}
+  \inferrule*[right=\rref*{u-eval-r}]{
+    \inferrule*[right=\rref*{pr-arrow}]{
+      \inferrule*[lab=\rref*{pr-evarR}]{  }{[[ evar, evarb |-pr (evar) evarb ~~> evar -| evar1, evar, evarb = evar1 ]]}
+      \quad
+      \inferrule*[lab=\rref*{pr-int}]{  }{[[ evar1, evar, evarb = evar1 |-pr (evar) int ~~> int -| evar1, evar, evarb = evar1 ]]}
+    }
+    {[[evar, evarb |-pr (evar) evarb -> int ~~> evar1 -> int -| evar1, evar, evarb = evar1 ]]}%
+  }{
+    [[evar, evarb |-u evar ~= evarb -> int -| evar1, evar = evar1 -> int, evarb =evar1  ]]
+  }
+\end{mathpar}
 
 
 \subsection{Soundness and Completeness}
 
+We prove that our type promotion strategy and the unification algorithm are
+sound. First, we show that except for resolving the order problem, promotion
+will not change the type. Namely, the input type and the output type are
+equivalent after substitution by the output context. Moreover, the promoted type
+is well-formed under the prefix context of $[[evar]]$.
+
 \begin{restatable}[Soundness of Promotion]{theorem}{prsound} \label{thm:pr_soundness}%
   If $[[  GG |-pr (evar) at1 ~~> at2 -| DD ]]$,
-  and $[[DD = DD1, evar, DD2]]$,
-  then $[[DD1 |-wf at2]]$,
-  and $[[ [DD]at1 = [DD ]at2 ]]$.
+  then $[[ [DD]at1 = [DD ]at2 ]]$.
+  Moreover, given
+   $[[DD = DD1, evar, DD2]]$,
+  we have $[[DD1 |-wf at2]]$,
 \end{restatable}
+
+With soundness of promotion, we can prove that the unification algorithm is also
+sound:
 
 \begin{restatable}[Soundness of Unification]{theorem}{prunifsound} \label{thm:pr_unif_soundness}%
   If $[[ GG |-u at1 ~= at2 -| DD ]]$,
   then $[[ [DD]at1 = [DD ]at2 ]]$.
 \end{restatable}
+
+We can further prove that promotion is complete using the notion of context
+extension. Note that in the completeness statement we require $[[evar notin
+fv(at)]]$, or otherwise promotion would fail.
 
 \begin{restatable}[Completeness of Promotion]{theorem}{prcomplete} \label{thm:pr_complete}%
   Given $[[ GG --> OO  ]]$,
@@ -99,6 +137,8 @@ infinite substitution when applying an algorithmic context. Note that
   $[[GG --> OO']]$ and $[[OO --> OO']]$
   and $[[  GG |-pr (evar) at ~~> at2 -| DD ]]$.
 \end{restatable}
+
+The completeness of unification is then built upon the completeness of promotion.
 
 \begin{restatable}[Completeness of Unification]{theorem}{prunifcomplete} \label{thm:pr_unif_complete}%
   Given $[[ GG --> OO  ]]$,

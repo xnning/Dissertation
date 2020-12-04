@@ -10,7 +10,7 @@ approach~\citep{garcia:abstracting} on simple types.
 
 The syntax of types is given at the top of \Cref{fig:gradual:decl:subtyping}.
 Types $[[A]]$ are either the integer type $[[int]]$, type variables $[[a]]$,
-functions types $[[A1 -> B]]$, universal quantification $[[ \/a . A ]]$, or the
+function types $[[A1 -> B]]$, universal quantification $[[ \/a . A ]]$, or the
 unknown type $[[unknown]]$. Note that monotypes $[[t]]$ contain all types other
 than the universal quantifier and the unknown type $[[unknown]]$. We will
 discuss this restriction when we present the subtyping rules. Contexts $[[dd]]$
