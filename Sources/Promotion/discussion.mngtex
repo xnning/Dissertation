@@ -64,7 +64,7 @@ well-formed, i.e.,
 %
 \begin{mathpar}
   \drule{s-instLL}\\
-  \drule{s-instLL}
+  \drule{s-instRR}
 \end{mathpar}
 
 \cite{tfp} include a more detailed discussion and formalization of applying

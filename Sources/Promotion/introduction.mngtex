@@ -83,7 +83,8 @@ appears on the left ($ [[ GG |-G evar <~~ aA -| DD ]] $ in
 example, \rref{gpc-instl-arr} and \rref{gpc-instr-arr} are symmetric:
 
 \begin{mathpar}
-\drule{gpc-instl-arr} \and \drule{gpc-instr-arr}
+  \drule{gpc-instl-arr} \\
+  \drule{gpc-instr-arr}
 \end{mathpar}
 
 \noindent Worse, this kind of ``duplication'' would scale up with the number of
