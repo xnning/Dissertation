@@ -1934,12 +1934,6 @@ by
 -------------------------- :: int
 GG |-pr (evar) int ~~> int -| GG
 
--------------------------- :: unknown
-GG[evar] |-pr (evar) unknown ~~> evarb -| GG[evarb,evar]
-
--------------------------- :: unknownG
-GG[evar] |-pr (evar) unknown ~~> gb -| GG[gb,evar]
-
 -------------------------- :: tvar
 GG[a][evar] |-pr (evar) a ~~> a -| GG[a][evar]
 
@@ -1984,6 +1978,13 @@ GG  |-pr -pm (evar) aA1 ~~> at1 -| TT
 TT |-pr  pm (evar) [TT] aA2  ~~> at2 -| DD
 -------------------------- :: arrow
 GG |-pr pm (evar) aA1 -> aA2 ~~> at1 -> at2 -| DD
+
+
+-------------------------- :: unknown
+GG[evar] |-pr pm (evar) unknown ~~> evarb -| GG[evarb,evar]
+
+-------------------------- :: unknownG
+GG[evar] |-pr pm (evar) unknown ~~> gb -| GG[gb,evar]
 
 defn
 

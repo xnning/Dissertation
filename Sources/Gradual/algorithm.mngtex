@@ -153,7 +153,7 @@ existential variables, but leave the real work to the instantiation judgment.
 
 
 Two symmetric judgments $[[ GG |-G evar <~~ aA -| DD ]]$ and $[[ GG |-G aA <~~
-evar -| DD ]]$ defined in \cref{fig:gradual:algo:instantiate} instantiate
+evar -| DD ]]$ defined in \Cref{fig:gradual:algo:instantiate} instantiate
 unsolved existential variables. They read ``under input context $[[GG]]$,
 instantiate $[[evar]]$ to a consistent subtype (or supertype) of $[[aA]]$, with
 output context $[[DD]]$''. The judgments are extended naturally from DK system,

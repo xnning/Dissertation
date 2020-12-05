@@ -69,14 +69,29 @@ well-formed, i.e.,
 \cite{tfp} include a more detailed discussion and formalization of applying
 promotion to a dependently typed lambda calculus.
 
+
 \subsection{Promoting Gradual Types}
 
+We can apply promotion to gradual types. In particular, consider we use
+polymorphic promotion instead of instantiation in \gpc
+(\Cref{fig:gradual:algo:instantiate}). Then the key is to show how to promote
+the unknown type. Since comparing with the unknown type does not impose any
+constraints, we can simply replace it with a fresh existential variable:
+%
 \begin{mathpar}
-\drule{pr-unknown}
+\drule{p-pr-unknown}
 \end{mathpar}
 
+\noindent
+For example, we have $[[evar |-pr (evar) int -> unknown ~~> int -> evarb -|
+evarb, evar]]$.
+
+For the extended \gpc which restores the dynamic guarantee
+(\Cref{chap:Dynamic}), we can replace the unknown type with a fresh gradual
+existential variables instead.
+%
 \begin{mathpar}
-\drule{pr-unknownG}
+\drule{p-pr-unknownG}
 \end{mathpar}
 
 %%% Local Variables:

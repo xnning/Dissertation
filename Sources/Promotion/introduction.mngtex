@@ -4,7 +4,7 @@
 \subsection{Background:Type Inference in Contexts}
 \label{sec:pr:background}
 
-\cite{gundry2010type} models unification and type inference from a general
+\cite{gundry2010type} model unification and type inference from a general
 perspective of information increase. The problem context is a ML-style
 polymorphic system, based on the invariant that types can only depend on
 bindings appearing earlier in the context. As we have briefly mentioned in
