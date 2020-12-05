@@ -142,7 +142,7 @@ However, ordering is still important for variables whose order matters. For
 instance, for polymorphic types, the order between existential variables
 $[[evar]]$ and type variables $[[a]]$ is important, so we cannot set $[[evar]]$
 to $[[a]]$ under the context $[[(evar, a)]]$ as $[[a]]$ is not in the scope of
-$[[evar]]$. Moreover, ordering rules out invalid cyclic results, e.g., $[[evara
+$[[evar]]$. Moreover, ordering prevents invalid cyclic results, e.g., $[[evara
 = evarb -> int]], [[evarb = evara -> int]]$.
 
 

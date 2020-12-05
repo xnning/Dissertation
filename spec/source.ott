@@ -1960,9 +1960,13 @@ GG[evarb,evar] |-pr+ (evar) aA[a ~> evarb] ~~> at -| DD
 -------------------------- :: forallL
 GG[evar] |-pr+ (evar) \/a. aA ~~> at -| DD
 
-a notin fv ( aA )
-GG |-pr- (evar) aA ~~> at -| DD
+GG, a |-pr- (evar) aA ~~> at -| DD, a
 -------------------------- :: forallR
+GG |-pr- (evar) \/a. aA ~~> at -| DD
+
+a notin fv(aA)
+GG |-pr- (evar) aA ~~> at -| DD
+-------------------------- :: forallRR
 GG |-pr- (evar) \/a. aA ~~> at -| DD
 
 GG |-pr (evar) at1 ~~> at2 -| DD
