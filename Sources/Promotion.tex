@@ -3,6 +3,23 @@
 \label{chap:Promotion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
+\cite{gundry2010type} proposed type inference in context as a general foundation
+for unification/type inference algorithms. The key idea is based on the notion
+of information increase. However, their semantic definition of information
+increase is semantic makes it hard to prove metatheory formally. Following this
+work, a more syntactic foundation for information increase is presented by
+\cite{DK} (\Cref{sec:DK}) to deal with higher-rank polymorphism. However, the
+DK approach produces duplication and cannot be easily generalized for more
+complicated types.
+
+In this section, we propose a strategy called \textit{promotion} that helps
+resolve the dependency of existential variables in the framework of type
+inference in context. \Cref{sec:pr:unif} shows that promotion works for the
+unification algorithm for the simply typed lambda calculus.
+\Cref{sec:pr:subtypin} proposes \textit{polymorphic promotion} to deal with
+subtyping for higher-rank polymorphism. Finally, \Cref{sec:pr:discussion}
+discusses how to promote dependent types and gradual types.
+
 
 \input{Gen/Promotion/introduction}
 \input{Gen/Promotion/unification}

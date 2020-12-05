@@ -1,4 +1,5 @@
 \section{Polymorphic Promotion for Subtyping}
+\label{sec:pr:subtypin}
 
 In this section, we adopt the type promotion strategy to a higher-rank
 polymorphic type system from DK \citep{DK}. We show that promotion can be

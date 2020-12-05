@@ -1,4 +1,5 @@
 \section{Discussion}
+\label{sec:pr:discussion}
 
 This section discusses two extensions of promotion. The first extension explores
 dependent types, while the second extension considers gradual types.
