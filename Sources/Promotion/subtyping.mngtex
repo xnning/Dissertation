@@ -1,4 +1,4 @@
-\section{Polymorphic Promotion for Subtyping}
+\section{Subtyping for Higher-Rank Polymorphism}
 \label{sec:pr:subtypin}
 
 In this section, we adopt the type promotion strategy to a higher-rank
