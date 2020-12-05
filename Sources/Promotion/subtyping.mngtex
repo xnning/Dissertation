@@ -197,17 +197,6 @@ remains sound and complete.
   and $[[  GG |-sub [GG]aA1 <: [GG]aA2 -| DD ]]$.
 \end{restatable}
 
-
-\subsection{Promoting Gradual Types}
-
-\begin{mathpar}
-\drule{pr-unknown}
-\end{mathpar}
-
-\begin{mathpar}
-\drule{pr-unknownG}
-\end{mathpar}
-
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"

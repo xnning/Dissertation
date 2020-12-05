@@ -1,0 +1,86 @@
+\section{Discussion}
+
+This section discusses two extensions of promotion. The first extension explores
+dependent types, while the second extension considers gradual types.
+
+\subsection{Promoting Dependent Types}
+
+In \Cref{sec:pr:background} we discussed about the drawback of decomposing type
+constructs that it cannot be easily applied to more advanced types like
+dependent types. In this section, we discuss how we can apply promotion to
+dependent types.
+
+Consider \rref{pr-pi} given below that promotes a dependent type
+$[[Pi a:at1.at2]]$.
+%
+\begin{mathpar}
+  \inferrule*[lab=pr-pi]{
+    [[ GG |-pr (evar) at1 ~~> at3 -| TT  ]]
+    \quad
+    [[ TT, a |-pr (evar) [TT]at2 ~~> at4 -| DD, a ]]
+  }{
+    [[GG |-pr (evar) Pi a : at1. at2 -> int ~~> Pi a : at3. at4 -| DD ]]
+  }
+\end{mathpar}
+
+\noindent
+Here we first promote $[[at1]]$, returning $[[at3]]$. Then we add $[[a]]$ into
+the context to promote $[[at2]]$. Finally, we return $[[Pi a:at3. at4]]$ and
+discard $[[a]]$ in the output context.
+
+Unfortunately, this design does not work. In particular, consider promoting
+$[[Pi a: evarb. a]]$.
+%
+\begin{mathpar}
+  \inferrule*[right=\rref*{pr-pi}]{
+    \inferrule*[lab=\rref*{pr-evarL}]{ }{
+    [[ evarb, evara |-pr (evar) evarb ~~> evarb -| evarb, evara  ]]}
+    \quad
+    \inferrule*[lab=\rref*{pr-evarL}]{ }{
+    [[ evarb, evara, a]] [[|-pr]]_{[[evar]]} [[a]] [[~~>]] ???}
+  }{
+    [[evarb, evara]] [[|-pr]]_{[[evar]]} [[Pi a : evarb. a -> int]] [[~~>]]
+  }
+\end{mathpar}
+
+\noindent
+We expect that the promotion would return $[[Pi a:evarb. a]]$. However, after we
+add $[[a]]$ into the context to promote $[[a]]$, \rref{pr-tvar} does not apply,
+as $[[a]]$ is out of the scope of $[[evar]]$!
+
+The design can be fixed by changing \rref{pr-tvar} to \rref{pr-tvarr} to not
+consider the order of type variables.
+%
+\begin{mathpar}
+  \drule{pr-tvarr}
+\end{mathpar}
+
+Then, while promotion resolves the ordering of existential variables, since
+there is no constraint for type variables, it is not guaranteed anymore that the
+promoted type is well-formed in the prefix context of $[[evar]]$. Therefore, we
+need to adjust the rule of subtyping to check explicitly that the result is
+well-formed, i.e.,
+%
+\begin{mathpar}
+  \drule{s-instLL}\\
+  \drule{s-instLL}
+\end{mathpar}
+
+\cite{tfp} include a more detailed discussion and formalization of applying
+promotion to a dependently typed lambda calculus.
+
+\subsection{Promoting Gradual Types}
+
+\begin{mathpar}
+\drule{pr-unknown}
+\end{mathpar}
+
+\begin{mathpar}
+\drule{pr-unknownG}
+\end{mathpar}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:

@@ -136,6 +136,7 @@ atyp, aA {{ tex \sigma }}, aB, aC  :: 'atyp_' ::=
   | aA [ a ~> at ] :: M :: subst
   | [ GG ] aA      :: S :: ctx_subst
   | ( aA )         :: S :: parens
+  | Pi a : aA1 . aA2 ::   :: pi
 
 % Static Types
 
@@ -148,6 +149,7 @@ atyp_static, aT {{ tex T }} :: 'atyp_static_' ::=
   | static     ::   :: static
   | gradual    ::   :: gradual
   | [ GG ] aA  :: S :: ctx_subst
+  | Pi a : aA1 . aA2 ::   :: pi
 
 % Mono Types
 
@@ -159,6 +161,7 @@ atyp_mono, at {{ tex \tau }}, as {{ tex \sigma }} :: 'atyp_mono_' ::=
   | static    ::   :: static
   | gradual   ::   :: gradual
   | [ GG ] aA :: S :: ctx_subst
+  | Pi a : aA1 . aA2 ::   :: pi
 
 % Castable Mono Types
 
@@ -382,6 +385,7 @@ terminals :: 'terminals_' ::=
   | \       :: :: lambda    {{ tex \lambda }}
   | ~~>     :: :: translate {{ tex \rightsquigarrow }}
   | /\      :: :: tlambda   {{ tex \Lambda }}
+  | Pi      :: :: pi        {{ tex \Pi }}
   | \/      :: :: forall   {{ tex \forall }}
   | `->     :: :: cast      {{ tex \hookrightarrow }}
   | <       :: :: lbr  {{ tex \langle }}
@@ -1939,6 +1943,9 @@ GG[evar] |-pr (evar) unknown ~~> gb -| GG[gb,evar]
 -------------------------- :: tvar
 GG[a][evar] |-pr (evar) a ~~> a -| GG[a][evar]
 
+-------------------------- :: tvarr
+GG |-pr (evar) a ~~> a -| GG
+
 GG |-pr (evar) at1 ~~> at3 -| TT
 TT |-pr (evar) [TT]at2 ~~> at4 -| DD
 -------------------------- :: arrow
@@ -2060,3 +2067,13 @@ GG[evar] |-sub  evar <: aA -| DD[evar=at]
 GG[evar] |-pr + (evar) aA ~~> at -| DD[evar]
 ---------------------------------- :: instR
 GG[evar] |-sub  aA <: evar -| DD[evar=at]
+
+GG[evar] |-pr - (evar) aA ~~> at -| DD1, evar, DD2
+DD1 |-wf at
+---------------------------------- :: instLL
+GG[evar] |-sub  evar <: aA -| DD1, evar = at, DD2
+
+GG[evar] |-pr + (evar) aA ~~> at -| DD1, evar, DD2
+DD1 |-wf at
+---------------------------------- :: instRR
+GG[evar] |-sub  aA <: evar -| DD1, evar = at, DD2

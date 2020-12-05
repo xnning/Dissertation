@@ -74,7 +74,7 @@ evar1] = evar1, evar2=int, evar=evar1->evar2, evarb=evar1 ]]$.
 
 \paragraph{Challenges.}
 
-However, while the approach of destructing type construct works perfectly for DK
+However, while the approach of decomposing type construct works perfectly for DK
 and \gpc, it has two drawbacks. The first drawback is that it produces
 duplication, in order to deal with both the case when the existential variable
 appears on the left ($ [[ GG |-G evar <~~ aA -| DD ]] $ in
