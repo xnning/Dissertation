@@ -1957,18 +1957,18 @@ GG |-pr pm ( evar ) aA ~~> at -| DD ::  :: sprpromotion :: 'p_pr_'
 {{ tex [[GG]] \vdash^{\!\![[pm]]}_{[[evar]]} [[aA]] [[~~>]] [[at]] [[-|]] [[DD]] }}
 by
 
-GG[evarb,evar] |-pr+ (evar) aA[a ~> evarb] ~~> at -| DD
+GG[evarb,evar] |-pr- (evar) aA[a ~> evarb] ~~> at -| DD
 -------------------------- :: forallL
-GG[evar] |-pr+ (evar) \/a. aA ~~> at -| DD
+GG[evar] |-pr- (evar) \/a. aA ~~> at -| DD
 
-GG, a |-pr- (evar) aA ~~> at -| DD, a
+GG, a |-pr+ (evar) aA ~~> at -| DD, a
 -------------------------- :: forallR
-GG |-pr- (evar) \/a. aA ~~> at -| DD
+GG |-pr+ (evar) \/a. aA ~~> at -| DD
 
 a notin fv(aA)
-GG |-pr- (evar) aA ~~> at -| DD
+GG |-pr+ (evar) aA ~~> at -| DD
 -------------------------- :: forallRR
-GG |-pr- (evar) \/a. aA ~~> at -| DD
+GG |-pr+ (evar) \/a. aA ~~> at -| DD
 
 GG |-pr (evar) at1 ~~> at2 -| DD
 -------------------------- :: mono
@@ -2061,20 +2061,20 @@ GG, mevar, evar |-sub aA1 [a ~> evar] <: aA2 -| DD, mevar, TT
 ------------------------------ :: forallL
 GG |-sub \/ a. aA1 <: aA2 -| DD
 
-GG[evar] |-pr - (evar) aA ~~> at -| DD[evar]
+GG[evar] |-pr + (evar) aA ~~> at -| DD[evar]
 ---------------------------------- :: instL
 GG[evar] |-sub  evar <: aA -| DD[evar=at]
 
-GG[evar] |-pr + (evar) aA ~~> at -| DD[evar]
+GG[evar] |-pr - (evar) aA ~~> at -| DD[evar]
 ---------------------------------- :: instR
 GG[evar] |-sub  aA <: evar -| DD[evar=at]
 
-GG[evar] |-pr - (evar) aA ~~> at -| DD1, evar, DD2
+GG[evar] |-pr + (evar) aA ~~> at -| DD1, evar, DD2
 DD1 |-wf at
 ---------------------------------- :: instLL
 GG[evar] |-sub  evar <: aA -| DD1, evar = at, DD2
 
-GG[evar] |-pr + (evar) aA ~~> at -| DD1, evar, DD2
+GG[evar] |-pr - (evar) aA ~~> at -| DD1, evar, DD2
 DD1 |-wf at
 ---------------------------------- :: instRR
 GG[evar] |-sub  aA <: evar -| DD1, evar = at, DD2

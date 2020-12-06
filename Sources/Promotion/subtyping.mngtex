@@ -45,7 +45,7 @@ relation as of OL (\Cref{fig:OL:static}), and we use the judgment $[[dd |-DK A1
 \end{figure}
 
 The syntax of the algorithmic system is given in \Cref{fig:poly-pr:algo}. The
-promotion mode $[[pm]]$ is either contravariant ($[[+]]$) or covariant
+promotion mode $[[pm]]$ is either covariant($[[+]]$) or contravariant
 ($[[pminus]]$). We can use $[[- pm]]$ to flip the promotion mode. Specifically,
 %
 \begin{center}
@@ -68,9 +68,9 @@ instantiation rules, which are duplicated for the case when $[[evar]]$ is on the
 left and the case when $[[evar]]$ is on the right. Here, instead of
 instantiation, we directly use polymorphic promotion to promote the possibly
 polymorphic type $[[aA]]$ into a monotype $[[at]]$. Specifically, \rref{s-instL}
-uses polymorphic promotion under the covariant mode ($[[pminus]]$) and
+uses polymorphic promotion under the covariant mode ($[[+]]$) and
 \rref{s-instR} uses polymorphic promotion under the contravariant mode
-($[[+]]$). If promotion succeeds, we can directly set $[[evar]]$ to $[[at]]$.
+($[[pminus]]$). If promotion succeeds, we can directly set $[[evar]]$ to $[[at]]$.
 
 \paragraph{Polymorphic promotion.}
 
@@ -79,10 +79,10 @@ context $[[GG]]$, promoting $[[aA]]$ under promotion mode $[[pm]]$ yields type
 $[[at]]$, so that $[[at]]$ is well-formed in the prefix context of $[[evar]]$.
 
 The only difference between these two promotion modes is how to promote
-polymorphic types. Under the contravariant mode,
+polymorphic types. Under the contravariant mode
 (\rref{p-pr-forallL}), a monotype would make the final type more
 polymorphic. Therefore, we replace the universal binder $[[a]]$ with a fresh
-existential variable $[[evar]]$ and put it before $[[evar]]$. Otherwise, in rule
+existential variable $[[evar]]$ and put it before $[[evar]]$. Otherwise, in
 \rref{p-pr-forallR}, we put $[[a]]$ in the context and promote $[[aA]]$. Notice
 that since $[[a]]$ is added to the tail of the context, it is not in the scope
 of $[[aA]]$ and can actually never be used in $[[aA]]$ or otherwise promotion
@@ -123,8 +123,8 @@ The statement of soundness of promotion remains the same as before.
 Based on soundness of promotion, we prove that after polymorphic promotion, the
 promoted type is also well-formed under the prefix context of $[[evar]]$.
 Moreover, polymorphic promotion builds a subtyping relation according to the
-promotion mode: under the contravariant mode ($[[+]]$), the original type is a
-subtype of the promoted type; under the covariant mode ($[[pminus]]$), the
+promotion mode: under the contravariant mode ($[[pminus]]$), the original type is a
+subtype of the promoted type; under the covariant mode ($[[+]]$), the
 promoted type is a subtype of the original type.
 
 \begin{restatable}[Soundness of Polymorphic Promotion]{theorem}{prpolysound} \label{thm:pr_poly_soundness} \leavevmode%
@@ -133,8 +133,8 @@ promoted type is a subtype of the original type.
   then $[[DD1 |-wf at2]]$.
   Moreoever, given $[[DD --> OO]]$,
   \begin{itemize}
-    \item if $[[pm]] = [[+]]$, then $[[ [OO]GG |-DK [OO] aA <: [OO] at ]]$; and
-    \item if $[[pm]] = [[pminus]]$, then $[[ [OO]GG |-DK [OO] at <: [OO] aA ]]$.
+    \item if $[[pm]] = [[pminus]]$, then $[[ [OO]GG |-DK [OO] aA <: [OO] at ]]$; and
+    \item if $[[pm]] = [[+]]$, then $[[ [OO]GG |-DK [OO] at <: [OO] aA ]]$.
   \end{itemize}
 \end{restatable}
 
@@ -163,7 +163,7 @@ Now we turn to completeness. The completeness of promotion is the same as before
 
 Completeness of polymorphic promotion has two parts. If the existential variable
 appears on the left, then we promote the type under the covariant mode
-$([[pminus]])$, or otherwise the contravariant mode ($[[+]]$). Moreover, it also
+$([[+]])$, or otherwise the contravariant mode ($[[pminus]]$). Moreover, it also
 requires $[[evar notin fv(aA)]]$.
 
 \begin{restatable}[Completeness of Polymorphic Promotion]{theorem}{prpolycomplete} \label{thm:pr_poly_complete}%
@@ -176,16 +176,16 @@ requires $[[evar notin fv(aA)]]$.
   \begin{itemize}
     \item if $[[ [OO]GG |-DK [OO]evar <: [OO]aA ]]$,
           then there exist $[[at]]$, $[[DD]]$ and $[[OO']]$
-          such that $[[ GG |-pr - (evar) aA ~~> at -| DD ]]$; and
+          such that $[[ GG |-pr + (evar) aA ~~> at -| DD ]]$; and
     \item if $[[ [OO]GG |-DK [OO]aA <: [OO]evar ]]$,
           then there exist $[[at]]$, $[[DD]]$ and $[[OO']]$
-          such that $[[ GG |-pr + (evar) aA ~~> at -| DD ]]$.
+          such that $[[ GG |-pr - (evar) aA ~~> at -| DD ]]$.
   \end{itemize}
 \end{restatable}
 
 Finally, we prove that our subtyping is complete. With this, we have proved our
-claims that the original instantiation relation in DK can be replaced by the
-polymorphic promotion process, by showing that the our subtyping algorithm
+claim that the original instantiation relation in DK can be replaced by the
+polymorphic promotion process, as the subtyping algorithm
 using polymorphic promotion remains sound and complete.
 
 \begin{restatable}[Completeness of Subtyping]{theorem}{prsubcomplete} \label{thm:pr_sub_complete}%
