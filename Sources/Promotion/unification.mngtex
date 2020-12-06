@@ -1,8 +1,8 @@
 \section{Unification for Simply Typed Lambda Calculus}
 \label{sec:pr:unif}
 
-This section first introduces simple typed lambda calculus, and then present the
-novel unification algorithm that uses the promotion mechanism.
+This section first introduces simple typed lambda calculus, and then present a
+unification algorithm that uses the novel promotion mechanism.
 
 \subsection{Declarative System}
 

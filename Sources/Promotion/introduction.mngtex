@@ -31,15 +31,15 @@ item in $[[GG2]]$ is, after context substitution, well-formed under $[[GG1]]$. T
 semantic definition makes it hard to prove metatheory formally, especially when
 advanced features are involved.
 
-DK \citep{DK} also uses ordered contexts as the input and output for type
-inference for a higher rank polymorphic type system (\Cref{sec:DK}). Unlike
-\cite{gundry2010type}, DK does it in a more syntactic way. In its instantiation
-rules, it decomposes type constructs so that unification between existential
-variables can only happen between single variables, which can then be solved by
-setting the one that appears later to the one that appears earlier. This way,
-the information increase of contexts is modeled as \textit{context extension},
-with an intuitive, straightforward, and syntactic definition, which allows for
-inductive reasoning and proofs. This approach is later adopted in \gpc
+DK \citep{DK} also uses ordered contexts as the input and output of the type
+inference algorithm for a higher-rank polymorphic type system (\Cref{sec:DK}).
+Unlike \cite{gundry2010type}, DK does it in a more syntactic way. In its
+instantiation rules, it decomposes type constructs so that unification between
+existential variables can only happen between single variables, which can then
+be solved by setting the one that appears later to the one that appears earlier.
+This way, the information increase of contexts is modeled as the intuitive and
+syntactic definition of \textit{context extension} ($[[GG --> DD]]$), which
+allows for inductive reasoning and proofs. This approach is adopted in \gpc
 (\Cref{chap:Gradual}), so let us consider how DK works in terms of the
 instantiation rules in \gpc. Specifically, consider the derivation of $[[evar,
 evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int ]]$ in \gpc:
@@ -150,8 +150,8 @@ $[[evar]]$. Moreover, ordering prevents invalid cyclic contexts, e.g., $[[evara
 
 As a first illustration of the utility of the promotion process,
 \Cref{sec:pr:unif} recasts the unification process for simply typed lambda
-calculus (STLC) using ordered algorithmic contexts with the promotion process.
-This system illustrates the key idea of promotion.
+calculus (STLC) using the promotion process. This system illustrates the key
+idea of promotion.
 
 \subsection{Polymorphic Promotion}
 
@@ -163,7 +163,7 @@ section, we discuss promotion for polymorphic subtyping.
 The difficulty of subtyping is that it needs to take unification into account at
 the same time. For example, given that $[[evar]]$ is a subtype of $[[int]]$, the
 only possible solution is $[[evar = int]]$. Now consider $[[evar]] [[|-]]
-[[\/a.a -> a]] [[<:]] [[evar]]$. How can we promote the polymorphic type into a
+[[\/a.a -> a]] [[<:]] [[evar]]$. How can we promote the polymorphic type $[[\/a.a->a]]$ into a
 monotype which can serve as a valid solution for $[[evar]]$? One possible answer
 is to set $[[evar = int -> int]]$, or $[[evar]] = [[bool -> bool]]$. In fact,
 the most general solution for this subtyping problem is $[[evar = evarb ->
@@ -174,15 +174,14 @@ $[[evarb, evara = evarb -> evarb]]$.
 
 On the other hand, how can we promote the type $[[\/a.a -> a]]$ in $[[evar]]
 [[|-]] [[evar]] [[<:]] [[\/a.a -> a]]$? It turns out that this subtyping is
-actually unsolvable, so we can never promote $[[\/a.a -> a]]$ into a valid
-monotype. In this case, promoting $[[\/a.a ->a]]$ will directly add the type
-variable $[[a]]$ to the tail of the context to promote $[[a->a]]$. Since $[[a]]$
-is added to the tail, it means that $[[a]]$ is out of the scope of the
-$[[evar]]$ and promoting $[[a->a]]$ would fail, which is exactly what we want.
-In fact, the promotion would succeed if only the variable is not used in the
-body of the polymorphic type. For example, $[[\/a.int -> int]]$ can be promoted
-to $[[int -> int]]$, which is a valid solution of $[[evar]]$ in $[[evar]] [[|-]]
-[[evar]] <: [[\/a. int -> int]]$.
+actually unsolvable. Therefore, in this case, promoting $[[\/a.a ->a]]$ will
+directly add the type variable $[[a]]$ to the tail of the context to promote
+$[[a->a]]$. Since $[[a]]$ is added to the tail, it means that $[[a]]$ is out of
+the scope of $[[evar]]$ and promoting $[[a->a]]$ would fail, which is exactly
+what we want. In fact, the promotion would succeed if only the variable is not
+used in the body of the polymorphic type. For example, $[[\/a.int -> int]]$ can
+be promoted to $[[int -> int]]$, which is a valid solution of $[[evar]]$ in
+$[[evar]] [[|-]] [[evar]] <: [[\/a. int -> int]]$.
 
 From these observations, we extend promotion to \textit{polymorphic promotion},
 which is able to resolve the polymorphic subtyping relation for existential
@@ -206,7 +205,7 @@ which corresponds to \rref{gpc-instl-forallR}. Since the type variable is out of
 the scope of the existential variable being solved, and promotion will succeed
 if only the variable is not used in the body of the polymorphic type.
 
-While promoting polymorphic types behaves differently under different modes, the
+While promoting polymorphic types behaves differently accroding to the mode, the
 mode does not matter for monotypes, as in both $[[evar]] [[<:]] [[int]]$ and
 $[[int]] [[<:]] [[evar]]$, $[[evar = int]]$ would be the only solution. Since
 function types are contravariant in codomains and covariant in domains,
