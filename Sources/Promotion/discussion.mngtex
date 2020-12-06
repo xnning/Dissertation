@@ -6,7 +6,7 @@ dependent types, while the second extension considers gradual types.
 
 \subsection{Promoting Dependent Types}
 
-In \Cref{sec:pr:background} we discussed about the drawback of decomposing type
+In \Cref{sec:pr:background} we mentioned the drawback of decomposing type
 constructs that it cannot be easily applied to more advanced types like
 dependent types. In this section, we discuss how we can apply promotion to
 dependent types.
@@ -49,7 +49,7 @@ We expect that the promotion would return $[[Pi a:evarb. a]]$. However, after we
 add $[[a]]$ into the context to promote $[[a]]$, \rref{pr-tvar} does not apply,
 as $[[a]]$ is out of the scope of $[[evar]]$!
 
-The design can be fixed by changing \rref{pr-tvar} to \rref{pr-tvarr} to not
+The issue can be fixed by changing \rref{pr-tvar} to \rref{pr-tvarr} to not
 consider the order of type variables.
 %
 \begin{mathpar}
@@ -73,11 +73,11 @@ promotion to a dependently typed lambda calculus.
 
 \subsection{Promoting Gradual Types}
 
-We can apply promotion to gradual types. In particular, consider we use
-polymorphic promotion instead of instantiation in \gpc
-(\Cref{fig:gradual:algo:instantiate}). Then the key is to show how to promote
-the unknown type. Since comparing with the unknown type does not impose any
-constraints, we can simply replace it with a fresh existential variable:
+We have shown that polymorphic promotion works for DK. A natural extension is to
+also apply polymorphic promotion to \gpc (\Cref{chap:Gradual}). Then the key is
+to show how to promote the unknown type. Since comparing with the unknown type
+does not impose any constraints, we can simply replace it with a fresh
+existential variable:
 %
 \begin{mathpar}
 \drule{p-pr-unknown}
@@ -94,6 +94,13 @@ existential variables instead.
 \begin{mathpar}
 \drule{p-pr-unknownG}
 \end{mathpar}
+
+With these rules it would be possible to apply polymorphic promotion to \gpc.
+Note this discussion is a sketch and we have not fully worked out the full
+algorithm yet.
+
+
+
 
 %%% Local Variables:
 %%% mode: latex
