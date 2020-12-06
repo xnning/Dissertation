@@ -4,7 +4,7 @@
 In this section, we adopt the type promotion strategy to a higher-rank
 polymorphic type system from DK \citep{DK}. We show that promotion can be
 further extended to polymorphic promotion to deal with subtyping, which can be
-used to replace the instantiation relation in the original system while
+used to replace the instantiation relation in the original DK system while
 preserving completeness and soundness.
 
 \subsection{Declarative System}
@@ -63,7 +63,7 @@ a subtype of $[[aA2]]$, with output context $[[DD]]$. The rules except the last
 two are the same as the algorithmic subtyping rules in DK.
 
 \Rref{s-instL} and \rref{instR} are specific to this system. Recall that in
-\gpc, the consistent subtyping between $[[evar]]$ and $[[aA]]$ replies on the
+\gpc (which follows DK), the consistent subtyping between $[[evar]]$ and $[[aA]]$ replies on the
 instantiation rules, which are duplicated for the case when $[[evar]]$ is on the
 left and the case when $[[evar]]$ is on the right. Here, instead of
 instantiation, we directly use polymorphic promotion to promote the possibly
@@ -79,8 +79,8 @@ context $[[GG]]$, promoting $[[aA]]$ under promotion mode $[[pm]]$ yields type
 $[[at]]$, so that $[[at]]$ is well-formed in the prefix context of $[[evar]]$.
 
 The only difference between these two promotion modes is how to promote
-polymorphic types. If a polymorphic type appears contravariantly
-(\rref{p-pr-forallL}), it means a monotype would make the final type more
+polymorphic types. Under the contravariant mode,
+(\rref{p-pr-forallL}), a monotype would make the final type more
 polymorphic. Therefore, we replace the universal binder $[[a]]$ with a fresh
 existential variable $[[evar]]$ and put it before $[[evar]]$. Otherwise, in rule
 \rref{p-pr-forallR}, we put $[[a]]$ in the context and promote $[[aA]]$. Notice
@@ -147,7 +147,7 @@ judgment using polymorphic promotion instead of instantiation remains sound.
   then $[[ [OO]GG |-DK [OO] aA1 <: [OO]aA2 ]]$.
 \end{restatable}
 
-The completeness of promotion is the same as before.
+Now we turn to completeness. The completeness of promotion is the same as before.
 
 \begin{restatable}[Completeness of Promotion]{theorem}{prcompletetwo} \label{thm:pr_complete_two}%
   Given $[[ GG --> OO  ]]$,
@@ -186,7 +186,7 @@ requires $[[evar notin fv(aA)]]$.
 Finally, we prove that our subtyping is complete. With this, we have proved our
 claims that the original instantiation relation in DK can be replaced by the
 polymorphic promotion process, by showing that the our subtyping algorithm
-remains sound and complete.
+using polymorphic promotion remains sound and complete.
 
 \begin{restatable}[Completeness of Subtyping]{theorem}{prsubcomplete} \label{thm:pr_sub_complete}%
   Given $[[ GG --> OO  ]]$,

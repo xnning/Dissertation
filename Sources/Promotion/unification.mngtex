@@ -124,18 +124,18 @@ sound:
 
 We can further prove that promotion is complete using the notion of context
 extension. Note that in the completeness statement we require $[[evar notin
-fv(at)]]$, or otherwise promotion would fail.
+fv(at1)]]$, or otherwise promotion would fail.
 
 \begin{restatable}[Completeness of Promotion]{theorem}{prcomplete} \label{thm:pr_complete}%
   Given $[[ GG --> OO  ]]$,
   and $[[ GG |-wf evar  ]]$,
-  and $[[ GG |-wf at ]]$,
+  and $[[ GG |-wf at1 ]]$,
   and $[[ [GG]evar = evar ]]$,
-  and $[[ [GG]at = at ]]$,
-  if $[[evar notin fv(at)]]$,
+  and $[[ [GG]at1 = at1 ]]$,
+  if $[[evar notin fv(at1)]]$,
   there exist $[[at2]]$, $[[DD]]$ and $[[OO']]$ such that
   $[[GG --> OO']]$ and $[[OO --> OO']]$
-  and $[[  GG |-pr (evar) at ~~> at2 -| DD ]]$.
+  and $[[  GG |-pr (evar) at1 ~~> at2 -| DD ]]$.
 \end{restatable}
 
 The completeness of unification is then built upon the completeness of promotion.
