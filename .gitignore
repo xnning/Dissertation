@@ -21,6 +21,7 @@
 *.sav
 *.swp
 *.toc
+*.ptb
 
 *.run.xml
 *-blx.bib
@@ -51,3 +52,4 @@ Figures/External/
 *.brf
 *.mngtex-old
 /Thesis.loe
+Thesis.tex

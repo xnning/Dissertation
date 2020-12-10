@@ -8,6 +8,20 @@
 \input{packages.tex}
 \input{pl-theory.tex}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lhs2TeX stuff
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%include rae.fmt
+
+\newcommand{\keyword}[1]{\textcolor{BlueViolet}{\textbf{#1}}}
+\newcommand{\id}[1]{\textsf{\textsl{#1}}}
+\newcommand{\varid}[1]{\textcolor{Sepia}{\id{#1}}}
+\newcommand{\conid}[1]{\textcolor{OliveGreen}{\id{#1}}}
+\newcommand{\tick}{\text{\textquoteright}}
+\newcommand{\package}[1]{\textsf{#1}}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % System Names
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -24,6 +38,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 % Revision Tool
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+\newcommand\auxiliarymaterialwithlink{the technical supplement\footnote{\url{http://arxiv.org/abs/1911.06153}.}\xspace}
 
 \newcommand\mynote[3]{\textcolor{#2}{#1: #3}}
 

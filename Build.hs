@@ -16,6 +16,7 @@ main =
     want [doc <.> "pdf"]
 
     "*.pdf" %> \_ -> do
+      let thesisSource = doc -<.> "tex"
       texSource <- getDirectoryFiles "" ["/*.tex", "Sources//*.tex"]
       codeSource <- getDirectoryFiles "" ["examples/*.sl"]
       genFiles <-
@@ -26,8 +27,13 @@ main =
         (\mngSource ->
            ["Gen" </> (dropDirectory1 c -<.> "lhstex") | c <- mngSource]) <$>
         getDirectoryFiles "" ["Sources//*.lhsmngtex"]
-      need $ [ottFile] ++ genFiles ++ texSource ++ codeSource ++ genLhsFiles
-      cmd "latexmk" [doc -<.> "tex"]
+      need $ [thesisSource, ottFile] ++ genFiles ++ texSource ++ codeSource ++ genLhsFiles
+      cmd "latexmk" [thesisSource]
+
+    doc ++ ".tex" %> \out -> do
+      let dep = out -<.> ".lhstex"
+      need $ [dep]
+      cmd "lhs2Tex" lhsFlags [out] [dep]
 
     "Gen//*.lhstex" %> \out -> do
       ottSource <- getDirectoryFiles "" ["spec/*.ott"]

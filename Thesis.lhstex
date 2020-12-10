@@ -1,0 +1,79 @@
+%include topmatter.tex
+
+\author{\textbf{Ningning Xie}}
+\date{February 2021}
+
+\begin{document}
+
+\title{Higher-rank Polymorphism: Type Inference and Extensions}
+\maketitle
+
+\begin{abstract}
+ \input{Sources/Abstract}
+\end{abstract}
+
+
+%%---------------------%%
+\frontmatter
+%%---------------------%%
+\makedeclaration
+\makeAck
+\tableofcontents
+\listoffigures
+\listoftables
+% \listoftheorems[ignoreall, show={theorem,lemma}]
+
+%%---------------------%%
+\mainmatter
+%%---------------------%%
+
+\part{Prologue}
+
+\include{Sources/Introduction}
+
+\include{Sources/Background}
+
+\part{Bidirectional Type Checking With Application Mode} \label{part:typeinference}
+
+\include{Sources/BiDirectional}
+
+\part{Higher-Rank Polymorphism and Gradual Typing}
+\label{part:gradual}
+
+\include{Sources/Gradual}
+\include{Sources/Dynamic}
+
+\part{Type Inference with Promotion} \label{part:dependentTypes}
+
+\include{Sources/Promotion}
+\include{Sources/KindInference}
+
+
+
+\part{Related and Future Work}
+
+\include{Sources/Related}
+
+\include{Sources/Future}
+
+\part{Epilogue}
+
+\include{Sources/Conclusion}
+
+% This ensures that the subsequent sections are being included as root
+% items in the bookmark structure of your PDF reader.
+\bookmarksetup{startatroot}
+
+%%---------------------%%
+% \backmatter
+%%---------------------%%
+
+\cleardoublepage
+\bibliography{Thesis}
+
+\part{Technical Appendix}
+
+\appendix
+
+
+\end{document}
