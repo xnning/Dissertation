@@ -7,6 +7,7 @@ import Development.Shake.Util
 ottFile = "Gen/ott-rules.tex"
 doc = "Thesis"
 ottFlags = "-tex_wrap false -tex_show_meta false"
+lhsFlags = "--poly -o"
 
 
 main :: IO ()
@@ -21,8 +22,20 @@ main =
         (\mngSource ->
            ["Gen" </> (dropDirectory1 c -<.> "tex") | c <- mngSource]) <$>
         getDirectoryFiles "" ["Sources//*.mngtex"]
-      need $ [ottFile] ++ genFiles ++ texSource ++ codeSource
+      genLhsFiles <-
+        (\mngSource ->
+           ["Gen" </> (dropDirectory1 c -<.> "lhstex") | c <- mngSource]) <$>
+        getDirectoryFiles "" ["Sources//*.lhsmngtex"]
+      need $ [ottFile] ++ genFiles ++ texSource ++ codeSource ++ genLhsFiles
       cmd "latexmk" [doc -<.> "tex"]
+
+    "Gen//*.lhstex" %> \out -> do
+      ottSource <- getDirectoryFiles "" ["spec/*.ott"]
+      let dep = "Sources" </> dropDirectory1 out -<.> ".lhsmngtex"
+          tmp = out -<.> ".tmp"
+      need $ dep : ottSource
+      cmd_ "ott" ottSource ottFlags "-tex_filter" [dep] [tmp]
+      cmd "lhs2Tex" lhsFlags [out] [tmp]
 
     "Gen//*.tex" %> \out -> do
       ottSource <- getDirectoryFiles "" ["spec/*.ott"]
