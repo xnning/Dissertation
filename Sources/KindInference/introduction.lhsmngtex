@@ -14,153 +14,86 @@ import Data.Kind ( Type )
 %endif
 
 
-\section{Introduction}
+\section{Introduction and Motivation}
 
-Modern functional languages such as Haskell, ML, and OCaml come with
-powerful forms of type inference. The global type-inference algorithms
-employed in those languages are derived from the Hindley-Milner type system
-(HM)~\cite{hindley69principal, damas1982principal}, with multiple extensions. As
-the languages evolve, researchers also formalize
-the key aspects of type inference for the new extensions.
-Common extensions of HM include \emph{higher-ranked
-  polymorphism}~\cite{odersky1996putting, jones2007practical} and \emph{type-inference for GADTs}~\cite{PeytonJones:2006:SUT:1159803.1159811},
-which have both been formally studied thoroughly.
+\subsection{The Kind Inference Challenge}
 
-Most research work for extensions of HM so far has focused on forms of
-polymorphism (such as support for
-impredicativity~\cite{le2014mlf,remy2008graphic,leijen2009flexible,vytiniotis2008fph,
-  Serrano:2018:GIP:3192366.3192389}), where type variables all have
-the same kind. In these systems, the type variables introduced by universal
-quantifiers and/or type declarations all stand for proper types (i.e., they have
-kind |*|). In such a simplified setting, datatype declarations such as
-|data Maybe a = Nothing || Just a|
-pose no problem at all for type inference: with only one possible kind for |a|,
-there is nothing to infer.
+Modern functional languages such as Haskell, ML, and OCaml come with powerful
+forms of type inference. The global type-inference algorithms employed in those
+languages are derived from the Hindley-Milner type system
+(HM) \citep{hindley,Damas:Milner}, with multiple extensions. As the languages
+evolve, researchers also formalize the key aspects of type inference for the new
+extensions. Common extensions of HM include \emph{higher-ranked
+  polymorphism} \citep{odersky:putting, practical:inference} and
+\emph{type-inference for GADTs} \citep{PeytonJones:gadt}, which have both been
+formally studied thoroughly.
 
-However, real-world implementations for
-languages like Haskell support a non-trivial kind language, including
-kinds other than |*|. \hne accepts \emph{higher-kinded polymorphism}~\cite{jones1995system}, enabling datatype declarations such as |data AppInt f = Mk (f Int)|.
-The type of constructor |Mk| applies the type variable |f| to an argument |Int|.
-Accordingly, |AppInt Bool| would not work, as the type |Bool Int| (in the instantiated type
-of |Mk|) is invalid. Instead, we must write something like |AppInt Maybe|: the argument
-to |AppInt| must be suitable for applying to |Int|. In \hne, |AppInt| has
-kind |(* -> *) -> *|. For \hne-style higher-kinded polymorphism, \citet{jones1995system}
-presents one of the few extensions of HM that deals with a non-trivial language of kinds.
-His work addresses the related problem of inference for \emph{constructor type classes},
-although he does not show directly how to do inference for datatype declarations.
+Most research work for extensions of HM so far (including OL, DK, \ap and \gpc) has
+focused on forms of polymorphism, where type variables all have the same kind.
+In these systems, the type variables introduced by universal quantifiers and/or
+type declarations all stand for proper types (i.e., they have kind |*|). In such
+a simplified setting, datatype declarations such as |data Maybe a = Nothing ||
+Just a| pose no problem at all for type inference: with only one possible kind
+for |a|, there is nothing to infer.
 
-Modern Haskell\footnote{We consider the Glasgow Haskell Compiler's implementation of
-Haskell, in version 8.8.} has a much richer type and kind language compared
-to \hne. In recent years, Haskell has seen a dramatic surge of new features
-that extend the expressive power of algebraic
-datatypes. Such features include \emph{GADTs}, 
-\emph{kind polymorphism}~\cite{yorgey2012giving} with 
-\emph{implicit kind arguments}, and \emph{dependent kinds}~\cite{Weirich:2013:SFE:2500365.2500599}, among others.
-With great power comes great responsibility: now we must be able to infer these kinds, too.
-For instance, consider these datatype declarations:
+However, real-world implementations for languages like Haskell support a
+non-trivial kind language, including kinds other than |*|. \hne accepts
+\emph{higher-kinded polymorphism} \citep{jones1995system}, enabling datatype
+declarations such as |data AppInt f = Mk (f Int)|. The type of constructor |Mk|
+applies the type variable |f| to an argument |Int|. Accordingly, |AppInt Bool|
+would not work, as the type |Bool Int| (in the instantiated type of |Mk|) is
+invalid. Instead, we must write something like |AppInt Maybe|: the argument to
+|AppInt| must be suitable for applying to |Int|. In \hne, |AppInt| has kind |(*
+-> *) -> *|. For \hne-style higher-kinded polymorphism, \citet{jones1995system}
+presents one of the few extensions of HM that deals with a non-trivial language
+of kinds. His work addresses the related problem of inference for
+\emph{constructor type classes}, although he does not show directly how to do
+inference for datatype declarations.
 
-\begin{tabular}{ll}
-\begin{minipage}{.35\textwidth}
+Modern Haskell\footnote{We consider the Glasgow Haskell Compiler's
+  implementation of Haskell, in version 8.8.} has a much richer type and kind
+language compared to \hne. In recent years, Haskell has seen a dramatic surge of
+new features that extend the expressive power of algebraic datatypes. Such
+features include \emph{GADTs}, \emph{kind polymorphism} \citep{yorgey2012giving}
+with \emph{implicit kind arguments}, and \emph{dependent
+  kinds} \citep{Weirich:2013:SFE:2500365.2500599}, among others. With great power
+comes great responsibility: now we must be able to infer these kinds, too. For
+instance, consider these datatype declarations:
+
 \begin{code}
 data App f a  = MkApp (f a)
 data Fix f    = In (f (Fix f))
-\end{code}
-\end{minipage}
-&
-\begin{minipage}{.55\textwidth}
-\begin{code}
+
 data T        =  MkT1 (App Maybe Int) 
               |  MkT2 (App Fix Maybe)  -- accept or reject?
 \end{code}
-\end{minipage}
-\end{tabular}
 
-\noindent Should the declaration for |T| be accepted or rejected? 
-In a \hne setting, the kind of |App| is |(* -> *) -> * -> *|. 
-Therefore |T| should be rejected, because in |MkT2| the datatype 
-|App| is applied to |Fix :: (* -> *) -> * | and |Maybe :: * -> *|,
-which do not match the
-expected kinds of |App|. However, 
-with kind polymorphism, |T| is accepted, because |App| has 
-the more general kind |forall k. (k -> *) -> k -> *|.
-%\richard{I dropped the braces
-%around |k|. No need to distract the reader with that detail here, I think. Feel free
-%to revert.}
-With this kind, both uses of |App| in |T| are valid.
+\noindent Should the declaration for |T| be accepted or rejected? In a \hne
+setting, the kind of |App| is |(* -> *) -> * -> *|. Therefore |T| should be
+rejected, because in |MkT2| the datatype |App| is applied to |Fix :: (* -> *) ->
+* | and |Maybe :: * -> *|, which do not match the expected kinds of |App|.
+However, with kind polymorphism, |T| is accepted, because |App| has the more
+general kind |forall k. (k -> *) -> k -> *|. With this kind, both uses of |App|
+in |T| are valid.
   
-The questions we ask in this paper are these:
+The questions we ask in this section are these:
 \emph{Which datatype declarations should be accepted?}
 \emph{What kinds do accepted datatypes have?}
 Surprisingly, the literature is essentially silent on these
 questions---we are unaware of any formal treatment of kind inference
 for datatype declarations.
 
-%% This paper studies kind inference for datatypes.
-Inspired by previous
-research on type inference, we offer declarative
-specifications for two languages: \hne, as standardized~\cite{jones2003haskell}~(\Cref{sec:h98});
-and \tit, a significant fragment of modern Haskell~(\Cref{subsec:tit:decl}).
-These specifications are complemented with 
-algorithmic versions that can guide implementations (Sections~\ref{sec:algo} and \ref{sec:tit_algo}).
-To relate the
-declarative and algorithmic formulations we study various properties,
-including \emph{soundness}, \emph{completeness}, and the existence of \emph{principal
-kinds} (Sections~\ref{sec:98:context-extension}, \ref{sec:type_par}, and \ref{subsec:tit:sound-complete}).
+Inspired by previous research on type inference, we offer declarative
+specifications for two languages: \hne, as
+standardized \citep{jones2003haskell}~(\Cref{sec:h98}); and \tit, a significant
+fragment of modern Haskell~(\Cref{subsec:tit:decl}). These specifications are
+complemented with algorithmic versions that can guide implementations
+(Sections~\ref{sec:algo} and \ref{sec:tit_algo}). To relate the declarative and
+algorithmic formulations we study various properties, including
+\emph{soundness}, \emph{completeness}, and the existence of \emph{principal
+  kinds} (Sections~\ref{sec:98:context-extension}, \ref{sec:type_par}, and
+\ref{subsec:tit:sound-complete}). TODO: fix references.
 
-We offer the following contributions:
-\begin{compactitem}
-\item \textbf{Kind inference for \hne:} We formalize
-  \hne's datatype declarations,
-  providing both a declarative specification and syntax-driven
-  algorithm for kind inference. We prove that the algorithm is
-  sound and observe how \hne's technique of defaulting unconstrained
-  kinds to |*| leads to incompleteness. We believe that ours is
-  the first formalization of this aspect of \hne. Its inclusion
-  in this paper both sheds light on this historically important
-  language and also prepares us for the more challenging
-  features of modern Haskell.
-
-\item \textbf{Completeness for \hne kind inference:} 
-To model the \hne behavior of defaulting declaratively, and 
-thus to achieve completeness, \Cref{sec:type_par} proposes a variant of the
-declarative system that adapts the \emph{type parameters} approach 
-from \citet{garcia2015principal}. 
- 
-\item \textbf{Kind inference for modern Haskell:} We present a type and kind
-language that is unified and dependently typed, 
-modeling the challenging features for kind inference in modern Haskell.
-We include both a declarative specification (\Cref{subsec:tit:decl}) and
-a syntax-driven algorithm (\Cref{sec:tit_algo}). The algorithm
-is proved sound, and we observe where and why completeness fails.
-In the design of our algorithm, we must choose between completeness and termination;
-we favor termination but conjecture that an alternative design would regain
-completeness (\Cref{sec:related}). Unlike other dependently typed languages,
-we retain the ability to \emph{infer} top-level kinds instead of relying
-on compulsory annotations.
-
-\item \textbf{Technical advances:} This work introduces a number of technical
-innovations that appear important in the implementation
-of type-inference for a dependently typed language. We expect implementations to have developed
-these ideas independently, but this paper provides their first known formalization.
-These innovations include
-\emph{promotion}~(Sections~\ref{par:h98:promotion} and \ref{par:tit:promotion}),
-\emph{local scopes} and \emph{moving}~(\Cref{par:tit:moving}),
-and the \emph{quantification check}~(\Cref{subsec:qcheck}).
-In addition, our kind-directed unification appears
-to risk divergence, yet we provide a subtle proof that it is indeed terminating.
-
-\end{compactitem}
-
-Our type systems are detailed, and many
-rules are elided to save
-space. The full judgments---and all proofs of stated lemmas and theorems---are
-provided in \auxiliarymaterialwithlink. In addition, we have included there a
-detailed comparison of our work here to the GHC implementation. %%  Some
-%% briefer remarks about our connection with GHC appear in \Cref{sec:related} along
-%% with other related work.
-It is our belief that this study can help inform the design of principled inference
-algorithms for languages beyond Haskell, as well as to guide the continued evolution 
-of GHC's kind inference algorithm.
 
 %%% Local Variables:
 %%% mode: latex
