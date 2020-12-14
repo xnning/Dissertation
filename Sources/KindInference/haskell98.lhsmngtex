@@ -29,7 +29,21 @@
  \bottomrule
    \end{tabular}\\[1ex]
  \end{center}
+ \drules[pgm]{$[[EE ; HH |-p pgm : A]]$}{Typing Program}{expr,dt}
+ \drules[dt]{$[[EE |- dt ~> HH]]$}{Typing Datatype Decl.}{decl}
+ \drules[dc]{$[[EE |-dc t dc ~> t']]$}{Typing Data Constructor Decl.}{decl}
+ \drules[k]{$[[EE |- t : k]]$}{Kinding}{var,tcon,nat,arrow,app}
+ \caption{Declarative specification of \hne datatype declarations}
+ \label{fig:kind:rules:98}
 \end{figure}
+
+We begin our formal presentation with \hne. The fragment of the syntax of \hne
+that concerns us appears at the top of \Cref{fig:kind:rules:98}, including
+datatype declarations, types, kinds, and contexts. The metavariable $[[e]]$
+refers to expressions, but we do not elaborate the details of expressions'
+syntax or typing rules here. A program $[[pgm]]$ is a sequence of groups
+(defined below) of datatype declarations $[[dt]]$, followed by an expression
+$[[e]]$. We write $[[t1 -> t2]]$ as an abbreviation for $([[->]]) [[t1 t2]]$.
 
 
 %%% Local Variables:
