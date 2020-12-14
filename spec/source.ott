@@ -108,7 +108,6 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA 
   | erase [ A ]    ::  :: erasetp {{ tex \lceil{[[A]]}\rceil }}
   | \/ kvs  . A                 ::  :: kind_forall
   | T                      ::  :: tcon
-  | ->                     ::  :: arrowsingle
   | A </ ti // i />        ::  :: apps
   | </ Ki // i /> --> K       ::  :: arrowl
   | \/ [ kvs ] . A              ::  :: forall_kvs {{ tex [[\/]] [[kvs]]. ~ [[A]] }}
@@ -141,7 +140,6 @@ dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}}, et {{tex \rho}}
   | star      ::   :: star
   | a         ::   :: tvar
   | t -> s    ::   :: arrow
-  | ->                     ::  :: arrowsingle
   | T                      ::  :: tcon
   | ( t )                  ::  :: paren
   | static    ::   :: static
@@ -2323,8 +2321,8 @@ EE |- a : k
 ---------------------------------- :: tcon
 EE |- T : k
 
---------------------------- :: arrow
-EE |- -> : star -> star -> star
+% --------------------------- :: arrow
+% EE |- -> : star -> star -> star
 
 EE , a : k |- A : star
 --------------------------- :: forall
@@ -2390,8 +2388,8 @@ EE |- a : ek ~> a
 ---------------------------------- :: tcon
 EE |- T : eK ~> T
 
---------------------------- :: arrow
-EE |- -> : star -> star -> star ~> ->
+% --------------------------- :: arrow
+% EE |- -> : star -> star -> star ~> ->
 
 EE |- k <= star ~> ek
 EE , a : ek |- A <= star ~> eA
@@ -2445,8 +2443,8 @@ EE |-el a : ek
 ---------------------------------- :: tcon
 EE |-el T : eK
 
---------------------------- :: arrow
-EE |-el -> : star -> star -> star
+% --------------------------- :: arrow
+% EE |-el -> : star -> star -> star
 
 EE |-el ek : star
 EE , a : ek |-el eA : star
