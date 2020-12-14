@@ -3,7 +3,10 @@ metavar kindvar, Xa {{ tex \widehat{\alpha} }}, Xb {{ tex \widehat{\beta} }} ::=
 
 metavar expvar, x, y, f, g, m, nn {{ tex n }}, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
 
-indexvar index, i, j, n, m ::=
+metavar  lit, ii {{tex {i} }} ::=
+metavar tconstrvar , T {{ tex T }} , Ty {{ tex T }}, Tt {{ tex \widetilde{ \mathcal{T} } }} ::=
+indexvar index, i, j, n, m, l ::=
+metavar dconstrvar , D {{ tex D }} ::=
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL TYPE
@@ -36,8 +39,47 @@ varset, avs  :: 'varset_' ::=
   | avs set                  ::  :: a_set {{ tex \overbar{[[avs]]} }}
   | avs1 - avs2              ::  :: minus {{ tex [[avs1]] - [[avs2]] }}
 
-dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4}} :: 'dtyp_' ::=
+kvarset, kvs {{ tex \phi }} , kvsy {{tex \phi }},  ckvs {{ tex \phi^{\mathsf{c} } }} , ckvsy  {{ tex \phi^{\mathsf{c} } }}, ikvs {{ tex \phi^{\star} }}, iikvs {{ tex \phi^{\star}_{i} }}, xkvs {{ tex \widehat{\phi}^{\star} }} , xckvs{{ tex \widehat{\phi}^{\mathsf{c} } }} :: 'kvs_' ::=
+  | X         ::  :: vars
+  | Xa = k    ::  :: solved_kuvars
+  | X : K     ::  :: kvars
+  | Xa : K = k    ::  :: solved_typed_kuvars
+  | a         ::  :: tvars
+  | a : K     ::  :: ktvar
+  | fkv ( K )             ::  :: fkv_kind
+    {{ tex [[fkv]]([[K]]) }}
+  | fkv ( DD )            ::  :: fkv_tctx
+    {{ tex [[fkv]]([[DD]]) }}
+  | fkb ( K )             ::  :: fkb_tctx
+    {{ tex [[fkb]]([[K]]) }}
+  | kvs1 - kvs2           ::  :: minus {{ tex [[kvs1]] \backslash_{[[kvs2]]} }}
+  | kvs1 + kvs2           ::  :: set_plus  {{ tex [[kvs1]]~\cup~[[kvs2]] }}
+  | kvs1 , ... , kvs2     ::  :: append_multiple
+  | empty                 ::  :: empty
+  | ( kvs )               ::  :: paren
+  | LS ( K )              ::  :: LexicalSort
+    {{ tex [[LS]]([[K]]) }}
+  | SS ( kvs )              ::  :: ScopedSort
+    {{ tex [[SS]]([[kvs]]) }}
+  | unsolved ( K )        ::  :: unsolved
+    {{ tex [[unsolved]]([[K]]) }}
+  | unsolved ( DD )        ::  :: unsolved_ctx
+    {{ tex [[unsolved]]([[DD]]) }}
+  | Lunsolved ( DD , K )        ::  :: Lunsolved
+  | Lunsolved ( DD , </ Ki // i /> )        ::  :: Lunsolved_mult
+  | [ DD ] kvs             ::  :: apply_ctx
+  | hat ckvs             ::   :: tilde {{ tex \widetilde{[[ckvs]]} }}
+  | fresh ( ckvs )         ::  :: fresh
+  | kvs [ </ kvsl |-> kvsl' // l /> ]     ::  :: subst_kvs
+  | kvs1 ^ kvs2      ::  :: kvs_inter {{ tex [[kvs1]]~\cap~[[kvs2]] }}
+  | dom ( DD )       ::   :: dom
+    {{ tex [[dom]]([[DD]]) }}
+  | var ( K )         ::   :: var
+    {{ tex [[var]]([[K]]) }}
+
+dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}  :: 'dtyp_' ::=
   | int            ::   :: int
+  | star           ::   :: star
   | nat            ::   :: nat
   | natu           ::   :: natu {{ tex \mathsf{Nat}_\unknown }}
   | float          ::   :: float
@@ -69,16 +111,24 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, D {{tex \sigma_4
   | ( A , B )      ::   :: pair
   | [ l1 : A1 , .. , ln : An  ]  ::   :: record
   | erase [ A ]    ::  :: erasetp {{ tex \lceil{[[A]]}\rceil }}
+  | \/ kvs  . A                 ::  :: kind_forall
+  | ->                     ::  :: arrowsingle
+  | A </ ti // i />        ::  :: apps
+  | </ Ki // i /> --> K       ::  :: arrowl
 
 % Mono Types
 
-dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }} :: 'dtyp_mono_' ::=
+dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}} :: 'dtyp_mono_' ::=
   | int       ::   :: int
+  | star      ::   :: star
   | a         ::   :: tvar
   | t -> s    ::   :: arrow
+  | ->                     ::  :: arrowsingle
   | static    ::   :: static
   | gradual   ::   :: gradual
   | t [ </  ti ~>  si // i /> ]  :: M :: subst
+  | t </ ti // i />        ::  :: apps
+  | </ ti // i /> --> t    ::  :: arrowl
 
 % Castable Mono Types
 
@@ -252,12 +302,32 @@ aexp, ae {{ tex e }} :: 'atrm_' ::=
 % DECL CONTEXT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-dctx, dd {{ tex \Psi}} :: 'dctx_' ::=
+tctx, EE  {{tex \Sigma}} :: 'tctx_' ::=
+  | empty             ::  :: empty
+  | a : K             ::  :: tvar
+  | X                 ::  :: kvar
+  | Xa = k            ::  :: kuvar_solved
+  | Ti : Ki           ::  :: tconstr_s
+  | ( EE )            ::  :: paren
+  | EE1 , .... , EEi  ::  :: append_multiple
+  | EE [ Xa ]         ::  :: contains
+  | EE [ Xa = k ]     ::  :: contains_solve
+  | [ CC ] DD         ::  :: context_apply
+  | Q ( K )           ::  :: quantifier
+    {{ tex [[Q]]([[K]]) }}
+  | Q ( K1 - EE )     ::  :: quantifier_minus {{ tex [[Q]] ( [[K1]] \backslash_{[[EE]]} ) }}
+  | Q ( K1 .... Ki ) ::  :: quantifier_mult
+  | [ ckvs ]          ::  :: fill_kvs {{ tex [[ckvs]] }}
+  | tsub ( EE )       ::  :: tsub
+
+dctx, dd {{ tex \Psi}} , HH {{ tex \Psi }} :: 'dctx_' ::=
   | empty       ::   :: empty
   | dd , x : A  ::   :: cons_var
   | dd , f : A  ::   :: cons_var_f
+  | HH , D : A         ::  :: dconstr
   | dd , a      ::   :: cons_tvar
   | [ OO ] DD     :: S :: ctx_subst
+  | </ Di : Ai // i /> ::  :: dconstr_s
 
 sctx, ss {{ tex \Sigma }} :: 'sctx_' ::=
   | empty       ::   :: empty
@@ -335,6 +405,30 @@ pvalue, pv {{ tex v }} :: 'pvalue_' ::=
   | /\ a . pe      ::   :: tabs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Kind Inference
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+program, pgm {{tex \mathit{pgm} }}:: 'pgm_' ::=
+  | rec </ dti // i /> ; pgm    ::  :: rec_dt
+  | dt ; pgm                    ::  :: dt
+  | sig dtsig ; pgm             ::  :: dtsig
+  | e                           ::  :: expr
+  | tsub ( pgm )                ::  :: tsub
+
+datatypesig, dtsig {{tex \mathcal{S} }}:: 'dtsig_' ::=
+  | data T : K  :: :: data_cusk {{ tex \mathbf{data}~[[T]] : [[K]] }}
+
+datatype, dt {{tex \mathcal{T} }} , dtt {{tex \mathcal{T} }} :: 'dt_' ::=
+  | data T kvs =  </ dcj // j />  :: :: data_partial
+  | data T : K ; Ty </ ai // i /> =  </ dcj // j />  :: :: data_cusk
+
+dataconstr, dc {{tex \mathcal{D} }} , dcc {{tex \mathcal{D} }} :: 'dc_' ::=
+  | D </ Ai // i />       ::  :: sigl
+  | \/  kvs  . D </ Ai // i /> :: :: sigl_exist
+
+typesubst, tsub {{ tex S }}, tsubstar {{tex S^{\star} }} :: 'tsub_' ::=
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TERMINALS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -403,6 +497,8 @@ terminals :: 'terminals_' ::=
   | <:      :: :: subtype {{ tex <: }}
   | =nid    :: :: etaid {{ tex =_{\eta id} }}
   | <<=     :: :: tless  {{ tex \sqsubseteq }}
+  | rec        :: :: rec {{ tex \mathbf{rec} }}
+  | sig        :: :: sig {{ tex \mathbf{sig} }}
 
 
 formula :: formula_ ::=
@@ -496,9 +592,9 @@ unknown ~ A
 
 
 A1 ~ C
-B ~ D
+B ~ A4
 -------------------- :: arrow
-A1 -> B ~ C -> D
+A1 -> B ~ C -> A4
 
 </ Ai ~ Ai' // i />
 -------------------------------------------------- :: rcd
@@ -522,9 +618,9 @@ float <: float
 int <: float
 
 C <: A1
-B <: D
+B <: A4
 -------------------- :: arrow
-A1 -> B <: C -> D
+A1 -> B <: C -> A4
 
 -------------------- :: unknown
 unknown <: unknown
@@ -568,9 +664,9 @@ unknown ~ b@(gc)
 
 
 A1 ~ C
-B ~ D
+B ~ A4
 -------------------- :: arrow
-A1 -> B ~ C -> D
+A1 -> B ~ C -> A4
 
 A ~ B
 ------------------ :: forall
@@ -735,9 +831,9 @@ a notin fv(A1)
 |-AP A1 <: \/ a. A2 ~~> \x:A1. /\a. ef x
 
 |-AP A1 <: C ~~> ef1
-|-AP B <: D ~~> ef2
+|-AP B <: A4 ~~> ef2
 ----------------------- :: pair
-|-AP (A1, B) <: (C, D) ~~> ef3
+|-AP (A1, B) <: (C, A4) ~~> ef3
 
 defn
 
@@ -811,9 +907,9 @@ dd |-G r@(int) <: r@(int)
 dd |-G b@(int) <: b@(int)
 
 dd |-G C <: A1
-dd |-G B <: D
+dd |-G B <: A4
 ---------------------------- :: arrow
-dd |-G A1 -> B <: C -> D
+dd |-G A1 -> B <: C -> A4
 
 
 --------------------------- :: unknown
@@ -856,9 +952,9 @@ dd |-G A1 [a ~> t] <~ B
 dd |-G \/ a. A1 <~ B
 
 dd |-G C <~ A1
-dd |-G B <~ D
+dd |-G B <~ A4
 ---------------------------- :: arrow
-dd |-G A1 -> B <~ C -> D
+dd |-G A1 -> B <~ C -> A4
 
 a in dd
 -------------------- :: tvar
