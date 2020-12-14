@@ -464,6 +464,7 @@ terminals :: 'terminals_' ::=
   | ~       :: :: consist {{ tex \sim }}
   | ~=      :: :: approx {{ tex \approx }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
+  | star       :: :: star      {{ tex \star }}
   | let     :: :: let     {{ tex \mathbf{let} }}
   | fst     :: :: fst     {{ tex \mathbf{fst} }}
   | snd     :: :: snd     {{ tex \mathbf{snd} }}
@@ -506,6 +507,7 @@ terminals :: 'terminals_' ::=
   | <~~     :: :: inst   {{ tex \lessapprox }}
   | \       :: :: lambda    {{ tex \lambda }}
   | ~~>     :: :: translate {{ tex \rightsquigarrow }}
+  | ~~~>    :: :: leadsto  {{ tex \leadsto }}
   | /\      :: :: tlambda   {{ tex \Lambda }}
   | Pi      :: :: pi        {{ tex \Pi }}
   | \/      :: :: forall   {{ tex \forall }}
@@ -527,6 +529,26 @@ terminals :: 'terminals_' ::=
   | <<=     :: :: tless  {{ tex \sqsubseteq }}
   | rec        :: :: rec {{ tex \mathbf{rec} }}
   | sig        :: :: sig {{ tex \mathbf{sig} }}
+  | |-p        :: :: vdashp {{ tex \vdash^{\!\!\mathsf{pgm} } }}
+  | ||-u       :: :: vdashu {{ tex \Vdash^{\!\!\mathsf{u} } }}
+  | ||-p       :: :: Vdashp {{ tex \Vdash^{\!\!\mathsf{pgm} } }}
+  | |-el       :: :: vdashela {{ tex \vdash^{\!\!\mathsf{ela} } }}
+  | ||-el      :: :: Vdashela {{ tex \Vdash^{\!\!\mathsf{ela} } }}
+  | ||-dt      :: :: Vdashdt {{ tex \Vdash^{\!\!\mathsf{dt} } }}
+  | |-dt       :: :: vdashdt {{ tex \vdash^{\!\!\mathsf{dt} } }}
+  | |-pr       :: :: vdashpr {{ tex \Vdash^{\!\!\mathsf{pr} } }}
+  | |-dc       :: :: vdashdc {{ tex \vdash^{\!\!\mathsf{dc} } }}
+  | |-grp      :: :: vdashgrp {{ tex \vdash^{\!\!\mathsf{grp} } }}
+  | ||-grp     :: :: Vdashgrp {{ tex \Vdash^{\!\!\mathsf{grp} } }}
+  | |-sig      :: :: vdashsig {{ tex \vdash^{\!\!\mathsf{sig} } }}
+  | |-k        :: :: vdashk {{ tex \vdash^{\!\!\mathsf{k} } }}
+  | ||-k       :: :: Vdashk {{ tex \Vdash^{\!\!\mathsf{k} } }}
+  | |-gen      :: :: vdashgen {{ tex \vdash^{\!\!\mathsf{gen} } }}
+  | ||-gen     :: :: Vdashgen {{ tex \Vdash^{\!\!\mathsf{gen} } }}
+  | |-inst     :: :: vdashinst {{ tex \vdash^{\!\!\mathsf{inst} } }}
+  | ||-inst    :: :: Vdashinst {{ tex \Vdash^{\!\!\mathsf{inst} } }}
+  | ||-kapp    :: :: Vdashkapp {{ tex \Vdash^{\!\!\mathsf{kapp} } }}
+  | |-kc       :: :: vdashkc {{ tex \vdash^{\!\!\mathsf{kc} } }}
 
 
 formula :: formula_ ::=
@@ -2173,7 +2195,7 @@ typing :: '' ::=
 defn
 
 EE |- dt ~> HH :: :: dt :: 'dt_'
-{{tex [[EE]] \vdash^{\!\!\mathsf{dt} } [[dt]] [[~>]] [[HH]] }}
+{{tex [[EE]] \vdash^{\!\!\mathsf{dt} } [[dt]] \leadsto [[HH]] }}
 by
 
 % Haskell 98
@@ -2198,6 +2220,7 @@ EE |- data T </ ai // i /> =  </ dcj // j />  ~>  </ Dj:  \/i [ckvs1] . \/ [ckvs
 defn
 
 A : K |- kvs ~> ckvs -| A' ::  :: matching_tt :: 'mat_'
+{{ tex [[A]] : [[K]] [[|-]] [[kvs]] \leadsto [[ckvs]] [[-|]] [[A']] }}
 
 by
 
@@ -2249,7 +2272,7 @@ rs \/i [a:k].  A
 defn
 
 EE |-dc t dc ~> A :: :: dc :: 'dc_'
-  {{tex [[EE]] [[|-dc]]_{\!\![[t]]} [[dc]] [[~>]] [[A]]}}
+  {{tex [[EE]] [[|-dc]]_{\!\![[t]]} [[dc]] \leadsto [[A]]}}
 by
 
 EE |- </ ti // i /> --> t : star
@@ -2336,10 +2359,10 @@ EE , a : k |- A : star
 --------------------------- :: forall_tt
 EE |- \/ a . A : star
 
-% EE |- t2 : k1
-% EE |- t1 : k1 -> k2
-% --------------------------- :: app
-% EE |- t1 t2 : k2
+EE |- t2 : k1
+EE |- t1 : k1 -> k2
+--------------------------- :: app
+EE |- t1 t2 : k2
 
 EE , X |- A : star
 --------------------------- :: kforall
@@ -2358,7 +2381,7 @@ EE |- A : K [ a |-> k']
 defn
 
 EE |- A <= K ~> A' :: :: kinding_checking :: 'kc_'
-{{ tex [[EE]] \vdash^{\!\!\mathsf{kc} } [[A]] [[<=]] [[K]] [[~>]] [[A']] }}
+{{ tex [[EE]] \vdash^{\!\!\mathsf{kc} } [[A]] [[<=]] [[K]] \leadsto [[A']] }}
 by
 
 
@@ -2370,7 +2393,7 @@ EE |- A <= ek ~> eA2
 defn
 
 EE |- A : K ~> A' :: :: kinding_tt :: 'ktt_'
-{{ tex [[EE]] \vdash^{\!\!\mathsf{k} } [[A]] : [[K]] [[~>]] [[A']] }}
+{{ tex [[EE]] \vdash^{\!\!\mathsf{k} } [[A]] : [[K]] \leadsto [[A']] }}
 by
 
 
@@ -2493,7 +2516,7 @@ EE |- et1 : \/i [a:ek] . eK |> et3 : ek2
 defn
 
 EE |- ( A1 : K1 ) . ( A2 : K2 ) : K ~> A :: :: app_mode :: 'kapp_'
-{{ tex [[EE]] \vdash^{\!\!\mathsf{kapp} } ([[A1]] : [[K1]]) \bullet ([[A2]]  : [[K2]]) : [[K]] [[~>]] [[A]] }}
+{{ tex [[EE]] \vdash^{\!\!\mathsf{kapp} } ([[A1]] : [[K1]]) \bullet ([[A2]]  : [[K2]]) : [[K]] \leadsto [[A]] }}
 
 by
 
@@ -2509,7 +2532,7 @@ EE |- ( et1 : \/ a:ek. eK1 ) . (et2 : eK2) : ek2 ~> et3
 
 defn
 EE |- A : K1 <: K2 ~> A' ::  :: instantiation :: 'inst_'
-{{ tex [[EE]] \vdash^{\!\!\mathsf{inst} } [[A]] : [[K1]] [[<:]] [[K2]] [[~>]] [[A']] }}
+{{ tex [[EE]] \vdash^{\!\!\mathsf{inst} } [[A]] : [[K1]] [[<:]] [[K2]] \leadsto [[A']] }}
 by
 
 ------------------------ :: refl
@@ -2632,7 +2655,7 @@ EE |- \/i [X] . K1 <: K2
 defn
 
 EE |-gen ckvs HH1 ~> HH2 :: :: gen :: ''
-{{ tex [[EE]] [[|-gen]]_{\!\![[ckvs]]} [[HH1]] [[~>]] [[HH2]] }}
+{{ tex [[EE]] [[|-gen]]_{\!\![[ckvs]]} [[HH1]] \leadsto [[HH2]] }}
 
 by
 
