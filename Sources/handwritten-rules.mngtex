@@ -1,0 +1,144 @@
+
+% PGM
+
+\newcommand{\ottdrulepgmXXdtXXtt}[1]{\ottdrule[#1]{%
+% \ottpremise{[[EE]] [[|-]] \ottcomp{[[ ckvsi ]]}{\ottmv{i}} }%
+\ottpremise{\ottcomp{[[EE]] , \, [[ ckvsi ]] [[|-el]] [[eki]] \ottsym{:} [[star]]}{\ottmv{i}} }
+\ottpremise{[[ </ ckvsi in Q (eki) // i /> ]]}%
+\ottpremise{ \ottcomp{
+[[EE]]\ottsym{,} \, \cup \ottcomp{[[ ckvsi ]]}{\ottmv{i}} \ottsym{,} \, [[</ Ti : eki // i />]]
+[[|-dt]] [[dti]] [[~>]] [[HHi]] }{\ottmv{i}} }  %
+\ottpremise{ \ottcomp{
+  [[EE]]\ottsym{,} \, \cup \ottcomp{[[ ckvsi ]]}{\ottmv{i}} \ottsym{,} \, [[</ Ti : eki // i />]]
+  [[|-gen]]_{\!\![[ckvsi]]} [[HHi]] [[~>]] [[HH'i]]
+  }{\ottmv{i}}
+}
+\ottpremise{[[ EE, </ Ti : \/i [ckvsi] . eki // i /> ]] \ottsym{;} [[HH]]
+  \ottsym{,} \,
+  \ottcomp{
+  % [[\/]] \{[[ckvsi]]\}\ottsym{.}
+  [[ HH'i [ </ Ti |-> Ti @@[ckvsi] // i /> ] ]]}{\ottmv{i}} [[|-p]] [[pgm]] \ottsym{:} [[A]] }%
+}{
+[[EE]]  \ottsym{;}  \Psi  [[|-p]]  \mathbf{rec} \, \ottcomp{\mathcal{T}_{\ottmv{i}}}{\ottmv{i}} \, \ottsym{;}  \mathit{pgm}  \ottsym{:}  \sigma}{%
+{\ottdrulename{pgm\_dt\_tt}}{}%
+}}
+
+
+\newcommand{\ottdrulepgmXXdtXXpoly}[1]{\ottdrule[#1]{%
+    \ottpremise{
+      [[EE]] \ottsym{,} \, \cup \ottcomp{[[ ikvsi ]]}{\ottmv{i}}
+      [[|-]]
+      \ottcomp{[[Tti]]}{\ottmv{i}}  [[~>]] [[</ Tl : kl // l />]]}
+\ottpremise{[[EE' = EE]]\ottsym{,} \, \cup \ottcomp{[[ ikvsi ]]}{\ottmv{i}} \ottsym{,} \, [[</ Tl : kl // l />]] }%
+\ottpremise{[[ </ ikvsl  in Q (kl - EE) // l /> ]]}%
+\ottpremise{[[ </ EE' |- dti ~> HHi // i /> ]]}%
+\ottpremise{[[ EE, </ Tl : \/i [ikvsl] . kl // l /> ]] \ottsym{;} [[HH]]
+  \ottsym{,} \,
+  \ottcomp{
+  [[\/]] \{[[ikvsi]]\}\ottsym{.}
+  [[ HHi [ </ Tl |-> Tl {ikvsl} // l /> ] ]]}{\ottmv{i}} [[|-p]] [[pgm]] \ottsym{:} [[A]] }%
+}{
+\Sigma  \ottsym{;}  \Psi  \vdash_{p}  \mathbf{rec} \, \ottcomp{\mathcal{T}_{\ottmv{i}}}{\ottmv{i}} \, \ottsym{;}  \mathit{pgm}  \ottsym{:}  \sigma}{%
+{\ottdrulename{pgm\_dt\_poly}}{}%
+}}
+
+\newcommand{\ottdruleaXXkvXXKParam}[1]{\ottdrule[#1]{%
+\ottpremise{[[P]] \in \textsc{KParam}}
+}{
+\Sigma  \vdash  P}{%
+{\ottdrulename{a\_kv\_kparam}}{}%
+}}
+
+
+
+\newcommand{\ottdruledcXXtt}[1]{\ottdrule[#1]
+  {
+    \ottpremise{ [[ ckvs]] \in [[Q]] ( [[eA]] \backslash_{
+        [[EE]],
+        \ottcomp{[[ti]]}{i} } ) }
+    % \ottpremise{ [[ EE |- ckvs ]] }
+    \ottpremise{[[ EE, [ckvs] |- \/kvs. </ ti // i /> --> et : star ~> eA   ]]}
+  }
+  { [[ EE |-dc et \/ kvs . D </ ti // i /> ~> \/i [ckvs] . eA ]]}
+  {\ottdrulename{dc\_tt}}
+}
+
+\newcommand{\ottdruledcXXpoly}[1]{\ottdrule[#1]
+  {
+    \ottpremise{ [[ikvs]] \in [[Q]] ( \ottcomp{[[Ai']]}{i} \backslash_{
+        \ottcomp{[[Ai]]}{i}, [[EE]] } ) }
+    \ottpremise{[[</ EE, [ikvs] |- Ai : star ~> Ki' // i />]]}
+    \ottpremise{[[ </ EE |- ti' : Ki <: star ~> ti'' // i /> ]]}
+  }
+  {[[EE |-dc t D </ Ai // i /> ~> \/i [ikvs] . </ Ai' // i /> --> t]]}
+  {\ottdrulename{dc\_poly}}
+}
+
+\newcommand{\ottdrulepgmXXdtXXttS}[1]{\ottdrule[#1]
+  {
+  \ottpremise{[[(T : eK) in EE]]
+  \quad [[EE |- dt ~> HH1]]
+  \quad [[EE ; HH, HH1 |-p pgm : eA]]}
+  }
+  {[[EE ; HH |-p rec dt ; pgm : eA]]}
+  {\ottdrulename{pgm\_dt\_ttS}}
+}
+
+\newcommand{\ottdrulepgmXXsig}[1]{\ottdrule[#1]
+   {
+     \ottpremise{
+       [[EE |- dtsig ~> T : eK]]
+       \quad [[EE, T : eK ; HH |-p pgm : eA]]}
+   }
+  {[[EE ; HH |-p sig dtsig ; pgm : eA]]}
+  {\ottdrulename{pgm\_sig}}
+}
+
+\newcommand{\ottdruleaXXqcXXsolve}[1]{\ottdrule[#1]{%
+\ottpremise{[[ DD `-> kvs]] [[-|]] [[TT]]}
+\ottpremise{[[NOT (fkv([TT] ek) # kvs)]]}
+}{
+[[DD, Xa : ek  `-> kvs  ]] [[-|]] [[TT, Xa : ek = \bot ]]
+}{%
+\ottdrulename{a\_qc\_solve}}
+}
+
+\newcommand{\ottdrulekttXXapp}[1]{\ottdrule[#1]{%
+    \ottpremise{
+      [[EE |- t1 : eK1 ~> et1]]
+  \quad\enskip [[EE |- et1 : eK1 <: (ek1 -> ek2) ~> et2]]
+  \quad [[EE |- t2 <= ek1 ~> et3]]}
+}{
+[[EE |- t1 t2 : ek2 ~> et2 et3]]
+}{%
+\ottdrulename{ktt\_app}}
+}
+
+\newcommand{\ottdrulepgmXXdtP}[1]{\ottdrule[#1]{%
+\ottpremise{[[ EE |-grp rec </ dti // i/>  ~> </ki // i/> ; </ HHi // i /> ]]
+ \quad\enskip [[ EE |- rec </ dti // i /> ~>p </ ki // i /> ]]
+ \quad\enskip [[ EE, </ Ti : tsubstar(ki) // i />; HH, </ tsubstar(HHi) // i /> |-p pgm : A ]]}
+}{
+[[ EE; HH |-p rec </ dti // i /> ; pgm : A ]]
+}{%
+{\ottdrulename{pgm\_dtP}}{}%
+}}
+
+
+\newcommand{\ottdruleaXXdtXXdecl}[1]{\ottdrule[#1]{%
+\ottpremise{[[(T : k) in DD]]
+ \quad\enskip [[DD, </ Xai // i /> |- [DD]k ~ (</ Xai // i /> --> star) -| TT1, </ Xai = ki // i />]]
+ \quad\enskip [[</ TTj, </ ai : ki // i /> |-T </ ai // i/>  dcj ~> tj -| TTsj, </ ai : ki // i /> // j />]]}
+}{
+[[DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TTsn ; </ Dj: \/ </ ai : ki //i /> .tj //j />]]
+}{%
+{\ottdrulename{a\_dt\_decl}}{}%
+}}
+
+\newcommand{\ottdrulekXXarrow}[1]{\ottdrule[#1]{%
+    \ottpremise{ }
+}{
+[[EE]] [[|-]] [[->]] : [[star -> star -> star]]
+}{%
+{\ottdrulename{k\_arrow}}{}%
+}}
