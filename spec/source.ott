@@ -109,7 +109,7 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA 
   | \/ kvs  . A                 ::  :: kind_forall
   | T                      ::  :: tcon
   | A </ ti // i />        ::  :: apps
-  | </ Ki // i /> --> K       ::  :: arrowl
+  | </ Ki // i /> ---> K       ::  :: arrowl
   | \/ [ kvs ] . A              ::  :: forall_kvs {{ tex [[\/]] [[kvs]]. ~ [[A]] }}
   | \/i [ kvs ] . A             ::  :: forall_kvsi {{ tex \forall \{ [[kvs]] \}. [[A]] }}
   | \/s [ kvs ] . A             ::  :: forall_kvss {{ tex \forall [[kvs]]. ~ [[A]] }}
@@ -146,7 +146,7 @@ dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}}, et {{tex \rho}}
   | gradual   ::   :: gradual
   | t [ </  ti ~>  si // i /> ]  :: M :: subst
   | t </ ti // i />        ::  :: apps
-  | </ ti // i /> --> t    ::  :: arrowl
+  | </ ti // i /> ---> t    ::  :: arrowl
   | t1 @ t2                ::  :: visible_app {{ tex [[t1]]~@[[t2]] }}
   | t1 @@ t2               ::  :: visible_app' {{ tex [[t1]]~@@[[t2]] }}
   | t @ [ kvs ]            ::  :: tcon_at_kvs {{ tex [[t]]~ @[[kvs]] }}
@@ -464,6 +464,7 @@ terminals :: 'terminals_' ::=
   | ~       :: :: consist {{ tex \sim }}
   | ~=      :: :: approx {{ tex \approx }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
+  | --->    :: :: longarrow   {{ tex \rightarrow }}
   | star       :: :: star      {{ tex \star }}
   | let     :: :: let     {{ tex \mathbf{let} }}
   | fst     :: :: fst     {{ tex \mathbf{fst} }}
@@ -2200,19 +2201,19 @@ by
 
 % Haskell 98
 
-(T : </ ki // i /> --> star) in EE
+(T : </ ki // i /> ---> star) in EE
 </ EE , </ ai : ki // i /> |-dc T </ ai // i/>  dcj ~> tj // j />
 ---------------------------  :: decl
 EE |- data T </ ai // i />    =  </ dcj // j />  ~> </ Dj: \/ </ ai :ki //i /> .tj //j />
 
 % TYPEINTYPE
 
-(T : \/i [ckvs1]. \/ [ckvs2]. </ eki // i/> --> star ) in EE
+(T : \/i [ckvs1]. \/ [ckvs2]. </ eki // i/> ---> star ) in EE
 </ EE, [ckvs1], [ckvs2], </ ai : eki // i /> |-dc (T @[ckvs1] @[ckvs2] </ ai // i />) dcj ~> eAj // j />
 ---------------------------  :: tt
 EE |- data T </ ai // i /> =  </ dcj // j />  ~>  </ Dj:  \/i [ckvs1] . \/ [ckvs2] . \/ </ ai : eki // i /> . eAj // j />
 
-% (T : \/i [ckvs1] . \/ [ckvs2] . </ eki // i /> --> star ) in EE
+% (T : \/i [ckvs1] . \/ [ckvs2] . </ eki // i /> ---> star ) in EE
 % </ EE, [ ckvs1 ], [ckvs2], </ ai : eki // i />  |- et  dcj ~> eAj // j />
 % -------------------------------------  :: tt
 % EE |- data T </ ai // i /> =  </ dcj // j />  ~>  </ Dj:  \/i [ckvs1] . \/[ckvs2]. \/ </ ai : eki // i/> .  eAj // j />
@@ -2275,14 +2276,14 @@ EE |-dc t dc ~> A :: :: dc :: 'dc_'
   {{tex [[EE]] [[|-dc]]_{\!\![[t]]} [[dc]] \leadsto [[A]]}}
 by
 
-EE |- </ ti // i /> --> t : star
+EE |- </ ti // i /> ---> t : star
 ---------------------------  :: decl
-EE |-dc t D </ ti // i /> ~> </ ti // i /> --> t
+EE |-dc t D </ ti // i /> ~> </ ti // i /> ---> t
 
 % ikvs in Q ( </ Ai' // i/> )
 % </ EE, [ikvs] |- Ai : star ~> Ai' // i />
 % ---------------------------  :: poly
-% EE |- t D </ Ai // i /> ~> \/i [ikvs] . </ Ai' // i /> --> t
+% EE |- t D </ Ai // i /> ~> \/i [ikvs] . </ Ai' // i /> ---> t
 
 
 defn
