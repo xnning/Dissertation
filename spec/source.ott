@@ -101,11 +101,6 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA 
   | [ OO ] aA      :: S :: ctx_subst
   | [ OO ] A       :: S :: ctx_subst2
   | ( A )          :: S :: parens
-  | r @ ( A )      :: S :: red   {{ tex {\color{red} [[A]] } }}
-  | b @ ( A )      :: S :: blue {{ tex {\color{blue} [[A]] } }}
-  | o @ ( A )      :: S :: orange {{ tex {\color{orange} [[A]] } }}
-  | r @ \/ a . A   :: S :: red_all {{ tex [[\/]] {\color{red} [[a]]} . [[A]] }}
-  | b @ \/ a . A   :: S :: blue_all {{ tex [[\/]] {\color{blue} [[a]]} . [[A]] }}
   | S ( A )        :: S :: subst2
   | ss -> A        ::   :: sctx_type
   | ( A , B )      ::   :: pair
@@ -696,13 +691,6 @@ A ~ unknown
 unknown ~ A
 
 
-------------- :: unknownbR
-b@(gc) ~ unknown
-
-------------- :: unknownbL
-unknown ~ b@(gc)
-
-
 A1 ~ C
 B ~ A4
 -------------------- :: arrow
@@ -911,40 +899,14 @@ dd |-G A [a ~> t] <: B
 dd |-G \/ a. A <: B
 
 
-dd |-G r @ (t)
-dd |-G A [r @ (a) ~> r @ (t) ] <: B
------------------------- :: forallLr
-dd |-G r @ \/ a. A <: B
-
-dd |-G b @ (t)
-dd |-G A [b @ (a) ~> b @ (t) ] <: B
------------------------- :: forallLb
-dd |-G b @ \/ a. A <: B
-
-
 a in dd
 -------------------- :: tvar
 dd |-G a <: a
-
-
-r@(a) in dd
--------------------- :: tvarr
-dd |-G r@(a) <: r@(a)
-
-b@(a) in dd
--------------------- :: tvarb
-dd |-G b@(a) <: b@(a)
-
 
 -------------------- :: int
 dd |-G int <: int
 
 
--------------------- :: intr
-dd |-G r@(int) <: r@(int)
-
--------------------- :: intb
-dd |-G b@(int) <: b@(int)
 
 dd |-G C <: A1
 dd |-G B <: A4
@@ -955,18 +917,6 @@ dd |-G A1 -> B <: C -> A4
 --------------------------- :: unknown
 dd |-G unknown <: unknown
 
-
---------------------------- :: unknownb
-dd |-G b@(unknown) <: b@(unknown)
-
---------------------------- :: spar
-dd |-G r@(static) <: r@(static)
-
---------------------------- :: gparr
-dd |-G r@(gradual) <: r@(gradual)
-
---------------------------- :: gparb
-dd |-G b@(gradual) <: b@(gradual)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % DECL CONSISTENT SUBTYPING
