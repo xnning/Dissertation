@@ -13,22 +13,19 @@
 \begin{figure}
 \begin{center}
    \begin{tabular}{llllllll} \toprule
-     program                  & $[[pgm]]$ & $\Coloneqq$ & $[[rec </ dti // i/> ; pgm]] \mid [[e]]$ &
+     program                  & $[[pgm]]$ & $\Coloneqq$ & $[[rec </ dti // i/> ; pgm]] \mid [[e]]$ \\
+     datatype decl.           & $[[dt]]$  & $\Coloneqq$ & $[[data T </ ai // i /> =  </ dcj // j /> ]] $ \\
+     data c'tor decl.   & $[[dc]]$  & $\Coloneqq$ & $[[D </ ti // i />]] $ \\[2ex]
+
+     expression & $[[e]]$   & $\Coloneqq$ & $\ldots$ \\[2ex]
+
      polytype  & $[[A]]$ & $\Coloneqq$ &$[[\/ </ ai : ki // i /> . t]]$ \\
-
-     datatype decl.           & $[[dt]]$  & $\Coloneqq$ & $[[data T </ ai // i /> =  </ dcj // j /> ]] $ &
      monotype  & $[[t]]$ & $\Coloneqq$ & $[[nat]] \mid [[a]] \mid [[T]] \mid [[t1 t2]] \mid [[->]]$ \\
-
-     data c'tor decl.   & $[[dc]]$  & $\Coloneqq$ & $[[D </ ti // i />]] $ &
      kind      & $[[k]]$ & $\Coloneqq$ & $[[star]] \mid [[k1 -> k2]]$ \\[2ex]
-     expression & $[[e]]$   & $\Coloneqq$ & $\ldots$ &
+
      term context  & $[[HH]]$ & $\Coloneqq$ & $[[empty]]
-                                              % \mid [[HH, x : A]]
                                               \mid [[HH, D : A ]]$ \\
-     & & & &
      type context  & $[[EE]]$ & $\Coloneqq$ & $[[empty]] \mid [[EE, a : k]] \mid [[EE, T : k ]]$ \\
-     % \multicolumn{4}{l}{   As usual, we write $[[t1 --> t2]]$ as an abbreviation for $[[(->) t1 t2]]$.}\\
-     % \ningning{move this part to text?}
  \bottomrule
    \end{tabular}\\[1ex]
  \end{center}
