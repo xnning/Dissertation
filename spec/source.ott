@@ -77,7 +77,7 @@ kvarset, kvs {{ tex \phi }} , kvsy {{tex \phi }},  ckvs {{ tex \phi^{\mathsf{c} 
   | var ( K )         ::   :: var
     {{ tex [[var]]([[K]]) }}
 
-dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}  :: 'dtyp_' ::=
+dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA {{tex \mu}}, eK {{tex \eta}}  :: 'dtyp_' ::=
   | int            ::   :: int
   | star           ::   :: star
   | nat            ::   :: nat
@@ -112,23 +112,56 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}  :: 
   | [ l1 : A1 , .. , ln : An  ]  ::   :: record
   | erase [ A ]    ::  :: erasetp {{ tex \lceil{[[A]]}\rceil }}
   | \/ kvs  . A                 ::  :: kind_forall
+  | T                      ::  :: tcon
   | ->                     ::  :: arrowsingle
   | A </ ti // i />        ::  :: apps
   | </ Ki // i /> --> K       ::  :: arrowl
+  | \/ [ kvs ] . A              ::  :: forall_kvs {{ tex [[\/]] [[kvs]]. ~ [[A]] }}
+  | \/i [ kvs ] . A             ::  :: forall_kvsi {{ tex \forall \{ [[kvs]] \}. [[A]] }}
+  | \/s [ kvs ] . A             ::  :: forall_kvss {{ tex \forall [[kvs]]. ~ [[A]] }}
+  | \/r [ kvs ] . A             ::  :: forall_kvsr {{ tex \forall [[kvs]] \arrow ~ [[A]] }}
+  | A1 @ A2                ::  :: visible_app {{ tex [[A1]]~@[[A2]] }}
+  | A1 @@ A2               ::  :: visible_app' {{ tex [[A1]]~@@[[A2]] }} % ESCAPING @ FOR lhs2tex
+  | K @ [ kvs ]            ::  :: tcon_at_kvs {{ tex [[K]]~ @[[kvs]] }}
+  | K @@ [ kvs ]           ::  :: tcon_at_kvs' {{ tex [[K]]~ @@[[kvs]] }}
+  | K @ [ kinds ]          ::  :: tcon_at_kinds {{ tex [[K]]~ @[[kinds]] }}
+  | K @@ [ kinds ]         ::  :: tcon_at_kinds' {{ tex [[K]]~ @@[[kinds]] }}
+  | \/ kvs -> A                 ::  :: forall_required
+  | A [ a |-> t ]           ::  :: subst_poly
+  | A [ X |-> k ]           ::  :: subst_poly_k
+  | A [ T |-> A1 ]          ::  :: subst_tcon
+  | A [ </ kvsl |-> kvsl' // l /> ]     ::  :: subst_kvs
+  | A [ </ ai |-> ti // i /> ]         ::  :: subst_mult
+  | A [ </ Xi |-> ki // i /> ]         ::  :: subst_k_mult
+  | A [ </ Ti |-> ki // i /> ]         ::  :: subst_t_mult
+  | X                 ::  :: kvar
+
+kinds :: 'kinds_' ::=
+  | </ Ki // i />       :: :: ks
 
 % Mono Types
 
-dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}} :: 'dtyp_mono_' ::=
+dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}}, et {{tex \rho}}, ek {{tex \omega }} :: 'dtyp_mono_' ::=
   | int       ::   :: int
   | star      ::   :: star
   | a         ::   :: tvar
   | t -> s    ::   :: arrow
   | ->                     ::  :: arrowsingle
+  | T                      ::  :: tcon
+  | ( t )                  ::  :: paren
   | static    ::   :: static
   | gradual   ::   :: gradual
   | t [ </  ti ~>  si // i /> ]  :: M :: subst
   | t </ ti // i />        ::  :: apps
   | </ ti // i /> --> t    ::  :: arrowl
+  | t1 @ t2                ::  :: visible_app {{ tex [[t1]]~@[[t2]] }}
+  | t1 @@ t2               ::  :: visible_app' {{ tex [[t1]]~@@[[t2]] }}
+  | t @ [ kvs ]            ::  :: tcon_at_kvs {{ tex [[t]]~ @[[kvs]] }}
+  | t @@ [ kvs ]           ::  :: tcon_at_kvs' {{ tex [[t]]~ @@[[kvs]] }}
+  | t1 [ a |-> t2 ]         ::  :: subst_kk
+  | t1 [ X |-> k2 ]         ::  :: subst_k
+  | t1 [ </ ai |-> ti // i /> ]         ::  :: subst_mult
+  | t1 [ </ Xi |-> ki // i /> ]         ::  :: subst_k_mult
 
 % Castable Mono Types
 
@@ -328,6 +361,7 @@ dctx, dd {{ tex \Psi}} , HH {{ tex \Psi }} :: 'dctx_' ::=
   | dd , a      ::   :: cons_tvar
   | [ OO ] DD     :: S :: ctx_subst
   | </ Di : Ai // i /> ::  :: dconstr_s
+  | HH1 , .. , HHi     ::  :: append_multiple
 
 sctx, ss {{ tex \Sigma }} :: 'sctx_' ::=
   | empty       ::   :: empty
@@ -474,6 +508,7 @@ terminals :: 'terminals_' ::=
   | |-sub   :: :: turnstilesub {{ tex \vdash^{\!\!\mathsf{sub} } }}
   | -|      :: :: dashv {{ tex \dashv }}
   | ~>      :: :: mapsto    {{ tex \mapsto }}
+  | |->     :: :: mapsto2   {{ tex \mapsto }}
   | <~      :: :: conssub   {{ tex \lesssim }}
   | <~~     :: :: inst   {{ tex \lessapprox }}
   | \       :: :: lambda    {{ tex \lambda }}
@@ -554,6 +589,11 @@ formula :: formula_ ::=
   | dd |-G e : A  ::  :: dtyping_without
   | dd |-Gm e : A  ::  :: dtyping_m
   | dd |-sub A1 <: A2  ::  :: dsub_pr
+  | ( T : K ) in DD  ::  :: atin {{ tex ( [[T]] : [[K]] ) \in [[DD]] }}
+  | ( T : K ) in EE  ::  :: tin {{ tex ( [[T]] : [[K]] ) \in [[EE]] }}
+  | EE1 = EE2        ::  :: tctx_eq
+  | ( a : K ) in DD  ::  :: aain {{ tex ( [[a]] : [[K]] ) \in [[DD]] }}
+  | kvs in EE        ::  :: kvs_in_quantifier {{ tex [[kvs]] \in [[EE]] }}
 
 
 subrules
@@ -2174,3 +2214,480 @@ GG[evar] |-pr - (evar) aA ~~> at -| DD1, evar, DD2
 DD1 |-wf at
 ---------------------------------- :: instRR
 GG[evar] |-sub  aA <: evar -| DD1, evar = at, DD2
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Kind Inference
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+typing :: '' ::=
+
+defn
+
+EE |- dt ~> HH :: :: dt :: 'dt_'
+{{tex [[EE]] \vdash^{\!\!\mathsf{dt} } [[dt]] [[~>]] [[HH]] }}
+by
+
+% Haskell 98
+
+(T : </ ki // i /> --> star) in EE
+</ EE , </ ai : ki // i /> |-dc T </ ai // i/>  dcj ~> tj // j />
+---------------------------  :: decl
+EE |- data T </ ai // i />    =  </ dcj // j />  ~> </ Dj: \/ </ ai :ki //i /> .tj //j />
+
+% TYPEINTYPE
+
+(T : \/i [ckvs1]. \/ [ckvs2]. </ eki // i/> --> star ) in EE
+</ EE, [ckvs1], [ckvs2], </ ai : eki // i /> |-dc (T @[ckvs1] @[ckvs2] </ ai // i />) dcj ~> eAj // j />
+---------------------------  :: tt
+EE |- data T </ ai // i /> =  </ dcj // j />  ~>  </ Dj:  \/i [ckvs1] . \/ [ckvs2] . \/ </ ai : eki // i /> . eAj // j />
+
+% (T : \/i [ckvs1] . \/ [ckvs2] . </ eki // i /> --> star ) in EE
+% </ EE, [ ckvs1 ], [ckvs2], </ ai : eki // i />  |- et  dcj ~> eAj // j />
+% -------------------------------------  :: tt
+% EE |- data T </ ai // i /> =  </ dcj // j />  ~>  </ Dj:  \/i [ckvs1] . \/[ckvs2]. \/ </ ai : eki // i/> .  eAj // j />
+
+defn
+
+A : K |- kvs ~> ckvs -| A' ::  :: matching_tt :: 'mat_'
+
+by
+
+--------------------------- :: empty
+et : star |- empty ~> empty -| et
+
+(et1 a) : ek2 |- kvs  ~> ckvs -| et2
+--------------------------- :: arr
+et1 : ek1 -> ek2 |- a, kvs ~> a : ek1, ckvs -| et2
+
+(et1 @ b) : eK |- kvs ~> ckvs -| et2
+--------------------------- :: forall
+et1 : (\/ b : ek1.  eK) |- kvs ~> b : ek1, ckvs -| et2
+
+(et1 @ a) : eK |- kvs ~> ckvs -| et2
+--------------------------- :: forallr
+et1 : (\/ (a : ek1) ->  eK) |- a, kvs ~> a : ek1, ckvs -| et2
+
+
+defn
+
+rs K  ::  :: rs :: 'sr_' {{ tex \rceil [[K]] \lceil }}
+by
+
+
+------------------- :: star
+rs star
+
+rs k2
+------------------- :: arrow
+rs k1 -> k2
+
+rs A
+------------------- :: foralli
+rs \/ a.  A
+
+rs A
+------------------- :: forall
+rs \/ [kvs].  A
+
+rs A
+------------------- :: forall_infer
+rs \/i [a].  A
+
+rs A
+------------------- :: foralli_infer
+rs \/i [a:k].  A
+
+defn
+
+EE |-dc t dc ~> A :: :: dc :: 'dc_'
+  {{tex [[EE]] [[|-dc]]_{\!\![[t]]} [[dc]] [[~>]] [[A]]}}
+by
+
+EE |- </ ti // i /> --> t : star
+---------------------------  :: decl
+EE |-dc t D </ ti // i /> ~> </ ti // i /> --> t
+
+% ikvs in Q ( </ Ai' // i/> )
+% </ EE, [ikvs] |- Ai : star ~> Ai' // i />
+% ---------------------------  :: poly
+% EE |- t D </ Ai // i /> ~> \/i [ikvs] . </ Ai' // i /> --> t
+
+
+defn
+
+EE ; HH |-p pgm : A :: :: pgm :: 'pgm_' by
+
+% Haskell 98
+
+% EE |- HH
+EE' = EE,  </ Ti : ki // i />
+</ EE' |- dti ~> HHi // i />
+EE' ; HH, </ HHi // i /> |-p pgm : A
+---------------------------------------  :: dt
+EE ; HH |-p rec </ dti // i /> ; pgm : A
+
+EE ; HH |- e : A
+---------------------------- :: expr
+EE ; HH |-p e : A
+
+% TYPE IN TYPE
+
+EE ; HH |- e : eA
+---------------------------- :: expr_tt
+EE ; HH |-p e : eA
+
+% EE |- dtsig ~> T : eK
+% EE, T : eK ; HH |-p pgm : A
+% ---------------------------- :: sig
+% EE ; HH |-p sig dtsig ; pgm : A
+
+% (T : eK) in EE
+% EE |- dt ~> HH1
+% EE ; HH, HH1 |-p pgm : eA
+% ---------------------------- :: dt_ttS
+% EE ; HH |-p rec dt ; pgm : eA
+
+defn
+
+EE ; HH |- e : A :: :: kind_expr :: 'e_' by
+
+defn
+
+EE |- A : K :: :: kinding :: 'k_'
+  {{ tex [[EE]] \vdash^{\!\!\mathsf{k} } [[A]] : [[K]] }}
+by
+
+
+--------------------------- :: star
+EE |- star : star
+
+--------------------------- :: nat
+EE |- nat : star
+
+(a : k) in EE
+--------------------------- :: var
+EE |- a : k
+
+(T : k) in EE
+---------------------------------- :: tcon
+EE |- T : k
+
+--------------------------- :: arrow
+EE |- -> : star -> star -> star
+
+EE , a : k |- A : star
+--------------------------- :: forall
+EE |- \/ a : k. A : star
+
+EE , a : k |- A : K
+--------------------------- :: gen
+EE |- A : \/ a : k . K
+
+EE , a : k |- A : star
+--------------------------- :: forall_tt
+EE |- \/ a . A : star
+
+% EE |- t2 : k1
+% EE |- t1 : k1 -> k2
+% --------------------------- :: app
+% EE |- t1 t2 : k2
+
+EE , X |- A : star
+--------------------------- :: kforall
+EE |- \/ X . A  : star
+
+EE |- A : \/ X . K
+EE |- k
+---------------------------------- :: inst
+EE |- A : K [ X |-> k]
+
+EE |- A : \/ a: k . K
+EE |- k'
+---------------------------------- :: inst_tt
+EE |- A : K [ a |-> k']
+
+defn
+
+EE |- A <= K ~> A' :: :: kinding_checking :: 'kc_'
+{{ tex [[EE]] \vdash^{\!\!\mathsf{kc} } [[A]] [[<=]] [[K]] [[~>]] [[A']] }}
+by
+
+
+EE |- A : eK ~> eA1
+EE |- eA1 : eK <: ek ~> eA2
+------------------------ :: sub
+EE |- A <= ek ~> eA2
+
+defn
+
+EE |- A : K ~> A' :: :: kinding_tt :: 'ktt_'
+{{ tex [[EE]] \vdash^{\!\!\mathsf{k} } [[A]] : [[K]] [[~>]] [[A']] }}
+by
+
+
+--------------------------- :: star
+EE |- star : star ~> star
+
+--------------------------- :: nat
+EE |- nat : star ~> nat
+
+(a : ek) in EE
+--------------------------- :: var
+EE |- a : ek ~> a
+
+(T : eK) in EE
+---------------------------------- :: tcon
+EE |- T : eK ~> T
+
+--------------------------- :: arrow
+EE |- -> : star -> star -> star ~> ->
+
+EE |- k <= star ~> ek
+EE , a : ek |- A <= star ~> eA
+--------------------------- :: forall
+EE |- \/ a : k. A : star ~> \/ a : ek . eA
+
+EE |- k <= star ~> ek
+EE , a : ek |- A <= star ~> eA
+--------------------------- :: forallr
+EE |- \/ a : k -> A : star ~> \/ a : ek -> eA
+
+EE |-el ek : star
+EE , a : ek |- A <= star ~> eA
+--------------------------- :: foralli
+EE |- \/ a . A : star ~> \/ a : ek . eA
+
+% EE |- t1 : eK1 ~> et1
+% EE |- et1 : eK1 <: ek1 -> ek2 ~> et2
+% EE |- t2 <= ek1 ~> et3
+% --------------------------- :: app
+% EE |- t1 t2 : ek2 ~> et2 et3
+
+EE |- k1 : \/ a: ek . eK ~> et1
+EE |- k2 <= ek ~> et2
+---------------------------------- :: kapp
+EE |- k1 @k2 : eK [ a |-> et2] ~> et1 @et2
+
+EE |- k1 : \/i [</ ai: eki // i />] . \/ a: ek . eK ~> et1'
+</ EE |-el eti : eki [ </  ai |-> eti  // i/> ] // i />
+EE |- k2 <= ek [ </  ai |-> eti  // i/> ] ~> et2'
+---------------------------------- :: kapp_infer
+EE |- k1 @k2 : eK [ </  ai |-> eti  // i/> ] [ a |-> et2] ~> et1' @ [ </ eti // i />] @et2'
+
+
+defn
+
+EE |-el eA : eK :: :: ela_kinding :: 'ela_' by
+
+
+--------------------------- :: star
+EE |-el star : star
+
+--------------------------- :: nat
+EE |-el nat : star
+
+(a : ek) in EE
+--------------------------- :: var
+EE |-el a : ek
+
+(T : eK) in EE
+---------------------------------- :: tcon
+EE |-el T : eK
+
+--------------------------- :: arrow
+EE |-el -> : star -> star -> star
+
+EE |-el ek : star
+EE , a : ek |-el eA : star
+--------------------------- :: forall
+EE |-el \/ a : ek. eA : star
+
+EE |-el ek : star
+EE , a : ek |-el eA : star
+--------------------------- :: forall_infer
+EE |-el \/i [a : ek]  . eA : star
+
+EE |-el et1 : ek1 -> ek2
+EE |-el et2 : ek1
+--------------------------- :: app
+EE |-el et1 et2 : ek2
+
+EE |-el et1 : \/ a:ek . eK
+EE |-el et2 : ek
+---------------------------------- :: kapp
+EE |-el et1 @et2 : eK [ a |-> et2]
+
+EE |-el et1 : \/i [a:ek] . eK
+EE |-el et2 : ek
+---------------------------------- :: kapp_infer
+EE |-el et1 @et2 : eK [ a |-> et2]
+
+defn
+
+EE |- A : K |> A' : K1   ::  :: arrowing :: 'arrowing_'
+by
+
+
+------------------------------------ :: refl
+EE |- et : ek1 -> ek2 |> et : ek1 -> ek2
+
+EE |-el et2 : ek
+EE |- et1 @et2 : eK [a |-> et2] |> et3 : ek2
+------------------------------------ :: forall
+EE |- et1 : \/ a:ek . eK |> et3 : ek2
+
+EE |-el et2 : ek
+EE |- et1 @et2 : eK [a |-> et2] |> et3 : ek2
+------------------------------------ :: forall_infer
+EE |- et1 : \/i [a:ek] . eK |> et3 : ek2
+
+defn
+
+EE |- ( A1 : K1 ) . ( A2 : K2 ) : K ~> A :: :: app_mode :: 'kapp_'
+{{ tex [[EE]] \vdash^{\!\!\mathsf{kapp} } ([[A1]] : [[K1]]) \bullet ([[A2]]  : [[K2]]) : [[K]] [[~>]] [[A]] }}
+
+by
+
+EE |- et2 : eK <: ek1 ~> et3
+-------------------------------- :: arrow
+EE |- ( et1 : ek1 -> ek2 ) . (et2 : eK) : ek2 ~> et1 et3
+
+EE |-el et : ek
+EE |- (et1 @ et : eK1 [ a |-> et]) . (et2 : eK2) : ek2 ~> et3
+----------------------------------- :: forall
+EE |- ( et1 : \/ a:ek. eK1 ) . (et2 : eK2) : ek2 ~> et3
+
+
+defn
+EE |- A : K1 <: K2 ~> A' ::  :: instantiation :: 'inst_'
+{{ tex [[EE]] \vdash^{\!\!\mathsf{inst} } [[A]] : [[K1]] [[<:]] [[K2]] [[~>]] [[A']] }}
+by
+
+------------------------ :: refl
+EE |- eA : ek <: ek ~> eA
+
+EE |-el et : ek1
+EE |- eA1 @ et : eK [a |-> et] <: ek2 ~> eA2
+---------------------------------- :: forall
+EE |- eA1 : \/ a : ek1. eK <: ek2 ~> eA2
+
+EE |-el et : ek1
+EE |- eA1 @ et: eK [a |-> et] <: ek2 ~> eA2
+---------------------------------- :: forall_infer
+EE |- eA1 : \/i [a:ek1]. eK <: ek2 ~> eA2
+
+defn
+
+EE |- K :: :: kind_validate :: 'kv_' by
+
+-------------- :: star
+EE |- star
+
+EE |- K1
+EE |- K2
+-------------- :: arrow
+EE |- K1 -> K2
+
+X in EE
+-------------- :: kvar
+EE |- X
+
+EE, X |- K
+-------------- :: forall
+EE |- \/ X . K
+
+EE, X |- K
+-------------- :: foralli
+EE |- \/i [ X ] . K
+
+defn
+
+EE ok :: :: well_formed_tctx :: 'tctx_'
+ {{ tex [[EE]] \ \mathsf{ok} }} by
+
+------------------------- :: empty
+empty ok
+
+EE ok
+EE |-el et : star
+------------------------- :: tvar_tt
+EE , a : et ok
+
+EE ok
+EE |-el eK : star
+------------------------- :: tcon_tt
+EE , T : eK ok
+
+defn
+
+EE |- ckvs :: :: well_formed_kvs :: 'fkv_'
+by
+
+-------------- :: empty
+EE |- empty
+
+EE |-el et : star
+EE , a : et |- ckvs
+---------------------- :: cons
+EE |- a : et , ckvs
+
+
+
+defn
+
+EE |- HH :: :: well_formed_ectx :: 'ectx_'
+by
+
+------------------------- :: empty
+EE |- empty
+
+EE |- HH
+EE |- A : star
+------------------------- :: var
+EE  |- HH , x : A
+
+EE |- HH
+EE |- A : star
+------------------------- :: dcon
+EE  |- HH , D : A
+
+EE |- HH
+EE |-el eA : star
+------------------------- :: var_tt
+EE  |- HH , x : eA
+
+EE |- HH
+EE |-el eA : star
+------------------------- :: dcon_tt
+EE  |- HH , D : eA
+
+
+defn
+
+EE |- K1 <: K2 :: :: subkinding :: 'sub_'
+{{tex [[EE]] [[|-]] [[K1]] [[<:]] [[K2]] }}
+by
+
+------------- :: refl
+EE |- K <: K
+
+EE, [kvs] |-  K1 <: K2
+------------------------------ :: forall
+EE |-  K1 <:  \/i [kvs] .K2
+
+EE |- k
+EE |- K1 [ X |-> k] <: K2
+------------------------------ :: inst
+EE |- \/i [X] . K1 <: K2
+
+defn
+
+EE |-gen ckvs HH1 ~> HH2 :: :: gen :: ''
+{{ tex [[EE]] [[|-gen]]_{\!\![[ckvs]]} [[HH1]] [[~>]] [[HH2]] }}
+
+by
+
+</ ckvs, ckvsi in Q (  eAi  ) // i />
+-------------------------------------------- :: gen
+EE |-gen ckvs </ Di :  eAi // i />  ~> </ Di :  \/i [ckvs, ckvsi] . eAi // i />
