@@ -45,6 +45,58 @@ syntax or typing rules here. A program $[[pgm]]$ is a sequence of groups
 (defined below) of datatype declarations $[[dt]]$, followed by an expression
 $[[e]]$. We write $[[t1 -> t2]]$ as an abbreviation for $([[->]]) [[t1 t2]]$.
 
+\subsection{Groups and Dependency Analysis}
+\label{sec:kind:dependency-analysis}
+
+
+Users are free to write declarations in any order: earlier declarations
+can depend on later ones in the same compilation unit. However,
+any kind-checking algorithm must process the declarations in dependency order.
+Complicating this is that type declarations may be mutually recursive.
+A formal analysis of this dependency analysis is not enlightening, so
+we consider it to be a preprocessing step that produces the grammar in
+\Cref{fig:kind:rules:98}. This dependency analysis breaks up the (unordered) raw
+input into mutually recursive groups (potentially containing just one declaration),
+and puts these in dependency order. We use the term \emph{group} to describe a
+set of mutually recursive declarations.
+
+\subsection{Declarative Typing Rules}
+\label{sec:kind:h98:decl-typing}
+
+The declarative typing rules are in \Cref{fig:kind:rules:98}.
+There are no surprises here; we review these rules briefly.
+The top judgment is $[[EE;HH |-p pgm : A]]$. Its \rref{pgm-dt} extends
+the input type context $[[EE]]$ with kinds for the datatype
+declarations to
+form $[[EE']]$, which is used to check both the datatype declarations and
+the rest of the program. In \rref{pgm-dt},
+we implicitly extract the names $\ottcomp{[[T]]}{i}$ from
+  the declarations $\ottcomp{[[dt]]}{i}$ (and use this abuse of notation
+throughout our work, relating $[[T]]$ to $[[dt]]$ and $[[D]]$ to $[[dc]]$).
+The kinds are \emph{guessed} for an entire group all at once: they are added
+to the context \emph{before} looking at the declarations.
+This is needed because the declarations in the group refer to one
+another.
+Guessing the right answer is typical of declarative type systems.
+The algorithmic system presented in \Cref{sec:kind:algo} provides a mechanism for an
+implementation. %%Note that kinds are guessed for an entire group all at once.
+Although there is no special judgment for typing a group of mutually recursive
+datatypes, we use $[[EE |-grp rec </ dti // i /> ~> </ ki // i/> ; </ HHi // i
+/>]]$ to denote that the kinding results of datatype declarations are
+$\ottcomp{[[ki]]}{i}$, and the output term contexts are $\ottcomp{[[HHi]]}{i}$.
+
+Declarations are checked with $[[EE |- dt ~> HH]]$.
+This uses the guessed kinds to process the data constructors of a declaration,
+producing a term context $[[HH]]$ with the data constructors and
+their types. The \rref{dt-decl} ensures that the datatype has an
+appropriate kind in the context and then checks data constructors
+using the $[[|-dc]]$ judgment. These checks are done in a type context extended
+with bindings for the type variables $[[</ ai // i />]]$, where each $[[ai]]$
+has a kind extracted from the guessed kind of the datatype $[[T]]$. The subscript
+on the $[[|-dc]]$ judgment is the return type of the constructors, whose types
+are easily checked by \rref{dc-decl}.
+The kinding judgment $[[EE |- t : k]]$ is standard.
+
 
 %%% Local Variables:
 %%% mode: latex

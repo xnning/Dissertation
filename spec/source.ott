@@ -610,6 +610,9 @@ formula :: formula_ ::=
   | EE1 = EE2        ::  :: tctx_eq
   | ( a : K ) in DD  ::  :: aain {{ tex ( [[a]] : [[K]] ) \in [[DD]] }}
   | kvs in EE        ::  :: kvs_in_quantifier {{ tex [[kvs]] \in [[EE]] }}
+  | EE |-grp rec </ dti // i /> ~> </ Kj // j /> ; </ HHl // l /> :: :: typing_rec
+  | DD ||-grp rec </ dti // i /> ~> </ Kj // j /> ; </ GGl // l /> -| TT :: :: typing_rec_algo
+  | DD ||-grp rec </ dti // i /> ~> </ Kj // j /> ; </ GGl // l /> :: :: typing_rec_algo_gen
 
 
 subrules
