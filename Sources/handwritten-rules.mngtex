@@ -57,7 +57,7 @@
         [[EE]],
         \ottcomp{[[ti]]}{i} } ) }
     % \ottpremise{ [[ EE |- ckvs ]] }
-    \ottpremise{[[ EE, [ckvs] |- \/kvs. </ ti // i /> --> et : star ~> eA   ]]}
+    \ottpremise{[[ EE, [ckvs] |- \/kvs. </ ti // i /> ---> et : star ~> eA   ]]}
   }
   { [[ EE |-dc et \/ kvs . D </ ti // i /> ~> \/i [ckvs] . eA ]]}
   {\ottdrulename{dc\_tt}}
@@ -70,7 +70,7 @@
     \ottpremise{[[</ EE, [ikvs] |- Ai : star ~> Ki' // i />]]}
     \ottpremise{[[ </ EE |- ti' : Ki <: star ~> ti'' // i /> ]]}
   }
-  {[[EE |-dc t D </ Ai // i /> ~> \/i [ikvs] . </ Ai' // i /> --> t]]}
+  {[[EE |-dc t D </ Ai // i /> ~> \/i [ikvs] . </ Ai' // i /> ---> t]]}
   {\ottdrulename{dc\_poly}}
 }
 
@@ -127,7 +127,7 @@
 
 \newcommand{\ottdruleaXXdtXXdecl}[1]{\ottdrule[#1]{%
 \ottpremise{[[(T : k) in DD]]
- \quad\enskip [[DD, </ Xai // i /> |- [DD]k ~ (</ Xai // i /> --> star) -| TT1, </ Xai = ki // i />]]
+ \quad\enskip [[DD, </ Xai // i /> |- [DD]k ~ (</ Xai // i /> ---> star) -| TT1, </ Xai = ki // i />]]
  \quad\enskip [[</ TTj, </ ai : ki // i /> |-T </ ai // i/>  dcj ~> tj -| TTsj, </ ai : ki // i /> // j />]]}
 }{
 [[DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TTsn ; </ Dj: \/ </ ai : ki //i /> .tj //j />]]

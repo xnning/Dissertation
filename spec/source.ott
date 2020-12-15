@@ -1,11 +1,11 @@
 metavar typvar, a {{ tex a }}, b {{tex b}}, L ::=
-metavar kindvar, Xa {{ tex \widehat{\alpha} }}, Xb {{ tex \widehat{\beta} }} ::=
+metavar kindvar, X, Xy {{ tex X}}, Xlist {{ tex \overbar{X} }}, Xlistwithi {{ tex \overbar{X_i} }}, Xa {{ tex \widehat{\alpha} }}, Xya {{ tex \widehat{\alpha} }}, Xb {{ tex \widehat{\beta} }} ::=
 
 metavar expvar, x, y, f, g, m, nn {{ tex n }}, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
 
 metavar  lit, ii {{tex {i} }} ::=
 metavar tconstrvar , T {{ tex T }} , Ty {{ tex T }}, Tt {{ tex \widetilde{ \mathcal{T} } }} ::=
-indexvar index, i, j, n, m, l ::=
+indexvar index, i, j, n, m, l, sj {{ tex j + 1 }}, ssi {{ tex i + 1 }} , sn {{ tex n + 1 }}::=
 metavar dconstrvar , D {{ tex D }} ::=
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -78,6 +78,7 @@ kvarset, kvs {{ tex \phi }} , kvsy {{tex \phi }},  ckvs {{ tex \phi^{\mathsf{c} 
     {{ tex [[var]]([[K]]) }}
 
 dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA {{tex \mu}}, eK {{tex \eta}}  :: 'dtyp_' ::=
+  | X              ::  :: vars
   | int            ::   :: int
   | star           ::   :: star
   | nat            ::   :: nat
@@ -128,7 +129,6 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA 
   | A [ </ ai |-> ti // i /> ]         ::  :: subst_mult
   | A [ </ Xi |-> ki // i /> ]         ::  :: subst_k_mult
   | A [ </ Ti |-> ki // i /> ]         ::  :: subst_t_mult
-  | X                 ::  :: kvar
 
 kinds :: 'kinds_' ::=
   | </ Ki // i />       :: :: ks
@@ -137,9 +137,12 @@ kinds :: 'kinds_' ::=
 
 dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}}, et {{tex \rho}}, ek {{tex \omega }} :: 'dtyp_mono_' ::=
   | int       ::   :: int
+  | nat            ::   :: nat
   | star      ::   :: star
   | a         ::   :: tvar
+  | X              ::  :: vars
   | t -> s    ::   :: arrow
+  | [ DD ] t  ::   :: apply
   | T                      ::  :: tcon
   | ( t )                  ::  :: paren
   | static    ::   :: static
@@ -160,6 +163,8 @@ dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}}, et {{tex \rho}}
 
 dtyp_mono_cast, tc {{ tex t }} :: 'dtyp_mono_cast_' ::=
   | int        :: :: int
+  | nat            ::   :: nat
+  | X              ::  :: vars
   | a          :: :: tvar
   | tc1 -> tc2 :: :: arrow
   | gradual    :: :: gradual
@@ -168,6 +173,8 @@ dtyp_mono_cast, tc {{ tex t }} :: 'dtyp_mono_cast_' ::=
 
 dtyp_castable, gc  {{ tex \mathbb{C} }}  :: 'dtyp_castable_' ::=
   | int        :: :: int
+  | nat            ::   :: nat
+  | X              ::  :: vars
   | a          :: :: tvar
   | gc1 -> gc2 :: :: arrow
   | \/ varset . gc  :: :: all
@@ -202,6 +209,7 @@ ma :: 'ma_' ::=
 
 atyp, aA {{ tex \sigma }}, aB, aC  :: 'atyp_' ::=
   | int            ::   :: int
+  | star           ::   :: star
   | a              ::   :: tvar
   | evar           ::   :: evar
   | aA1 -> aA2     ::   :: arrow
@@ -218,6 +226,7 @@ atyp, aA {{ tex \sigma }}, aB, aC  :: 'atyp_' ::=
 
 atyp_static, aT {{ tex T }} :: 'atyp_static_' ::=
   | int        ::   :: int
+  | star           ::   :: star
   | a          ::   :: tvar
   | evar       ::   :: evar
   | aT1 -> aT2 ::   :: arrow
@@ -231,6 +240,7 @@ atyp_static, aT {{ tex T }} :: 'atyp_static_' ::=
 
 atyp_mono, at {{ tex \tau }}, as {{ tex \sigma }} :: 'atyp_mono_' ::=
   | int       ::   :: int
+  | star      ::   :: star
   | a         ::   :: tvar
   | evar      ::   :: evar
   | at -> as  ::   :: arrow
@@ -338,7 +348,7 @@ tctx, EE  {{tex \Sigma}} :: 'tctx_' ::=
   | EE1 , .... , EEi  ::  :: append_multiple
   | EE [ Xa ]         ::  :: contains
   | EE [ Xa = k ]     ::  :: contains_solve
-  | [ CC ] DD         ::  :: context_apply
+  | [ OO ] DD         ::  :: context_apply
   | Q ( K )           ::  :: quantifier
     {{ tex [[Q]]([[K]]) }}
   | Q ( K1 - EE )     ::  :: quantifier_minus {{ tex [[Q]] ( [[K1]] \backslash_{[[EE]]} ) }}
@@ -366,32 +376,35 @@ sctx, ss {{ tex \Sigma }} :: 'sctx_' ::=
 % ALGO CONTEXT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \Omega }}, DL {{ tex \Delta_L }}, DR {{ tex \Delta_R }}, GL {{ tex \Gamma_L }}, GR {{ tex \Gamma_R }}, GM {{ tex \Gamma_M }}, OL {{ tex \Omega_L }} , OR {{ tex \Omega_R }} :: 'actx_' ::=
-  | empty                                          ::   :: empty
-  | GG , x : aA                                    ::   :: cons_var
-  | GG , a                                         ::   :: cons_tvar
-  | GG , ma                                        ::   :: cons_mark
-  | GG , evar                                      ::   :: cons_evar
-  | GG , evar = at                                 ::   :: cons_evar_solu
-  | GG [ a ]                                       :: S :: ctx_tvar
-  | GG [ evar ]                                    :: S :: ctx_etvar
-  | GG [ GG1 ]                                     :: S :: ctx_ctx
-  | GG [ evar1 , evar2 ]                           :: S :: ctx_etvar2
-  | GG [ evar1 , evar2 , evar3 ]                   :: S :: ctx_etvar3
-  | GG [ evar = at ]                               :: S :: ctx_etvar_solve
-  | GG [ evar1 , evar2 = at ]                      :: S :: ctx_etvar_solve2
-  | GG [ evar1 , evar2 , evar3 = at ]              :: S :: ctx_etvar_solve3
-  | GG [ evar1 = at1 , evar2 = at2 , evar3 = at3 ] :: S :: ctx_etvar_solve4
-  | GG [ evar1 = at1 , evar2 = at2 ]               :: S :: ctx_etvar_solve5
-  | GG , a , DD                                    :: S :: middle
-  | GG , x : aA , DD                               :: S :: middle2
-  | GG , evar , DD                                 :: S :: middle3
-  | GG , evar = at , DD                            :: S :: middle4
-  | GG , DD                                        :: S :: ext
+actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \Omega }}, DL {{ tex \Delta_L }}, DR {{ tex \Delta_R }}, GL {{ tex \Gamma_L }}, GR {{ tex \Gamma_R }}, GM {{ tex \Gamma_M }}, OL {{ tex \Omega_L }} , OR {{ tex \Omega_R }}, DDlo {{ tex \Delta^{\mathsf{lo} } }} :: 'actx_' ::=
+  | empty                                     ::   :: empty
+  | x : aA                                    ::   :: cons_var
+  | x :  A                                    ::   :: cons_var2
+  | D : aA                                    ::   :: cons_data
+  | D :  A                                    ::   :: cons_data2
+  | a                                         ::   :: cons_tvar
+  | a : k                                     ::   :: cons_tvar2
+  | T : K                                     ::   :: cons_tvar3
+  | T                                         ::   :: tconstr_s_untyped
+  | marker D                                  ::   :: marker      {{ tex { \scriptstyle \blacktriangleright_{[[D]]} } }}
+  | { DD }                                    ::  :: local_scope {{ tex \{ [[DD]] \} }}
+  | ma                                        ::   :: cons_mark
+  | evar                                      ::   :: cons_evar
+  | evar : k                                  ::   :: cons_evar2
+  | evar = at                                 ::   :: cons_evar_solu
+  | evar =  t                                 ::   :: cons_evar_solu2
+  | Xa : K = k                                ::  :: kuvar_typed_solved
+  | [ ckvs ]                                  ::   :: fill_kvs {{ tex [[ckvs]] }}
+  | GG [ TT ]                                       :: S :: ctx_tvar
   | ( GG )                                         :: S :: parens
   | [ aA ] GG                                      :: S :: subst_ctx {{ tex  \mathsf{contaminate}( [[GG]] , [[aA]] ) }}
   | | GG |                                         :: S :: solve_ctx
-  | evar    :: S :: singleton
+  | GG [ </ Ti |-> Ai // i /> ]      ::  :: subst_tcon_mult
+  | GG [ </ kvsi |-> kvsi' // i /> ]      ::  :: subst_kvs
+  | [ TT ] GG          ::  :: context_apply
+  | DD1 , .... , DDi  ::  :: append_multiple
+  | unsolved ( DD )   ::  :: unsolved
+  | topo ( DD )       ::  :: topo
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -460,11 +473,13 @@ typesubst, tsub {{ tex S }}, tsubstar {{tex S^{\star} }} :: 'tsub_' ::=
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 terminals :: 'terminals_' ::=
+  | topo       ::  :: topo {{tex \mathsf{topo} }}
   | ok      :: :: ok {{ tex \mathsf{ok} }}
   | ~       :: :: consist {{ tex \sim }}
   | ~=      :: :: approx {{ tex \approx }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
   | --->    :: :: longarrow   {{ tex \rightarrow }}
+  | --->>      :: :: two_head_long_rightarrow   {{ tex \longrightarrow\mathrel{\mkern-14mu}\rightarrow }}
   | star       :: :: star      {{ tex \star }}
   | let     :: :: let     {{ tex \mathbf{let} }}
   | fst     :: :: fst     {{ tex \mathbf{fst} }}
@@ -555,6 +570,7 @@ terminals :: 'terminals_' ::=
 formula :: formula_ ::=
   | judgement             :: :: judgement
   | formula1 .. formulan            ::   :: dots
+  | NOT ( formula )  ::  :: not {{ tex \neg ([[formula]]) }}
   | dd |- e => A          :: :: ap_inf_introduction
   | dd ; ss |- e => A     :: :: ap_app_introduction
   | |- A1 <: A2           :: :: ap_sub_introduction
@@ -571,6 +587,7 @@ formula :: formula_ ::=
   | ( x : aA ) in GG      :: :: bind_var2 {{ tex ( [[x]] : [[aA]] ) \in [[GG]] }}
   | evar in fv ( aA )     :: :: fv {{ tex [[evar]] \in \textsc{fv} ( [[aA]] ) }}
   | evar in GG            :: :: evargg {{ tex [[evar]] \in  [[GG]]  }}
+  | ( Xa : K ) in DD  ::  :: xain {{ tex ( [[Xa]] : [[K]] ) \in [[DD]] }}
   | evar notin fv ( aA )  :: :: nfv {{ tex [[evar]] \notin \textsc{fv} ( [[aA]] ) }}
   | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
   | varset1 notin varset2     :: :: notin_varset
@@ -610,6 +627,8 @@ formula :: formula_ ::=
   | EE1 = EE2        ::  :: tctx_eq
   | ( a : K ) in DD  ::  :: aain {{ tex ( [[a]] : [[K]] ) \in [[DD]] }}
   | kvs in EE        ::  :: kvs_in_quantifier {{ tex [[kvs]] \in [[EE]] }}
+  | kvs1 = kvs2      ::  :: eq_kvs
+  | kvs1 # kvs2           ::  :: set_disjoint  {{ tex [[kvs1]]~\sharp~[[kvs2]] }}
   | EE |-grp rec </ dti // i /> ~> </ Kj // j /> ; </ HHl // l /> :: :: typing_rec
   | DD ||-grp rec </ dti // i /> ~> </ Kj // j /> ; </ GGl // l /> -| TT :: :: typing_rec_algo
   | DD ||-grp rec </ dti // i /> ~> </ Kj // j /> ; </ GGl // l /> :: :: typing_rec_algo_gen
@@ -2638,23 +2657,23 @@ EE |-el eA : star
 EE  |- HH , D : eA
 
 
-defn
+% defn
 
-EE |- K1 <: K2 :: :: subkinding :: 'sub_'
-{{tex [[EE]] [[|-]] [[K1]] [[<:]] [[K2]] }}
-by
+% EE |- K1 <: K2 :: :: subkinding :: 'sub_'
+% {{tex [[EE]] [[|-]] [[K1]] [[<:]] [[K2]] }}
+% by
 
-------------- :: refl
-EE |- K <: K
+% ------------- :: refl
+% EE |- K <: K
 
-EE, [kvs] |-  K1 <: K2
------------------------------- :: forall
-EE |-  K1 <:  \/i [kvs] .K2
+% EE, [kvs] |-  K1 <: K2
+% ------------------------------ :: forall
+% EE |-  K1 <:  \/i [kvs] .K2
 
-EE |- k
-EE |- K1 [ X |-> k] <: K2
------------------------------- :: inst
-EE |- \/i [X] . K1 <: K2
+% EE |- k
+% EE |- K1 [ X |-> k] <: K2
+% ------------------------------ :: inst
+% EE |- \/i [X] . K1 <: K2
 
 defn
 
@@ -2666,3 +2685,834 @@ by
 </ ckvs, ckvsi in Q (  eAi  ) // i />
 -------------------------------------------- :: gen
 EE |-gen ckvs </ Di :  eAi // i />  ~> </ Di :  \/i [ckvs, ckvsi] . eAi // i />
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGORITHMIC TYPING
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+algo_typing :: 'a_' ::=
+
+defn
+
+DD ; GG ||-p pgm : A :: :: pgm :: 'pgm_'
+by
+
+% Haskell 98
+
+TT1 = OO, </Xai // i />,  </ Ti : Xai // i />
+</ TTi |- dti ~> TTssi ; GGi // i />
+TTsn --->> OO'
+OO' ; GG, </ GGi // i /> ||-p pgm : A
+---------------------------------------  :: dt
+OO ; GG ||-p rec </ dtti // i IN 1..n /> ; pgm : A
+
+[OO] OO; [OO] GG |- e : A
+---------------------------- :: expr
+OO ; GG ||-p e : A
+
+
+DD --->> OO
+[OO] OO; [OO] GG |- e : A
+---------------------------- :: expr_alt
+DD ; GG ||-p e : A
+
+% PolyKinds
+
+[OO] OO; [OO] GG |- e : eA
+---------------------------- :: expr_tt
+OO ; GG ||-p e : eA
+
+OO |- dtsig ~> T : eK
+OO, T : eK ; GG ||-p pgm : eA
+---------------------------- :: sig
+OO ; GG ||-p sig dtsig ; pgm : eA
+
+TT1 = OO, </ Xai : star // i />, </ Ti : Xai // i />
+</ TTi |- dti ~> TTssi ; GGi // i />
+</ xckvsi = unsolved ([TTsn] Xai) // i />
+</ TTsn ||-gen ckvsi ([TTsn] (GGi[ </ xckvsi |-> ckvsi // i /> ])) ~> GG'i // i />
+OO , </ Ti : \/i [ckvsi] . (([TTsn] Xai) [ </ xckvsi |-> ckvsi // i /> ]) // i /> ; GG , </ GG'i [</ Ti |-> Ti @ [ ckvsi ] // i />] // i /> ||-p pgm : eA
+---------------------------------------  :: dt_tt
+OO ; GG ||-p rec </ dtti // i IN 1..n /> ; pgm : eA
+
+(T : eK) in OO
+OO |- dt ~> OO ; GG1
+OO ; GG , GG1 ||-p pgm : eA
+---------------------------------------  :: dt_ttS
+OO ; GG ||-p rec dt ; pgm : eA
+
+defn
+
+DD |- dt ~> TT ; GG :: :: dt :: 'dt_'
+{{tex [[DD]] \Vdash^{\!\!\mathsf{dt} } [[dt]] [[~>]] [[GG]] \dashv [[TT]] }}
+by
+
+% Haskell 98
+
+% (T : k) in DD
+% DD, </ Xai // i /> |- [DD]k ~ (</ Xai // i /> ---> star) -| TT1, </ Xai = ki // i />
+% </ TTj, </ ai : ki // i /> |-T </ ai // i/>  dcj ~> tj -| TTsj, </ ai : ki // i /> // j />
+% ---------------------------  :: decl
+% DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TTsn ; </ Dj: \/ </ ai : ki //i /> .tj //j />
+
+% (T : \/i [ckvs1]. \/ [ckvs2]. ek) in DD
+% DD, marker T, [ckvs1], [ckvs2], </ Xai : star // i /> |- [DD]ek ~ (</ Xai // i /> ---> star) -| DD1
+% TT1 = DD1, </ ai : Xai // i />
+% </ TTj  |-(T @[ckvs1] @[ckvs2] </ ai // i />)  dcj ~> eAj -| TTsj // j />
+% TTsn = TT, marker T, TT'
+% ---------------------------  :: tt
+% DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TT ; </ Dj: \/i [ckvs1] . \/ [ckvs2] . \/ </ ai :[TTsn]Xai //i /> .eAj // j />
+
+(T : \/i [ckvs1]. \/ [ckvs2]. ek) in DD
+DD, [ckvs1], [ckvs2], </ Xai : star // i /> |- [DD]ek ~ (</ Xai // i /> ---> star) -| TT1, [ckvs1], [ckvs2], </ Xai : star = eki // i />
+</ TTj, [ckvs1], [ckvs2], </ ai : eki // i />  |-(T @[ckvs1] @[ckvs2] </ ai // i />)  dcj ~> eAj -| TTsj, [ckvs1], [ckvs2], </ ai : eki  // i /> // j />
+---------------------------  :: tt
+DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TTsn ; </ Dj: \/i [ckvs1] . \/ [ckvs2] . \/ </ ai : eki //i /> .eAj // j />
+
+defn
+
+DD |- t dc ~> A -| TT :: :: dc :: 'dc_'
+  {{tex [[DD]] \Vdash^{\!\!\mathsf{dc} }_{\!\![[t]]} [[dc]] [[~>]] [[A]] [[-|]] [[TT]]}}
+by
+
+% Haskell 98
+
+DD |- </ ti // i /> ---> t : star -| TT
+---------------------------  :: decl
+DD |- t D </ ti // i /> ~> </ ti // i /> ---> t -| TT
+
+% PolyKinds
+
+</ DDi |- Ai : Ki ~> Ai' -| TTi // i IN 1..n />
+</ TTi |- Ai' : [TTi] Ki <: star ~> Ai'' -| DDssi //i IN 1..n/>
+---------------------------  :: poly
+DD1 |- t D </ Ai // i IN 1..n /> ~> \/i [ikvs] . </ Ai'' // i IN 1..n /> ---> t -| DDsn
+
+% TT
+
+
+DD, marker D |- \/ kvs.  (</ ti // i /> ---> et) : star ~> eA -| TT1, marker D, TT2
+xckvs = unsolved (TT2)
+% ckvs = fresh (xckvs)
+---------------------------  :: tt
+DD |- et \/ kvs. D </ ti // i /> ~> \/i [ckvs] . (([TT2] eA)[ xckvs |-> ckvs ]) -| TT1
+
+defn
+
+DD |- A : K -| TT :: :: kinding :: 'k_'
+  {{ tex [[DD]] \Vdash^{\!\!\mathsf{k} } [[A]] : [[K]] [[-|]] [[TT]] }}
+by
+
+--------------------------- :: nat
+DD |- nat : star -| DD
+
+(a : k) in DD
+--------------------------- :: var
+DD |- a : k -| DD
+
+(T : k) in DD
+---------------------------------- :: tcon
+DD |- T : k -| DD
+
+% --------------------------- :: arrow
+% DD |- -> : star -> star -> star -| DD
+
+DD |- k
+DD, a : k |- A : k2 -| TT, a : k
+[TT]k2 = star
+--------------------------- :: forall
+DD |- \/ a : k. A : star -| TT
+
+DD |- t1 : k1 -| TT1
+TT1 |- t2 : k2 -| TT2
+TT2 |- [TT2]k1 . [TT2]k2 : k3 -| TT
+-------------------------------- :: app
+DD |- t1 t2 : k3 -| TT
+
+defn
+
+DD |- k1 . k2 : k' -| TT :: :: app_mode :: 'kapp_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{kapp} } [[k1]] \bullet [[k2]] : [[k']] [[-|]] [[TT]] }}
+by
+
+
+DD[Xa1, Xa2, Xa = Xa1 -> Xa2] |- Xa1 ~ k -| TT
+-------------------------- :: kuvar
+DD[Xa] |- Xa . k : Xa2 -| TT
+
+DD |- k1 ~ k -| TT
+---------------------- :: arrow
+DD |- k1 -> k2 . k : k2 -| TT
+
+defn
+
+DD |- ( A1 : K1 ) . A2 : K' ~> A -| TT :: :: app_mode_poly :: 'kapp_tt_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{kapp} } ([[A1]] : [[K1]]) \bullet [[A2]] : [[K']] [[~>]] [[A]] [[-|]] [[TT]] }}
+by
+
+DD |- t <= ek1 ~> et2 -| TT
+-------------------------------- :: arrow
+DD |- ( et1 : ek1 -> ek2 ) . t : ek2 ~> et1 et2 -| TT
+
+DD, Xa: ek1 |- (et1 @Xa : eK [ a |-> Xa]) . t : ek ~> et -| TT
+----------------------------------- :: forall
+DD |- ( et1 : \/ a:ek1. eK ) . t : ek ~> et -| TT
+
+DD, Xa: ek1 |- (et1 @Xa : eK [ a |-> Xa]) . t : ek ~> et -| TT
+----------------------------------- :: forall_infer
+DD |- ( et1 : \/i [a:ek1]. eK ) . t : ek ~> et -| TT
+
+DD1, Xa1:star,Xa2:star,Xa:ek=(Xa1->Xa2), DD2 |- t <= Xa1 ~> et2 -| TT
+----------------------------------------------- :: kuvar
+DD1, Xa:ek, DD2 |- (et1 : Xa) . t : Xa2 ~> et1 et2 -| TT
+
+
+defn
+
+DD |- K1 ~ K2 -| TT :: :: unif :: 'u_'
+ {{ tex [[DD]] \Vdash^{\!\!\mathsf{u} } [[K1]] [[~]] [[K2]] [[-|]] [[TT]] }}
+by
+
+
+----------------------- :: refl
+DD |- k ~ k -| DD
+
+----------------------- :: refl_tt
+DD |- ek ~ ek -| DD
+
+
+DD |- k1 ~ k3 -| TT1
+TT1 |- [TT1] k2 ~ [TT1] k4 -| TT
+--------------------------------- :: arrow
+DD |- k1 -> k2 ~ k3 -> k4 -| TT
+
+DD |-pr (Xa) k ~~> k2 -| TT[Xa]
+------------------------------------------ :: kvarL
+DD[Xa] |- Xa ~ k -| TT[Xa=k2]
+
+DD |-pr (Xa) et1 ~~> et2 -| TT1, Xa:ek1, TT2
+TT1 |-el et2 : ek2
+TT1 |- [TT1] ek1 ~ ek2 -| TT3
+------------------------------------------ :: kvarL_tt
+DD |- Xa ~ et1 -| TT3, Xa : ek1 = et2, TT2
+
+DD |-pr (Xa) et1 ~~> et2 -| TT1, Xa:ek1, TT2
+TT1 |-el et2 : ek2
+TT1 |- [TT1] ek1 ~ ek2 -| TT3
+------------------------------------------ :: kvarR_tt
+DD |- et1 ~ Xa  -| TT3, Xa : ek1 = et2, TT2
+
+
+DD1, DD2 ++ Xa: ek1 -| TT
+DD[{TT}] |-pr (Xa) et1 ~~> et2 -| TT1, { TT2, Xa : ek1,  TT3 } , TT4
+TT1, {TT2} |-el et2 : ek2
+TT1, {TT2} |- [TT1,TT2] ek1 ~ ek2 -| TT5, {TT6}
+------------------------------------------------------- :: kvarL_lo_tt
+DD[{DD1, Xa : ek1, DD2}] |- Xa ~ et1 -| TT5, {TT6,  Xa : ek1 = et2 , TT3 }, TT4
+
+DD1, DD2 ++ Xa: ek1 -| TT
+DD[{TT}] |-pr (Xa) et1 ~~> et2 -| TT1, { TT2, Xa : ek1,  TT3 } , TT4
+TT1, {TT2} |-el et2 : ek2
+TT1, {TT2} |- [TT1,TT2] ek1 ~ ek2 -| TT5, {TT6}
+------------------------------------------------------- :: kvarR_lo_tt
+DD[{DD1, Xa : ek1, DD2}] |- et1 ~ Xa -| TT5, {TT6,  Xa : ek1 = et2 , TT3 }, TT4
+
+
+DD |-pr (Xa) k ~~> k2 -| TT[Xa]
+------------------------------------------ :: kvarR
+DD[Xa] |- k ~ Xa -| TT[Xa=k2]
+
+
+DD |- et1 ~ et3 -| DD1
+DD1 |- [DD1] et2 ~ [DD1] et4 -| TT
+----------------------------------- :: app
+DD |- et1 et2 ~ et3 et4 -| TT
+
+DD |- et1 ~ et3 -| DD1
+DD1 |- [DD1] et2 ~ [DD1] et4 -| TT
+----------------------------------- :: kapp
+DD |- et1 @et2 ~ et3 @et4 -| TT
+
+
+defn
+
+DD |-pr ( et ) ek1 ~~> ek2 -| TT :: :: promote :: 'pr_'
+{{ tex [[DD]] [[|-pr]]_{\!\![[et]]} [[ek1]] [[~~>]] [[ek2]] [[-|]] [[TT]] }}
+by
+
+---------------------------------- :: star
+DD |-pr (Xa) star ~~> star -| DD
+
+DD |-pr (Xa) k1 ~~> k3 -| DD1
+DD1 |-pr (Xa) [DD1]k2 ~~> k4 -| TT
+---------------------------------- :: arrow
+DD |-pr (Xa) k1 -> k2  ~~> k3 -> k4 -| TT
+
+------------------------------ :: kuvarL
+DD[Xb][Xa] |-pr (Xa) Xb ~~> Xb -| DD[Xb][Xa]
+
+------------------------------ :: kuvarR
+DD[Xa][Xb] |-pr (Xa) Xb ~~> Xb1 -| DD[Xb1,Xa][Xb=Xb1]
+
+---------------------------------- :: nat
+DD |-pr (Xa) nat ~~> nat -| DD
+
+---------------------------------- :: tvar
+DD[a][Xa] |-pr (Xa) a ~~> a -| DD[a][Xa]
+
+% ---------------------------------- :: arr
+% DD |-pr (Xa) -> ~~> -> -| DD
+
+---------------------------------- :: tcon
+DD[T][Xa] |-pr (Xa) T ~~> T -| DD[T][Xa]
+
+DD |-pr (Xa) ek1 ~~> et1 -| DD1
+DD1 |-pr (Xa) [DD1]ek2 ~~> et2 -| TT
+---------------------------------- :: app
+DD |-pr (Xa) ek1 ek2 ~~> et1 et2 -| TT
+
+DD |-pr (Xa) ek1 ~~> et1 -| DD1
+DD1 |-pr (Xa) [DD1]ek2 ~~> et2 -| TT
+---------------------------------- :: kapp
+DD |-pr (Xa) ek1 @ek2 ~~> et1 @et2 -| TT
+
+------------------------------ :: kuvarL_tt
+DD[Xb][Xa] |-pr (Xa) Xb ~~> Xb -| DD[Xb][Xa]
+
+DD |-pr (Xa) [ DD ]et ~~> et1 -| TT[Xa][Xb:et]
+------------------------------------------------ :: kuvarR_tt
+DD[Xa ][Xb:et] |-pr (Xa) Xb ~~> Xb1 -| TT[Xb1 : et1, Xa][Xb:et = Xb1]
+
+defn
+
+DD |- K :: :: kind_validate :: 'kv_'
+  {{ tex [[DD]] \Vdash^{\!\!\mathsf{kv} } [[K]] }}
+by
+
+-------------- :: star
+DD |- star
+
+DD |- k1
+DD |- k2
+-------------- :: arrow
+DD |- k1 -> k2
+
+Xa in DD
+-------------- :: kuvar
+DD |- Xa
+
+defn
+
+DD ok :: :: well_formed_tctx :: 'tctx_'
+ {{ tex [[DD]] \ \mathsf{ok} }} by
+
+------------------------- :: empty
+empty ok
+
+DD ok
+DD |- k
+------------------------- :: tvar
+DD , a : k ok
+
+DD ok
+DD |- k
+------------------------- :: tcon
+DD , T : k ok
+
+DD ok
+------------------------- :: kuvar
+DD , Xa ok
+
+DD ok
+DD |- k
+------------------------- :: kuvarSolved
+DD , Xa=k ok
+
+DD ok
+DD |-el ek : star
+------------------------- :: kuvar_tt
+DD , Xa : ek ok
+
+DD ok
+DD |-el ek2 : [DD]ek1
+------------------------- :: kuvarSolved_tt
+DD , Xa : ek1 = ek2 ok
+
+DD ok
+DD |-el ek : star
+------------------------- :: tvar_tt
+DD , a : ek ok
+
+DD ok
+DD |-el eK : star
+------------------------- :: tcon_tt
+DD , T : eK ok
+
+DD, DDlo ok
+------------------------- :: lo
+DD , {DDlo} ok
+
+DD ok
+------------------------- :: marker
+DD, marker D ok
+
+defn
+
+DD ||- GG :: :: well_formed_ectx :: 'ectx_'
+  {{ tex [[DD]] \Vdash^{\!\!\mathsf{ectx} } [[GG]] }}
+by
+
+------------------------- :: empty
+DD ||- empty
+
+DD ||- GG
+DD |- A <= star
+------------------------- :: var
+DD ||- GG , x : A
+
+DD ||- GG
+DD |- A <= star
+------------------------- :: dcon
+DD ||- GG , D : A
+
+DD ||- GG
+DD |-el eA : star
+------------------------- :: var_tt
+DD ||- GG , x : eA
+
+DD ||- GG
+DD |-el eA : star
+------------------------- :: dcon_tt
+DD ||- GG , D : eA
+
+
+
+defn
+
+DD --> TT :: :: tctx_extension :: 'ctxe_'
+by
+
+---------------------- :: empty
+empty --> empty
+
+DD --> TT
+-------------------------- :: tvar
+DD , a : k --> TT , a : k
+
+DD --> TT
+-------------------------- :: tvar_tt
+DD , a : ek --> TT , a : ek
+
+DD --> TT
+-------------------------- :: tcon
+DD , T : k --> TT , T : k
+
+DD --> TT
+-------------------------- :: tcon_tt
+DD , T : eK --> TT , T : eK
+
+DD --> TT
+---------------------- :: kuvar
+DD , Xa --> TT , Xa
+
+DD --> TT
+---------------------- :: kuvar_tt
+DD , Xa : ek --> TT , Xa : ek
+
+DD --> TT
+[TT] k1 = [TT] k2
+----------------------------- :: kuvarSolved
+DD , Xa = k1 --> TT , Xa = k2
+
+DD --> TT
+[TT] et1 = [TT] et2
+----------------------------- :: kuvarSolved_tt
+DD , Xa : ek = et1 --> TT , Xa : ek = et2
+
+
+DD --> TT
+TT |- k
+-------------------- :: solve
+DD, Xa --> TT , Xa = k
+
+DD --> TT
+TT |-el et : [TT] ek
+-------------------- :: solve_tt
+DD, Xa : ek --> TT , Xa : ek = et
+
+DD --> TT
+-------------------- :: add
+DD --> TT , Xa
+
+
+DD --> TT
+TT |-el ek : star
+-------------------- :: add_tt
+DD --> TT , Xa : ek
+
+DD --> TT
+TT |- k
+-------------------- :: addSolved
+DD --> TT , Xa = k
+
+DD --> TT
+TT |-el et : [TT] ek
+-------------------- :: addSolved_tt
+DD --> TT , Xa : ek = et
+
+DD --> TT
+--------------------------------- :: marker
+DD , marker D --> TT , marker D
+
+DD --> TT
+DD, topo (DD1) --> TT, TT1
+------------------------------------------------ :: lo
+DD, {DD1} --> TT, {TT1}
+
+% DD --> TT
+% DDlo1 isperm DDlo2
+% ------------------------------ :: lo
+% DD, {DDlo1} --> TT, {DDlo2}
+
+% DD, {DDlo1, DDlo2} --> TT, {TTlo1, TTlo2}
+% TT, {TTlo1, TTlo2} |-el ek <= star
+% ------------------------------------------------ :: lo_add
+% DD, {DDlo1, DDlo2} --> TT, {TTlo1, Xa : ek, TTlo2}
+
+% DD, {DDlo1, DDlo2} --> TT, {TTlo1, TTlo2}
+% TT, {TTlo1, TTlo2} |-el et <= ek
+% ------------------------------------------------ :: lo_addSolved
+% DD, {DDlo1, DDlo2} --> TT, {TTlo1, Xa : ek = et, TTlo2}
+
+% DD, {DDlo1, Xa : ek, DDlo2} --> TT, {TTlo1, Xa : ek, TTlo2}
+% TT, {TTlo1, Xa : ek, TTlo2} |-el et <= ek
+% topo (TTlo1, Xa : ek = et, TTlo2)
+% ------------------------------------------------- :: lo_solve
+% DD, {DDlo1, Xa : ek, DDlo2} --> TT, {TTlo1, Xa : ek = et, TTlo2}
+
+% DD, {DDlo1, Xa : ek = et1, DDlo2} --> TT, {TTlo1, Xa : ek = et2, TTlo2}
+% [TT, {TTlo1, Xa : ek = et2, TTlo2}] et1 = [TT, {TTlo1, Xa : ek = et2, TTlo2}] et2
+% topo (TT, {TTlo1, Xa : ek = et2, TTlo2})
+% ------------------------------------------------- :: lo_solved
+% DD, {DDlo1, Xa : ek = et1, DDlo2} --> TT, {TTlo1, Xa : ek = et2, TTlo2}
+
+defn
+
+DD --->> OO :: :: tctx_extension_default :: 'ctxde_'
+by
+
+---------------------- :: empty
+empty --->> empty
+
+DD --->> OO
+-------------------------- :: tvar
+DD , a : k --->> OO , a : k
+
+DD --->> OO
+-------------------------- :: tcon
+DD , T : k --->> OO , T : k
+
+DD --->> OO
+----------------------------- :: kuvarSolved
+DD , Xa = k --->> OO , Xa = k
+
+
+DD --->> OO
+-------------------- :: solve
+DD, Xa --->> OO , Xa = star
+
+
+defn
+DD ; A : K |- kvs ~> ckvs ; A' -| TT ::  :: matching_tt :: 'mat_'
+{{ tex [[DD]] \mid [[A]] : [[K]] [[|-]] [[kvs]] [[~>]] [[ckvs]] [[-|]] [[A']] \mid [[TT]]  }}
+by
+
+------------------------------------------ :: empty
+DD ; et : star |- empty ~> empty ; et -| DD
+
+DD ; (et1 a) : ek2 |- kvs ~> ckvs ; et2 -| TT
+------------------------------------ :: arr
+DD ; et1 : ek1 -> ek2 |- a, kvs ~> a : ek1, ckvs ; et2 -| TT
+
+DD ; (et1 @a) : eK |- kvs ~> ckvs ; et2 -| TT
+------------------------------------ :: forall
+DD ; et1 : \/ a : ek1.  eK |- kvs ~> a : ek1, ckvs ; et2 -| TT
+
+------------------------------------------------------- :: kvarempty
+DD[Xa : star] ; et : Xa |- empty ~> empty ; et -| DD[Xa : star = star]
+
+DD [ Xa1 : star, Xa2 : star, Xa : star = Xa1 -> Xa2 ] ; (et1 a) : Xa2 |- kvs ~> ckvs ; et2 -| TT
+-------------------------------------------------------------- :: kvarcons
+DD [ Xa :star ] ; et1 : Xa |- a, kvs ~> a : Xa1, ckvs ; et2 -| TT
+
+defn
+
+DD |- A <= k  :: :: kinding_kc_eq :: 'kc_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{kc} } [[A]] [[<=]] [[k]] }}
+
+by
+
+DD |- A : k1 -| DD
+[DD]k1 = [DD]k2
+------------------------ :: eq
+DD |- A <= k2
+
+
+defn
+
+DD |- A <= K ~> A' -| TT :: :: kinding_checking :: 'kc_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{kc} } [[A]] [[<=]] [[K]] [[~>]] [[A']] [[-|]] [[TT]] }}
+
+by
+
+DD |- A : eK ~> eA1 -| DD1
+DD1 |- eA1 : [DD1] eK <: [DD1] ek ~> eA2 -| DD2
+------------------------ :: sub
+DD |- A <= ek ~> eA2 -| DD2
+
+defn
+
+DD |- dtsig ~> DD'  ::  :: sig :: 'sig_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{sig} } [[dtsig]] [[~>]] [[DD']] }}
+by
+
+ikvs = LS (K)
+---------------------------- :: poly
+OO |- data T : K ~> T : \/i [ikvs]. K
+
+
+rs A
+</ ai // i /> = LS (A)
+OO , { </ Xai : star , ai : Xai // i/> } |- A : star ~> eK -| DD
+ckvs1 = SS ( </ ai : [DD] Xai // i />  )
+xckvs2 = unsolved (DD)
+DD `-> </ ai // i />
+---------------------------------------------- :: tt
+OO |- data T : A ~> T : \/i [ckvs2] . ((\/i [ckvs1] . [DD] eK)[xckvs2 |-> ckvs2])
+
+defn
+
+DD |- A : K1 <: K2 ~> A' -| TT :: :: instantiation :: 'inst_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{inst} } [[A]] : [[K1]] [[<:]] [[K2]] [[~>]] [[A']] [[-|]] [[TT]] }}
+by
+
+DD |- ek1 ~ ek2 -| TT
+---------------------- :: refl
+DD |- eA : ek1 <: ek2 ~> eA -| TT
+
+DD, Xa:ek1 |- eA1 @Xa : eK [a |-> Xa] <: ek2 ~> eA2 -| TT
+------------------------------------------ :: forall
+DD |- eA1 : \/ a:ek1 . eK <: ek2 ~> eA2 -| TT
+
+DD, Xa:ek1 |- eA1 @Xa : eK [a |-> Xa] <: ek2 ~> eA2 -| TT
+------------------------------------------ :: forall_infer
+DD |- eA1 : \/i [a:ek1] . eK <: ek2 ~> eA2 -| TT
+
+
+
+defn
+
+DD |- A : K ~> K' -| TT :: :: kinding_tt :: 'ktt_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{k} } [[A]] : [[K]] [[~>]] [[K']] [[-|]] [[TT]] }}
+by
+
+
+--------------------------------- :: star
+DD |- star : star ~> star -| DD
+
+--------------------------- :: nat
+DD |- nat : star ~> nat -| DD
+
+(a : ek) in DD
+--------------------------- :: var
+DD |- a : ek ~> a -| DD
+
+(T : eK) in DD
+---------------------------------- :: tcon
+DD |- T : eK ~> T -| DD
+
+% --------------------------- :: arrow
+% DD |- -> : star -> star -> star ~> -> -| DD
+
+DD |- k <= star ~> ek -| DD1
+DD1 , a : ek |- A <= star ~> eA -| DD2, a : ek, DD3
+DD3 `-> a
+------------------------------------------ :: forall
+DD |- \/ a : k. A : star ~> \/ a : ek . [DD3] eA -| DD2, unsolved (DD3)
+
+DD, Xa : star, a : Xa |- A <= star ~> eA -| DD2, a : Xa, DD3
+DD3 `-> a
+------------------------------------------ :: foralli
+DD |- \/ a . A : star ~> \/ a : Xa . [DD3]eA -| DD2, unsolved (DD3)
+
+DD |- t1 : eK1 ~> et1 -| DD1
+DD1 |- (et1 : [DD1]eK1) . t2 : ek ~> et -| TT
+------------------------------------ :: app
+DD |- t1 t2 : ek ~> et -| TT
+
+DD |- t1 : eK ~> et1 -| DD1
+[DD1] eK = \/ a : ek . eK2
+DD1 |- t2 <= ek ~> et2 -| DD2
+---------------------------------------------- :: kapp
+DD |- t1 @t2 : eK2 [a |-> et2] ~> et1 @et2 -| DD2
+
+DD |- t1 : eK ~> et1 -| DD1
+[DD1] eK = \/i [</ ai: eki // i />] . \/ a : ek . eK2
+DD1, </ Xai : eki [ </ ai |-> Xai // i/> ] // i /> |- t2 <= ek [ </ ai |-> Xai // i/> ]~> et2 -| DD2
+---------------------------------------------- :: kapp_infer
+DD |- t1 @t2 : eK2[ </ ai |-> Xai // i/> ] [a |-> et2] ~> et1 @[</Xai // i/>] @et2 -| DD2
+
+DD , X |- A : star ~> A' -| TT
+--------------------------- :: kforall
+DD |- \/ X . A  : star ~> \/ X. A' -| TT
+
+DD , X |- A : star ~> A' -| TT
+--------------------------- :: kforall_infer
+DD |- \/i [X] . A  : star ~> \/i [X]. A' -| TT
+
+defn
+
+DD |-el eA : eK  :: :: ela_kinding :: 'ela_'
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{ela} } [[eA]] : [[eK]] }}
+by
+
+
+(Xa : ek) in DD
+--------------------------------- :: kuvar
+DD |-el Xa : [DD] ek
+
+--------------------------------- :: star
+DD |-el star : star
+
+--------------------------- :: nat
+DD |-el nat : star
+
+(a : ek) in DD
+--------------------------- :: var
+DD |-el a : [DD] ek
+
+(T : eK) in DD
+---------------------------------- :: tcon
+DD |-el T : [DD] eK
+
+% --------------------------- :: arrow
+% DD |-el -> : star -> star -> star
+
+DD |-el ek : star
+DD , a : ek |-el eA : star
+------------------------------------------ :: forall
+DD |-el \/ a : ek. eA : star
+
+DD |-el ek : star
+DD , a : ek |-el eA : star
+------------------------------------------ :: forall_infer
+DD |-el \/i [a : ek]. eA : star
+
+DD |-el et1 : ek1 -> ek2
+DD |-el et2 : ek1
+------------------------------------ :: app
+DD |-el et1 et2 : ek2
+
+DD |-el et1 : \/ a : ek . eK
+DD |-el et2 : ek
+------------------------------------ :: kapp
+DD |-el et1 @et2 : eK [a |-> [DD]et2]
+
+DD |-el et1 : \/i [a : ek] . eK
+DD |-el et2 : ek
+------------------------------------ :: kapp_infer
+DD |-el et1 @et2 : eK [a |-> [DD]et2]
+
+defn
+
+DD |- A : K |> A' : K1 -| TT   ::  :: arrowing :: 'arrowing_'
+by
+
+
+------------------------------------ :: refl
+DD |- et : ek1 -> ek2 |> et : ek1 -> ek2 -| DD
+
+DD, Xa:ek1 |- et1 @Xa : eK [a |-> Xa] |> et2 : ek2 -| TT
+------------------------------------ :: forall
+DD |- et1 : \/ a:ek1 . eK |> et2 : ek2 -| TT
+
+DD, Xa:ek1 |- et1 @Xa : eK [a |-> Xa] |> et2 : ek2 -| TT
+------------------------------------ :: forall_infer
+DD |- et1 : \/i [a:ek1] . eK |> et2 : ek2 -| TT
+
+DD1 |- [DD1] k ~ star -| TT1
+------------------------------------ :: kuvar
+DD1, Xa:k, DD2 |- et : Xa |> et : Xa1 -> Xa2 -| TT1, Xa1:star,Xa2:star,Xa:k=Xa1 ->  Xa2, DD2
+
+
+defn
+
+DD `-> kvs   ::  :: qcheck :: 'qc_' by
+
+---------------------- :: empty
+empty `-> kvs
+
+DD `-> kvs
+--------------------------- :: kuvarSolved
+DD, Xa : ek1 = ek2  `-> kvs
+
+
+DD `-> kvs
+fkv([DD] ek) # kvs
+--------------------------- :: kuvar
+DD, Xa : ek  `-> kvs
+
+DD `-> kvs
+--------------------------- :: tvar
+DD, a : ek `-> kvs
+
+DD `-> kvs
+--------------------------- :: tcon
+DD, T : eK `-> kvs
+
+DD, DDlo `-> kvs
+--------------------------- :: lo
+DD, {DDlo} `-> kvs
+
+defn
+
+TT1 ++ DD -| TT2    ::  :: moving :: 'mv_'
+ {{ tex [[TT1]] [[++]] [[DD]] \leadsto [[TT2]] }}
+by
+
+--------------------------- :: empty
+empty ++ DD -| DD
+
+
+var(ek) # dom (DD2)
+DD1 ++ DD2 -| TT
+--------------------------- :: kuvar
+Xa : ek , DD1  ++ DD2 -| Xa : ek, TT
+
+var(ek) # dom (DD2)
+DD1 ++ DD2 -| TT
+--------------------------- :: tvar
+a : ek , DD1 ++ DD2 -| a : ek , TT
+
+NOT (var(ek) # dom (DD2))
+DD1 ++ DD2, Xa : ek -| TT
+--------------------------- :: kuvarM
+Xa : ek , DD1  ++ DD -| TT
+
+NOT (var(ek) # dom (DD2))
+DD1 ++ DD2, a : ek -| TT
+--------------------------- :: tvarM
+a : ek , DD1 ++ DD2 -| TT
+
+
+defn
+
+DD ||-gen ckvs GG1 ~> GG2  :: :: agen :: ''
+{{ tex [[DD]] [[||-gen]]_{\!\![[ckvs]]} [[GG1]] [[~>]] [[GG2]] }}
+
+by
+
+</ xckvsi = unsolved (eAi) // i />
+-------------------------------- :: gen
+DD ||-gen ckvs </ Di : eAi // i /> ~> </ D : \/i [ckvs] . \/i [ckvsi] . (eA [ xckvsi |-> ckvsi ]) // i />
