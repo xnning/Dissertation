@@ -378,33 +378,34 @@ sctx, ss {{ tex \Sigma }} :: 'sctx_' ::=
 
 actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \Omega }}, DL {{ tex \Delta_L }}, DR {{ tex \Delta_R }}, GL {{ tex \Gamma_L }}, GR {{ tex \Gamma_R }}, GM {{ tex \Gamma_M }}, OL {{ tex \Omega_L }} , OR {{ tex \Omega_R }}, DDlo {{ tex \Delta^{\mathsf{lo} } }} :: 'actx_' ::=
   | empty                                     ::   :: empty
-  | x : aA                                    ::   :: cons_var
-  | x :  A                                    ::   :: cons_var2
-  | D : aA                                    ::   :: cons_data
-  | D :  A                                    ::   :: cons_data2
-  | a                                         ::   :: cons_tvar
   | a : k                                     ::   :: cons_tvar2
-  | T : K                                     ::   :: cons_tvar3
-  | T                                         ::   :: tconstr_s_untyped
-  | marker D                                  ::   :: marker      {{ tex { \scriptstyle \blacktriangleright_{[[D]]} } }}
-  | { DD }                                    ::  :: local_scope {{ tex \{ [[DD]] \} }}
-  | ma                                        ::   :: cons_mark
+  | a                                         ::   :: cons_tvar
   | evar                                      ::   :: cons_evar
   | evar : k                                  ::   :: cons_evar2
   | evar = at                                 ::   :: cons_evar_solu
   | evar =  t                                 ::   :: cons_evar_solu2
-  | Xa : K = k                                ::  :: kuvar_typed_solved
+  | evar : K = k                              ::   :: kuvar_typed_solved
+  | T : K                                     ::   :: cons_tvar3
+  | T                                         ::   :: tconstr_s_untyped
+  | ( GG )                                    :: S :: parens
+  | DD1 , .... , DDi                          ::   :: append_multiple
+  | x : aA                                    ::   :: cons_var
+  | x :  A                                    ::   :: cons_var2
+  | D : aA                                    ::   :: cons_data
+  | D :  A                                    ::   :: cons_data2
+  | marker D                                  ::   :: marker      {{ tex { \scriptstyle \blacktriangleright_{[[D]]} } }}
+  | { DD }                                    ::  :: local_scope {{ tex \{ [[DD]] \} }}
+  | ma                                        ::   :: cons_mark
   | [ ckvs ]                                  ::   :: fill_kvs {{ tex [[ckvs]] }}
   | GG [ TT ]                                       :: S :: ctx_tvar
-  | ( GG )                                         :: S :: parens
   | [ aA ] GG                                      :: S :: subst_ctx {{ tex  \mathsf{contaminate}( [[GG]] , [[aA]] ) }}
   | | GG |                                         :: S :: solve_ctx
   | GG [ </ Ti |-> Ai // i /> ]      ::  :: subst_tcon_mult
   | GG [ </ kvsi |-> kvsi' // i /> ]      ::  :: subst_kvs
   | [ TT ] GG          ::  :: context_apply
-  | DD1 , .... , DDi  ::  :: append_multiple
   | unsolved ( DD )   ::  :: unsolved
   | topo ( DD )       ::  :: topo
+  | [< DD >]           ::  :: placeholder {{ tex [[DD]] }}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2700,7 +2701,7 @@ by
 
 % Haskell 98
 
-TT1 = OO, </Xai // i />,  </ Ti : Xai // i />
+TT1 = OO, [< </Xai // i /> >],  </ Ti : Xai // i />
 </ TTi |- dti ~> TTssi ; GGi // i />
 TTsn --->> OO'
 OO' ; GG, </ GGi // i /> ||-p pgm : A
@@ -2728,7 +2729,7 @@ OO, T : eK ; GG ||-p pgm : eA
 ---------------------------- :: sig
 OO ; GG ||-p sig dtsig ; pgm : eA
 
-TT1 = OO, </ Xai : star // i />, </ Ti : Xai // i />
+TT1 = OO, [< </ Xai : star // i /> >], </ Ti : Xai // i />
 </ TTi |- dti ~> TTssi ; GGi // i />
 </ xckvsi = unsolved ([TTsn] Xai) // i />
 </ TTsn ||-gen ckvsi ([TTsn] (GGi[ </ xckvsi |-> ckvsi // i /> ])) ~> GG'i // i />

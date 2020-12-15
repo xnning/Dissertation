@@ -1,0 +1,112 @@
+%include polycode.fmt
+%include rae.fmt
+
+%if style == newcode
+\begin{code}
+{-# LANGUAGE PolyKinds #-}
+
+module Haskell98Algo where
+\end{code}
+%endif
+
+
+\section{Kind Inference for \hne}\label{sec:kind:algo}
+
+We now present the algorithmic system for \hne. Of particular interest
+is the defaulting rule (Section~\ref{sec:kind:haskell98:defaulting}), which
+means that these rules are not complete with respect to the declarative
+system.
+
+\subsection{Syntax}
+
+The top of
+\Cref{fig:kind:98:algo:pgm} describes the syntax of kinds and contexts in the
+algorithmic system for \hne. The differences from the declarative system are
+highlighted in gray. Following \citet{DK}, kinds are extended with unification kind variables
+$[[Xa]]$. Algorithmic contexts are also extended with unification kind
+variables, either unsolved ($[[Xa]]$) or solved ($[[Xa = k]]$). Although the
+grammar for algorithmic term contexts $[[GG]]$ appears identical to that
+of declarative contexts, note that the grammar for $[[k]]$ has been extended;
+accordingly, algorithmic contexts $[[GG]]$ might include kinds with unification variables,
+while declarative contexts $[[HH]]$ do not.
+
+% \ningning{explanations that have been given before in previous chapters.}
+% This approach of
+% recording unification variables and their solutions in the contexts is inspired
+% by \citet{gundry2010type} and \citet{DK}.
+% Importantly, an algorithmic
+% context is an \textit{ordered} list, which enforces that given
+% $[[DD1, Xa=k, DD2]]$, the kind $[[k]]$ must be well-formed under $[[DD1]]$. This rules out
+% solutions like $[[ Xa = Xa -> star ]]$ or $[[ Xa = Xb, Xb = Xa ]]$. Complete contexts $[[OO]]$ are contexts with all unification
+% variables solved.
+
+% We use a hole notation for inserting or replacing
+% declarations in the middle of a context. $[[ DD[TT] ]]$ means that $[[DD]]$ is of the form
+% $[[DD1, TT, DD2]]$.
+% To reduce clutter, when we have $[[ DD[Xa] ]]$,
+% we also use only $[[ DD ]]$ to refer to the same context.
+% If we have $[[ DD[Xa] ]] = [[ DD1, Xa, DD2 ]]$, then
+% $[[ DD[Xa=k] ]] = [[ DD1, Xa=k, DD2 ]]$.
+% This notation allows
+% multiple holes: $[[ DD[TT1][TT2] ]]$ means that $[[DD]]$ is of the form
+% $[[DD1, TT1, DD2, TT2, DD3]]$. For example,
+% $[[ DD[Xa][Xb] ]]$ is $[[ DD1, Xa, DD2, Xb, DD3 ]]$. Critically, $[[Xa]]$ appears
+% before $[[Xb]]$.
+
+% Since type contexts carry solutions for unification variables, we use
+% contexts as substitutions:
+% $[[ [DD] k ]]$ applies $[[DD]]$ to kind $[[k]]$.
+% Applying $[[DD]]$ substitutes all solved unification variables in its argument
+% idempotently.
+% If
+% under a complete context $[[OO]]$, a kind $[[k]]$ is well-formed, then $[[ [OO]k ]] $
+% contains no unification variables and is thus a well-formed declarative kind.
+% For term contexts, $[[ [DD] GG ]]$ applies $[[DD]]$ to each
+% kind in $[[GG]]$. Similarly, if under $[[OO]]$, a term context $[[GG]]$ is well-formed,
+% then $[[ [OO]GG ]]$ gives back a declarative term context. 
+% The notation $[[ [OO] DD ]]$ applies a complete context $[[OO]]$ to $[[DD]]$.
+% We apply $[[OO]]$ to the
+% kind of type variables and type constructors in $[[DD]]$ and remove the binding
+% of solved unification variables from $[[DD]]$. The full definition of context
+% substitution is in TODO.
+% As above, $[[ [OO]DD ]]$ is a declarative type
+% context.
+
+\subsection{Algorithmic Typing Rules}
+\label{sec:kind:h98:algo-typing}
+
+\begin{figure}[t]
+\begin{center}
+   \begin{tabular}{llll}\toprule
+     kind      & $[[k]]$ & $\Coloneqq$ & $[[star]] \mid [[k1 -> k2]] \mid \rulehl{[[Xa]]} $ \\
+     % \\
+     term context  & $[[GG]]$ & $\Coloneqq$ & $[[empty]]
+                                              \mid [[GG, D : A ]]$ \\
+     type context  & $[[DD]], [[TT]]$ & $\Coloneqq$ & $[[empty]] \mid [[DD, a : k]] \mid [[DD, T : k ]] \mid \rulehl{[[DD, Xa]]} \mid \rulehl{[[DD, Xa = k]]} $ \\
+     complete type context  & $[[OO]]$ & $\Coloneqq$ & $[[empty]] \mid [[OO, a : k]] \mid [[OO, T : k ]] \mid [[OO, Xa = k]] $ \\ \bottomrule
+   \end{tabular}
+ \end{center}
+\drules[a-pgm]{$[[OO ; GG ||-p pgm : A]]$}{Typing Program}{expr,dt}
+\drules[a-dt]{$[[DD |- dt ~> TT ; GG]]$}{Typing Datatype Decl.}{decl}
+\drules[a-dc]{$[[DD |- t dc ~> t' -| TT ]]$}{Typing Data Constructor Decl.}{decl}
+\caption{Algorithmic program typing in \hne}
+\label{fig:kind:98:algo:pgm}
+\end{figure}
+
+\Cref{fig:kind:98:algo:pgm} presents the typing rules for programs, datatype
+declarations and data constructor declarations.
+As this work focuses on the problem of kind inference of datatypes, we
+reduce the expression typing to the declarative system (\rref{a-pgm-expr});
+note that the contexts used there are declarative, as explained above.
+For type-checking a group of mutually recursive datatypes (\rref{a-pgm-dt}), we first
+assign each type constructor a unification variable $[[Xa]]$
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
+
+%%  LocalWords:  polycode newcode PolyKinds Algo endif Decl decl App FormData
+%%  LocalWords:  DataList MkQ MkP mkQ lemmasoundtypingdcd lemmactxkinduniftwo
+%%  LocalWords:  lemmacompleteddgroup
