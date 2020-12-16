@@ -1,0 +1,115 @@
+%include polycode.fmt
+%include rae.fmt
+
+%if style == newcode
+\begin{code}
+module Haskell98TParm where
+\end{code}
+%endif
+
+\section{Type Parameters, Principal Kinds and Completeness in \hne}
+\label{sec:kind:type_par}
+
+We have seen that our judgments for checking programs $[[|-p]]$ and $[[||-p]]$
+do not support completeness, because the
+declarative system cannot easily model the defaulting rule given in
+\Cref{sec:kind:haskell98:defaulting}. In this section, we introduce \emph{kind parameters},
+inspired by type parameters in \citet{garcia:principal}, and relate the
+defaulting rule to principal kinds to recover completeness.
+
+\subsection{Type Parameters}
+
+Consider the datatype |data App f a = MkApp (f a)| again.
+The parameter |a| in this example
+can be of any kind, including |*|, |* -> *|, or others.
+To express this polymorphism without introducing first-class polymorphism, we
+endow the declarative system with a set of \textit{kind parameters}. Importantly,
+kind parameters live only in our reasoning; users are not allowed to write
+any kind parameters in the source. We amend the definition of kinds in
+\Cref{fig:kind:rules:98} as follows.
+
+\begin{center}
+  \begin{tabular}{llll}\toprule
+    kind parameter & $[[P]]$ & $\in$  & $\textsc{KParam}$ \\
+    kind           & $[[k]]$ & $\Coloneqq$ & $[[star]] \mid [[k1 -> k2]] \mid \hlmath{[[P]]}$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\noindent Kind parameters are uninterpreted kinds: there is no special
+treatment of kind parameters in the type system. Think of them as abstract, opaque
+kind constants. Kind parameters are eliminated by substitutions $[[tsub]]$, which
+map kind parameters to kinds, and homomorphically work on kinds themselves.
+For example, |App| can be assigned kind $[[ (P -> star) -> P -> star
+]]$. By substituting for $[[P]]$, we can get, for example, $[[ (star -> star) ->
+star -> star]]$. Indeed, from $[[ (P -> star) -> P -> star]]$
+we can get all other possible kinds of |App|. This leads to the
+definition of \textit{principal kinds} for a group; and to the property
+that for every well-formed group, there exists a list of principal
+kinds.
+%
+\begin{definition}[Principal Kind in \hne with Kind Parameters]
+  Given a context $[[EE]]$, a group $[[rec </ dti // i />]]$,
+  and a list of kinds $[[ </ ki // i /> ]]$,
+  we say that the $[[</ ki // i />]]$ are \emph{principal kinds} of
+  $[[EE]]$ and $[[rec </ dti // i />]]$,
+  denoted as $ [[EE |- rec </ dti // i /> ~~~>p </ ki // i />]] $,
+  if $[[ EE |-grp rec </ dti // i /> ~~~> </ ki // i/> ; </HHi // i/> ]]$,
+  and
+  whenever $[[ EE |-grp rec </ dti // i /> ~~~> </ k'i // i/> ; </HH'i // i/> ]]$ holds,
+  there exists some substitution $[[tsub]]$,
+  such that $ [[ </ tsub(ki) = k'i // i /> ]]$
+  and $[[ </ tsub(HHi) = HH'i // i /> ]]$.
+\end{definition}
+
+\begin{restatable}[Principality of \hne with Kind Parameters]{theorem}{lemmaprincipal}
+  \label{lemma:h98:principal}
+  If $[[ EE |-grp rec </ dti // i /> ~~~> </ ki // i/> ; </HHi // i/> ]]$,
+  then there exists some $[[ </ k'i // i />]]$
+  such that $[[EE |- rec </ dti // i /> ~~~>p </ k'i // i />]] $.
+\end{restatable}
+
+\subsection{Principal Kinds and Defaulting}
+\label{sec:kind:tparm:defaulting}
+
+Using the notion of kind parameters, we can now incorporate defaulting into the
+declarative specification of \hne.
+To this end, we define the defaulting kind parameter substitution $[[tsubstar]]$:
+% 
+\begin{definition}[Defaulting Kind Parameter Substitution]
+  \label{def:defaulting-kparm}
+  Let $[[tsubstar]] \in \textsc{KParam} \to [[k]]$ denote the substitution that
+  substitutes all kind parameters to $[[star]]$.
+\end{definition}
+% 
+\noindent Using $[[tsubstar]]$, we can rewrite \rref{pgm-dt}. Noteworthy is the fact that 
+kind parameters only live in the middle of the derivation (in the $[[ki]]$),
+but never
+appear in the results $[[tsubstar(ki)]]$.
+% 
+\[ \drule{pgm-dtP} \]
+
+\subsection{Completeness}
+
+The two versions of defaulting (the one above and $[[DD --->> OO]]$ of
+\Cref{sec:kind:h98:algo-typing}) are equivalent. This fact is embodied in the
+following theorem, stating that the algorithmic system is complete with respect
+to the declarative system with kind parameters.
+% 
+\begin{restatable}[Completeness of $[[||-p]]$ with Kind Parameters]{theorem}{lemmacomplete}
+  \label{lemma:h98:complete}
+  Given algorithmic contexts $[[ OO ]]$, $[[GG]]$,
+  and a program $[[pgm]]$,
+  if $[[ [OO] OO ; [OO] GG |-p pgm : A  ]]$,
+  then $[[ OO ; GG ||-p pgm : A ]]$.
+\end{restatable}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
+
+%%  LocalWords:  polycode newcode TParm endif App MkApp lemmaprincipal
+%%  LocalWords:  lemmacomplete

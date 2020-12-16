@@ -129,6 +129,9 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA 
   | A [ </ ai |-> ti // i /> ]         ::  :: subst_mult
   | A [ </ Xi |-> ki // i /> ]         ::  :: subst_k_mult
   | A [ </ Ti |-> ki // i /> ]         ::  :: subst_t_mult
+  | P                      ::  :: type_par {{ tex P }}
+  | \bot                   ::  :: any
+  | tsub ( K )             ::  :: tsubst
 
 kinds :: 'kinds_' ::=
   | </ Ki // i />       :: :: ks
@@ -365,6 +368,7 @@ dctx, dd {{ tex \Psi}} , HH {{ tex \Psi }} :: 'dctx_' ::=
   | [ OO ] DD     :: S :: ctx_subst
   | </ Di : Ai // i /> ::  :: dconstr_s
   | HH1 , .. , HHi     ::  :: append_multiple
+  | tsub ( HH )        ::  :: tsub
 
 sctx, ss {{ tex \Sigma }} :: 'sctx_' ::=
   | empty       ::   :: empty
@@ -469,6 +473,12 @@ dataconstr, dc {{tex \mathcal{D} }} , dcc {{tex \mathcal{D} }} :: 'dc_' ::=
 
 typesubst, tsub {{ tex S }}, tsubstar {{tex S^{\star} }} :: 'tsub_' ::=
 
+group :: 'group_' ::=
+  | rec </ dti // i />  :: :: group
+
+other_syntax :: 'other_' ::=
+  | EE |- group ~~~>p kinds   :: :: princ
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % TERMINALS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -479,6 +489,7 @@ terminals :: 'terminals_' ::=
   | ~       :: :: consist {{ tex \sim }}
   | ~=      :: :: approx {{ tex \approx }}
   | ->      :: :: arrow   {{ tex \rightarrow }}
+  | ~~~>p        ::  :: princ {{ tex \leadsto^{\mathsf{p} } }}
   | --->    :: :: longarrow   {{ tex \rightarrow }}
   | --->>      :: :: two_head_long_rightarrow   {{ tex \longrightarrow\mathrel{\mkern-14mu}\rightarrow }}
   | star       :: :: star      {{ tex \star }}
@@ -566,6 +577,7 @@ terminals :: 'terminals_' ::=
   | ||-inst    :: :: Vdashinst {{ tex \Vdash^{\!\!\mathsf{inst} } }}
   | ||-kapp    :: :: Vdashkapp {{ tex \Vdash^{\!\!\mathsf{kapp} } }}
   | |-kc       :: :: vdashkc {{ tex \vdash^{\!\!\mathsf{kc} } }}
+  | \bot       ::  :: bot {{ tex \bot }}
 
 
 formula :: formula_ ::=

@@ -115,8 +115,8 @@
 }
 
 \newcommand{\ottdrulepgmXXdtP}[1]{\ottdrule[#1]{%
-\ottpremise{[[ EE |-grp rec </ dti // i/>  ~> </ki // i/> ; </ HHi // i /> ]]
- \quad\enskip [[ EE |- rec </ dti // i /> ~>p </ ki // i /> ]]
+\ottpremise{[[ EE |-grp rec </ dti // i/>  ~~~> </ki // i/> ; </ HHi // i /> ]]
+ \quad\enskip [[ EE |- rec </ dti // i /> ~~~>p </ ki // i /> ]]
  \quad\enskip [[ EE, </ Ti : tsubstar(ki) // i />; HH, </ tsubstar(HHi) // i /> |-p pgm : A ]]}
 }{
 [[ EE; HH |-p rec </ dti // i /> ; pgm : A ]]
