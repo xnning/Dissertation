@@ -1,0 +1,124 @@
+%include polycode.fmt
+%include rae.fmt
+
+%if style == newcode
+\begin{code}
+{-# LANGUAGE ExplicitForAll, PolyKinds, ExistentialQuantification, TypeInType
+  #-}
+{-# OPTIONS_GHC -Wno-unused-foralls #-}
+
+module TypeInType where
+
+import Data.Proxy ( Proxy(..) )
+
+\end{code}
+%endif
+
+\section{Declarative Syntax and Semantics of \tit}
+\label{sec:kind:tit:decl}
+
+Having set the stage for kind inference for datatypes in \hne,
+we now present the declarative \tit system.
+Our syntax is given at the top of \Cref{fig:kind:tit:decl}. Compared to
+\hne, programs $[[pgm]]$ now include datatype signatures $[[dtsig]]$.
+Data constructor declarations $[[dc]]$ support existential quantification.
+Types and kinds are collapsed into one level; $[[A]]$ and $[[K]]$ are now
+synonymous metavariables and allow
+prenex polymorphism, where variables in a kind binder $[[kvs]]$ can
+optionally have kind annotations. Monotypes $[[t]]$ and $[[k]]$ allow visible kind
+applications $[[t1 @@ t2]]$. Elaborated types $[[eA]]$, $[[eK]]$ are the result
+of elaboration, which decorates source types to make them fully explicit.
+This is done so that
+checking equality of elaborated types is straightforward.
+The syntax for elaborated types contains inferred polymorphism $[[\/i [ckvs]. eA]]$,
+where complete free kind binders $[[ckvs]]$ have all variables annotated.
+Elaborated monotypes $[[et]]$ and $[[ek]]$ share the same syntax as monotypes. We
+informally use only $[[et]]$ or $[[ek]]$ for elaborated monotypes.
+
+\subsection{Groups and Dependency Analysis}
+\label{sec:kind:more-complicated-dependency}
+
+Decomposition of signatures and definitions allows a more fine-grained control of
+dependency analysis.
+If |T| has a signature, and |S|
+depends on |T|, then we can kind-check |S| without inspecting the definition of
+|T|, because we know the kind of |T|. In other words, |S| only
+depends on the \emph{signature} of |T|, not the \emph{definition} of |T|.
+The complete dependency analysis rule, inspired by \citet[Section~11.6.3]{jones99typing}, is:
+
+\begin{definition}[Dependency Analysis in \tit]\leavevmode
+  \label{def:dep-cusk}
+  \begin{enumerate}[(i)]
+  \item If the signature/definition of $[[T1]]$ mentions $[[T2]]$, then:
+    \begin{enumerate}
+    \item if $[[T2]]$ has a signature, the signature/definition of $[[T1]]$ depends on
+      the signature of $[[T2]]$;
+    \item otherwise, the signature/definition of $[[T1]]$ depends on the definition of $[[T2]]$.
+    \end{enumerate}
+  \item A definition depends on its signature.
+  \end{enumerate}
+\end{definition}
+
+To avoid a type that mentions itself in its own kind, we disallow
+self-dependency or mutual dependency involving signatures. For example, a group
+|cusk(T1 :: T2 a -> *)|; |cusk(T2 :: T1 -> *)| is rejected, lest |T1| be assigned
+type |forall (a::T1). T2 a -> *|.
+In other words, signatures do not form groups: they are always processed
+individually. Moreover, the definition of a datatype which has a signature does
+not join others in a group, as according to \Cref{def:dep-cusk}, there will be no
+dependency from datatypes on it. This simplifies the kinding procedure, as we
+will see in the coming section.
+
+\begin{figure}
+  \begin{center}
+  \begin{tabular}{llll}\toprule
+    program                  & $[[pgm]]$ & $\Coloneqq$ & $[[ sig dtsig ; pgm ]] \mid [[rec </ dti // i/> ; pgm]] \mid [[e]]$ \\
+    datatype signature       & $[[dtsig]]$ & $\Coloneqq$ & $[[data T : A]] $ \\
+    datatype decl.           & $[[dt]]$  & $\Coloneqq$ & $[[data T </ ai // i /> =  </ dcj // j /> ]] $ \\
+    data constructor decl.   & $[[dc]]$  & $\Coloneqq$ & $ [[ \/ kvs . D </ ti // i />]]$ \\[2ex]
+
+    type, kind           & $[[A]]$, $[[K]]$ & $\Coloneqq$ & $
+                                                            % [[ \/i [kvs] . A ]] \mid
+                                                            [[ \/s [kvs] . A]] \mid [[t]] $ \\
+
+    monotype, monokind  & $[[t]], [[k]]$, $[[et]]$, $[[ek]]$ & $\Coloneqq$ & $[[star]] \mid [[nat]] \mid [[a]] \mid [[T]] \mid [[t1 t2]] \mid [[t1 @@t2]] \mid [[->]]$ \\
+    elaborated type, kind & $[[eA]]$, $[[eK]]$ & $\Coloneqq$ & $[[ \/i [ckvs] . eA ]] \mid [[ \/s [ckvs] . eA]] \mid [[et]] $ \\[2ex]
+    % elaborated monotype   & $[[et]], [[ek]]$ & $\Coloneqq$ & $[[star]] \mid [[nat]] \mid [[a]] \mid [[T]] \mid [[et1 et2]] \mid [[et1 @@et2]] \mid [[->]]$ \\
+
+    term context  & $[[HH]]$ & $\Coloneqq$ & $[[empty]]
+                                             % \mid [[HH, x : eA]]
+                                             \mid [[HH, D : eA ]]$ \\
+    type context  & $[[EE]]$ & $\Coloneqq$ & $[[empty]] \mid [[EE, a : et]] \mid [[EE, T : eK ]]$ \\
+    kind binder list & $[[ kvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[kvs, a]] \mid [[kvs, a : k]]  $ \\
+    complete kind binder list & $[[ ckvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[ckvs, a:et]] $ \\
+                              % & $[[ ikvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[ikvs, a:star]] $ \\
+    \bottomrule
+  \end{tabular}
+  \end{center}
+% \drules[sr]{$[[rs A]]$}{Kind results in $[[star]]$}{star,arrow,forall}
+\drules[pgm]{$[[EE ; HH |-p pgm : A]]$}{Typing Program}{sig,dt-ttS,dt-tt}
+
+\drules[sig]{$[[EE |- dtsig ~> T : eK]]$}{Typing Signature}{tt}
+
+\drules[dt]{$[[EE |- dt ~> HH]]$}{Typing Datatype Decl.}{tt}
+
+\begin{minipage}{.52\textwidth}
+\drules[dc]{$[[EE |-dc et dc ~> eA]]$}{Typing Data Constructor Decl.}{tt}
+\end{minipage}
+\hspace{.04\textwidth}
+\begin{minipage}{.42\textwidth}
+\drules[]{$[[EE |-gen ckvs HH1 ~> HH2]]$}{Generalization}{gen}
+\end{minipage}
+\caption{Declarative specification of \tit}
+\label{fig:kind:tit:decl}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
+
+%%  LocalWords:  polycode newcode ExplicitForAll PolyKinds TypeInType foralls
+%%  LocalWords:  ExistentialQuantification endif poly cusk decl monokind
+%%  LocalWords:  lemmattwfkinding
