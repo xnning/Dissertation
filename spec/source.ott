@@ -161,6 +161,7 @@ dtyp_mono, t {{ tex \tau }}, s {{ tex \tau }}, k {{tex \kappa}}, et {{tex \rho}}
   | t1 [ X |-> k2 ]         ::  :: subst_k
   | t1 [ </ ai |-> ti // i /> ]         ::  :: subst_mult
   | t1 [ </ Xi |-> ki // i /> ]         ::  :: subst_k_mult
+  | \bot                   ::  :: any
 
 % Castable Mono Types
 
@@ -171,6 +172,7 @@ dtyp_mono_cast, tc {{ tex t }} :: 'dtyp_mono_cast_' ::=
   | a          :: :: tvar
   | tc1 -> tc2 :: :: arrow
   | gradual    :: :: gradual
+  | \bot                   ::  :: any
 
 % Castable Types
 

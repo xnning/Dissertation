@@ -13,8 +13,11 @@ module Haskell98TParm where
 We have seen that our judgments for checking programs $[[|-p]]$ and $[[||-p]]$
 do not support completeness, because the
 declarative system cannot easily model the defaulting rule given in
-\Cref{sec:kind:haskell98:defaulting}. In this section, we introduce \emph{kind parameters},
-inspired by type parameters in \citet{garcia:principal}, and relate the
+\Cref{sec:kind:haskell98:defaulting}.
+In \Cref{chap:Dynamic}, we have seen that introducing type parameters
+\citep{garcia:principal} helps resolve the dynamic gradual guarantee.
+Inspired by that, in this section, we introduce \emph{kind parameters},
+and relate the
 defaulting rule to principal kinds to recover completeness.
 
 \subsection{Type Parameters}

@@ -305,21 +305,20 @@ The main theorem of soundness is for program typing:
 \end{restatable}
 %
 This lemma statement refers to judgments $[[OO ok]]$ and $[[OO ||- GG]]$; these
-basic well-formedness checks are given in TODO.
+basic well-formedness checks are standard.
 Because the declarative judgment $[[|-p]]$ requires declarative contexts, we
 write $[[ [OO]OO ]]$ and $[[ [OO]GG ]]$ in the conclusion, applying the complete algorithmic
 context $[[OO]]$ as a substitution to form a declarative context, free of unification
 variables.
 
 The statement of completeness relies on the definition of \textit{context
-  extension} $[[DD --> TT]]$. The judgment
+  extension} $[[DD --> TT]]$ \citep{DK}. The judgment
 captures a process of \textit{information
-  increase}. The formal definition of context extension is given in
-TODO,
- and its treatment is as in
-\citet{dunfield2013complete}. Intuitively, context extension preserves all
-information in $[[DD]]$, and may increase the information by adding or solving
-more unification variables. In all the algorithmic judgments, the output context
+  increase}, and its definition is similar as in previous chapters.
+% Intuitively, context extension preserves all
+% information in $[[DD]]$, and may increase the information by adding or solving
+% more unification variables.
+In all the algorithmic judgments, the output context
 is an extension of the input context.
 
 We prove that our system is complete only up to checking \textit{a group of
