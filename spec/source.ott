@@ -630,9 +630,12 @@ formula :: formula_ ::=
   | kvs in EE        ::  :: kvs_in_quantifier {{ tex [[kvs]] \in [[EE]] }}
   | kvs1 = kvs2      ::  :: eq_kvs
   | kvs1 # kvs2           ::  :: set_disjoint  {{ tex [[kvs1]]~\sharp~[[kvs2]] }}
-  | EE |-grp rec </ dti // i /> ~> </ Kj // j /> ; </ HHl // l /> :: :: typing_rec
-  | DD ||-grp rec </ dti // i /> ~> </ Kj // j /> ; </ GGl // l /> -| TT :: :: typing_rec_algo
-  | DD ||-grp rec </ dti // i /> ~> </ Kj // j /> ; </ GGl // l /> :: :: typing_rec_algo_gen
+  | EE |-grp rec </ dti // i /> ~~~> </ Kj // j /> ; </ HHl // l /> :: :: typing_rec
+  | DD ||-grp rec </ dti // i /> ~~~> </ Kj // j /> ; </ GGl // l /> -| TT :: :: typing_rec_algo
+  | DD ||-grp rec </ dti // i /> ~~~> </ Kj // j /> ; </ GGl // l /> :: :: typing_rec_algo_gen
+  | K1 ~= K2           ::  :: unify
+  | DD |- eK1 ~= eK2   ::  :: wip_unif
+  | HH1 = HH2        ::  :: ectx_eq
 
 
 subrules
@@ -2058,7 +2061,7 @@ promotion :: '' ::=
 defn
 
 DD |-pr ( evar ) aA ~~> at2 -| TT ::  :: promotion :: 'pr_'
-{{ tex [[DD]] [[|-pr]]_{[[evar]]} [[aA]] [[~~>]] [[at2]] [[-|]] [[TT]] }}
+{{ tex [[DD]] [[|-pr]]_{\!\![[evar]]} [[aA]] [[~~>]] [[at2]] [[-|]] [[TT]] }}
 by
 
 -------------------------- :: int
@@ -2079,12 +2082,12 @@ GG |-pr (evar) at1 -> at2 ~~> at3 -> at4 -| DD
 GG[evarb][evar] |-pr (evar) evarb ~~> evarb -| GG[evarb][evar]
 
 -------------------------- :: evarR
-GG[evar][evarb] |-pr (evar) evarb ~~> evarb1 -| GG[evarb1,evar][evarb]
+GG[evar][evarb] |-pr (evar) evarb ~~> evarb1 -| GG[evarb1,evar][evarb=evarb1]
 
 defn
 
 GG |-pr pm ( evar ) aA ~~> at -| DD ::  :: sprpromotion :: 'p_pr_'
-{{ tex [[GG]] \vdash^{\!\![[pm]]}_{[[evar]]} [[aA]] [[~~>]] [[at]] [[-|]] [[DD]] }}
+{{ tex [[GG]] \vdash^{\!\![[pm]]}_{\!\![[evar]]} [[aA]] [[~~>]] [[at]] [[-|]] [[DD]] }}
 by
 
 GG[evarb,evar] |-pr- (evar) aA[a ~> evarb] ~~> at -| DD
@@ -2746,7 +2749,7 @@ OO ; GG ||-p rec dt ; pgm : eA
 defn
 
 DD |- dt ~> TT ; GG :: :: dt :: 'dt_'
-{{tex [[DD]] \Vdash^{\!\!\mathsf{dt} } [[dt]] [[~>]] [[GG]] \dashv [[TT]] }}
+{{tex [[DD]] \Vdash^{\!\!\mathsf{dt} } [[dt]] \leadsto [[GG]] \dashv [[TT]] }}
 by
 
 % Haskell 98
@@ -2766,7 +2769,7 @@ by
 % DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TT ; </ Dj: \/i [ckvs1] . \/ [ckvs2] . \/ </ ai :[TTsn]Xai //i /> .eAj // j />
 
 (T : \/i [ckvs1]. \/ [ckvs2]. ek) in DD
-DD, [ckvs1], [ckvs2], </ Xai : star // i /> |- [DD]ek ~ (</ Xai // i /> ---> star) -| TT1, [ckvs1], [ckvs2], </ Xai : star = eki // i />
+DD, [ckvs1], [ckvs2], </ Xai : star // i /> |- [DD]ek ~= (</ Xai // i /> ---> star) -| TT1, [ckvs1], [ckvs2], </ Xai : star = eki // i />
 </ TTj, [ckvs1], [ckvs2], </ ai : eki // i />  |-(T @[ckvs1] @[ckvs2] </ ai // i />)  dcj ~> eAj -| TTsj, [ckvs1], [ckvs2], </ ai : eki  // i /> // j />
 ---------------------------  :: tt
 DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TTsn ; </ Dj: \/i [ckvs1] . \/ [ckvs2] . \/ </ ai : eki //i /> .eAj // j />
@@ -2774,7 +2777,7 @@ DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TTsn ; </ Dj: \/i [
 defn
 
 DD |- t dc ~> A -| TT :: :: dc :: 'dc_'
-  {{tex [[DD]] \Vdash^{\!\!\mathsf{dc} }_{\!\![[t]]} [[dc]] [[~>]] [[A]] [[-|]] [[TT]]}}
+  {{tex [[DD]] \Vdash^{\!\!\mathsf{dc} }_{\!\![[t]]} [[dc]] \leadsto [[A]] [[-|]] [[TT]]}}
 by
 
 % Haskell 98
@@ -2838,11 +2841,11 @@ DD |- k1 . k2 : k' -| TT :: :: app_mode :: 'kapp_'
 by
 
 
-DD[Xa1, Xa2, Xa = Xa1 -> Xa2] |- Xa1 ~ k -| TT
+DD[Xa1, Xa2, Xa = Xa1 -> Xa2] |- Xa1 ~= k -| TT
 -------------------------- :: kuvar
 DD[Xa] |- Xa . k : Xa2 -| TT
 
-DD |- k1 ~ k -| TT
+DD |- k1 ~= k -| TT
 ---------------------- :: arrow
 DD |- k1 -> k2 . k : k2 -| TT
 
@@ -2871,69 +2874,69 @@ DD1, Xa:ek, DD2 |- (et1 : Xa) . t : Xa2 ~> et1 et2 -| TT
 
 defn
 
-DD |- K1 ~ K2 -| TT :: :: unif :: 'u_'
- {{ tex [[DD]] \Vdash^{\!\!\mathsf{u} } [[K1]] [[~]] [[K2]] [[-|]] [[TT]] }}
+DD |- K1 ~= K2 -| TT :: :: unif :: 'u_'
+ {{ tex [[DD]] \Vdash^{\!\!\mathsf{u} } [[K1]] [[~=]] [[K2]] [[-|]] [[TT]] }}
 by
 
 
 ----------------------- :: refl
-DD |- k ~ k -| DD
+DD |- k ~= k -| DD
 
 ----------------------- :: refl_tt
-DD |- ek ~ ek -| DD
+DD |- ek ~= ek -| DD
 
 
-DD |- k1 ~ k3 -| TT1
-TT1 |- [TT1] k2 ~ [TT1] k4 -| TT
+DD |- k1 ~= k3 -| TT1
+TT1 |- [TT1] k2 ~= [TT1] k4 -| TT
 --------------------------------- :: arrow
-DD |- k1 -> k2 ~ k3 -> k4 -| TT
+DD |- k1 -> k2 ~= k3 -> k4 -| TT
 
 DD |-pr (Xa) k ~~> k2 -| TT[Xa]
 ------------------------------------------ :: kvarL
-DD[Xa] |- Xa ~ k -| TT[Xa=k2]
+DD[Xa] |- Xa ~= k -| TT[Xa=k2]
 
 DD |-pr (Xa) et1 ~~> et2 -| TT1, Xa:ek1, TT2
 TT1 |-el et2 : ek2
-TT1 |- [TT1] ek1 ~ ek2 -| TT3
+TT1 |- [TT1] ek1 ~= ek2 -| TT3
 ------------------------------------------ :: kvarL_tt
-DD |- Xa ~ et1 -| TT3, Xa : ek1 = et2, TT2
+DD |- Xa ~= et1 -| TT3, Xa : ek1 = et2, TT2
 
 DD |-pr (Xa) et1 ~~> et2 -| TT1, Xa:ek1, TT2
 TT1 |-el et2 : ek2
-TT1 |- [TT1] ek1 ~ ek2 -| TT3
+TT1 |- [TT1] ek1 ~= ek2 -| TT3
 ------------------------------------------ :: kvarR_tt
-DD |- et1 ~ Xa  -| TT3, Xa : ek1 = et2, TT2
+DD |- et1 ~= Xa  -| TT3, Xa : ek1 = et2, TT2
 
 
 DD1, DD2 ++ Xa: ek1 -| TT
 DD[{TT}] |-pr (Xa) et1 ~~> et2 -| TT1, { TT2, Xa : ek1,  TT3 } , TT4
 TT1, {TT2} |-el et2 : ek2
-TT1, {TT2} |- [TT1,TT2] ek1 ~ ek2 -| TT5, {TT6}
+TT1, {TT2} |- [TT1,TT2] ek1 ~= ek2 -| TT5, {TT6}
 ------------------------------------------------------- :: kvarL_lo_tt
-DD[{DD1, Xa : ek1, DD2}] |- Xa ~ et1 -| TT5, {TT6,  Xa : ek1 = et2 , TT3 }, TT4
+DD[{DD1, Xa : ek1, DD2}] |- Xa ~= et1 -| TT5, {TT6,  Xa : ek1 = et2 , TT3 }, TT4
 
 DD1, DD2 ++ Xa: ek1 -| TT
 DD[{TT}] |-pr (Xa) et1 ~~> et2 -| TT1, { TT2, Xa : ek1,  TT3 } , TT4
 TT1, {TT2} |-el et2 : ek2
-TT1, {TT2} |- [TT1,TT2] ek1 ~ ek2 -| TT5, {TT6}
+TT1, {TT2} |- [TT1,TT2] ek1 ~= ek2 -| TT5, {TT6}
 ------------------------------------------------------- :: kvarR_lo_tt
-DD[{DD1, Xa : ek1, DD2}] |- et1 ~ Xa -| TT5, {TT6,  Xa : ek1 = et2 , TT3 }, TT4
+DD[{DD1, Xa : ek1, DD2}] |- et1 ~= Xa -| TT5, {TT6,  Xa : ek1 = et2 , TT3 }, TT4
 
 
 DD |-pr (Xa) k ~~> k2 -| TT[Xa]
 ------------------------------------------ :: kvarR
-DD[Xa] |- k ~ Xa -| TT[Xa=k2]
+DD[Xa] |- k ~= Xa -| TT[Xa=k2]
 
 
-DD |- et1 ~ et3 -| DD1
-DD1 |- [DD1] et2 ~ [DD1] et4 -| TT
+DD |- et1 ~= et3 -| DD1
+DD1 |- [DD1] et2 ~= [DD1] et4 -| TT
 ----------------------------------- :: app
-DD |- et1 et2 ~ et3 et4 -| TT
+DD |- et1 et2 ~= et3 et4 -| TT
 
-DD |- et1 ~ et3 -| DD1
-DD1 |- [DD1] et2 ~ [DD1] et4 -| TT
+DD |- et1 ~= et3 -| DD1
+DD1 |- [DD1] et2 ~= [DD1] et4 -| TT
 ----------------------------------- :: kapp
-DD |- et1 @et2 ~ et3 @et4 -| TT
+DD |- et1 @et2 ~= et3 @et4 -| TT
 
 
 defn
@@ -3298,7 +3301,7 @@ DD |- A : K1 <: K2 ~> A' -| TT :: :: instantiation :: 'inst_'
 {{ tex [[DD]] \Vdash^{\!\!\mathsf{inst} } [[A]] : [[K1]] [[<:]] [[K2]] [[~>]] [[A']] [[-|]] [[TT]] }}
 by
 
-DD |- ek1 ~ ek2 -| TT
+DD |- ek1 ~= ek2 -| TT
 ---------------------- :: refl
 DD |- eA : ek1 <: ek2 ~> eA -| TT
 
@@ -3442,7 +3445,7 @@ DD, Xa:ek1 |- et1 @Xa : eK [a |-> Xa] |> et2 : ek2 -| TT
 ------------------------------------ :: forall_infer
 DD |- et1 : \/i [a:ek1] . eK |> et2 : ek2 -| TT
 
-DD1 |- [DD1] k ~ star -| TT1
+DD1 |- [DD1] k ~= star -| TT1
 ------------------------------------ :: kuvar
 DD1, Xa:k, DD2 |- et : Xa |> et : Xa1 -> Xa2 -| TT1, Xa1:star,Xa2:star,Xa:k=Xa1 ->  Xa2, DD2
 

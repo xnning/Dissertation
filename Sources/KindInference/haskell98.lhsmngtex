@@ -81,7 +81,7 @@ Guessing the right answer is typical of declarative type systems.
 The algorithmic system presented in \Cref{sec:kind:algo} provides a mechanism for an
 implementation. %%Note that kinds are guessed for an entire group all at once.
 Although there is no special judgment for typing a group of mutually recursive
-datatypes, we use $[[EE |-grp rec </ dti // i /> ~> </ ki // i/> ; </ HHi // i
+datatypes, we use $[[EE |-grp rec </ dti // i /> ~~~> </ ki // i/> ; </ HHi // i
 />]]$ to denote that the kinding results of datatype declarations are
 $\ottcomp{[[ki]]}{i}$, and the output term contexts are $\ottcomp{[[HHi]]}{i}$.
 

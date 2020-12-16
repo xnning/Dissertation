@@ -55,7 +55,10 @@ unifying $[[evar]] [[~=]] [[at1]]$ (\rref{u-evarL}), we cannot simply set
 $[[evar]]$ to $[[at1]]$, as $[[at1]]$ might include variables bound to the right
 of $[[evar]]$. Instead, we need to \textit{promote} ($[[|-pr]]$) $[[at1]]$.
 After promoting $[[at1]]$ to $[[at2]]$, we can directly set $[[evar = at2]]$.
-\Rref{u-varR} deals with the case when $[[evar]]$ appears on the right.
+\Rref{u-evarR} is symmetric to \rref{u-evarL}.
+Note that when
+unifying $[[Xa ~= Xb]]$, either \rref{u-evarL} and \rref{u-evarR} could be
+tried; an implementation can arbitrarily choose between them.
 
 \paragraph{Promotion.}
 

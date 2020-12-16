@@ -126,9 +126,9 @@
 
 
 \newcommand{\ottdruleaXXdtXXdecl}[1]{\ottdrule[#1]{%
-\ottpremise{[[(T : k) in DD]]
- \quad\enskip [[DD, </ Xai // i /> |- [DD]k ~ (</ Xai // i /> ---> star) -| TT1, </ Xai = ki // i />]]
- \quad\enskip [[</ TTj, </ ai : ki // i /> |-T </ ai // i/>  dcj ~> tj -| TTsj, </ ai : ki // i /> // j />]]}
+\ottpremise{[[(T : k) in DD]]}
+\ottpremise{[[DD, </ Xai // i /> |- [DD]k ~= (</ Xai // i /> ---> star) -| TT1, </ Xai = ki // i />]]}
+\ottpremise{[[</ TTj, </ ai : ki // i /> |-T </ ai // i/>  dcj ~> tj -| TTsj, </ ai : ki // i /> // j />]]}
 }{
 [[DD |- data T </ ai // i />    =  </ dccj // j IN 1..n />  ~> TTsn ; </ Dj: \/ </ ai : ki //i /> .tj //j />]]
 }{%
@@ -141,4 +141,12 @@
 [[EE]] [[|-]] [[->]] : [[star -> star -> star]]
 }{%
 {\ottdrulename{k\_arrow}}{}%
+}}
+
+\newcommand{\ottdruleaXXkXXarrow}[1]{\ottdrule[#1]{%
+    \ottpremise{ }
+}{
+[[DD]] \Vdash^{\!\!\mathsf{k} } [[->]] : [[star -> star -> star]] [[-|]] [[DD]]
+}{%
+{\ottdrulename{a\_k\_arrow}}{}%
 }}

@@ -75,7 +75,7 @@ while declarative contexts $[[HH]]$ do not.
 \subsection{Algorithmic Typing Rules}
 \label{sec:kind:h98:algo-typing}
 
-\begin{figure}[t]
+\begin{figure}
 \begin{center}
    \begin{tabular}{llll}\toprule
      kind      & $[[k]]$ & $\Coloneqq$ & $[[star]] \mid [[k1 -> k2]] \mid \rulehl{[[Xa]]} $ \\
@@ -97,9 +97,256 @@ while declarative contexts $[[HH]]$ do not.
 declarations and data constructor declarations.
 As this work focuses on the problem of kind inference of datatypes, we
 reduce the expression typing to the declarative system (\rref{a-pgm-expr});
-note that the contexts used there are declarative, as explained above.
+note the contexts used there are declarative.
 For type-checking a group of mutually recursive datatypes (\rref{a-pgm-dt}), we first
-assign each type constructor a unification variable $[[Xa]]$
+assign each type constructor a unification variable $[[Xa]]$, and then
+type-check ($[[||-dt]]$)
+each datatype definition (\Cref{sec:kind:haskell98:dt}), producing the context $[[TTsn]]$. Then we
+default (\Cref{sec:kind:haskell98:defaulting})
+all unsolved unification variables with $[[star]]$ using $[[ TTsn --->> OO
+]]$, and continue with the rest of the program. Defaulting here means that the
+constraints of
+one group do not propagate to the rest of the program; accordingly,
+the input context of $[[||-p]]$ is always a complete context.
+Echoing the notation for the declarative system, we write $[[OO ||-grp rec </ dti // i />
+~~~> </ ki // i/> ; </ GGi // i /> -| TT]]$ to denote that the results of type-checking
+a group of datatype declarations are the kinds $\ottcomp{[[ki]]}{i}$,
+the output term contexts
+$\ottcomp{[[GGi]]}{i}$, and the final output type context $[[TT]]$.
+
+\subsection{Defaulting}
+\label{sec:kind:haskell98:defaulting}
+
+One of the key properties of datatypes in \hne is the \textit{defaulting} rule.
+In a datatype definition, if a type parameter is not fully determined by the
+definitions in its mutually recursive group, it is defaulted to have kind |*|.
+
+\begin{definition}[Defaulting, $[[--->>]]$]
+  An algorithmic context $[[DD]]$ is defaulted to a complete context $[[OO]]$, written
+  $[[DD --->> OO]]$ by replacing all unsolved unification variables $[[Xa]]$ in $[[DD]]$
+  with $[[Xa = star]]$.
+\end{definition}
+
+To understand how this rule affects code in practice, consider the following definitions:
+
+\begin{code}
+  data Q1 a  = MkQ1   -- |Q1  :: (* -> *)|
+  data Q2    = MkQ2 (Q1 Maybe) -- rejected
+\end{code}
+
+\begin{code}
+  data P1 a  = MkP1 P2         -- |P1 :: (* -> *) -> *|
+  data P2    = MkP2 (P1 Maybe) -- accepted
+\end{code}
+
+
+\noindent One might think that the result of checking |Q1| and |Q2|
+would be the same as checking |P1| and
+|P2|. However, this is not true. |Q1|
+and |Q2| are not mutually recursive: they will not be in the same group
+and are checked separately. In contrast, |P1| and |P2| are mutually recursive
+and are checked together. This difference leads to the rejection of |Q2|:
+after kinding |Q1|, the parameter |a| is defaulted to |*|, and then |Q1 Maybe|
+fails to kind check.
+Our algorithm is a faithful model of datatypes in \hne, and this rejection is
+exactly what the step $[[ TTsn --->> OO ]]$ (in \rref{a-pgm-dt})
+brings. 
+
+\paragraph{Other design alternatives.}
+
+One alternative design is to default in \rref{a-pgm-expr} instead
+of \rref{a-pgm-dt}, as shown in \rref{a-pgm-expr-alt}.
+This means
+constraints in one group propagate to other groups, but not
+to expressions. Then |Q2| above is accepted.
+%
+\[ \drule{a-pgm-expr-alt} \]
+%
+A second alternative is that defaulting happens at the very end of type-checking
+a compilation unit. In this scenario, we wait to commit to the kind of a datatype
+until checking expressions. Now we can
+accept the following program, which would otherwise be rejected.
+However, this strategy does not play along
+well with modular design, as it takes an extra action at a module boundary.
+
+\begin{spec}
+  data Q1 a                = MkQ1
+  mkQ1                     = MkQ1 :: Q1 Maybe
+\end{spec}
+
+In the rest of this section, we stay with the standard, doing defaulting as portrayed
+in \Cref{fig:kind:98:algo:pgm}.
+
+\begin{figure}
+  \drules[a-k]{$[[DD |- t : k -| TT]]$}{Kinding}{arrow, tcon, nat, var, app}
+  \drules[a-kapp]{$[[DD |- k1 . k2 : k -| TT]]$}{Application Kinding}{kuvar,arrow}
+  \drules[a-u]{$[[DD |- k1 ~= k2 -| TT]]$}{Kind Unification}
+  {
+    refl
+    ,arrow
+    ,kvarL
+    ,kvarR
+  }
+  \drules[a-pr]{$[[DD |-pr (Xa) k1 ~~> k2 -| TT]]$}{Promotion}
+  {
+    star
+    , arrow
+    , kuvarL
+    , kuvarR
+  }
+  \caption{Algorithmic kinding, unification and promotion in \hne.}
+  \label{fig:kind:h98:unif}
+\end{figure}
+
+\subsection{Checking Datatype Declarations}
+\label{sec:kind:haskell98:dt}
+
+The judgment $[[ DD |- dt ~> TT ; GG ]]$ checks the datatype declaration $[[dt]]$
+ under the input context $[[DD]]$,
+returning a term context $[[GG]]$ and an
+output context $[[TT]]$.
+Its \rref{a-dt-decl} first gets the kind $[[k]]$ of the the type constructor
+from the context. It then assigns a fresh unification variable $[[Xa]]$ to each
+type parameter. The expected kind of the type constructor is $[[ </ Xai // i
+/> ---> star ]]$. The rule then unifies $[[k]]$ with $[[ </ Xai // i /> ---> star ]]$.
+Before unification, we apply the context to $[[k]]$; unification (\Cref{sec:kind:98:unif})
+requires its inputs to be inert with respect to the context substitution. Our implementation
+of unification guarantees that all the $[[Xai]]$ will be solved, as reflected in the \rref{a-dt-decl}.
+The type parameters are added to the context to type check each data
+constructor. Checking the data constructor $[[ dcj ]]$ returns its type $[[tj]]$
+and the context $[[TTsj, </ ai : Xai // i />]]$. Note that each output context
+must be of this form as no new entries are added to the end of the context
+during checking individual data constructors. We can then generalize the type
+$[[tj]]$ over type parameters, returning $[[TTsn]]$ as the result context.
+
+The data constructor
+declaration judgment $[[DD |- t dc ~> t' -| TT ]]$ type-checks a
+data constructor, by simply checking that the expected type $[[</ ti // i /> --->
+t]]$ is well-kinded.
+
+\subsection{Kinding}
+
+The algorithmic kinding $[[DD |- t : k -| TT]]$ is given in
+\Cref{fig:sec:h98:unif}. Most rules are self-explanatory.
+For applications (\rref{a-k-app}), we synthesize the type for an
+application $[[t1 t2]]$, where $[[t1]]$ and $[[t2]]$ have kinds $[[k1]]$ and
+$[[k2]]$, respectively. The hard work is delegated to the
+\emph{application kinding} judgment.
+
+Application kinding $[[DD |- k1 . k2 : k -| TT]]$ says that, under the
+context $[[DD]]$, applying an expression of kind $[[k1]]$ to an argument of kind
+$[[k2]]$ returns the result kind $[[k]]$ and an output context $[[TT]]$. We require
+the invariants that $[[ [DD] k1 = k1 ]]$ and $[[ [DD]k2 = k2 ]]$. Therefore, if
+the kind is a unification variable $[[Xa]]$ (\rref{a-kapp-kuvar}), we know it
+must be an unsolved unification variable. Since we know $[[k1]]$ must be a function kind,
+we solve $[[Xa]]$ using $[[Xa1 -> Xa2]]$, unify $[[Xa1]]$ with the
+argument kind $[[k]]$, and return $[[Xa2]]$. Note that the unification variables
+$[[Xa1]]$ and $[[Xa2]]$ are inserted in the \emph{middle} of the context $[[DD]]$;
+this allows us to remove the type variables from the end of the context in
+\rref{a-dt-decl} and also plays a critical role in maintaining unification variable
+scoping in the more complicated system we analyze later.
+If the kind of the function is not a unification variable, it must surely be a
+function kind $[[k1 -> k2]]$ (\rref{a-kapp-arrow}), so we unify $[[k1]]$ with the
+known argument kind
+$[[k]]$, returning $[[k2]]$.
+
+\subsection{Unification}
+\label{sec:kind:98:unif}
+
+The unification judgment $[[DD |- k1 ~= k2 -| TT]]$ is given in
+\Cref{fig:kind:h98:unif}. The elaborate style of this judgment (and its helper judgment $[[|-pr]]$)
+is overkill for \hne, but this design sets us up well to understand unification in the
+presence of our \tit system, later. We require the preconditions that $[[ [DD]k1 = k1 ]]$ and $[[
+[DD] k2 = k2 ]]$, so that every time we encounter a unification variable, we
+know it is unsolved. \Rref{a-u-refl} is our base case, and \rref{a-u-arrow} unifies the
+components of the arrow types. When unifying $[[Xa]] [[~=]] [[k]]$ (\rref{a-u-kvarL}), we
+cannot simply set $[[Xa]]$ to $[[k]]$, as $[[k]]$
+might include variables bound to the \emph{right}
+of $[[Xa]]$. Instead, we need to \textit{promote}
+($[[|-pr]]$) $[[k]]$.
+\Rref{a-u-kvarL} first promotes the
+kind $[[k]]$, yielding $[[k2]]$, so that $[[k2]]$ is well-formed in the
+prefix context of $[[Xa]]$. We can then set $[[Xa=k2]]$ in the concluding
+context. \Rref{a-u-kvarR} is symmetric to \rref{a-u-kvarL}.
+
+
+\paragraph{Promotion.}
+\label{par:h98:promotion}
+
+As described in \Cref{chap:Promotion},
+the crucial observation of $[[|-pr]]$ is that \textit{the
+  relative order between unification variables does not matter for solving a
+  constraint}.
+The promotion judgment $[[DD |-pr (Xa) k1 ~~> k2 -| TT]]$ captures this
+observation. The judgment says that, under the context $[[ DD ]]$, we
+promote the kind $[[k1]]$, yielding $[[k2]]$, so that $[[k2]]$ is
+well-formed in the prefix context of $[[Xa]]$, while retaining $[[ [TT]k1 =
+[TT]k2 ]]$. The promotion rules here are essentially the same as in \Cref{fig:pr:algo}.
+Importantly, in
+\rref{a-pr-kuvarR}, a unification variable $[[Xb]]$ bound to the right of
+$[[Xa]]$ in $[[DD]]$ is replaced by a fresh variable introduced to $[[Xa]]$'s
+left.
+It is this promotion algorithm that guarantees that all the $[[Xai]]$ will be solved
+in \rref{a-dt-decl}: those variables will appear to the right of the unification variable
+invented in \rref{a-pgm-dt} and will be promoted (and thus solved).
+
+
+\subsection{Soundness and Completeness}
+\label{sec:kind:98:context-extension}
+
+The main theorem of soundness is for program typing:
+%
+\begin{restatable}[Soundness of $[[||-p]]$]{theorem}{lemmasoundtypingpgm}
+  \label{lemma:sound:pgm}
+  If $[[OO ok]]$,
+  and $[[ OO ||- GG ]]$,
+  and $[[OO ; GG ||-p pgm : A]]$,
+  then $[[ [OO] OO ; [OO] GG |-p pgm : A]]$.
+\end{restatable}
+%
+This lemma statement refers to judgments $[[OO ok]]$ and $[[OO ||- GG]]$; these
+basic well-formedness checks are given in TODO.
+Because the declarative judgment $[[|-p]]$ requires declarative contexts, we
+write $[[ [OO]OO ]]$ and $[[ [OO]GG ]]$ in the conclusion, applying the complete algorithmic
+context $[[OO]]$ as a substitution to form a declarative context, free of unification
+variables.
+
+The statement of completeness relies on the definition of \textit{context
+  extension} $[[DD --> TT]]$. The judgment
+captures a process of \textit{information
+  increase}. The formal definition of context extension is given in
+TODO,
+ and its treatment is as in
+\citet{dunfield2013complete}. Intuitively, context extension preserves all
+information in $[[DD]]$, and may increase the information by adding or solving
+more unification variables. In all the algorithmic judgments, the output context
+is an extension of the input context.
+
+We prove that our system is complete only up to checking \textit{a group of
+  datatype declarations}.
+\begin{restatable}[Completeness of $[[||-grp]]$]{theorem}{lemmacompleteddgroup}
+  \label{lemma:complete:dt-group}
+  Given $[[OO ok]]$,
+  if $[[ [OO] OO |-grp rec </ dti // i/> ~~~> </ ki // i/> ; </ HHi // i /> ]]$,
+  then there exists $\ottcomp{[[ki']]}{i}$, $\ottcomp{[[GGi]]}{i}$, $[[TT]]$, and
+  $[[OO']]$,
+  such that $[[ OO ||-grp rec </ dti // i/> ~~~> </ ki' // i/> ; </ GGi // i/> -| TT]]$,
+  where $[[ TT --> OO']]$,
+  and $[[ </ [OO'] ki' = ki // i /> ]]$,
+  and $[[ </ HHi = [OO'] GGi // i /> ]]$.
+\end{restatable}
+The theorem statement uses the notational convenience for checking
+groups, defined in \Cref{sec:kind:h98:decl-typing} and
+\Cref{sec:kind:h98:algo-typing}. The theorem states that for every possible
+declarative typing for a group, the algorithmic typing results can be extended
+to support the declarative typing.
+
+Unfortunately, the typing program judgment $[[|-p]]$ is incomplete, as our algorithm
+models defaulting, while the declarative system does not. (For example, the |Q1|/|Q2| example
+of \Cref{sec:kind:haskell98:defaulting} is accepted by the declarative system
+but rejected by both GHC and our algorithmic system.) As straightforward as the
+defaulting rule may seem, it is surprisingly hard to model in a declarative
+system. We remedy this in the next section.
 
 %%% Local Variables:
 %%% mode: latex
