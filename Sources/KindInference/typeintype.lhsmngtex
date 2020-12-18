@@ -19,7 +19,7 @@ import Data.Proxy ( Proxy(..) )
 
 Having set the stage for kind inference for datatypes in \hne,
 we now present the declarative \tit system.
-Our syntax is given at the top of \Cref{fig:kind:tit:decl}. Compared to
+Our syntax is given in \Cref{fig:kind:tit:syntax}. Compared to
 \hne, programs $[[pgm]]$ now include datatype signatures $[[dtsig]]$.
 Data constructor declarations $[[dc]]$ support existential quantification.
 Types and kinds are collapsed into one level; $[[A]]$ and $[[K]]$ are now
@@ -83,7 +83,6 @@ will see in the coming section.
 
     monotype, monokind  & $[[t]], [[k]]$, $[[et]]$, $[[ek]]$ & $\Coloneqq$ & $[[star]] \mid [[nat]] \mid [[a]] \mid [[T]] \mid [[t1 t2]] \mid [[t1 @@t2]] \mid [[->]]$ \\
     elaborated type, kind & $[[eA]]$, $[[eK]]$ & $\Coloneqq$ & $[[ \/i [ckvs] . eA ]] \mid [[ \/s [ckvs] . eA]] \mid [[et]] $ \\[2ex]
-    % elaborated monotype   & $[[et]], [[ek]]$ & $\Coloneqq$ & $[[star]] \mid [[nat]] \mid [[a]] \mid [[T]] \mid [[et1 et2]] \mid [[et1 @@et2]] \mid [[->]]$ \\
 
     term context  & $[[HH]]$ & $\Coloneqq$ & $[[empty]]
                                              % \mid [[HH, x : eA]]
@@ -95,6 +94,11 @@ will see in the coming section.
     \bottomrule
   \end{tabular}
   \end{center}
+  \caption{Syntax of \tit}
+  \label{fig:kind:tit:syntax}
+\end{figure}
+
+\begin{figure}
 % \drules[sr]{$[[rs A]]$}{Kind results in $[[star]]$}{star,arrow,forall}
 \drules[pgm]{$[[EE ; HH |-p pgm : A]]$}{Typing Program}{sig,dt-ttS,dt-tt}
 
@@ -112,6 +116,137 @@ will see in the coming section.
 \caption{Declarative specification of \tit}
 \label{fig:kind:tit:decl}
 \end{figure}
+
+\begin{figure}
+  \drules[inst]{$[[EE |- eA1 : eK <: ek ~> eA2]]$}{Instantiation}{refl,forall
+    % ,forall-infer
+  }
+  \drules[kc]{$[[EE |- A <= ek ~> eA]]$}{Kind Checking}{sub}
+  \drules[ktt]{$[[EE |- A : eK ~> eA]]$}{Kinding}{
+    star
+    % ,nat,var,arrow,tcon
+    ,app,kapp
+    % ,kapp-infer
+    % ,forall
+    ,foralli}
+  \drules[ela]{$[[EE |-el eA : eK]]$}{Elaborated Kinding}{
+    % star,nat,var,tcon,arrow,
+    app,kapp
+    % ,kapp-infer
+    % ,forall,forall-infer
+  }
+
+  \caption{Selected rules for declarative kind-checking in \tit}
+  \label{fig:kind:tit:kinding}
+\end{figure}
+
+The declarative typing rules appear in \Cref{fig:kind:tit:decl}.
+The judgment $[[EE;HH |-p pgm : A]]$ checks the program. From now on we omit the
+typing rule for expressions in programs, which is essentially the same as in
+\hne.
+\Rref{pgm-sig} processes kind signatures by elaborating and generalizing the
+kind, then adding it to the context $[[EE]]$.
+The helper judgment $[[EE |- dtsig ~> T : eK]]$ checks a kind signature
+$[[data T : A]]$. First, it uses $[[rs A]]$ to ensure $[[A]]$ returns
+$[[star]]$:
+$[[rs A]]$ simply traverses over arrows and foralls, checking that the final kind of $[[A]]$
+is $[[star]]$.
+Then, as $[[A]]$ may be an open kind signature, it extracts the free kind variables
+$[[kvs in  Q (A)]]$, where $[[Q (A)]]$ is the set of all well-formed
+orderings of the free
+variables (transitively looking into variables' kinds) of $[[A]]$;
+ thus, $[[kvs]]$ is one such ordering.
+As discussed in \Cref{sec:kind:tit-overview}, variables in
+$[[kvs]]$ are \textit{inferred} so we accept any relative order,
+as long as it features the necessary dependency between the variables. Then the
+rule tries to elaborate ($[[|-k]]$) the kind $[[\/ [kvs]. A]]$, where $[[kvs]]$
+and $[[ckvs]]$ have the same length ($[[ ||kvs|| = ||ckvs|| ]]$). As the
+elaborated result $[[\/ [ckvs]. eK]]$ can be further generalized, we bring the free
+variables $[[ckvs1 in Q(\/[ckvs]. eK)]]$ into scope when elaborating. The concluding output
+is $[[T]]: [[\/i [ckvs1]. \/i [ckvs] . eK]]$. As an example, consider a kind signature $[[\/
+a . b -> star]]$. We have $[[kvs = b]]$, $[[ckvs = b:star]]$, and $[[ckvs1 = c : star ]]$, and the
+final kind is $[[\/i [c:star] . \/i [b:star]. \/ (a :c) . b -> star ]]$. We see
+in this one example the three sources of quantified variables, always in this order:
+variables arising from generalization (|c|), from implicit quantification
+(|b|), and from explicit quantification (|a|).
+
+Returning to the $[[|-p]]$ judgment, \rref{pgm-dt-ttS} checks a datatype definition that has a kind signature. It
+ensures that the signature has already been checked, by fetching the kind
+information in the context using $[[(T : eK) in EE]]$. Then it checks the
+datatype declaration, and gathers the output term context to check the rest of
+the program.
+\Rref{pgm-dt-tt}, as in \hne, guesses kinds $[[eki]]$ for each datatype $[[Ti]]$
+and puts $[[Ti:eki]]$ in the context \textit{before} looking at the declarations.
+The major difference from \hne is that kinds can be generalized \textit{after}
+the group is checked. We use $[[ckvsi]]$ to denote the free variables in each
+kind $[[eki]]$. After the recursive group is typed, we generalize the kind of
+each type constructor as well as the type of its data constructors.
+To generalize the type of data constructors, we use the
+$[[|-gen]]$ judgment. \Rref{gen} generalizes every data constructor in the context,
+where $[[ckvs]]$ are
+free type variables of its corresponding type constructor, and $[[ckvsi]]$ are free
+type variables specific to the data constructor.
+% We lift the judgment to the term context $[[HHi]]$.
+Returning to \rref{pgm-dt-tt}, note that
+since the kinds of type constructors are generalized, the occurrences of the
+type constructors now require more type arguments. Therefore in $[[HH'i]]$, we
+substitute $[[Ti]]$ with $[[ Ti @@[ckvsi] ]]$, where $[[Ti]]$ is applied to all
+the variables bound in $[[ckvsi]]$.
+
+The judgment of checking datatype declarations $[[EE |- dt ~> HH]]$ has only
+\rref{dt-tt}, which expands on the rule in \hne, to support top-level polymorphism for the kind
+of $[[T]]$.
+
+\Rref{dc-tt} supports existential variables $[[kvs]]$. Moreover, the elaborated
+type $[[eA]]$ of $[[\/kvs. </ ti // i /> ---> et]]$ can be further generalized
+over $[[ckvs]]$. Note that $[[ckvs]]$ (via a small abuse of notation in the rule)
+excludes free variables in
+$[[ti]]$ and $[[EE]]$.
+
+\subsection{Checking Kinds}
+
+The kinding judgment $[[|-k]]$ appears in \Cref{fig:kind:tit:kinding}.
+We only highlight selected rules.
+Kinding $[[EE |- A : eK ~> eA]]$ infers the type $[[A]]$ to have kind $[[eK]]$,
+and it elaborates $[[A]]$ to $[[eA]]$. The kinding rules are built
+upon the axiom $[[EE |- star : star ~> star]]$ (\rref{ktt-star}). While this
+axiom is known to violate logical consistency, as Haskell is already logically
+inconsistent because of its general recursion, we do not consider it as an issue
+here.
+\Rref{ktt-app} concerns applications $[[t1 t2]]$. It first infers the kind of
+$[[t1]]$ to be $[[eK1]]$. The kind $[[eK1]]$ can be a polymorphic kind headed by a $[[\/]]$,
+though it
+is expected to be a function kind. Thus the rule uses $[[|-inst]]$ to
+instantiate $[[eK1]]$ to $[[ek1 -> ek2]]$. The instantiation judgment $[[EE |-
+eA1 : eK <: ek ~> eA2]]$ instantiates a kind $[[eK]]$ to a monokind $[[ek]]$,
+where if $[[eA1]]$ has kind $[[eK]]$ then $[[eA2]]$ has kind $[[ek]]$. After
+instantiation, \rref{ktt-app} checks ($[[|-kc]]$) the argument $[[t2]]$ against
+the expected argument kind $[[ek1]]$. The kind checking judgment $[[|-kc]]$
+simply delegates the work to kinding and instantiation.
+\Rref{ktt-kapp} checks visible kind applications. Note in the return kind
+$[[eK]]$, the variable $[[a]]$ is substituted by the elaborated argument
+$[[et2]]$. \Rref{ktt-foralli} elaborates an unannotated type $[[\/ a . A]]$ to
+$[[\/ a : ek . eA]]$, where $[[ek]]$ is an \textit{elaborated} kind ($[[|-el]]$)
+guessed for $[[a]]$.
+
+The stand-alone elaborated kinding judgment $[[|-el]]$ type-checks elaborated
+types. As all necessary instantiation has been done, type-checking for
+elaborated types is easy. For example, \rref{ela-app} concerns
+applications $[[et1 et2]]$. Compared to \rref{ktt-app}, here $[[et1]]$ has an
+arrow kind, and takes exactly the kind of $[[et2]]$.
+All judgments output well-formed elaborated types, as the following lemma states:
+
+\begin{restatable}[Type Elaboration]{lemma}{lemmattwfkinding}
+  \label{lemma:tt:wf_kinding}
+  We have:
+  \begin{inparaenum}
+  \item if $[[EE |- A : eK ~> eA]]$, then $[[EE |-el eA : eK]]$;
+  \item if $[[EE |- A <= eK ~> eA]]$, then $[[EE |-el eA : eK]]$;
+  \item if $[[EE |-el eA1 : eK]]$,
+    and $[[EE |- eA1 : eK <: ek ~> eA2]]$,
+    then $[[EE |-el eA2 : ek]]$.
+  \end{inparaenum}
+\end{restatable}
 
 %%% Local Variables:
 %%% mode: latex

@@ -137,7 +137,7 @@ complications in writing a declarative specification. We discuss this point furt
 Section~\ref{sec:kind:haskell98:defaulting}.
 
 \subsection{Kind Inference in Modern GHC Haskell}
-\label{sub:kind:tit-overview}
+\label{sec:kind:tit-overview}
 
 The type and kind languages for modern GHC are \emph{unified} (i.e., types and kinds are indistinguishable),
 \emph{dependently typed}, and the kind system includes the |* :: *|

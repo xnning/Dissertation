@@ -1,7 +1,7 @@
-metavar typvar, a {{ tex a }}, b {{tex b}}, L ::=
+metavar typvar, a {{ tex a }}, b {{tex b}}, c, L ::=
 metavar kindvar, X, Xy {{ tex X}}, Xlist {{ tex \overbar{X} }}, Xlistwithi {{ tex \overbar{X_i} }}, Xa {{ tex \widehat{\alpha} }}, Xya {{ tex \widehat{\alpha} }}, Xb {{ tex \widehat{\beta} }} ::=
 
-metavar expvar, x, y, f, g, m, nn {{ tex n }}, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
+metavar expvar, x, y, f, g, m, nn {{ tex n }}, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
 
 metavar  lit, ii {{tex {i} }} ::=
 metavar tconstrvar , T {{ tex T }} , Ty {{ tex T }}, Tt {{ tex \widetilde{ \mathcal{T} } }} ::=
@@ -655,6 +655,7 @@ formula :: formula_ ::=
   | DD |- eK1 ~= eK2   ::  :: wip_unif
   | HH1 = HH2        ::  :: ectx_eq
   | '|' kvs1 '|' = '|' kvs2 '|'     ::  :: binder_list_size_eq {{ tex | [[kvs1]] | = | [[kvs2]] | }}
+  | '||' kvs1 '||' = '||' kvs2 '||' ::  :: binder_list_size_eq_escape {{ tex || [[kvs1]] || = || [[kvs2]] || }}
 
 
 subrules
