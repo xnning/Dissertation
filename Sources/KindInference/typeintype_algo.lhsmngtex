@@ -1,0 +1,107 @@
+%include polycode.fmt
+%include rae.fmt
+
+%if style == newcode
+\begin{code}
+{-# LANGUAGE ExplicitForAll, PolyKinds, DataKinds #-}
+
+module Haskell98Algo where
+
+data SameKind :: k -> k -> *
+
+\end{code}
+%endif
+
+\section{Kind Inference for \tit}
+\label{sec:kind:tit_algo}
+
+We now describe the \emph{algorithmic} counterpart of the \tit system.
+\Cref{fig:kind:tit:algo:pgm} presents the syntax of kinds and contexts in the
+algorithmic system for \tit. Elaborated monotypes are extended with unification
+variables $[[Xa]]$. Echoing the algorithm for \hne, type contexts are extended
+with unification variables, which now have kinds ($[[Xa:ek]]$ and $[[Xa:ek=et]]$).
+Also added to contexts are local scopes $[[{DD}]]$. These
+ are special type contexts, where \textit{variables can
+  be reordered}. Recall the kind |forall
+(a::(f b)) (c::k). f c -> *| in \Cref{sec:kind:tit-overview}, where |f| and |b|
+appear before |k|, but end up depending on |k|. In which order should we
+put |f|, |b| and |k| in the algorithmic context to kind-check
+the signature? We cannot have a correct order before completing inference.
+Therefore, we put them into a local scope, knowing we can reorder the
+variables during kind-checking
+according to the dependency information. The well-formedness judgment
+for local scopes requires them to be well-scoped, leading to the fact that
+$[[ DD, {DD'}]]$ is well-formed iff $[[DD, DD']]$ is.
+The marker $[[marker D]]$, subscripted by the name of a data constructor,
+is used only in and explained with \rref{a-dc-tt}.
+
+\subsection{Algorithmic Program Typing}
+
+\begin{figure}
+\begin{center}
+  \begin{tabular}{llll} \toprule
+    % elaborated type, kind & $[[eA]]$, $[[eK]]$ & $\Coloneqq$ & $[[ \/i [ckvs] . eA ]] \mid [[ \/s [ckvs] . eA]] \mid [[et]] $ \\
+    elaborated monotype   & $[[et]], [[ek]]$ & $\Coloneqq$ & $[[star]] \mid [[nat]] \mid [[a]] \mid [[T]] \mid [[et1 et2]] \mid [[et1 @@et2]] \mid [[->]] \mid \hlmath{[[Xa]]}$ \\
+    term context  & $[[GG]]$ & $\Coloneqq$ & $[[empty]]
+                                             % \mid [[GG, x : eA]]
+                                             \mid [[GG, D : eA ]]$ \\
+    type context  & $[[DD]], [[TT]] $ & $\Coloneqq$ & $[[empty]] \mid [[DD, a : ek]] \mid [[DD, T : eK ]]$ \\
+                                                & & $\mid$ & $\hlmath{[[DD, Xa: ek]]} \mid \hlmath{[[DD, Xa : ek = et]]} \mid \hlmath{[[DD, {DD'}]]} \mid \hlmath{[[DD, marker D]]}$\\
+    complete type context  & $[[OO]]$ & $\Coloneqq$ & $[[empty]] \mid [[OO, a : ek]] \mid [[OO, T : eK ]]$
+                              $ \mid $    $ [[OO, Xa : ek = et]] \mid [[OO, {OO'}]] \mid [[OO, marker D]] $ \\
+    kind binder list
+                            % & $[[ ckvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[ckvs, a:k]] $ \\
+                            & $[[ xckvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[xckvs, Xa:k]] $ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+    % \drules[a-qc]{$[[DD `-> kvs]]$}{Quantification Checking}{
+    %   tvar
+    %   ,tcon,lo
+    %   ,kuvarSolved
+    %   ,kuvar
+    % }
+    \drules[a-pgm]{$[[OO ; GG ||-p pgm : eA]]$}{Typing Program}{sig,dt-ttS}
+    \drule{a-pgm-dt-tt}
+    \drules[a-sig]{$[[OO |- dtsig ~> T : eK]]$}{Typing Signature}{tt}
+    \drules[a-dt]{$[[DD |- dt ~> TT ; GG]]$}{Typing Datatype Decl.}{tt}
+    \drules[a-dc]{$[[DD |- et dc ~> eA -| TT ]]$}{Typing Data Constructor Decl.}{tt}
+\caption{Algorithmic program typing in \tit}
+\label{fig:kind:tit:algo:pgm}
+\end{figure}
+
+The algorithmic typing rules appear in \Cref{fig:kind:tit:algo:pgm}.
+The judgment $[[OO ; GG ||-p pgm : eA]]$ checks the program. The
+\rref{a-pgm-sig} and \rref{a-pgm-dt-ttS} correspond directly to the declarative
+rules. Note that as the datatype declaration in \rref{a-pgm-dt-ttS} already has a
+signature, the output type context remains unchanged.
+\Rref{a-pgm-dt-tt} concerns a group (without kind signatures). Like in \hne, it first assigns a
+fresh unification variable $[[Xai:star]]$ as the kind of each type constructor,
+and then type-checks each datatype declaration, yielding the output context
+$[[TTsn]]$. Unlike \hne which then uses defaulting, here from each $[[Xai]]$ we
+get their unsolved unification variables $[[xckvsi]]$ and generalize the kind of
+each type constructor as well as the type of each data constructor. The $[[unsolved(DD)]]$
+metafunction simply extracts a set of free unification variables in $[[DD]]$, with their
+kinds substituted by $[[DD]]$.
+ Before
+generalization, we apply $[[TTsn]]$ to the results so all solved unification
+variables get substituted away. We use the notation $[[ xckvsi]] [[|->]] [[ckvsi ]]$
+to mean that all unification variables in $[[xckvsi]]$ are replaced by fresh
+type variables in $[[ckvsi]]$. The algorithmic generalization judgment $[[||-gen]]$ corresponds
+straightforwardly to the declarative rule, and thus is omitted.
+Though they appear daunting, the extended contexts
+used in the last premise to this rule are unsurprising: they just apply the relevant
+substitutions (the solved unification variables in $[[TTsn]]$, the replacement
+of unification variables with fresh proper type variables $[[xckvsi]] [[|->]] [[ckvsi]]$,
+and the generalization of the kinds of the group of datatypes $[[Ti]] [[|->]] [[Ti @@[ckvsi] ]]$).
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
+
+%%  LocalWords:  polycode newcode ExplicitForAll PolyKinds DataKinds Algo
+%%  LocalWords:  SameKind endif Decl metafunction lemmaprogressunif EdgeStyle
+%%  LocalWords:  lemmadecideunif VertexStyle lemmadecidepr lemmattsoundpgm
+%%  LocalWords:  monokinds lemmattcompleteddgroup
