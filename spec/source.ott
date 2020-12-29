@@ -583,7 +583,10 @@ terminals :: 'terminals_' ::=
   | ||-inst    :: :: Vdashinst {{ tex \Vdash^{\!\!\mathsf{inst} } }}
   | ||-kapp    :: :: Vdashkapp {{ tex \Vdash^{\!\!\mathsf{kapp} } }}
   | |-kc       :: :: vdashkc {{ tex \vdash^{\!\!\mathsf{kc} } }}
-  | \bot       ::  :: bot {{ tex \bot }}
+  | \bot       :: :: bot {{ tex \bot }}
+  | LS         :: :: lexicalsort {{ tex \mathsf{fkv} }}
+  | SS         :: :: scopedsort {{ tex \mathsf{scoped\_sort} }}
+  | <<:        ::  :: more_general {{ tex \preceq }}
 
 
 formula :: formula_ ::=
@@ -656,6 +659,12 @@ formula :: formula_ ::=
   | HH1 = HH2        ::  :: ectx_eq
   | '|' kvs1 '|' = '|' kvs2 '|'     ::  :: binder_list_size_eq {{ tex | [[kvs1]] | = | [[kvs2]] | }}
   | '||' kvs1 '||' = '||' kvs2 '||' ::  :: binder_list_size_eq_escape {{ tex || [[kvs1]] || = || [[kvs2]] || }}
+  | < DD >            ::  :: number_unsolved {{ tex \langle [[DD]] \rangle }}
+  | < DD1 > = < DD2 > ::  :: eq_number_unsolved {{ tex \langle [[DD1]] \rangle  = \langle [[DD2]] \rangle }}
+  | < DD1 > < < DD2 > ::  :: less_number_unsolved {{ tex \langle [[DD1]] \rangle  < \langle [[DD2]] \rangle }}
+  | EE |- K <<: K2          ::  :: kind_prec_ee
+  | DD |- K <<: K2          ::  :: kind_prec
+  | HH1 <<: HH2       ::  :: ectx_prec
 
 
 subrules

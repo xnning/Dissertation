@@ -15,8 +15,30 @@ data SameKind :: k -> k -> *
 \section{Kind Inference for \tit}
 \label{sec:kind:tit_algo}
 
+\begin{figure}
+\begin{center}
+  \begin{tabular}{llll} \toprule
+    % elaborated type, kind & $[[eA]]$, $[[eK]]$ & $\Coloneqq$ & $[[ \/i [ckvs] . eA ]] \mid [[ \/s [ckvs] . eA]] \mid [[et]] $ \\
+    elaborated monotype   & $[[et]], [[ek]]$ & $\Coloneqq$ & $[[star]] \mid [[nat]] \mid [[a]] \mid [[T]] \mid [[et1 et2]] \mid [[et1 @@et2]] \mid [[->]] \mid \hlmath{[[Xa]]}$ \\
+    term context  & $[[GG]]$ & $\Coloneqq$ & $[[empty]]
+                                             % \mid [[GG, x : eA]]
+                                             \mid [[GG, D : eA ]]$ \\
+    type context  & $[[DD]], [[TT]] $ & $\Coloneqq$ & $[[empty]] \mid [[DD, a : ek]] \mid [[DD, T : eK ]]$ \\
+                                                & & $\mid$ & $\hlmath{[[DD, Xa: ek]]} \mid \hlmath{[[DD, Xa : ek = et]]} \mid \hlmath{[[DD, {DD'}]]} \mid \hlmath{[[DD, marker D]]}$\\
+    complete type context  & $[[OO]]$ & $\Coloneqq$ & $[[empty]] \mid [[OO, a : ek]] \mid [[OO, T : eK ]]$
+                              $ \mid $    $ [[OO, Xa : ek = et]] \mid [[OO, {OO'}]] \mid [[OO, marker D]] $ \\
+    kind binder list
+                            % & $[[ ckvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[ckvs, a:k]] $ \\
+                            & $[[ xckvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[xckvs, Xa:k]] $ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+\caption{Algorithmic syntax in \tit}
+\label{fig:kind:tit:syntax}
+\end{figure}
+
 We now describe the \emph{algorithmic} counterpart of the \tit system.
-\Cref{fig:kind:tit:algo:pgm} presents the syntax of kinds and contexts in the
+\Cref{fig:kind:tit:syntax} presents the syntax of kinds and contexts in the
 algorithmic system for \tit. Elaborated monotypes are extended with unification
 variables $[[Xa]]$. Echoing the algorithm for \hne, type contexts are extended
 with unification variables, which now have kinds ($[[Xa:ek]]$ and $[[Xa:ek=et]]$).
@@ -38,23 +60,6 @@ is used only in and explained with \rref{a-dc-tt}.
 \subsection{Algorithmic Program Typing}
 
 \begin{figure}
-\begin{center}
-  \begin{tabular}{llll} \toprule
-    % elaborated type, kind & $[[eA]]$, $[[eK]]$ & $\Coloneqq$ & $[[ \/i [ckvs] . eA ]] \mid [[ \/s [ckvs] . eA]] \mid [[et]] $ \\
-    elaborated monotype   & $[[et]], [[ek]]$ & $\Coloneqq$ & $[[star]] \mid [[nat]] \mid [[a]] \mid [[T]] \mid [[et1 et2]] \mid [[et1 @@et2]] \mid [[->]] \mid \hlmath{[[Xa]]}$ \\
-    term context  & $[[GG]]$ & $\Coloneqq$ & $[[empty]]
-                                             % \mid [[GG, x : eA]]
-                                             \mid [[GG, D : eA ]]$ \\
-    type context  & $[[DD]], [[TT]] $ & $\Coloneqq$ & $[[empty]] \mid [[DD, a : ek]] \mid [[DD, T : eK ]]$ \\
-                                                & & $\mid$ & $\hlmath{[[DD, Xa: ek]]} \mid \hlmath{[[DD, Xa : ek = et]]} \mid \hlmath{[[DD, {DD'}]]} \mid \hlmath{[[DD, marker D]]}$\\
-    complete type context  & $[[OO]]$ & $\Coloneqq$ & $[[empty]] \mid [[OO, a : ek]] \mid [[OO, T : eK ]]$
-                              $ \mid $    $ [[OO, Xa : ek = et]] \mid [[OO, {OO'}]] \mid [[OO, marker D]] $ \\
-    kind binder list
-                            % & $[[ ckvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[ckvs, a:k]] $ \\
-                            & $[[ xckvs ]]$ & $\Coloneqq$ & $[[empty]] \mid [[xckvs, Xa:k]] $ \\
-    \bottomrule
-  \end{tabular}
-\end{center}
     % \drules[a-qc]{$[[DD `-> kvs]]$}{Quantification Checking}{
     %   tvar
     %   ,tcon,lo
@@ -94,6 +99,586 @@ used in the last premise to this rule are unsurprising: they just apply the rele
 substitutions (the solved unification variables in $[[TTsn]]$, the replacement
 of unification variables with fresh proper type variables $[[xckvsi]] [[|->]] [[ckvsi]]$,
 and the generalization of the kinds of the group of datatypes $[[Ti]] [[|->]] [[Ti @@[ckvsi] ]]$).
+
+The judgment $[[OO |- dtsig ~> T : eK]]$ type-checks a signature definition. We
+get all free variables in $[[A]]$ using $[[LS(A)]]$ and assign each variable
+$[[ai]]$ a kind $[[Xai : star]]$. Those variables are put
+into a local scope to kind-check $[[A]]$. Then, we use $[[SS]]$---a standard topological
+sort---to return an
+ordering of the variables that respects dependencies.
+Finally, we substitute away solved unification variables
+in the result kind $[[eA]]$
+and generalize over the unsolved variables $[[xckvs2]]$ in $[[DD]]$. As
+$[[xckvs2]]$ is generalized outside $[[ckvs1]]$, we use the \emph{quantification check}
+$[[DD `-> </ ai // i />]]$ (\Cref{sec:kind:qcheck}) to ensure the result kind is
+well-ordered.
+
+\Rref{a-dt-tt} is a straightforward generalization of \rref{a-dt-decl} to polymorphic
+kinds. Here $[[T]]$ can have a polymorphic kind from kind signatures.
+
+\Rref{a-dc-tt} checks a data constructor declaration. It first puts a marker
+into the context before kinding. After kinding, it substitutes away all the
+solved unification variables to the right of the marker, and generalizes over
+all unsolved unification variables to the right of the marker. The fact that the
+context is ordered gives us precise control over variables that need
+generalization.
+
+
+\subsection{The Quantification Check}
+\label{sec:kind:qcheck}
+
+Ill-ordered kinds are rejected. Consider the following example:
+%
+%
+\begin{code}
+data Proxy :: forall k. k -> *
+data Relate :: forall a (b :: a). a -> Proxy b -> *
+data T :: forall (a :: *) (b :: a) (c :: a) d. Relate b d -> *
+\end{code}
+%
+%format tau1
+%format tau2
+|Proxy| just gives us a way to
+write a type whose kind is not |*|. The |Relate tau1 tau2| type forces the kind
+of |tau2| to depend on that of |tau1|, giving rise to the unusual dependency in
+|T|. The definition of |T| then introduces |a|, |b|, |c| and |d|. The kinds of
+|a|, |b| and |c| are known, but the kind of |d| must be inferred; call it
+$[[Xa]]$. We discover that $[[Xa]] = |Proxy|\ [[Xb]]$, where $[[Xb]] |:: a|$.
+There are no further constraints on $[[Xb]]$. Na\"ively, we would generalize
+over $[[Xb]]$, but that would be disastrous, as |a| is locally bound. Instead,
+we must reject this definition, as our declarative specification always
+puts inferred variables (such as the type variable $[[Xb]]$ would become if
+generalized) before other ones.
+
+The quantification-checking metafunction $[[ DD `-> kvs ]]$, defined as $[[
+fkv(unsolved(DD)) # kvs ]]$, ensures that free variables in
+$[[unsolved(DD)]]$ are disjoint ($\sharp$) with $[[kvs]]$, so that we can safely
+generalize $[[unsolved(DD)]]$ outside $[[kvs]]$.\footnote{See also the
+  alternative design in TODO.}
+
+\subsection{Kinding}
+
+\begin{figure}
+\drules[a-inst]{$[[DD |- eA1 : eK <: ek ~> eA2 -|
+  TT]]$}{Instantiation}{refl, forall
+  % , forall-infer
+}
+\drules[a-kc]{$[[DD |- A <= ek ~> eA -| TT]]$}{Kind Checking}{sub}
+\drules[a-ktt]{$[[DD |- A : eK ~> eA -| TT]]$}{Kinding}{
+  star
+  % , kuvar, nat, var, tcon, arrow
+  % , forall
+  % , forall-infer
+  , app
+  , foralli
+  % , foralli-infer
+  % , kapp
+  % , kapp-infer
+}
+\drules[a-kapp-tt]{$[[ DD |- (et1 : eK) . t : ek ~> et2 -| TT]]$}
+  {Application Kinding}{arrow,forall,kuvar}
+
+\drules[a-ela]{$[[DD |-el eA : eK]]$}{Elaborated Kinding}{
+    % star ,
+    % kuvar
+    % , nat, var, tcon, arrow, forall, forall-infer,
+     app
+    , kapp
+    % , kapp-infer
+}
+\caption{Selected rules for algorithmic kinding in \tit}
+\label{fig:kind:tit:algo:kinding}
+\end{figure}
+
+\Cref{fig:kind:tit:algo:kinding} presents the selected rules for kinding judgment
+$[[||-k]]$, along with the auxiliary judgments. Most rules correspond directly
+to their declarative counterparts.
+For applications $[[t1 t2]]$, \rref{a-ktt-app} first synthesizes the kind of
+$[[t1]]$ to be $[[eK1]]$, then uses $[[||-kapp]]$ to type-check $[[t2]]$. The
+judgment $[[ DD |- (et1 : eK) . t : ek ~> et2 -| TT]]$ is interpreted as, under
+context $[[DD]]$, applying the type $[[et1]]$ of kind $[[eK]]$ to the type
+$[[t]]$ returns kind $[[ek]]$, the elaboration result $[[et2]]$, and an output
+context $[[TT]]$. When $[[eK1]]$ is polymorphic (\rref{a-kapp-tt-forall}), we
+instantiate it with a fresh unification variable.
+\Rref{a-ktt-foralli} checks a polymorphic type. We assign a unification variable
+as the kind of $[[a]]$, bring $[[Xa:star, a:Xa]]$ into scope to check the body
+against $[[star]]$, yielding the output context $[[DD2, a : Xa, DD3]]$. As
+$[[a]]$ goes out of the scope in the conclusion, we need to drop $[[a]]$ in the
+concluding context. To make sure that dropping $[[a]]$ outputs a well-formed
+context, we substitute away all solved unification variables in $[[DD3]]$ for
+the return kind, and keep only $[[ unsolved(DD3)]]$, which are ensured ($[[DD3
+`-> a]]$) to have no dependency on $[[a]]$. %% To see why the quantification check is
+%% necessary here, consider the slightly modified |T| from the example in
+%% \Cref{sec:kind:qcheck}:
+%% \begin{spec}
+%% data T2 :: forall (b:: star) (c::b -> *). SameKind T1 c -> *
+%% \end{spec}
+%% Here |T2| suffers from the similar ill-formedness issue: we have |T1 (at b)|~$
+%% @@[[Xa]] $, with $[[Xa]]$|::b|, but we cannot generalize $[[Xa]]$ outside |b|.
+
+In the algorithmic elaborated kinding judgment $[[DD |-el eA : eK]]$, we keep
+the invariant: $[[ [DD]eK ]] = [[eK]]$. That is why in \rref{a-ela-app} we
+substitute $[[a]]$ with $[[ [DD]et2 ]]$.
+
+Instantiation ($[[||-inst]]$) contains the only entry to unification
+(\rref{a-inst-refl}).
+
+\subsection{Unification}
+\label{sec:kind:unification}
+
+\begin{figure}
+
+\drules[a-u]{$[[DD |- ek1 ~= ek2 -| TT]]$}
+{Unification}{refl-tt
+  , app
+  % , kapp
+  % ,kvarR-tt
+  , kvarL-tt
+  , kvarL-lo-tt
+  % ,kvarR-lo-tt
+}
+
+\drules[a-pr]{$[[ DD |-pr (Xa) ek1 ~~> ek2 -| TT]]$}
+  {Promotion}
+  { % star
+    % ,arr,tcon
+    % ,nat
+    % , app
+    % ,kapp
+    tvar
+    % , kuvarL
+    , kuvarR-tt}
+
+\drules[a-mv]{$[[ DD1 ++ DD2 -| TT ]]$}
+  {Moving}
+  {empty, kuvar
+    , kuvarM
+    % , tvar, tvarM
+  }
+\caption{Selected rules for unification, promotion, and moving in \tit}
+\label{fig:kind;tit:algo:unif}
+\end{figure}
+
+The judgments of unification and promotion are excerpted in
+\Cref{fig:kind:tit:algo:unif}. Most rules are natural extensions of those in \hne.
+
+\paragraph{Promotion}
+\label{par:kind:tit:promotion}
+
+The promotion judgment $[[ DD |-pr (Xa) ek1 ~~> ek2 -| TT]]$ is extended
+with kind annotations for unification variables. As our unification variables
+have kinds now, \rref{a-pr-kuvarR-tt} must also promote the kind of
+$[[Xb]]$, so that $[[Xb1:et1]]$ in the context is well-formed. 
+Promotion now has a new failure mode: it cannot move proper quantified type variables.
+In \rref{a-pr-tvar}, the variable $[[a]]$ must be to the left of $[[Xa]]$.
+
+Unfortunately, now we cannot easily tell whether promoting is
+terminating. In particular, the convergence of promotion in \hne is built
+upon the obvious fact that the size of the kind being promoted always gets
+smaller from the conclusion to the hypothesis. However, \rref{a-pr-kuvarR-tt}
+breaks this invariant, as the judgment recurs into the kinds of unification
+variables, and the size of the kinds may be larger than the unification
+variables.
+As shown in \Cref{sec:kind:tit:decidable}, we prove that promotion
+is terminating. 
+
+
+\paragraph{Unification}
+
+The unification judgment $[[ DD |- ek1 ~= ek2 -| TT]]$ for \tit features
+\textit{heterogeneous constraints}. Recall the definition of |X| and |Y|
+discussed in \Cref{para:first-oder}. When unifying $[[Xa Xb]]$ with |Maybe
+Bool|, setting $[[Xa]]=$|Maybe| and $[[Xb]]=$|Bool| results in ill-kinded
+results. This suggests that when solving a unification variable, we need to
+first unify the kinds of both sides, as shown in \rref{a-u-kvarL-tt}. When
+unifying $[[Xa]]$ with $[[et1]]$, we first promote $[[et1]]$, yielding
+$[[et2]]$. Now $[[et2]]$ must be well-formed under $[[TT1]]$, so we can get its
+kind $[[ek1]]$. We then unify the kinds of both sides. If everything succeeds,
+we set $[[Xa : ek1 = et2]]$. Under this rule, the unification $[[Xa Xb]]
+[[~=]]$|Maybe Bool| would be rejected correctly.
+
+\Rref{a-u-kvarL-lo-tt} is essentially the same as \rref{a-u-kvarL-tt}, but
+deals with unification variables in a local scope. We thus need an
+extra step to \textit{move} $[[Xa]]$ towards the end of the local scope.
+
+\paragraph{Local scopes and moving}
+\label{par:kind:tit:moving}
+
+As we have mentioned, a local scope can be reordered as long as the context is
+well-formed. Consider unifying $[[ {Xa:star, a : star, b : Xa, c:star} |- Xa ~=
+a]] $. We see that $[[a]]$ is not well-formed under the context before $[[Xa]]$,
+and thus we cannot rewrite $[[Xa : star]]$ with $[[Xa = a : star]]$.
+However, we \emph{can} reorder the context to put $[[Xa]]$ to the right of $[[a]]$. In
+fact, to maximize the prefix context of $[[Xa]]$, we can move $[[Xa]]$ to the
+end of the context, yielding $[[ { a : star, c:star, Xa:star, b : Xa} ]]$. As
+$[[b]]$ depends on $[[Xa]]$, $[[b]]$ is also moved to the end of the
+context. The final context is now $[[ {a : star, c:star, Xa:star=a, b : Xa}]]$.
+
+The \textit{moving} judgment $[[ DD1 ++ DD2 -| TT ]]$ reorders the context, by
+appending $[[DD2]]$ to the end of $[[DD1]]$, yielding $[[TT]]$. As we have
+emphasized, reordering must preserve a well-formed context. Therefore, every
+term that depends on $[[DD2]]$ (\rref{a-mv-kuvarM}) needs to be placed at the end, along with
+$[[DD2]]$.
+
+In \rref{a-u-kvarL-lo-tt}, we begin by reordering the local scope to put $[[Xa]]$
+as far to the right as possible.
+The rest of the rule is essentially the same as \rref{a-u-kvarL-tt}: the added
+complication stems from the need to keep track of what bindings in the context are
+a part of the current local scope.
+
+\subsection{Termination}
+\label{sec:kind:tit:decidable}
+
+Now the challenge is to prove that our unification algorithm terminates, which
+relies on the convergence of the promotion algorithm. Next, we first discuss
+the termination of unification, and then move to the more complicated proof for
+promotion. Let
+$[[ <DD> ]]$ denote the number of unsolved unification variables in
+$[[DD]]$.
+\begin{restatable}[Promotion Preserves $[[<DD>]]$]{lemma}{lemmanumpr}
+  \label{lemma:num:pr}
+  If $[[ DD |-pr (Xa) ek1 ~~> ek2 -| TT ]]$,
+  then $[[ <DD> = <TT> ]]$.
+\end{restatable}
+\vspace{-7pt}
+\begin{restatable}[Unification Makes Progress]{lemma}{lemmaprogressunif}
+  \label{lemma:progress:unif}
+  If $[[DD |- ek1 ~= ek2 -| TT]]$,
+  then either $[[TT = DD]]$,
+  or $[[ <TT> < <DD>]]$.
+\end{restatable}
+% 
+\newcommand{\size}[1]{|| {#1} ||}
+Now we measure unification $[[DD |- ek1 ~= ek2 -| TT]]$ using the lexicographic order
+of the pair $( [[<DD>]], \size{[[ek1]]} )$, where $\size{[[ek1]]}$ computes
+the standard size of $[[ek1]]$.
+We prove the pair always gets smaller
+from the conclusion to the hypothesis. Formally, assuming promotion terminates, we have
+
+\begin{restatable}[Unification Terminates]{theorem}{lemmadecideunif}
+  \label{lemma:decide:unif}
+  Given a context $[[ DD ok ]]$,
+  and kinds $[[et1]]$ and $[[et2]]$,
+  where $[[ [DD]et1 = et1 ]]$,
+  and $[[ [DD]et2 = et2 ]]$,
+  it is decidable whether there exists $[[TT]]$ such that
+  $[[ DD |- et1 ~= et2 -| TT ]]$.
+\end{restatable}
+
+We are not yet done, since \Cref{lemma:decide:unif} depends on the
+convergence of promotion. As observed in \rref{a-pr-kuvarR}, the
+size of the type being promoted increases from the conclusion to the
+hypothesis. Worse, the context never decreases. How do we prove promotion
+terminates?
+The crucial observation for \rref{a-pr-kuvarR} is that, when we move from the
+conclusion to the hypothesis, we also move from a unification variable to its
+kind. Since the kind is well-formed under the prefix context of the variable,
+we are somehow moving leftward in the context.
+%although the context keeps changing as well.
+
+To formalize the observation, we define the \textit{dependency graph} of a context.
+
+\begin{figure}
+\begin{subfigure}[b]{0.24\textwidth}
+\begin{tikzpicture}
+\SetVertexMath
+\tikzset{VertexStyle/.append style = {minimum size = 3pt, inner sep=1pt}}
+\tikzset{EdgeStyle/.style={->}}
+% terminals
+\Vertex[x=0, y=0,L={[[star]]}]{star}
+\Loop[dir=SO,dist=1cm](star)
+\Vertex[x=-1.1, y=0,L={[[->]]}]{arrow}
+\Loop[dir=SO,dist=1cm](arrow)
+\tikzset{VertexStyle/.append style={fill=gray!30}}
+\Vertex[x=1.1, y=0,L={[[nat]]}]{nat}
+\tikzset{VertexStyle/.append style ={fill=none}}
+\Edges(arrow,star)
+\Edges(nat,star)
+
+% graph
+\Vertex[x=0,y=0.8,L={[[Xa1]]}]{Xa1}
+\Vertex[x=0.8,y=0.8,L={[[Xa]]}]{Xa}
+\tikzset{VertexStyle/.append style={fill=gray!30}}
+\Vertex[x=0,y=1.6,L={[[Xa3]]}]{Xa3}
+\tikzset{VertexStyle/.append style ={fill=none}}
+\Edges(Xa1,star)
+\Edges(Xa,star)
+\Edges(Xa3,Xa1)
+\tikzset{EdgeStyle/.style={->,bend right=60}}
+\Edges(Xa3,arrow)
+\Edges(Xa3,star)
+\end{tikzpicture}
+\caption{Promote $[[Xa3 nat]]$}
+\label{subfig:dg:1}
+\end{subfigure}
+\begin{subfigure}[b]{0.24\textwidth}
+\begin{tikzpicture}
+\SetVertexMath
+\tikzset{VertexStyle/.append style = {minimum size = 3pt, inner sep=1pt}}
+\tikzset{EdgeStyle/.style={->}}
+% terminals
+\tikzset{VertexStyle/.append style={fill=gray!30}}
+\Vertex[x=0, y=0,L={[[star]]}]{star}
+\Loop[dir=SO,dist=1cm](star)
+\Vertex[x=-1.1, y=0,L={[[->]]}]{arrow}
+\Loop[dir=SO,dist=1cm](arrow)
+\tikzset{VertexStyle/.append style ={fill=none}}
+\Vertex[x=1.1, y=0,L={[[nat]]}]{nat}
+\Edges(arrow,star)
+\Edges(nat,star)
+
+% graph
+\tikzset{VertexStyle/.append style={fill=gray!30}}
+\Vertex[x=0,y=0.8,L={[[Xa1]]}]{Xa1}
+\tikzset{VertexStyle/.append style ={fill=none}}
+\Vertex[x=0.8,y=0.8,L={[[Xa]]}]{Xa}
+\Vertex[x=0,y=1.6,L={[[Xa3]]}]{Xa3}
+\Edges(Xa1,star)
+\Edges(Xa,star)
+\Edges(Xa3,Xa1)
+\tikzset{EdgeStyle/.style={->,bend right=60}}
+\Edges(Xa3,arrow)
+\Edges(Xa3,star)
+\end{tikzpicture}
+\caption{Promote $[[star -> Xa1]]$}
+\label{subfig:dg:2}
+\end{subfigure}
+\begin{subfigure}[b]{0.24\textwidth}
+\begin{tikzpicture}
+\SetVertexMath
+\tikzset{VertexStyle/.append style = {minimum size = 3pt, inner sep=1pt}}
+\tikzset{EdgeStyle/.style={->}}
+% terminals
+\Vertex[x=0, y=0,L={[[star]]}]{star}
+\Loop[dir=SO,dist=1cm](star)
+\Vertex[x=-1.1, y=0,L={[[->]]}]{arrow}
+\Loop[dir=SO,dist=1cm](arrow)
+\Vertex[x=1.1, y=0,L={[[nat]]}]{nat}
+\Edges(arrow,star)
+\Edges(nat,star)
+
+% graph
+\Vertex[x=0,y=0.8,L={[[Xb1]]}]{Xa1}
+\Vertex[x=0.8,y=0.8,L={[[Xa]]}]{Xa}
+\Vertex[x=0,y=1.6,L={[[Xa3]]}]{Xa3}
+\Edges(Xa1,star)
+\Edges(Xa,star)
+\Edges(Xa3,Xa1)
+\tikzset{EdgeStyle/.style={->,bend right=60}}
+\Edges(Xa3,arrow)
+\Edges(Xa3,star)
+\end{tikzpicture}
+\caption{Solve $[[Xa1=Xb1]]$}
+\label{subfig:dg:3}
+\end{subfigure}
+\begin{subfigure}[b]{0.24\textwidth}
+\begin{tikzpicture}
+\SetVertexMath
+\tikzset{VertexStyle/.append style = {minimum size = 3pt, inner sep=1pt}}
+\tikzset{EdgeStyle/.style={->}}
+% terminals
+\Vertex[x=0, y=0,L={[[star]]}]{star}
+\Loop[dir=SO,dist=1cm](star)
+\Vertex[x=-1.1, y=0,L={[[->]]}]{arrow}
+\Loop[dir=SO,dist=1cm](arrow)
+\Vertex[x=1.1, y=0,L={[[nat]]}]{nat}
+\Edges(arrow,star)
+\Edges(nat,star)
+
+% graph
+\Vertex[x=0,y=0.8,L={[[Xb1]]}]{Xa1}
+\Vertex[x=0.8,y=0.8,L={[[Xa]]}]{Xa}
+\Vertex[x=0,y=1.6,L={[[Xb2]]}]{Xa3}
+\Edges(Xa1,star)
+\Edges(Xa,star)
+\Edges(Xa3,Xa1)
+\tikzset{EdgeStyle/.style={->,bend right=60}}
+\Edges(Xa3,arrow)
+\Edges(Xa3,star)
+\end{tikzpicture}
+\caption{Solve $[[Xa3=Xb2]]$}
+\label{subfig:dg:4}
+\end{subfigure}
+
+\centering
+\begin{align*}
+&[[TT1]] = \hlmath{[[Xb1:star]]}, [[Xa:star]], \hlmath{[[Xa1:star = Xb1]]}, [[Xa2:star=Xa1, Xa3:star -> Xa2 ]] \\
+&[[TT2 = Xb1:star]], \hlmath{[[Xb2:star -> Xb1]]}, [[Xa:star, Xa1:star = Xb1, Xa2:star=Xa1]],
+  \hlmath{[[Xa3:star -> Xa2 = Xb2 ]]} \\
+&\inferrule*[right=a-pr-app]
+  {
+     \inferrule*[right=a-pr-kuvarR]
+     {
+        \inferrule*[right=a-pr-app]
+        {
+          \cdots \quad
+           \inferrule*[right=a-pr-kuvarR]
+           {
+             [[DD |-pr (Xa) star ~~> star -| DD]]
+           }
+           {[[DD |-pr (Xa) Xa1 ~~> Xb1 -| TT1]] \quad \boxed{\ref{subfig:dg:3}} }
+        }
+        { \boxed{\ref{subfig:dg:2}} \quad [[DD |-pr (Xa) star -> Xa1 ~~> star -> Xb1 -| TT1]]}
+     }
+     {[[DD |-pr (Xa) Xa3 ~~> Xb2 -| TT2]] \quad \boxed{\ref{subfig:dg:4}}}
+     \quad \cdots
+     % \quad
+     % \inferrule*[right=a-pr-nat]
+     % {
+     % }
+     % {[[ TT2 |-pr (Xa) nat ~~> nat -| TT2 ]]}
+  }
+  { \boxed{\ref{subfig:dg:1}} \quad [[ DD |-pr (Xa) Xa3 nat ~~> Xb2 nat -| TT2 ]] }
+\end{align*}
+\caption{Example of dependency graph}
+\label{fig:dg}
+\end{figure}
+
+\begin{definition}[Dependency Graph]
+  The dependency graph of a context $[[DD]]$ is a \textit{directed} graph where:
+  \begin{enumerate}
+  \item Nodes are all type variables and unsolved unification variables of
+    $[[DD]]$, and the terminal symbols $[[star]]$, $[[->]]$ and
+    $[[nat]]$.
+  \item Edges indicate the dependency from a type to its substituted kind. For example, if
+    $[[Xa:ek]]$, then there is a directed edge from $[[Xa]]$ to all the nodes
+    appearing in $[[ [DD]ek ]]$.
+  \end{enumerate}
+\end{definition}
+
+As an illustration, consider the context
+$[[ DD =  Xa:star, Xa1:star, Xa2:star=Xa1, Xa3:star -> Xa2]]$,
+whose dependency graph is given
+in \Cref{subfig:dg:1} (the reader is advised to ignore the color for now). There
+are several notable properties. First, as long as the context is well-formed, the
+graph is \textit{acyclic} except for the self-loop of $[[star]]$ and
+$[[->]]$. Second, solved unification variables never appear in the graph.
+The kind of $[[Xa3]]$ depends on $[[Xa2]]$, which is already solved
+by $[[Xa1]]$, so the dependency goes from $[[Xa3]]$ to $[[Xa1]]$.
+
+Now let us consider how promotion works in terms of the dependency graph,
+by trying to unify $[[DD |-  Xa ~= Xa3 nat ]]$. We start by
+promoting $[[Xa3 nat]]$. The derivation of the promotion is given
+at the bottom of \Cref{fig:dg}. We omit some details via ($\cdots$) as promoting
+constants ($[[star]]$,$[[->]]$ and $[[nat]]$) is trivial.
+At the top of \Cref{fig:dg} we give the dependency graph at certain
+points in the derivation, where the part being promoted is highlighted in
+gray. At the beginning we are at \Cref{subfig:dg:1}. For $[[Xa3]]$, by
+\rref{a-pr-kuvarR}, we first promote the kind of $[[Xa3]]$, which is
+(after context application) $[[star -> Xa1]]$~(\Cref{subfig:dg:2}). As
+$[[star]]$ and $[[->]]$ are always well-formed, we then promote $[[Xa1]]$
+whose kind is the well-formed $[[star]]$. Now we create a fresh variable
+$[[Xb1:star]]$, and solve $[[Xa1]]$ with $[[Xb1]]$~(\Cref{subfig:dg:3}). Note
+since $[[Xa1]]$ is solved, the dependency from $[[Xa3]]$ goes to $[[Xb1]]$.
+Finally, we create a fresh variable $[[Xb2]]$ with kind $[[star -> Xb1]]$, and
+solve $[[Xa3]]$ with $[[Xb2]]$~(\Cref{subfig:dg:4}). Going back to unification,
+we solve $[[Xa = Xb2 nat]]$.
+% The output context of unification is
+% $[[ Xb1:star, Xb2:star->Xb1, Xa:star=Xb2 nat, Xa1:star=Xb1, Xa2:star=Xa1, Xa3:star -> Xa2=Xb2]]$.
+
+We have several key observations. First, when we move from \Cref{subfig:dg:1} to
+\Cref{subfig:dg:2} via \rref{a-pr-kuvarR}, we are actually moving from the
+current node ($[[Xa3]]$) to its adjacent nodes ($[[star]]$, $[[->]]$, and
+$[[Xa1]]$). In other words, we are going down in this graph. Moreover,
+promotion terminates immediately at type constants,
+so we never fall into the trap of loop. Further, when we solve variables with
+fresh ones (\Cref{subfig:dg:3} and \Cref{subfig:dg:4}), the shape of the graph
+never changes.
+
+With all those in mind, we conclude that \textit{the promotion process goes
+  top-down via \rref{a-pr-kuvarR} in the dependency graph until it terminates at
+  types that are already well-formed}. Based on this conclusion, we can formally
+prove that promotion terminates.
+% 
+\begin{restatable}[Promotion Terminates]{theorem}{lemmadecidepr}
+  \label{lemma:decide:pr}
+  Given a context $[[ DD[Xa] ok ]]$,
+  and a kind $[[ek1]]$ with $[[ [ DD ] ek1 = ek1 ]]$,
+  it is decidable whether there exists $[[TT]]$ such that
+  $[[ DD |-pr (Xa) ek1 ~~> ek2 -| TT ]]$.
+\end{restatable}
+
+\subsection{Soundness, Completeness and Principality}
+\label{sec:kind:tit:sound-complete}
+
+We prove our algorithm is sound:
+
+\begin{restatable}[Soundness of $[[||-p]]$]{theorem}{lemmattsoundpgm}
+  \label{lemma:tt:sound:pgm}
+  If $[[OO ; GG ||-p pgm : eA]]$,
+  then $[[ [OO]OO ; [OO] GG |-p pgm : [OO]eA ]]$.
+\end{restatable}
+
+Unfortunately, we lose completeness.
+% while we restrict the algorithm to accept only predictable programs.
+Recall the example in \Cref{subsec:qcheck}. This definition of |T| is rejected
+by the algorithmic quantification check as the kind of |d| cannot be determined.
+However, the declarative system can guess correctly, e.g., |Proxy b| or |Proxy
+c|. Unfortunately, different choices lead to incomparable kinds for |T|. Thus we
+argue such programs must be rejected.
+
+Nevertheless, if the user explicitly writes down |d::Proxy b| or |d::Proxy
+c|, then the program will be accepted by the algorithm. Thus, we conjecture that
+if all local dependencies are annotated by the user, we can regain completeness.
+This, however, is a bit annoying to users, because it means that we cannot
+accept definitions like the one below, even though the dependency is clear.
+
+\begin{spec}
+data Eq :: forall k. k -> k -> *
+data P  :: forall k (a::k) b. Eq a b -> *
+\end{spec}
+
+We do not consider the incompleteness as a problematic issue in practice, as this
+scenario is quite contrived and (we expect) will rarely occur ``in the wild''. See
+more discussion of this point in \Cref{sec:related}.
+
+Although the algorithm is incomplete, we offer the following guarantee:
+\textit{if the algorithm accepts a definition, then that definition has a
+  principal kind, and the algorithm infers the principal kind}.
+%
+\begin{definition}[Kind Instantiation]
+  Under context $[[EE]]$,
+  a kind $[[ eK = \/i [kvs1] . \/ kvs2.  ek1]]$, where $[[kvs]]$'s can be empty,
+  instantiates to $[[ek]]$,
+  denoted as $[[ EE |- eK <: ek]]$,
+  if $ [[ek1]] [ [[kvs1]] [[|->]] \ottcomp{[[et1]]}{} ] [ [[kvs2]] [[|->]]
+  \ottcomp{[[et2]]}{} ] = [[ek]]  $
+  for some $ \ottcomp{[[et1]]}{}$ and $ \ottcomp{[[et2]]}{}$.
+\end{definition}
+%
+The relation is embedded in $[[ EE |- eA1 : eK <: ek ~> eA2]]$
+(\Cref{fig:tit:kinding}), where we ignore $[[eA1]]$ and $[[eA2]]$.
+
+
+\begin{definition}[Partial Order of Kinds in \tit]
+  \label{def:tit:partial-order}
+  Under context $[[EE]]$,
+  a kind $[[eK1]]$ is \textit{more general than} $[[eK2]]$,
+  denoted as $[[EE |- eK1 <<: eK2]]$,
+  if for all $[[ek]]$ such that $[[EE |- eK2 <: ek]]$,
+  we have $[[EE |- eK1 <: ek]]$.
+\end{definition}
+
+To understand the definition, consider that if the program type-checks under
+$[[T:eK2]]$, then it must type-check under $[[T:eK1]]$, as $[[T:eK1]]$ can be
+instantiated to all monokinds that $[[T:eK2]]$ is used at.
+
+Now we lift the definition of $[[||-grp]]$ to be the generalized result of kinds
+and contexts.
+%
+\begin{restatable}[Principality of $[[||-grp]]$]{theorem}{lemmattcompleteddgroup}
+  \label{lemma:tt:complete:dt-group}
+  If $[[ OO ||-grp rec </ dti // i /> ~~~> </ eKi // i/> ; </ GGi // i/> ]]$,
+  then whenever $[[ [OO]OO |-grp rec </ dti // i /> ~~~> </ eK'i // i/> ; </ HHi
+  // i/> ]]$ holds,
+  we have $[[ [OO]OO |- [OO]eKi <<: eK'i ]]$.
+\end{restatable}
+
+
+This result echoes the result in the term-level type inference algorithm for
+Haskell~(\citep[Section 6.5]{vytiniotis2011outsidein}): our algorithm does not
+infer every kind acceptable by the declarative system, but the kinds it does
+infer are always the best (principal) ones.
 
 %%% Local Variables:
 %%% mode: latex
