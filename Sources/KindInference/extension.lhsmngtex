@@ -1,0 +1,140 @@
+%include polycode.fmt
+%include rae.fmt
+
+%if style == newcode
+\begin{code}
+{-# LANGUAGE PolyKinds, ExplicitForAll, GADTSyntax #-}
+
+module Extension where
+\end{code}
+%endif
+
+\section{Language Extensions}
+\label{sec:kind:extensions}
+
+We have seen that the \tit system incorporates many features and enjoys
+desirable properties. In this section, we discuss how the \tit system can be
+extended with more related language features.
+
+\subsection{Higher-Rank Polymorphism}
+\label{sec:kind:higher-rank}
+
+The system can be extended naturally to support higher-rank
+polymorphism~\citep{practical:inference,DK}. With higher-rank
+polymorphism, every type can have a polymorphic kind.
+For example, data constructor declarations become $[[\/  kvs  . D </ Ai //
+i />]]$ instead of $[[\/ kvs. D </ ti // i />]]$.
+
+Unfortunately, higher-rank polymorphism breaks principality. Consider:
+
+\begin{tabular}{ll}
+\begin{minipage}{.45\textwidth}
+\begin{spec}
+data Q1 :: forall k1 k2. k1 -> *
+\end{spec}
+\end{minipage}
+&
+\begin{minipage}{.45\textwidth}
+\begin{spec}
+data Q2 :: (forall (k1: *) (k2:k1). k1 -> *) -> *
+\end{spec}
+\end{minipage}
+\end{tabular}
+
+\noindent First, we modify the
+definition of partial order of kinds (\Cref{def:tit:partial-order}) to state that one
+kind is more general than another if it can be instantiated to all
+\textit{polykinds} that the other kind can be instantiated to. Now consider the
+kind of |Q1|, which under the algorithm is generalized to |forall {k3: *} (k1:
+*) (k2:k3). k1 -> *|. In \Cref{lemma:tt:complete:dt-group}, we guarantee that
+this kind is a principal kind as it can be instantiated to all monokinds that
+other possible kinds for |Q1|, e.g., |forall (k1:: *) (k2::k1). k1 -> *|, can be
+instantiated to. However, under the new definition, |forall {k3:: *} (k1:: *)
+(k2::k3). k1 -> *| is no longer more general than |forall (k1:: *) (k2::k1). k1 ->
+*|, as there is no way to instantiate the former to the latter. To see why we
+need to modify the definition at all, consider the rank-2 kind of |Q2|, which expects
+exactly an argument of kind |forall (k1:: *) (k2::k1). k1 -> *|.
+
+We do not consider the absence of principality in the setting of higher-rank
+polymorphism to be a severe issue in practice, for two reasons: to our knowledge,
+higher-rank polymorphism for datatypes is not heavily used; and it may be possible
+to recover principality through the use of a more generous type-subsumption relation.
+Currently, GHC (and our model of it) does not support first-class type-level
+abstraction (i.e., $\Lambda$ in types)~\citep{jones1995system}.
+This means that we cannot introduce new variables (also called
+\emph{skolemization}~\cite[Section~4.6.2]{practical:inference}) in an attempt
+to equate one type with another. Returning to the example above, we \emph{could}
+massage |forall {k3:: *} (k1:: *) (k2::k3). k1 -> *| to |forall (k1:: *) (k2::k1). k1 -> *|
+if we could abstract over the |k1| in the target type.
+Recent advances in type-level
+programming in Haskell~\cite{kiss2019higher} suggest we may be able to add
+first-class abstraction, meaning that type-subsumption can use both instantiation
+\emph{and} skolemization. We conjecture that this development would recover principal
+types.
+
+\subsection{Generalized Algebraic Datatypes (GADTs)}
+\label{sec:kind:ext:gadts}
+
+The focus of this work has been on uniform datatypes, where every constructor's
+type matches exactly the datatype head: this fact allows us to easily choose the
+subscript to the $[[|-dc]]$ judgment in, e.g., \rref{dt-tt}. Programmers in
+modern Haskell, however, often use \emph{generalized} algebraic
+datatypes~\cite{Xi:2003:GRD:604131.604150,PeytonJones:gadt}.
+There are two impacts of adding these, both of which we found surprising.
+
+\paragraph{Equality constraints}
+
+The power of GADTs arises from how they encode local equality
+  constraints. Any GADT can be rewritten to a uniform datatype with equality
+  constraints~\cite[Section~4.1]{vytiniotis2011outsidein}. 
+For example, we can rewrite |data G a where MkG :: G
+  Bool| to be |data G a = (a ~ Bool) => MkG|, where |~| describes an equality
+  constraint. For our purposes of doing kind inference, these equality
+  constraints are uninteresting: the |~| operator simply relates two types of
+  the same kind and can be processed as any polykinded type constructor would
+  be. Modeling constraints to the left of a |=>| similarly would add a little clutter to our rules,
+  but would offer no real challenges.
+
+  The unexpected simplicity of adding GADTs to our system arises from a key fact:
+  we do not ever allow \emph{pattern-matching}. A GADT pattern-match brings a local
+  equality assumption into scope, which would influence the unification algorithm.
+  However, as pattern matching does not happen in the context of datatype declarations,
+  we avoid this wrinkle here.
+
+\paragraph{Syntax}
+
+The implementation of GADTs in GHC has an unusual syntax: |data G a where MkG :: a -> G Int|.
+The surprising aspect of this syntax is that the two |a|s above are \emph{different}:
+the |a| in the header is unrelated to the |a| in the data constructor. This seemingly
+inconsequential design choice makes kind inference for GADTs very challenging, as constructors
+have no way to refer back to the datatype parameters. Given that this aspect of GADTs
+is a quirk of GHC's design---and is not repeated in other languages that support GADTs---we
+remark here that it is odd and perhaps should be remedied. For the details, please see
+\cite{xie2019kind}.
+
+\subsection{Type Families}
+
+Type families~\citep{Chakravarty:2005:ATS:1086365.1086397} are, effectively, type-level
+functions. Kind inference of type families thus can be designed much like type inference
+for ordinary functions. However, as they can have dependency, the complications we
+describe in this paper would arise here, too. In particular, unification would have
+to be kind-directed, as we have described. The current syntax for closed type
+families~\citep{Eisenberg:2014:CTF:2535838.2535856} shares the same scoping problem as the syntax
+for GADTs, so our arguments above apply to closed type families equally.
+
+The challenge with type families is that they indeed do pattern-matching, and thus
+(in concert with GADTs) can bring local equalities into scope. A full analysis
+of the ramifications here is beyond the scope of this paper, but we believe the
+literature on type inference in the presence of local equalities would be helpful.
+Principal among these is the work of \citet{vytiniotis2011outsidein}, but
+\citet{gundry2013type} and \citet{eisenberg2016dependent} also approach this problem
+in the context of dependent types.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
+
+%%  LocalWords:  polycode newcode PolyKinds ExplicitForAll GADTSyntax endif
+%%  LocalWords:  polykinds monokinds MkG polykinded
