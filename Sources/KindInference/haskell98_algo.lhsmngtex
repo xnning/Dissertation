@@ -227,7 +227,7 @@ t]]$ is well-kinded.
 \subsection{Kinding}
 
 The algorithmic kinding $[[DD |- t : k -| TT]]$ is given in
-\Cref{fig:sec:h98:unif}. Most rules are self-explanatory.
+\Cref{fig:kind:h98:unif}. Most rules are self-explanatory.
 For applications (\rref{a-k-app}), we synthesize the type for an
 application $[[t1 t2]]$, where $[[t1]]$ and $[[t2]]$ have kinds $[[k1]]$ and
 $[[k2]]$, respectively. The hard work is delegated to the

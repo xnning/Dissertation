@@ -154,7 +154,7 @@ The quantification-checking metafunction $[[ DD `-> kvs ]]$, defined as $[[
 fkv(unsolved(DD)) # kvs ]]$, ensures that free variables in
 $[[unsolved(DD)]]$ are disjoint ($\sharp$) with $[[kvs]]$, so that we can safely
 generalize $[[unsolved(DD)]]$ outside $[[kvs]]$.\footnote{See also the
-  alternative design in TODO.}
+  alternative design in \cite{xie2019kind}.}
 
 \subsection{Kinding}
 

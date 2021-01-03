@@ -150,7 +150,7 @@ well-studied. While we are motivated concretely by Haskell, many of the challeng
 we face would be present in any dependently typed language seeking principled type
 inference. We use the term \tit
 to refer to the fragment of modern Haskell we model.\footnote{Some of the features
-we model are slightly different in our presentation than they exist in GHC. TODO
+we model are slightly different in our presentation than they exist in GHC. \cite{xie2019kind}
 outlines the differences. These minor differences do not affect the applicability of our work to
 improving the GHC implementations, but they may affect the ability to test our examples in GHC.} We enumerate
 the key features of this fragment below.
