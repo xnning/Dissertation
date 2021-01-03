@@ -1,0 +1,248 @@
+\section{Type Inference for Higher-Rank Types}
+
+Based on \citet{odersky:putting}, \citet{practical:inference} developed an
+approach for type inference for higher-rank types using traditional
+bi-directional type checking. They combine a variant of the containment relation
+from \citet{mitchell1988polymorphic} for deep skolemisation in subsumption
+rules, which we believe is compatible with our subtyping definition.
+
+\citet{DK} build a simple and concise algorithm for higher-rank polymorphism
+based on traditional bidirectional type checking. They deal with the same
+language of \citet{practical:inference}, except they do not have $[[let]]$
+expressions nor generalization (though it is discussed in design variations).
+Built upon some of these techniques, \cite{DK:extend} extend the system to a
+much richer type language that includes existentials, indexed types, and
+equations over type variables.
+
+\newcommand{\mlf}{\mathit{ML^F}}
+
+While our work focuses on predicative higher-rank types, there are also many
+works on type inference for \textit{impredicative} higher-rank types. Many of
+these work replies on new forms of types. $\mlf$
+\citep{le2014mlf,remy2008graphic,le2009recasting} generalizes ML with
+first-class polymorphism. $\mlf$ introduces a new type of bounded quantification
+(either rigid or flexible) for polymorphic types so that instantiation of
+polymorphic bindings is delayed until a principal type is found. higher-rank
+types. The HML system \citep{leijen2009flexible} is proposed as a simplification
+and restriction of $\mlf$. HML only uses flexible types, which simplifies the
+type inference algorithm, but retains many interesting properties and features.
+
+The FPH system \citep{vytiniotis2008fph} introduces boxy monotypes into System F
+types. One critique of boxy type inference is that the impredicativity is deeply
+hidden in the algorithmic type inference rules, which makes it hard to
+understand the interaction between its predicative constraints and impredicative
+instantiations~\citep{remy2005simple}.
+
+Recently, \citet{guarded:impred,quick:look} exploit impredicative instantiations
+of type variables that appears under a type constructor (i.e., type variables
+are \textit{guarded}). \cite{guarded:impred} distinguish variables using three
+\textit{sorts},
+% which specify the possible types that the variable can stand for,
+so that certain sorts of variables can be instantiated with higher-rank
+polymorphic types. \cite{quick:look} inspect the function arguments and assign
+impredicative instantiations first before the monomorphic ones.
+
+\section{Bi-Directional Type Checking}
+
+
+Bi-directional type checking was popularized by the work of
+\citet{pierce:local}. It has since been applied to many type systems with
+advanced features. The alternative \mode mode introduced in
+\Cref{chap:BiDirectional} enables a variant of bi-directional type checking.
+There are many other efforts to refine bi-directional type checking.
+
+Colored local type inference \citep{odersky2001colored} allows partial type
+information to be propagated Their work is built on distinguishing inherited
+types (known from the context) and synthesized types (inferred from terms). A
+similar distinction is achieved in \cite{DK} by manipulating type variables.
+
+The system of \emph{tridirectional} type checking
+\citep{dunfield:tridirectional} is based on bi-directional type checking and has
+a rich set of property types including intersections, unions and quantified
+dependent types, but without parametric polymorphism. Tridirectional type
+checking has a new direction for supporting type checking unions and existential
+quantification.
+
+Greedy bi-directional polymorphism \citep{dunfield2009greedy} adopts a greedy
+idea from \citet{cardelli1993implementation} on bi-directional type checking
+with higher-rank types, where the type variables in instantiations are
+determined by the first constraint. In this way, they support some uses of
+impredicative polymorphism. However, the greediness also makes many obvious
+programs rejected.
+
+
+
+\section{Kind Inference for Datatypes}
+
+\paragraph{The Glasgow Haskell Compiler.}
+
+The systems we present here are inspired by the algorithms
+implemented in GHC. However, our goal in the design of these systems is to produce
+a sound and (nearly) complete pair of specification and implementation, not simply
+to faithfully record what is implemented. We have identified ways that the GHC
+implementation can improve in the future. For example, GHC quantifies over local scopes
+as \emph{specified} where
+we believe they should be \emph{inferred}; and the tight connection in our system
+between unification and promotion may improve upon GHC's approach, which separates
+the two. The details
+of the relationship between our work and GHC (including a myriad of ways our design
+choices differ in small ways from GHC's) appear in \cite{xie2019kind}.
+
+\paragraph{Unification with dependent types.}
+
+While full higher-order unification is
+undecidable~\citep{goldfarb1981undecidability}, the \textit{pattern}
+fragment~\cite{miller1991unification} is a well-known decidable fragment. Much 
+ literature~\citep{reed2009higher,abel2011higher, gundry2013tutorial} is
+built upon the pattern fragment.
+
+Unification in a dependently typed language features \emph{heterogeneous
+  constraints}. To prove correctness, \citet{reed2009higher} used a weaker
+invariant on homogeneous equality, \textit{typing modulo}, which states that two
+sides are well typed up to the equality of the constraint yet to be solved.
+\citet{gundry2013tutorial} observed the same problem, and use \textit{twin
+  variables} to explicitly represent the same variable at different types, where
+twin variables are eliminated once the heterogeneous constraint is solved. In
+both approaches the well-formedness of a constraint depends on other
+constraints.
+\citet{Cockx:2016:UEP:2951913.2951917} proposed a proof-relevant unification that
+keeps track of the dependencies between equations.
+Different from their approaches, our algorithm unifies the kinds when
+solving unification variables. This guarantees that
+our unification always outputs well-formed solutions.
+
+\citet{ziliani2015unification} present the higher-order unification algorithm
+for CIC, the base logic of Coq. They favor syntactic equality by trying
+first-order unification, as they argue the first-order solution gives the most
+\textit{natural} solution. However, they omit a correctness proof for their algorithm.
+\citet{coen2004mathematical} also considers first-order unification,
+but only the soundness lemma is proved. Different from their systems, our system
+is based on the novel promotion judgment, and correctness including
+soundness and termination is proved.
+ 
+The technique of \textit{suspended
+  substitutions}~\cite{eisenberg2016dependent, gundry2013tutorial} is widely
+adopted in unification algorithms. Our
+system provides a design alternative, our \textit{quantification check}.
+Choosing between suspended substitutions and the quantification check is a
+user-facing language design decision, as suspended substitutions can accept some
+more
+programs. The quantification check means that the kind of a locally quantified
+variable |a| must be fully determined in |a|'s scope; it may \emph{not} be
+influenced by usage sites of the construct that depends on |a|. Suspended
+substitutions relax this restriction.
+%% With suspended substitutions, a unification variable $[[Xa]]$ may have a
+%% telescope of variables that $[[Xa]]$ can depend on. Recall the example |T| in
+%% \Cref{subsec:qcheck}, we have $|c|::[[Xb]]$, where $[[Xb]] |:: a|$, but we
+%% cannot generalize $[[Xb]]$, so |T| is rejected. Using suspended substitutions, we
+%% can keep $|c::| [[ Xb ]] [ |a: *, b : a | ] $, where $ [ | a:star, b : a | ] $
+%% is the telescope of $[[Xb]]$. Later, if we have |P T| (with |P| defined below),
+%% then $[[Xb]]$ can be solved to |b|.
+%% \begin{spec}
+%% data P :: (forall (a :: *) (b :: a) (c :: b). Relate b c -> *) -> *
+%% \end{spec}
+We conjecture that suspended substitutions can yield a complete algorithm.
+However, that mechanism is complex. Moreover,
+unification based on suspended substitutions is only decidable for the pattern
+fragment. Our system, in contrast, avoids all the complication
+introduced by suspended substitutions through its quantification check.
+Our unification terminates for all inputs, preserving
+backward compatibility to Hindley-Milner-style inference. Although
+we reject the definition of |T| (\Cref{sec:kind:qcheck}), we can solve more
+constraints outside
+the pattern fragment. We conjecture that those constraints are much
+more common than definitions like |T|.
+Suspended substitutions often come with a \textit{pruning}
+process~\citep{abel2011higher},
+which produces a
+valid solution before solving a unification variable.
+Our promotion process has a similar effect.
+
+\paragraph{Homogeneous kind-preserving unification}
+
+\citet{jones1995system} proposed a homogeneous kind-preserving unification
+between two types. Kinds $[[k]]$ are defined only as
+$[[star]]$ or $[[k1 -> k2]]$. As the kind system is much simpler,
+kind-preserving unification $[[~]]_{[[k]]}$ is simply subscripted by the kind,
+and working out the kinds is straightforward. Our unification subsumes Jones's algorithm. 
+
+% \paragraph{Datatypes}
+
+% General-purpose dependently typed languages, including Coq~\citep{coqteam},
+% Agda~\citep{norell2007towards}, and Idris~\citep{brady2013idris}, can define
+% datatypes in a similar way to Haskell datatypes. However, as far as we know,
+% there is no formalization established of their inference algorithm for
+% datatypes. \ningning{not sure whether to include the following;} We conjecture
+% that their underlying inference mechanism for datatypes is different from
+% our system. For example, the unification algorithm in
+% Coq~\citep{ziliani2015unification} is quite different from ours.
+% \richard{I don't find that this paragraph contributes much. Cut?}
+% \ningning{Cut for now.}
+
+\paragraph{Type inference in Haskell}
+
+Type inference in Haskell is inspired by
+\citet{damas1982principal} and \citet{pottier2005essence},
+extended with various
+type features, including
+higher rank polymorphism~\citep{practical:inference} and
+local
+assumptions~\citep{simonet2007constraint,Schrijvers:2009:CDT:1596550.1596599,
+  vytiniotis2011outsidein},
+among
+others.
+However, none of these works describe an inference algorithm
+for datatypes, nor do they formalize type variables of varying kinds or polymorphic recursion.
+
+\paragraph{Dependent Haskell}
+Our \tit system merges types and kinds, a key feature of
+\textit{Dependent
+  Haskell} (DH)~\citep{eisenberg2016dependent,gundry2013type,weirich2017specification,
+  Weirich:2013:SFE:2500365.2500599}. There is ongoing work dedicated to its
+implementation~\citep{coercionq}. The most recent work by
+\citet{weirich2019role} integrates \textit{roles}~\cite{breitner2016safe}
+with dependent types.
+Our work is the first presentation of unification for DH,
+and our system
+may be useful in designing DH's
+term-level type inference.
+
+\paragraph{Context extension}
+
+TODO
+Our approach of recording unification variables and their solutions in the
+contexts is inspired by \citet{gundry2010type} and \citet{dunfield2013complete}.
+\citet{gundry2013tutorial} applied the
+approach to unification in dependent types, where the context also records
+constraints; constraints also appear in context in \citet{eisenberg2016dependent}.
+Further, we extend
+the context extension approach with local scopes, supporting 
+groups of order-insensitive variables.
+
+\paragraph{Polymorphic recursion}
+
+\citet{mycroft1984polymorphic} presented a semi-algorithm for polymorphic
+recursion. \citet{jim1996principal} and \citet{damiani2003rank} studied typing rules for
+recursive definitions based on rank-2 intersection types.
+\citet{comini2008polymorphic} studied recursive definitions in a type system
+that corresponds to the abstract interpreter in
+\citet{gori2002experiment,gori2003properties}. Our system does not infer
+polymorphic recursion; instead, we exploit kind annotations to guide the acceptance of polymorphic
+recursion.
+
+% \paragraph{Constraint-solving approaches}
+
+% Many systems (e.g.~\citep{pottier2005essence}) adopt
+% a modular presentation of type inference, which consists of a constraint
+% generator and a constraint solver. For simplicity, we have presented an eager
+% unification algorithm instead of using a separate constraint solver. However, we
+% believe changing to a constraint-solving approach should not change any of our
+% main results. Section~B.1 of \auxiliarymaterial considers this point further.
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
