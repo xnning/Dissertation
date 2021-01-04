@@ -63,12 +63,12 @@ to recover principality through the use of a more generous type-subsumption rela
 Currently, GHC (and our model of it) does not support first-class type-level
 abstraction (i.e., $\Lambda$ in types)~\citep{jones1995system}.
 This means that we cannot introduce new variables (also called
-\emph{skolemization}~\cite[Section~4.6.2]{practical:inference}) in an attempt
+\emph{skolemization}~\citep[Section~4.6.2]{practical:inference}) in an attempt
 to equate one type with another. Returning to the example above, we \emph{could}
 massage |forall {k3:: *} (k1:: *) (k2::k3). k1 -> *| to |forall (k1:: *) (k2::k1). k1 -> *|
 if we could abstract over the |k1| in the target type.
 Recent advances in type-level
-programming in Haskell~\cite{kiss2019higher} suggest we may be able to add
+programming in Haskell~\citep{kiss2019higher} suggest we may be able to add
 first-class abstraction, meaning that type-subsumption can use both instantiation
 \emph{and} skolemization. We conjecture that this development would recover principal
 types.
@@ -80,14 +80,14 @@ The focus of this work has been on uniform datatypes, where every constructor's
 type matches exactly the datatype head: this fact allows us to easily choose the
 subscript to the $[[|-dc]]$ judgment in, e.g., \rref{dt-tt}. Programmers in
 modern Haskell, however, often use \emph{generalized} algebraic
-datatypes~\cite{Xi:2003:GRD:604131.604150,PeytonJones:gadt}.
+datatypes~\citep{Xi:2003:GRD:604131.604150,PeytonJones:gadt}.
 There are two impacts of adding these, both of which we found surprising.
 
 \paragraph{Equality constraints}
 
 The power of GADTs arises from how they encode local equality
   constraints. Any GADT can be rewritten to a uniform datatype with equality
-  constraints~\cite[Section~4.1]{vytiniotis2011outsidein}. 
+  constraints~\citep[Section~4.1]{vytiniotis2011outsidein}.
 For example, we can rewrite |data G a where MkG :: G
   Bool| to be |data G a = (a ~ Bool) => MkG|, where |~| describes an equality
   constraint. For our purposes of doing kind inference, these equality

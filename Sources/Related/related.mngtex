@@ -1,8 +1,10 @@
 \section{Type Inference for Higher-Rank Types}
 
-Based on \citet{odersky:putting}, \citet{practical:inference} developed an
+
+\citet{odersky1996putting} introduced a type system for higher-rank implicit
+polymorphic types. Based on that, \citet{practical:inference} developed an
 approach for type inference for higher-rank types using traditional
-bi-directional type checking. They combine a variant of the containment relation
+bidirectional type checking. They combine a variant of the containment relation
 from \citet{mitchell1988polymorphic} for deep skolemisation in subsumption
 rules, which we believe is compatible with our subtyping definition.
 
@@ -16,8 +18,8 @@ equations over type variables.
 
 \newcommand{\mlf}{\mathit{ML^F}}
 
-While our work focuses on predicative higher-rank types, there are also many
-works on type inference for \textit{impredicative} higher-rank types. Many of
+While our work focuses on predicative higher-rank types, there are also a lot of
+work on type inference for \textit{impredicative} higher-rank types. Many of
 these work replies on new forms of types. $\mlf$
 \citep{le2014mlf,remy2008graphic,le2009recasting} generalizes ML with
 first-class polymorphism. $\mlf$ introduces a new type of bounded quantification
@@ -40,36 +42,130 @@ are \textit{guarded}). \cite{guarded:impred} distinguish variables using three
 % which specify the possible types that the variable can stand for,
 so that certain sorts of variables can be instantiated with higher-rank
 polymorphic types. \cite{quick:look} inspect the function arguments and assign
-impredicative instantiations first before the monomorphic ones.
+impredicative instantiations before monomorphic ones.
 
-\section{Bi-Directional Type Checking}
+\section{Bidirectional Type Checking}
 
 
-Bi-directional type checking was popularized by the work of
+Bidirectional type checking was popularized by the work of
 \citet{pierce:local}. It has since been applied to many type systems with
 advanced features. The alternative \mode mode introduced in
-\Cref{chap:BiDirectional} enables a variant of bi-directional type checking.
-There are many other efforts to refine bi-directional type checking.
+\Cref{chap:BiDirectional} enables a variant of bidirectional type checking.
+There are many other efforts to refine bidirectional type checking.
 
 Colored local type inference \citep{odersky2001colored} allows partial type
-information to be propagated Their work is built on distinguishing inherited
+information to be propagated, by distinguishing inherited
 types (known from the context) and synthesized types (inferred from terms). A
 similar distinction is achieved in \cite{DK} by manipulating type variables.
 
-The system of \emph{tridirectional} type checking
-\citep{dunfield:tridirectional} is based on bi-directional type checking and has
+\emph{Tridirectional} type checking
+\citep{dunfield:tridirectional} is based on bidirectional type checking and has
 a rich set of property types including intersections, unions and quantified
 dependent types, but without parametric polymorphism. Tridirectional type
 checking has a new direction for supporting type checking unions and existential
 quantification.
 
-Greedy bi-directional polymorphism \citep{dunfield2009greedy} adopts a greedy
-idea from \citet{cardelli1993implementation} on bi-directional type checking
-with higher-rank types, where the type variables in instantiations are
-determined by the first constraint. In this way, they support some uses of
+Greedy bidirectional polymorphism \citep{dunfield2009greedy} adopts a greedy
+idea from \citet{cardelli1993implementation} on bidirectional type checking
+with higher-rank types, where type variables in instantiations are
+determined by their first constraint. In this way, they support some uses of
 impredicative polymorphism. However, the greediness also makes many obvious
 programs rejected.
 
+A detailed survey of the development of bidirectional type checking is given by
+\cite{dunfield2020bidirectional}, which collect and explain the design
+principles of bidirectional type checking, and summarize past research related
+to bidirectional type checking.
+
+
+\section{Gradual Typing}
+
+The seminal paper by \citet{siek2006gradual} is the first to propose gradual
+typing, which enables programmers to mix static and dynamic typing in a program
+by providing a mechanism to control which parts of a program are statically
+checked. The original proposal extends the simply typed lambda calculus by
+introducing the unknown type $\unknown$ and replacing type equality with type
+consistency. Casts are introduced to mediate between statically and dynamically
+typed code. Later \citet{siek2007gradual} incorporated gradual typing into a
+simple object oriented language, and showed that subtyping and consistency are
+orthogonal -- an insight that partly inspired our work on \gpc. We show that subtyping
+and consistency are orthogonal in a much richer type system with higher-rank
+polymorphism. \citet{siek2009exploring} explores the design space of different
+dynamic semantics for simply typed lambda calculus with casts and unknown types.
+In the light of the ever-growing popularity of gradual typing, and its somewhat
+murky theoretical foundations, \citet{siek:criteria} felt the urge to have a
+complete formal characterization of what it means to be gradually typed. They
+proposed a set of criteria that provides important guidelines for designers of
+gradually typed languages. \citet{cimini2016gradualizer} introduced the
+\emph{Gradualizer}, a general methodology for generating gradual type systems
+from static type systems. Later they also develop an algorithm to generate
+dynamic semantics~\citep{CiminiPOPL}. \citet{garcia:abstracting} introduced
+the AGT approach based on abstract interpretation. As we discussed, none of
+these approaches instructed us how to define consistent subtyping for
+polymorphic types.
+
+There is some work on integrating gradual typing with rich type disciplines.
+\citet{Ba_ados_Schwerter_2014} establish a framework to combine gradual typing and
+effects, with which a static effect system can be transformed to a dynamic
+effect system or any intermediate blend. \citet{Jafery:2017:SUR:3093333.3009865}
+present a type system with \emph{gradual sums}, which combines refinement and
+imprecision. We have discussed the interesting definition of \emph{directed
+  consistency} in \Cref{sec:gradual:exploration}. \citet{castagna2017gradual} develop a gradual type system with
+intersection and union types, with consistent subtyping defined by following
+the idea of \citet{garcia:abstracting}.
+TypeScript~\citep{typescript} has a distinguished dynamic type, written {\color{blue} any}, whose fundamental feature is that any type can be
+implicitly converted to and from {\color{blue} any}.
+% They prove that the conversion
+% definition (called \emph{assignment compatibility}) coincides with the
+% restriction operator from \citet{siek2007gradual}.
+Our treatment of the unknown type in \Cref{fig:gradual:decl:conssub} is similar to their
+treatment of {\color{blue} any}. However, their type system does not have
+polymorphic types. Also, unlike our consistent subtyping which inserts runtime
+casts, in TypeScript, type information is erased after compilation so there are
+no runtime casts, which makes runtime type errors possible.
+% dynamic checks does not contribute to type safety.
+
+\section{Gradual Type Systems with Explicit Polymorphism}
+
+\citet{Morris:1973:TS:512927.512938} dynamically enforces
+parametric polymorphism and uses \emph{sealing} functions as the
+dynamic type mechanism. More recent works on integrating gradual typing with
+parametric polymorphism include the dynamic type of \citet{abadi1995dynamic} and
+the \emph{Sage} language of \citet{gronski2006sage}. None of these has carefully
+studied the interaction between statically and dynamically typed code.
+\citet{ahmed2011blame} proposed \pbc that extends the blame
+calculus~\citep{Wadler_2009} to incorporate polymorphism. The key novelty of
+their work is to use dynamic sealing to enforce parametricity. As such, they end
+up with a sophisticated dynamic semantics. Later, \citet{amal2017blame} prove
+that with more restrictions, \pbc satisfies parametricity. Compared to their
+work, our type system can catch more errors earlier since, as we argued,
+their notion of \emph{compatibility} is too permissive. For example, the
+following is rejected (more precisely, the corresponding source program never
+gets elaborated) by our type system:
+
+\[
+  [[(\x:unknown. x + 1)]] : [[\/ a. a -> a]] [[~~>]] [[ <unknown -> nat `-> \/a. a -> a> (\x:unknown. x + 1) ]]
+\]
+while the type system of \pbc would accept the translation, though at runtime,
+the program would result in a cast error as it violates parametricity.
+% This does not imply, in any regard that \pbc is not well-designed; there are
+% circumstances where runtime checks are \emph{needed} to ensure
+% parametricity.
+We emphasize that it is the combination of our powerful type system together
+with the powerful dynamic semantics of \pbc that makes it possible to have
+implicit higher-rank polymorphism in a gradually typed setting.
+% without compromising parametricity.
+\citet{devriese2017parametricity} proved that
+embedding of System F terms into \pbc is not fully abstract. \citet{yuu2017poly}
+also studied integrating gradual typing with parametric polymorphism. They
+proposed System F$_G$, a gradually typed extension of System F, and System
+F$_C$, a new polymorphic blame calculus. As has been discussed extensively,
+their definition of type consistency does not apply to our setting (implicit
+polymorphism). All of these approaches mix consistency with subtyping to some
+extent, which we argue should be orthogonal. On a side note, it seems that our
+calculus can also be safely translated to System F$_C$. However we do not
+understand all the tradeoffs involved in the choice between \pbc and System
+F$_C$ as a target.
 
 
 \section{Kind Inference for Datatypes}
