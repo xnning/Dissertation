@@ -106,7 +106,7 @@ definitions, but use $[[dd |-DK A]]$ to denote the corresponding judgment in DK.
 \begin{figure}
   \drules[dk-inf]{$ [[dd |-DK e => A ]] $}{Type Inference}{var, int,lam, app, anno}
   \drules[dk-chk]{$ [[dd |-DK e <= A ]] $}{Type Checking}{int, lam, gen, sub}
-  \drules[dk-m]{$ [[dd |-DK A1 |> A2]] $}{Matching}{forall, arr}
+  \drules[dk-app]{$ [[dd |-DK A1 . e =>=> A2]] $}{Application judgment}{forall,arr}
   \caption{Static semantics of the Dunfield-Krishnaswami type system.}
   \label{fig:DK:static}
 \end{figure}
@@ -125,13 +125,11 @@ first discuss rules in the inference mode.
 \Rref{dk-inf-var} and \rref{dk-inf-int} are straightforward. To infer
 unannotated lambdas, \rref{dk-inf-lam} guesses a monotype. For an application
 $[[e1 e2]]$, \rref{dk-inf-app} first infers the type $[[A]]$ of the expression
-$[[e1]]$. Then, because $[[e1]]$ is applied to an argument, the type $[[A]]$ is
-decomposed into a function type $[[A1 -> A2]]$, using the matching judgment
-(discussed shortly). Now since the function expects an argument of type
-$[[A1]]$, the rule proceeds by checking $[[e2]]$ against $[[A1]]$. Similarly,
-for an annotated expression $[[e : A]]$, \rref{dk-inf-anno} simply checks
-$[[e]]$ against $[[A]]$. Both rules (\rref{dk-inf-app} and \rref{dk-inf-anno})
-have mode switched from inference to checking.
+$[[e1]]$. The \textit{application judgment} (discussed shortly) then takes the
+type $[[A]]$ and the argument $[[e2]]$, and returns the final result type
+$[[A2]]$. For an annotated expression $[[e : A]]$, \rref{dk-inf-anno} simply
+checks $[[e]]$ against $[[A]]$. Both rules (\rref{dk-inf-app} and
+\rref{dk-inf-anno}) have mode switched from inference to checking.
 
 \paragraph{Type Checking.}
 
@@ -157,39 +155,46 @@ requiring type annotations.
 $[[e]]$ can be checked against $[[A2]]$, if $[[e]]$ infers the type $[[A1]]$ and
 $[[A1]]$ is a subtype of $[[A2]]$.
 
-\paragraph{Matching.}
+\paragraph{Application judgment.}
 
-In \rref{dk-inf-app} where we type-check an application $[[e1 e2]]$, we derive
+The application judgment $[[dd |-DK A1 . e =>=> A2]]$ is interpreted as, when we
+apply an expression of type $[[A1]]$ to the expression $[[e]]$, we get a return
+type $[[A2]]$. For a polymorphic type (\rref{dk-app-forall}), we
+instantiate the universal quantifier with a monotype, until the type becomes a
+function type (\rref{dk-app-arr}). In the function type case, since the function
+expects an argument of type $[[A1]]$, the rule proceeds by checking $[[e2]]$
+against $[[A1]]$.
+
+In many other type systems
+\citep{garcia:principal,esop2018:consistent,toplas:consistent}, the application
+judgment is replaced by \textit{matching}. Using matching, \rref{dk-inf-app} is
+replaced by \rref{dk-inf-app2}.
+
+\begin{center}
+  \drule{dk-inf-appTwo}
+\end{center}
+
+In \rref{dk-inf-app2} where we type-check an application $[[e1 e2]]$, we derive
 that $[[e1]]$ has type $[[A]]$, but $[[e1]]$ must have a function type so that
 it can be applied to an argument. The \textit{matching} judgment instantiates
-$[[A]]$ into a function.
+$[[A]]$ into a function $[[A1 -> A2]]$. We then check $[[e2]]$ against $[[A1]]$.
+
+The definition of matching given below.
+
+\drules[dk-m]{$ [[dd |-DK A1 |> A2]] $}{Matching}{forall, arr}
 
 Matching has two straightforward rules: \rref{dk-m-forall} instantiates a
 polymorphic type, by substituting $[[a]]$ with a well-formed monotype $[[t]]$,
 and continues matching on $[[ A[a ~> t] ]]$; \rref{dk-m-arr} returns the
 function type directly.
 
-In \cite{DK}, they use an \textit{application judgment} instead of matching. The
-application judgment $[[dd |-DK A1 . e =>=> A2]]$, whose definition is given below, is
-interpreted as, when we apply an expression of type $[[A1]]$ to the expression
-$[[e]]$, we get a return type $[[A2]]$.
-
-\drules[dk-app]{$ [[dd |-DK A1 . e =>=> A2]] $}{Application}{forall,arr}
-
-With the application judgment, \rref{dk-inf-app} is replaced by \rref{dk-inf-app2}.
-
-\begin{center}
-  \drule{dk-inf-appTwo}
-\end{center}
-
-It can be easily shown that the presentation of \rref{dk-inf-app} with matching
-is equivalent to that of \rref{dk-inf-app2} with the application judgment.
+It can be easily shown that the presentation of \rref{dk-inf-app} with the
+application judgment is equivalent to that of \rref{dk-inf-app2} with matching.
 Essentially, they both make sure that the expression being applied has an arrow
-type $[[A1 -> A2]]$, and then check the argument against $[[A1]]$.
-
-We prefer the presentation of \rref{dk-inf-app} with matching, as matching is a
+type $[[A1 -> A2]]$, and then check the argument against $[[A1]]$. We sometimes
+use the presentation of \rref{dk-inf-app2} with matching, as matching is a
 simple and independent process whose purpose is clear. In contrast, it is
-relatively less comprehensible with \rref{dk-inf-app2} and the application
+relatively less comprehensible with \rref{dk-inf-app} and the application
 judgment, where all three forms of the judgment (inference, checking,
 application) are mutually dependent.
 
