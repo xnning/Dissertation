@@ -177,6 +177,29 @@ parametricity are inherently incompatible. However, later
 \citet{new:gradual:parametricity} show that by modifying System F's syntax to
 make the sealing visible, both graduality and parametricity can be achieved.
 
+\section{Gradual Type Inference}
+
+\citet{siek2008gradual} studied unification-based type inference for gradual
+typing, where they show why three straightforward approaches fail to meet their
+design goals. One of their main observations is
+that simply ignoring dynamic types during unification does not work. Therefore,
+their type system assigns unknown types to type variables and infers gradual
+types, which results in a complicated type system and inference algorithm. In
+our algorithm presented in \cref{chap:Dynamic}, comparisons between
+existential variables and unknown types are emphasized by the distinction
+between static existential variables and gradual existential variables. By
+syntactically refining unsolved gradual existential variables with unknown types, we gain a
+similar effect as assigning unknown types, while keeping the algorithm relatively
+simple.
+\citet{garcia:principal} presented a new approach where gradual type
+inference only produces static types, which is adopted in our type system. They
+also deal with let-polymorphism (rank 1 types). They proposed the distinction
+between static and gradual type parameters, which inspired our extension to
+restore the dynamic gradual guarantee. Although those existing works all involve
+gradual types and inference, none of these works deal with higher-rank
+implicit polymorphism.
+
+
 
 \section{Kind Inference for Datatypes}
 
