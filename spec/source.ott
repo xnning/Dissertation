@@ -448,6 +448,7 @@ pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }} :: 'ptrm_' ::=
   | < A `-> B > pe ::   :: cast
   | ( pe )         :: S :: paren
   | S ( pe )       :: S :: subst
+  | pe1 + pe2      :: S :: plus
 
 pvalue, pv {{ tex v }} :: 'pvalue_' ::=
   | n              ::   :: lit

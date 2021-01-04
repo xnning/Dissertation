@@ -113,6 +113,9 @@ imprecision. We have discussed the interesting definition of \emph{directed
   consistency} in \Cref{sec:gradual:exploration}. \citet{castagna2017gradual} develop a gradual type system with
 intersection and union types, with consistent subtyping defined by following
 the idea of \citet{garcia:abstracting}.
+\citet{eremondi:gradualdependent} develop a gradual dependently-typed language,
+where compile-time normalization and run-time execution are distinguished to
+account for nontermination and failure.
 TypeScript~\citep{typescript} has a distinguished dynamic type, written {\color{blue} any}, whose fundamental feature is that any type can be
 implicitly converted to and from {\color{blue} any}.
 % They prove that the conversion
@@ -133,12 +136,13 @@ dynamic type mechanism. More recent works on integrating gradual typing with
 parametric polymorphism include the dynamic type of \citet{abadi1995dynamic} and
 the \emph{Sage} language of \citet{gronski2006sage}. None of these has carefully
 studied the interaction between statically and dynamically typed code.
-\citet{ahmed2011blame} proposed \pbc that extends the blame
+
+\citet{amal:blame} proposed \pbc that extends the blame
 calculus~\citep{Wadler_2009} to incorporate polymorphism. The key novelty of
 their work is to use dynamic sealing to enforce parametricity. As such, they end
 up with a sophisticated dynamic semantics. Later, \citet{amal2017blame} prove
 that with more restrictions, \pbc satisfies parametricity. Compared to their
-work, our type system can catch more errors earlier since, as we argued,
+work, our \gpc type system can catch more errors earlier since, as we argued,
 their notion of \emph{compatibility} is too permissive. For example, the
 following is rejected (more precisely, the corresponding source program never
 gets elaborated) by our type system:
@@ -166,6 +170,12 @@ extent, which we argue should be orthogonal. On a side note, it seems that our
 calculus can also be safely translated to System F$_C$. However we do not
 understand all the tradeoffs involved in the choice between \pbc and System
 F$_C$ as a target.
+
+Recently, \citet{toro:gradual:parametricity} applied AGT to designing a gradual
+language with explicit parametric polymorphism, claiming that graduality and
+parametricity are inherently incompatible. However, later
+\citet{new:gradual:parametricity} show that by modifying System F's syntax to
+make the sealing visible, both graduality and parametricity can be achieved.
 
 
 \section{Kind Inference for Datatypes}
