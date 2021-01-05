@@ -217,58 +217,6 @@ abstraction directly applied to an argument, can be regarded as the desugared
 expression for $\mathbf{type}~[[a = int]]~\mathbf{in}~[[\x:a. x + 1]]$.
 
 
-\subsection{Dependent Type Systems}
-\label{subsec:dep-type}
-
-\ningning{Move to future work.}
-
-One remark about the application mode is that the same idea is possibly
-applicable to systems with advanced features, where type inference is
-sophisticated or even undecidable. One promising application is, for instance,
-dependent type systems~\citep{xi:dependent}. Type systems with dependent types
-usually unify the syntax for terms and types, with a single lambda abstraction
-generalizing both type and lambda abstractions. Unfortunately, this means that
-the $[[let]]$ desugar is not valid in those systems. As a concrete example,
-consider desugaring the expression $[[let]]~[[a = int]]~\mathbf{in}~[[\x:a. x]] + [[1]]$
-into $(\lambda [[a]]. [[\x:a. x]] + 1)~[[int]]$, which is ill-typed because the type
-of $[[x]]$ in the abstraction body is $[[a]]$ and not $[[int]]$.
-
-
-Because $[[let]]$ cannot be encoded, declarations cannot be encoded either.
-Modeling declarations in dependently typed languages is a subtle matter, and
-normally requires some additional complexity
-\citep{severi:dependent:definitions}.
-
-
-We believe that the same technique presented in \Cref{sec:AP:typeapplication}
-can be adapted into a dependently typed language to enable a $[[let]]$ encoding.
-In a dependent type system with unified syntax for terms and types, we can
-combine the two forms in the typing context, i.e., $[[x: A]]$ and $[[a = A]]$,
-into a unified form $[[x]] = [[e]] : [[A]]$. Then we can combine two application
-rules \rref{ap-app-app} and \rref{ap-app-tapp} into \rref{ap-app-dapp}, and also
-two abstraction rules \rref{ap-app-lam} and \rref{ap-app-tlam} into
-\rref{ap-app-dlam}.
-%
-\begin{mathpar}
-  \inferrule*[right=ap-app-dapp]{
-    [[dd|-AP e2 => A1]] \\
-    [[dd]] ; [[ss]], [[e2]]:[[A1]] [[|-AP]] [[e1]] [[=>]] [[B]]
-  }{
-    [[dd;ss|-AP e1 e2 => B]]
-  }
-  \and
-  \inferrule*[right=ap-app-dlam]{
-    [[dd]], [[x]] = [[e1 : A1]]; [[ss]] [[|-AP]] [[e]] [[=>]] [[B]]
-  }{
-    [[dd]] ; [[ss]], [[e1]] : [[A1]]  [[|-AP]] [[\x.e]] [[=>]] [[B]]
-}
-\end{mathpar}
-
-
-With such rules it would be possible to handle declarations easily in dependent
-type systems. Note this is still a rough idea and we have not fully worked out
-the typing rules for this type system yet.
-
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"

@@ -1,0 +1,96 @@
+
+\section{Dependent Type Systems with \Mode mode}
+\label{sec:future:dep-type}
+
+The \mode mode is possibly
+applicable to systems with advanced features, where type inference is
+sophisticated or even undecidable. One promising application is, for instance,
+dependent type systems~\citep{xi:dependent}. Type systems with dependent types
+usually unify the syntax for terms and types, with a single lambda abstraction
+generalizing both type and lambda abstractions. Unfortunately, this means that
+the $[[let]]$ desugar is not valid in those systems. As a concrete example,
+consider desugaring the expression $[[let]]~[[a = int]]~\mathbf{in}~[[\x:a. x]] + [[1]]$
+into $(\lambda [[a]]. [[\x:a. x]] + 1)~[[int]]$, which is ill-typed because the type
+of $[[x]]$ in the abstraction body is $[[a]]$ and not $[[int]]$.
+
+
+Because $[[let]]$ cannot be encoded, declarations cannot be encoded either.
+Modeling declarations in dependently typed languages is a subtle matter, and
+normally requires some additional complexity
+\citep{severi:dependent:definitions}.
+
+
+We believe that the same technique presented in \Cref{sec:AP:typeapplication}
+can be adapted into a dependently typed language to enable a $[[let]]$ encoding.
+In a dependent type system with unified syntax for terms and types, we can
+combine the two forms in the typing context, i.e., $[[x: A]]$ and $[[a = A]]$,
+into a unified form $[[x]] = [[e]] : [[A]]$. Then we can combine two application
+rules \rref{ap-app-app} and \rref{ap-app-tapp} into \rref{ap-app-dapp}, and also
+two abstraction rules \rref{ap-app-lam} and \rref{ap-app-tlam} into
+\rref{ap-app-dlam}.
+%
+\begin{mathpar}
+  \inferrule*[right=ap-app-dapp]{
+    [[dd|-AP e2 => A1]] \\
+    [[dd]] ; [[ss]], [[e2]]:[[A1]] [[|-AP]] [[e1]] [[=>]] [[B]]
+  }{
+    [[dd;ss|-AP e1 e2 => B]]
+  }
+  \and
+  \inferrule*[right=ap-app-dlam]{
+    [[dd]], [[x]] = [[e1 : A1]]; [[ss]] [[|-AP]] [[e]] [[=>]] [[B]]
+  }{
+    [[dd]] ; [[ss]], [[e1]] : [[A1]]  [[|-AP]] [[\x.e]] [[=>]] [[B]]
+}
+\end{mathpar}
+
+
+With such rules it would be possible to handle declarations easily in dependent
+type systems.
+
+\section{Intersection Type Systems with \Mode mode}
+\label{sec:future:intersection-type}
+
+Another type system that could possibly benefit from the \mode mode is
+intersection type systems
+\citep{pottinger1980type,coppo1979functional,Salle:1978aa}. In particular, we
+consider intersection type systems with an explicit \textit{merge operator}
+\citep{dunfield2014elaborating}. In such a system, we can construct terms of an
+intersection type, like $[[1]] \, ,, \, [[true]]$ of type
+$\inter{[[nat]]}{[[bool]]}$. Thanks to \emph{subtyping}, a term of type
+$\inter{[[nat]]}{[[bool]]}$ can also be used as if it had type $[[int]]$, or as
+if it had type $[[bool]]$. Calculi with \emph{disjoint intersection
+  types}~\citep{oliveira2016disjoint,bi2019dis,alpuimdisjoint} incorporate a
+\textit{coherent} merge operator. In such calculi the merge operator can merge
+two terms with \textit{arbitrary} types as long as their types are disjoint;
+disjointness conflicts are reported as type-errors. As illustrated by
+\cite{xie:ecoop}, the expressive power of disjoint intersection types can encode
+diverse programming language features, promising an economy of theory and
+implementation.
+
+Disjoint intersection types also pose challenges to type inference.
+Supposing that we have $\mathsf{succ}: [[int -> int]]$ and $\mathsf{not} :
+[[bool -> bool]]$, consider the following term:
+
+$(\mathsf{succ} \, ,, \, \mathsf{not}) ~ 3 $
+
+\noindent We expect the expression to type-check, as according to subtyping, the term
+$(\mathsf{succ} \, ,, \, \mathsf{not})$ of type $(\inter{[[int ->
+  int]]}{[[bool->bool]]})$ can also be used as type $[[int -> int]]$. Thus we
+expect typing to automatically pick $\mathsf{succ}$ and apply it to $3$. To this
+end, we need to push the type information of the argument ($3$)
+into the function ($\mathsf{succ} \, ,, \, \mathsf{not}$).
+
+Future work is required to explore how well the \mode mode can be used for type
+inference in intersection type systems, and whether it can be integrated with
+the distributivity subtyping rules of intersection types \citep{bi2019dis}.
+
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
