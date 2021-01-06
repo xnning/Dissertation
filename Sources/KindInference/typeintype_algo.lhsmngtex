@@ -256,7 +256,7 @@ Instantiation ($[[||-inst]]$) contains the only entry to unification
     % , tvar, tvarM
   }
 \caption{Selected rules for unification, promotion, and moving in \tit}
-\label{fig:kind;tit:algo:unif}
+\label{fig:kind:tit:algo:unif}
 \end{figure}
 
 The judgments of unification and promotion are excerpted in
