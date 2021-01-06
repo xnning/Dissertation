@@ -1,3 +1,11 @@
+%include polycode.fmt
+%include rae.fmt
+
+%if style == newcode
+\begin{code}
+  module Related where
+\end{code}
+%endif
 
 \section{Dependent Type Systems with \Mode mode}
 \label{sec:future:dep-type}
@@ -109,10 +117,8 @@ class constraints in their types, e.g.,
 
 \begin{lstlisting}
 show     :: Show a => a -> String
-fromEnum :: Enum a => a -> Int
 
 (\f :: foralla. a -> a. (f 1, f 'a')) show     -- rejected
-(\f :: foralla. a -> a. (f 1, f 'a')) fromEnum -- rejected
 \end{lstlisting}
 
 With gradual typing, if we annotation \lstinline{f} with the the
@@ -120,8 +126,7 @@ unknown type $[[unknown]]$, we expect that the expression can also be applied to
 \lstinline{show} or \lstinline{fromEnum}.
 
 \begin{lstlisting}
-(\f :: ?. (f 1, f 'a')) show     -- accepted
-(\f :: ?. (f 1, f 'a')) fromEnum -- accepted
+(\f :: ?. (f 1, f 'a')) show
 \end{lstlisting}
 
 However, a nontrivial challenge in gradualizing type classes is that the dynamic
@@ -150,7 +155,69 @@ This kind of uncertainty in elaboration brings extra complexity and may interact
 with explicit casts in the target blame calculus.
 
 
-\section{GADTs}
+\section{Generalized Algebraic Datatypes (GADTs)}
+
+A natural extension of \tit is to include GADTs. We have briefly discussed GADTs
+in \Cref{sec:kind:ext:gadts}. In particular, we are interested in finding the
+right formalization of GADTs.
+
+Haskell's \emph{syntax} for GADT declarations is quite troublesome.
+Consider these examples:
+% 
+\begin{code}
+  data R a where
+  MkR :: b -> R b
+
+  data S a where
+  MkS :: S b
+
+  data T a where
+  MkT :: forall (k :: *) (b :: k). T b
+\end{code}
+% 
+In GHC's implementation of GADTs, any variables declared in the header (between |data| and
+|where|) \emph{do not scope}. In all the examples above, the type variable |a| does not
+scope over the constructor declarations. This is why we have written the variable |b| in
+those types, to make it clear that |b| is distinct from |a|. We could have written |a|---it
+would still be a distinct |a| from that in the header---but it would be more confusing.
+
+The question is: how do we determine the kind of the parameter to the datatype? One
+possibility is to look only in the header. In all cases above, we would infer no constraints
+and would give each type a kind of |forall (k :: *). k -> *|. This is unfortunate, as
+it would make |R| a kind-indexed GADT: the |MkR| constructor would carry a proof that
+the kind of its type parameter is |*|. This, in turn, wreaks havoc with type inference, as
+it is hard to infer the result type of a pattern-match against a GADT~\cite{vytiniotis2011outsidein}.
+
+Furthermore, this approach might accept \emph{more} programs than the user wants.
+Consider this definition:
+\begin{spec}
+  data P a where
+  MkP1 :: b -> P b
+  MkP2 :: f a -> P f
+\end{spec}
+Does the user want a kind-indexed GADT, noting that |b| and |f| have different kinds?
+Or would the user want this rejected? If we make the fully general kind |forall k. k -> *|
+for |P|, this would be accepted, perhaps surprising users.
+
+It thus seems we wish
+to look at the data constructors when inferring the kind of the datatype.
+The challenge in looking at data constructors is that their variables are \emph{locally}
+bound. In |MkR| and |MkS|, we implicitly quantify over |b|. In |MkR|, we discover that
+|b :: *|, and thus that |R| must have kind |* -> *|. In |MkS|, we find no constraints
+on |b|'s kind, and thus no constraints on |S|'s argument's kind, and so we can generalize
+to get |S :: forall (k :: *). k -> *|. Let us now examine |MkT|: it explicitly brings
+|k| and |b| into scope. Thus, the argument to |T| has \emph{local} kind |k|. It would
+be impossible to unify the kind of |T|'s argument---call it $[[Xa]]$---with |k|, because
+|k| would be bound to the \emph{right} of $[[Xa]]$ in an inference context. Thus it seems
+we would reject |T|.
+
+Our conclusion here is that the design of GADTs in GHC/Haskell is flawed: the
+type variables mentioned in the header should indeed scope over the
+constructors. This would mean we could reject |T|: if the user wanted to
+explicitly make |T| polymorphically kinded, they could do so right in the
+header. So one possible application of our work is to apply our insights in the
+scoping (order in the context) and unification into formalizing GADTs.
+
 
 %%% Local Variables:
 %%% mode: latex
