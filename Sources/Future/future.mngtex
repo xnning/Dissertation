@@ -48,7 +48,7 @@ two abstraction rules \rref{ap-app-lam} and \rref{ap-app-tlam} into
 With such rules it would be possible to handle declarations easily in dependent
 type systems.
 
-\section{Intersection Type Systems with \Mode mode}
+\section{Type Inference for Intersection Type Systems}
 \label{sec:future:intersection-type}
 
 Another type system that could possibly benefit from the \mode mode is
@@ -86,8 +86,71 @@ inference in intersection type systems, and whether it can be integrated with
 the distributivity subtyping rules of intersection types \citep{bi2019dis}.
 
 
+\section{Gradualizing Type Classes}
+
+In \Cref{sec:gradual:motivation}, we discussed about gradualizing modern
+functional programming languages like Haskell. One of its core abstraction
+features in Haskell is \textit{type classes}. Type classes
+\citep{AdHocPolymorphism} were initially introduced in Haskell to make ad-hoc
+overloading less ad-hoc, and since then have been adopted in many languages
+including Mercury~\citep{mercury}, Coq~\citep{Sozeau2008},
+PureScript~\citep{purescript}, and Lean~\citep{de2015lean}. An interesting
+future direction then is to gradualizing type classes.
+
+Consider again the example used in \Cref{sec:gradual:motivation}:
+
+\begin{lstlisting}
+(\f. (f 1, f 'a')) (\x. x)
+\end{lstlisting}
+
+\noindent While \lstinline{f : foralla. a -> a} is of course a valid type
+annotation, it unfortunately rules out many valid arguments that may have type
+class constraints in their types, e.g.,
+
+\begin{lstlisting}
+show     :: Show a => a -> String
+fromEnum :: Enum a => a -> Int
+
+(\f :: foralla. a -> a. (f 1, f 'a')) show     -- rejected
+(\f :: foralla. a -> a. (f 1, f 'a')) fromEnum -- rejected
+\end{lstlisting}
+
+With gradual typing, if we annotation \lstinline{f} with the the
+unknown type $[[unknown]]$, we expect that the expression can also be applied to
+\lstinline{show} or \lstinline{fromEnum}.
+
+\begin{lstlisting}
+(\f :: ?. (f 1, f 'a')) show     -- accepted
+(\f :: ?. (f 1, f 'a')) fromEnum -- accepted
+\end{lstlisting}
+
+However, a nontrivial challenge in gradualizing type classes is that the dynamic
+semantics of type classes is not expressed directly but rather by type-directed
+elaboration into a simpler language without type classes. Thus the dynamic
+semantics of type classes is given indirectly as the dynamic semantics of their
+elaborated forms. Consider \lstinline{show} as an example. The
+\textit{dictionary-passing} elaboration of type-classes translates the type of
+\lstinline{show} into the following one, supposing \lstinline{ShowD} is
+the dictionary type of the type class \lstinline{show}.
+
+\begin{lstlisting}
+show :: ShowD a -> a -> String
+\end{lstlisting}
+
+Now with the unknown type, we cannot predict how to elaborate the original
+expression. In particular, if \lstinline{f} is applied to \lstinline{show}, it
+means that \lstinline{f} needs to be elaborated into a function that actually
+takes two arguments, first the dictionary and then the argument.
+
+\begin{lstlisting}
+  (\f. (f showInt 1, f showChar 'a')) show
+\end{lstlisting}
+
+This kind of uncertainty in elaboration brings extra complexity and may interact
+with explicit casts in the target blame calculus.
 
 
+\section{GADTs}
 
 %%% Local Variables:
 %%% mode: latex
