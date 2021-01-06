@@ -85,33 +85,50 @@ There are two impacts of adding these, both of which we found surprising.
 
 \paragraph{Equality constraints}
 
-The power of GADTs arises from how they encode local equality
-  constraints. Any GADT can be rewritten to a uniform datatype with equality
-  constraints~\citep[Section~4.1]{vytiniotis2011outsidein}.
-For example, we can rewrite |data G a where MkG :: G
-  Bool| to be |data G a = (a ~ Bool) => MkG|, where |~| describes an equality
-  constraint. For our purposes of doing kind inference, these equality
-  constraints are uninteresting: the |~| operator simply relates two types of
-  the same kind and can be processed as any polykinded type constructor would
-  be. Modeling constraints to the left of a |=>| similarly would add a little clutter to our rules,
-  but would offer no real challenges.
+The power of GADTs arises from how they encode local equality constraints. Any
+GADT can be rewritten to a uniform datatype with equality
+constraints~\citep[Section~4.1]{vytiniotis2011outsidein}. For example, we can
+rewrite
+%
+\begin{code}
+data G a where
+  MkG :: G Bool
+\end{code}
+%
+to be
+%
+\begin{code}
+data G a = (a ~ Bool) => MkG
+\end{code}
+%
+\noindent where |~| describes an equality constraint. For our purposes of doing kind
+inference, these equality constraints are uninteresting: the |~| operator simply
+relates two types of the same kind and can be processed as any polykinded type
+constructor would be. Modeling constraints to the left of a |=>| similarly would
+add a little clutter to our rules, but would offer no real challenges.
 
-  The unexpected simplicity of adding GADTs to our system arises from a key fact:
-  we do not ever allow \emph{pattern-matching}. A GADT pattern-match brings a local
-  equality assumption into scope, which would influence the unification algorithm.
-  However, as pattern matching does not happen in the context of datatype declarations,
-  we avoid this wrinkle here.
+The unexpected simplicity of adding GADTs to our system arises from a key fact:
+we do not ever allow \emph{pattern-matching}. A GADT pattern-match brings a
+local equality assumption into scope, which would influence the unification
+algorithm. However, as pattern matching does not happen in the context of
+datatype declarations, we avoid this wrinkle here.
 
 \paragraph{Syntax}
 
-The implementation of GADTs in GHC has an unusual syntax: |data G a where MkG :: a -> G Int|.
-The surprising aspect of this syntax is that the two |a|s above are \emph{different}:
-the |a| in the header is unrelated to the |a| in the data constructor. This seemingly
-inconsequential design choice makes kind inference for GADTs very challenging, as constructors
-have no way to refer back to the datatype parameters. Given that this aspect of GADTs
-is a quirk of GHC's design---and is not repeated in other languages that support GADTs---we
-remark here that it is odd and perhaps should be remedied. For the details, please see
-\cite{xie2019kind}.
+The implementation of GADTs in GHC has an unusual syntax:
+%
+\begin{code}
+data G a where
+  MkG :: a -> G Int
+\end{code}
+%
+The surprising aspect of this syntax is that the two |a|s above are
+\emph{different}: the |a| in the header is unrelated to the |a| in the data
+constructor. This seemingly inconsequential design choice makes kind inference
+for GADTs very challenging, as constructors have no way to refer back to the
+datatype parameters. Given that this aspect of GADTs is a quirk of GHC's
+design---and is not repeated in other languages that support GADTs---we remark
+here that it is odd and perhaps should be remedied.
 
 \subsection{Type Families}
 
