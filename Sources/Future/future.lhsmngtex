@@ -122,8 +122,7 @@ show     :: Show a => a -> String
 \end{lstlisting}
 
 With gradual typing, if we annotation \lstinline{f} with the the
-unknown type $[[unknown]]$, we expect that the expression can also be applied to
-\lstinline{show} or \lstinline{fromEnum}.
+unknown type $[[unknown]]$, we expect that the following expression can type-check.
 
 \begin{lstlisting}
 (\f :: ?. (f 1, f 'a')) show
@@ -152,10 +151,11 @@ takes two arguments, first the dictionary and then the argument.
 \end{lstlisting}
 
 This kind of uncertainty in elaboration brings extra complexity and may interact
-with explicit casts in the target blame calculus.
+with explicit casts in the target blame calculi.
 
 
 \section{Generalized Algebraic Datatypes (GADTs)}
+\label{sec:future:gadts}
 
 A natural extension of \tit is to include GADTs. We have briefly discussed GADTs
 in \Cref{sec:kind:ext:gadts}. In particular, we are interested in finding the

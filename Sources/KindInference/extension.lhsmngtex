@@ -128,7 +128,8 @@ constructor. This seemingly inconsequential design choice makes kind inference
 for GADTs very challenging, as constructors have no way to refer back to the
 datatype parameters. Given that this aspect of GADTs is a quirk of GHC's
 design---and is not repeated in other languages that support GADTs---we remark
-here that it is odd and perhaps should be remedied.
+here that it is odd and perhaps should be remedied. We will return back to this
+discussion in \Cref{sec:future:gadts}.
 
 \subsection{Type Families}
 

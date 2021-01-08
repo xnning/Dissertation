@@ -2,9 +2,19 @@
 \chapter{Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-mention that in this thesis when we say ``higher-rank polymorphism'' we mean
-``predicative implicit higher-rank polymorphism''.
 
+Modern functional languages such as Haskell, ML, and OCaml come with powerful
+forms of type inference. The global type-inference algorithms employed in those
+languages are derived from the Hindley-Milner type system (HM)~\citep{hindley,
+  Damas:Milner}, with multiple extensions. As the languages evolve, researchers
+also formalize the key aspects of type inference for the new extensions. One
+common extension of HM, which is also the central theme of this dissertation, is
+\emph{higher-ranked polymorphism}~\citep{odersky:putting,practical:inference,
+  DK}. In particular, we are interested in \textit{predicative implicit
+  higher-rank polymorphism}. In this dissertation, we study the type inference
+problem of predicative implicit higher-rank polymorphism, and apply techniques
+we developed into other advanced type system features including gradual typing
+and kind inference.
 \section{Contributions}
 
 In summary the contributions of this thesis are:
