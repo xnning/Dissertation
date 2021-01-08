@@ -43,7 +43,8 @@
 \include{Sources/Gradual}
 \include{Sources/Dynamic}
 
-\part{Type Inference with Promotion} \label{part:dependentTypes}
+\part{Type Inference with Promotion}
+\label{part:promotion}
 
 \include{Sources/Promotion}
 \include{Sources/KindInference}

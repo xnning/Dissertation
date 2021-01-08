@@ -37,7 +37,7 @@ by some type annotations, enables type inference in an expressive language with
 polymorphism and subtyping. In its basic form typing is split into
 \textit{inference} and \textit{checking} modes. The most salient feature of a
 bidirectional type-checker is when information deduced from inference mode is
-used to guide checking of an expression in checked mode.
+used to guide checking of an expression in checking mode.
 
 Since Pierce and Turner's work, various other authors have proved the
 effectiveness of bidirectional type checking in several other settings,

@@ -67,15 +67,19 @@
     \end{itemize}
   \end{itemize}
 
-\item \Cref{chap:Promotion} presents a new approach for implementing unification.
+\item[\Cref{part:promotion}]
   \begin{itemize}
-  \item We propose a process named \textit{promotion}, which, given a
-    unification variable and a type, promotes the type so
-    that all unification variables in the type are well-typed with regard to
-    the unification variable.
-  \item We apply promotion in a new implementation of the unification
-    procedure in higher-rank polymorphism, and show that the new
-    implementation is sound and complete.
+    \item \Cref{chap:Promotion} presents a new approach for implementing unification.
+      \begin{itemize}
+      \item We propose a process named \textit{promotion}, which, given a
+        unification variable and a type, promotes the type so
+        that all unification variables in the type are well-typed with regard to
+        the unification variable.
+      \item We apply promotion in a new implementation of the unification
+        procedure in higher-rank polymorphism, and show that the new
+        implementation is sound and complete.
+      \end{itemize}
+    \item \Cref{chap:kindinference} 
   \end{itemize}
 \end{description}
 

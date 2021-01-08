@@ -12,33 +12,15 @@ that helps build simpler \textit{type unification} process.
 
 \paragraph{\Cref{part:typeinference}: Bidirectional type checking with application mode.}
 
-Bidirectional type checking has been known in the folklore of type systems for a
-long time. It was popularized by Pierce and Turner's work on \emph{local type
-  inference}~\citep{pierce:local}. Local type inference was introduced as an
-alternative to Hindley-Milner type systems~\citep{hindley,Damas:Milner}, which
-could easily deal with polymorphic languages with subtyping. Bidirectional type
-checking is one component of local type inference that, aided by some type
-annotations, enables type inference in an expressive language with polymorphism
-and subtyping. Since Pierce and Turner's work, various other authors have proved
-the effectiveness of bidirectional type checking in several other settings,
-including many different systems with
-subtyping~\citep{DK,dunfield:tridirectional,davies2000intersection}, systems
-with dependent types~\citep{xi:dependent, coquand:algorithm, abel2008verifying,
-  loh:tutorial, asperti2012bi}, and various other
-works~\citep{abel2004termination, dunfield2009greedy, pientka2008type,
-  chlipala2005strict, lovas2010refinement}. Furthermore, bidirectional type
-checking has also been combined with HM-style techniques for providing type
-inference in the presence of higher-rank types~\citep{practical:inference,
-  DK}.
-
-The key idea in bidirectional type checking is simple. In its basic form typing
-is split into \emph{inference} and \emph{checking} modes. The most salient
-feature of a bidirectional type checker is when information deduced from
-inference mode is used to guide checking of an expression in checking mode. One
-of such interactions between modes happens in the typing rule for function
-applications. In particular, when type checking $[[e1 e2]]$, we first synthesize
-the type of $[[e1]]$, and then check $[[e2]]$ with the expected argument type we
-get from the type of $[[e1]]$.
+Bidirectional type checking~\citep{pierce:local} has proved to be an extremely
+useful and versatile tool for type checking and type inference. The conventional
+presentation of bidirectional type checking consists of two modes: inference
+mode and checking mode. In traditional bidirectional type-checking, type
+annotations are used to guide (via the checking mode) the type
+inference/checking procedure to determine the type of an expression, and type
+information flows from functions to arguments. In particular, when type checking
+$[[e1 e2]]$, we first synthesize the type of $[[e1]]$, and then check $[[e2]]$
+with the expected argument type we get from the type of $[[e1]]$.
 
 We study a variant of bidirectional type checking that employs a so-called
 \emph{\mode} mode. With the \mode mode, when type checking $[[e1 e2]]$, the type
@@ -99,11 +81,12 @@ consistent subtyping by \citet{siek2007gradual}. One important case where such a
 mismatch happens is in type systems supporting implicit (higher-rank)
 polymorphism. It is well-known that polymorphic types \`a la System F
 induce a subtyping relation that relates polymorphic types to their
-instantiations~\citep{odersky:putting, mitchell1990polymorphic}. However
+instantiations~\citep{odersky:putting, mitchell1988polymorphic}. However
 \citeauthor{siek2007gradual}'s definition is not adequate for this kind of
-subtyping. Moreover the current framework for \emph{Abstracting Gradual Typing}
-(AGT)~\citep{garcia:abstracting} does not account for polymorphism either,
-but the authors acknowledge that it is an interesting avenue for future work.
+subtyping.
+% Moreover the current framework for \emph{Abstracting Gradual Typing}
+% (AGT)~\citep{garcia:abstracting} does not account for polymorphism either,
+% but the authors acknowledge that it is an interesting avenue for future work.
 
 This part first studies the gradually typed subtyping and
 consistent subtyping relations for implicit higher-rank polymorphism. To
@@ -126,7 +109,7 @@ not require the \emph{restriction} operator of \citet{siek2007gradual}.
 
 We then present the design of \gpc, which stands for
 \textbf{G}radually \textbf{P}olymorphic \textbf{C}alculus: a (source-level)
-gradually typed calculus for (predicative) implicit higher-rank polymorphism
+gradually typed calculus for predicative implicit higher-rank polymorphism
 that uses our new notion of consistent subtyping. As far as we are aware, there
 is no work on bridging the gap between implicit higher-rank polymorphism and
 gradual typing, which is interesting for two reasons. On the one hand, modern
@@ -161,9 +144,32 @@ higher-rank polymorphism into a gradually typed source language.
 % can be reduced to that of \pbc. Nonetheless, we believe our discussion of
 % representative translations is helpful in shedding some light on this issue.
 
-\paragraph{\Cref{part:dependentTypes}: Type Promotion and Kind Inference.}
+\paragraph{\Cref{part:promotion}: Type Inference with Promotion.}
 
+In order to properly conduct type inference for higher-rank types, one question
+essential to the inference algorithm is how to handle the dependency among
+universal and existential variables. Several work \citep{gundry2010type,DK}
+proposed type inference in context as a general foundation for unification/type
+inference algorithms. However, their approach cannot be easily generalized to
+handle more complicated types.
 
+We thus propose a strategy called \textit{promotion} that helps resolve the
+dependency between variables. In this part, we first apply promotion to the
+unification algorithm for simply typed lambda calculus, and its polymorphic
+extension to the subtyping algorithm for implicit predicative higher-rank
+polymorphism.
+
+We then apply promotion to kind inference for datatypes.
+Most research work for extensions of HM so far has focused on forms of
+polymorphism (such as support for
+impredicativity~\cite{le2014mlf,remy2008graphic,leijen2009flexible,vytiniotis2008fph,
+  Serrano:2018:GIP:3192366.3192389}), where type variables all have
+the same kind. In these systems, the type variables introduced by universal
+quantifiers and/or type declarations all stand for proper types (i.e., they have
+kind |*|). In such a simplified setting, datatype declarations such as
+|data Maybe a = Nothing || Just a|
+pose no problem at all for type inference: with only one possible kind for |a|,
+there is nothing to infer.
 
 
 
