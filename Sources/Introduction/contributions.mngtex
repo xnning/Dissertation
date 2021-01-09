@@ -16,7 +16,7 @@ In particular, I offer the following specific contributions:
 \begin{description}
 \item[\Cref{part:typeinference}]
   \begin{itemize}
-  \item \Cref{chap:BiDirectional} presents a higher-rank implicit polymorphic
+  \item \Cref{chap:BiDirectional} presents an implicit higher-rank polymorphic
     type system \ap, which infers higher-rank types, generalizes the HM type
     system, and has polymorphic $[[let]]$ as syntactic sugar. As far as we are
     aware, no previous work enables an HM-style let construct to be expressed as
