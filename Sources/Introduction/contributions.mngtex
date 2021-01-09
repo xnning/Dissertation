@@ -1,18 +1,7 @@
 In this dissertation, we study the type inference problem of predicative
-implicit higher-rank polymorphism and its extensions.
-
-and integrate techniques we have developed
+implicit higher-rank polymorphism and integrate techniques we have developed
 into other advanced type system features including \textit{gradual typing}
 \citep{siek2007gradual} and \textit{kind inference}.
-
-TODO:say something about why this work is good
-
-- new algorithm that can do what some existing work cannot do.
-- the first to integrate higher-rank polymorphism to gradual typing.
-- new strategy that resolves the dependency issue.
-built upon the new strategy, the first specification/algorithm of the kind
-inference algorithm
-
 
 % Specifically, the
 % dissertation consists of three main technical parts: bidirectional type checking
@@ -42,7 +31,7 @@ In particular, I offer the following specific contributions:
     can be applied to a wide range of type systems.
   \end{itemize}
 
-  % -----------------------------------------------------------
+% -----------------------------------------------------------
 
 \item[\Cref{part:gradual}]
   \begin{itemize}
@@ -60,20 +49,23 @@ In particular, I offer the following specific contributions:
     \begin{itemize}
     \item a new definition of consistent subtyping that subsumes and generalizes
       that of \citeauthor{siek2007gradual}, and can deal with polymorphism and
-      top types; and
+      top types. Our new definition of consistent subtyping preserves the
+      orthogonality between consistency and subtyping. To slightly rephrase
+      \cite{siek2007gradual}, the motto of this framework is that: \emph{Gradual
+        typing and polymorphism are orthogonal and can be combined in a
+        principled fashion.}\footnote{Note here that we borrow
+        \citeauthor{siek2007gradual}'s motto mostly to talk about the static
+        semantics. As \citet{amal:blame} show there are several non-trivial
+        interactions between polymorphism and casts at the level of the dynamic
+        semantics.}
     \item a syntax-directed version of consistent subtyping that is sound and
       complete with respect to our definition of consistent subtyping.
       % , but still guesses instantiations.
+      The syntax-directed
+      version of consistent subtyping is remarkably simple and well-behaved, and does
+      not require the \emph{restriction} operator of \citet{siek2007gradual}.
     \end{itemize}
 
-    Our new definition of consistent subtyping preserves the orthogonality
-    between consistency and subtyping. To slightly rephrase
-    \cite{siek2007gradual}, the motto of this work is that: \emph{Gradual typing
-      and polymorphism are orthogonal and can be combined in a principled
-      fashion.}\footnote{Note here that we borrow \citeauthor{siek2007gradual}'s
-      motto mostly to talk about the static semantics. As \citet{amal:blame}
-      show there are several non-trivial interactions between polymorphism and
-      casts at the level of the dynamic semantics.}
 
     Based on consistent subtyping, we then present the design of \gpc, which
     stands for \textbf{G}radually \textbf{P}olymorphic \textbf{C}alculus: a
@@ -94,18 +86,16 @@ In particular, I offer the following specific contributions:
     a natural extension of the approach by \citet{DK}.
   \end{itemize}
 
-  % -----------------------------------------------------------
+% -----------------------------------------------------------
 
 \item[\Cref{part:promotion}]
   \begin{itemize}
   \item \Cref{chap:Promotion} proposes a simpler algorithmic system of the type
-    inference algorithm for higher-rank implicit polymorphism.
-
-    The system is based on a new strategy called \textit{promotion}. in the
-    \textit{type inference in context} \citep{gundry2010type, DK} framework.
-    Promotion helps resolve the dependency between variables during unification,
-    which leads to simpler and more modular unification implementations, and can
-    be naturally generalize to more complicated types.
+    inference algorithm for higher-rank implicit polymorphism, based on a new
+    strategy called \textit{promotion} in the \textit{type inference in context}
+    \citep{gundry2010type, DK} framework. Promotion helps resolve the dependency
+    between variables during solving, which leads to simpler and more modular
+    implementations, and can be naturally generalized to more complicated types.
 
     In this part, we first apply promotion to the unification algorithm for
     simply typed lambda calculus, and then its polymorphic extension to the
@@ -137,140 +127,6 @@ In particular, I offer the following specific contributions:
 
 
 
-\paragraph{\Cref{part:gradual}: Higher-rank polymorphism and gradual typing.}
-
-Gradual typing~\citep{siek2006gradual} is an increasingly popular topic in both
-programming language practice and theory. On the practical side there is a
-growing number of programming languages adopting gradual typing. Those languages
-include Clojure~\citep{Bonnaire_Sergeant_2016}, Python~\citep{Vitousek_2014, lehtosalo2016mypy},
-TypeScript~\citep{typescript}, Hack~\citep{verlaguet2013facebook}, and the
-addition of Dynamic to C\#~\citep{Bierman_2010}, to name a few. On the
-theoretical side, recent years have seen a large body of research that defines
-the foundations of gradual typing~\citep{garcia:abstracting,
-  cimini2016gradualizer, CiminiPOPL}, explores their use for both functional and
-object-oriented programming~\citep{siek2006gradual, siek2007gradual}, as well as
-its applications to many other areas~\citep{Ba_ados_Schwerter_2014,
-  castagna2017gradual, Jafery:2017:SUR:3093333.3009865}.
-
-A key concept in gradual type systems is
-\emph{consistency}~\citep{siek2006gradual}. Consistency weakens type equality to allow
-for the presence of \emph{unknown} types $[[ unknown ]]$. In some gradual type systems
-with subtyping, consistency is combined with subtyping to give rise to
-the notion of \emph{consistent subtyping}~\citep{siek2007gradual}. Consistent
-subtyping is employed by gradual type systems to validate type
-conversions arising from conventional subtyping. One nice feature of consistent
-subtyping is that it is derivable from the more primitive
-notions of \emph{consistency} % (arising from gradual typing)
-and \emph{subtyping}. As \citet{siek2007gradual}
-put it, this shows that
-``gradual typing and subtyping are orthogonal and can be combined in a principled fashion''.
-Thus consistent subtyping is often used as a guideline for
-designing gradual type systems with subtyping. 
-
-Unfortunately, as noted by \citet{garcia:abstracting}, notions of consistency
-and/or consistent subtyping ``become more difficult to adapt as type systems get
-more complex''. In particular, for the case of type systems with subtyping,
-certain kinds of subtyping do not fit well with the original definition of
-consistent subtyping by \citet{siek2007gradual}. One important case where such a
-mismatch happens is in type systems supporting implicit (higher-rank)
-polymorphism. It is well-known that polymorphic types \`a la System F
-induce a subtyping relation that relates polymorphic types to their
-instantiations~\citep{odersky:putting, mitchell1988polymorphic}. However
-\citeauthor{siek2007gradual}'s definition is not adequate for this kind of
-subtyping.
-% Moreover the current framework for \emph{Abstracting Gradual Typing}
-% (AGT)~\citep{garcia:abstracting} does not account for polymorphism either,
-% but the authors acknowledge that it is an interesting avenue for future work.
-
-This part first studies the gradually typed subtyping and
-consistent subtyping relations for implicit higher-rank polymorphism. To
-accomplish this, we first show how to reconcile consistent subtyping with
-polymorphism by generalizing the original consistent subtyping definition by
-\citeauthor{siek2007gradual}. Our new definition of consistent subtyping can
-deal with polymorphism, and preserves the orthogonality between consistency and
-subtyping. To slightly rephrase \citeauthor{siek2007gradual}, the motto of this
-work is that: \emph{Gradual typing and polymorphism are orthogonal and
-  can be combined in a principled fashion.}\footnote{Note here that we borrow
-  \citeauthor{siek2007gradual}'s motto mostly to talk about the static
-  semantics. As \citet{amal:blame} show there are several non-trivial
-  interactions between polymorphism and casts at the level of the dynamic
-  semantics.}
-As a step towards an algorithmic version of consistent subtyping, we present a
-syntax-directed version of consistent subtyping that is sound and complete with
-respect to our formal definition of consistent subtyping. The syntax-directed
-version of consistent subtyping is remarkably simple and well-behaved, and does
-not require the \emph{restriction} operator of \citet{siek2007gradual}.
-
-We then present the design of \gpc, which stands for
-\textbf{G}radually \textbf{P}olymorphic \textbf{C}alculus: a (source-level)
-gradually typed calculus for predicative implicit higher-rank polymorphism
-that uses our new notion of consistent subtyping. As far as we are aware, there
-is no work on bridging the gap between implicit higher-rank polymorphism and
-gradual typing, which is interesting for two reasons. On the one hand, modern
-functional languages such as Haskell employ sophisticated type-inference
-algorithms that, aided by type annotations, can deal with implicit higher-rank
-polymorphism. So a natural question is how gradual typing can be integrated in
-such languages. On the other hand, there are several existing works on
-integrating \emph{explicit} polymorphism into gradual typing \citep{amal:blame,
-  yuu2017poly}. Yet no work investigates how to move its expressive power into a
-source language with implicit polymorphism. Therefore as a step towards
-gradualizing such type systems, we develop both declarative and
-algorithmic versions for a gradual type system with implicit higher-rank
-polymorphism. The new calculus brings the expressive power of full implicit
-higher-rank polymorphism into a gradually typed source language.
-
-% We prove that
-% our calculus satisfies all of the \emph{static} aspects of the refined criteria
-% for gradual typing~\cite{siek2015refined}. As a step towards the \emph{dynamic
-%   gradual guarantee} property~\citep{siek2015refined}, we propose an extension
-% of our calculus. This extension employs \emph{static type parameters}, which are
-% placeholders for monotypes, and \emph{gradual type parameters}, which are
-% placeholders for monotypes that are consistent with the unknown type. The
-% concept of static type parameters and gradual type parameters in the context of
-% gradual typing was first introduced by \citet{garcia:principal}, and later
-% played a central role in the work of \citet{yuu2017poly}\footnote{The static and
-%   gradual type variables in their work.}. With this extension it becomes
-% possible to talk about \emph{representative translations}: those translations
-% that generalize a number of other translations using specific monotypes. Our
-% work recasts the dynamic gradual guarantee in terms of representative
-% translations. Assuming a coherence conjecture regarding representative
-% translations, the dynamic gradual guarantee of our extended source language now
-% can be reduced to that of \pbc. Nonetheless, we believe our discussion of
-% representative translations is helpful in shedding some light on this issue.
-
-\paragraph{\Cref{part:promotion}: Type Inference with Promotion.}
-
-In order to properly conduct type inference for higher-rank types, one question
-essential to the inference algorithm is how to handle the dependency among
-universal and existential variables. Several work \citep{gundry2010type,DK}
-proposed type inference in context as a general foundation for unification/type
-inference algorithms. However, their approach cannot be easily generalized to
-handle more complicated types.
-
-We thus propose a strategy called \textit{promotion} that helps resolve the
-dependency between variables. In this part, we first apply promotion to the
-unification algorithm for simply typed lambda calculus, and its polymorphic
-extension to the subtyping algorithm for implicit predicative higher-rank
-polymorphism.
-
-We then apply promotion to kind inference for datatypes.
-Most research work for extensions of HM so far has focused on forms of
-polymorphism (such as support for
-impredicativity~\cite{le2014mlf,remy2008graphic,leijen2009flexible,vytiniotis2008fph,
-  Serrano:2018:GIP:3192366.3192389}), where type variables all have
-the same kind. In these systems, the type variables introduced by universal
-quantifiers and/or type declarations all stand for proper types (i.e., they have
-kind |*|). In such a simplified setting, datatype declarations such as
-|data Maybe a = Nothing || Just a|
-pose no problem at all for type inference: with only one possible kind for |a|,
-there is nothing to infer.
-
-
-
-
-\paragraph{Contributions.}
-
-In summary the contributions of this dissertation are:
 
 %%% Local Variables:
 %%% mode: latex
