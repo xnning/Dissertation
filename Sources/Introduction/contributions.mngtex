@@ -3,12 +3,6 @@ implicit higher-rank polymorphism and integrate techniques we have developed
 into other advanced type system features including \textit{gradual typing}
 \citep{siek2007gradual} and \textit{kind inference}.
 
-% Specifically, the
-% dissertation consists of three main technical parts: bidirectional type checking
-% with the new \textit{\mode} mode, integration of higher-rank polymorphism and
-% gradual typing, and a type unification technique called \textit{type promotion}
-% that helps build simpler \textit{type unification} process.
-
 In particular, I offer the following specific contributions:
 
 % -----------------------------------------------------------

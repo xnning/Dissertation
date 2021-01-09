@@ -51,15 +51,13 @@
 
 
 
-\part{Related and Future Work}
+\part{Epilogue}
 
 \include{Sources/Related}
 
 \include{Sources/Future}
 
-\part{Epilogue}
 
-\include{Sources/Conclusion}
 
 % This ensures that the subsequent sections are being included as root
 % items in the bookmark structure of your PDF reader.
