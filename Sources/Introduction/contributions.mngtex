@@ -1,47 +1,141 @@
-\section{Contributions}
-
 In this dissertation, we study the type inference problem of predicative
-implicit higher-rank polymorphism, and integrate techniques we have developed
+implicit higher-rank polymorphism and its extensions.
+
+and integrate techniques we have developed
 into other advanced type system features including \textit{gradual typing}
-\citep{siek2007gradual} and \textit{kind inference}. Specifically, the
-dissertation consists of three main technical parts: bidirectional type checking
-with the new \textit{\mode} mode, integration of higher-rank polymorphism and
-gradual typing, and a type unification technique called \textit{type promotion}
-that helps build simpler \textit{type unification} process.
+\citep{siek2007gradual} and \textit{kind inference}.
+
+TODO:say something about why this work is good
+
+- new algorithm that can do what some existing work cannot do.
+- the first to integrate higher-rank polymorphism to gradual typing.
+- new strategy that resolves the dependency issue.
+built upon the new strategy, the first specification/algorithm of the kind
+inference algorithm
 
 
-\paragraph{\Cref{part:typeinference}: Bidirectional type checking with application mode.}
+% Specifically, the
+% dissertation consists of three main technical parts: bidirectional type checking
+% with the new \textit{\mode} mode, integration of higher-rank polymorphism and
+% gradual typing, and a type unification technique called \textit{type promotion}
+% that helps build simpler \textit{type unification} process.
 
-Bidirectional type checking~\citep{pierce:local} has proved to be an extremely
-useful and versatile tool for type checking and type inference. The conventional
-presentation of bidirectional type checking consists of two modes: inference
-mode and checking mode. In traditional bidirectional type-checking, type
-annotations are used to guide (via the checking mode) the type
-inference/checking procedure to determine the type of an expression, and type
-information flows from functions to arguments. In particular, when type checking
-$[[e1 e2]]$, we first synthesize the type of $[[e1]]$, and then check $[[e2]]$
-with the expected argument type we get from the type of $[[e1]]$.
+In particular, I offer the following specific contributions:
 
-We study a variant of bidirectional type checking that employs a so-called
-\emph{\mode} mode. With the \mode mode, when type checking $[[e1 e2]]$, the type
-information of $[[e2]]$ flows into $[[e1]]$. With the application mode it is
-possible to infer the type for expressions such as \lstinline{(\x. x) 1} without
-additional annotations.
+% -----------------------------------------------------------
 
-Bidirectional type checking with an \mode mode may still require type
-annotations and it gives different trade-offs with respect to the checked mode
-in terms of type annotations. However the different trade-offs open paths to
-different designs of type checking/inference algorithms. To illustrate the
-utility of the \mode mode, we present a higher-rank implicit polymorphic type
-system, which infers higher-rank types, generalizes the HM type system, and has
-polymorphic $[[let]]$ as syntactic sugar. As far as we are aware, no previous
-work enables an HM-style let construct to be expressed as syntactic sugar.
+\begin{description}
+\item[\Cref{part:typeinference}]
+  \begin{itemize}
+  \item \Cref{chap:BiDirectional} presents a higher-rank implicit polymorphic
+    type system \ap, which infers higher-rank types, generalizes the HM type
+    system, and has polymorphic $[[let]]$ as syntactic sugar. As far as we are
+    aware, no previous work enables an HM-style let construct to be expressed as
+    syntactic sugar.
 
-We believe that, similarly to standard bidirectional type checking,
-bidirectional type checking with an \mode mode can be applied to a wide range
-of type systems. Our work show a particular and non-trivial application.
-Other potential areas of applications are other type systems with subtyping,
-static overloading, implicit parameters or dependent types.
+    The system is defined based on a variant of \textit{bidirectional type
+      (checking)} \citep{pierce:local} with a new \textit{application} mode. The
+    new variant preserves the advantage of bidirectional type checking, namely
+    many redundant type annotations are removed, while certain programs can type
+    check with even fewer annotations. We believe that, similarly to standard
+    bidirectional type checking, bidirectional type checking with an \mode mode
+    can be applied to a wide range of type systems.
+  \end{itemize}
+
+  % -----------------------------------------------------------
+
+\item[\Cref{part:gradual}]
+  \begin{itemize}
+  \item \cref{chap:Gradual} integrates implicit higher-rank polymorphism with
+    \textit{gradual types}\citep{siek2006gradual}, which is, as far as we are
+    aware, the first work on bridging the gap between implicit higher-rank
+    polymorphism and gradual typing.
+
+    We start by studying the gradually typed subtyping and \textit{type
+      consistent} \citep{siek2006gradual}, the central concept for gradual
+    typing, for implicit higher-rank polymorphism. To accomplish this, we first
+    define a framework for \textit{consistent
+      subtyping}~\citep{siek2007gradual} with
+
+    \begin{itemize}
+    \item a new definition of consistent subtyping that subsumes and generalizes
+      that of \citeauthor{siek2007gradual}, and can deal with polymorphism and
+      top types; and
+    \item a syntax-directed version of consistent subtyping that is sound and
+      complete with respect to our definition of consistent subtyping.
+      % , but still guesses instantiations.
+    \end{itemize}
+
+    Our new definition of consistent subtyping preserves the orthogonality
+    between consistency and subtyping. To slightly rephrase
+    \cite{siek2007gradual}, the motto of this work is that: \emph{Gradual typing
+      and polymorphism are orthogonal and can be combined in a principled
+      fashion.}\footnote{Note here that we borrow \citeauthor{siek2007gradual}'s
+      motto mostly to talk about the static semantics. As \citet{amal:blame}
+      show there are several non-trivial interactions between polymorphism and
+      casts at the level of the dynamic semantics.}
+
+    Based on consistent subtyping, we then present the design of \gpc, which
+    stands for \textbf{G}radually \textbf{P}olymorphic \textbf{C}alculus: a
+    (source-level) gradually typed calculus for predicative implicit higher-rank
+    polymorphism that uses our new notion of consistent subtyping.
+    We prove that our calculus
+    satisfies the static aspects of the refined criteria for gradual typing
+    \citep{siek:criteria}, and is type-safe by a type-directed translation to
+    \pbc \citep{amal:blame}. We then give a sound and complete bidirectional
+    algorithm for implementing the declarative system based on the design
+    principle of \cite{garcia:principal}.
+
+  \item \Cref{chap:Dynamic} proposes an extension of \gpc with type
+    parameters~\citep{garcia:principal} as a step towards restoring the
+    \emph{dynamic gradual guarantee}~\citep{siek:criteria}. The extension
+    significantly changes the algorithmic system. The new algorithm features a
+    novel use of existential variables with a different solution space, which is
+    a natural extension of the approach by \citet{DK}.
+  \end{itemize}
+
+  % -----------------------------------------------------------
+
+\item[\Cref{part:promotion}]
+  \begin{itemize}
+  \item \Cref{chap:Promotion} proposes a simpler algorithmic system of the type
+    inference algorithm for higher-rank implicit polymorphism.
+
+    The system is based on a new strategy called \textit{promotion}. in the
+    \textit{type inference in context} \citep{gundry2010type, DK} framework.
+    Promotion helps resolve the dependency between variables during unification,
+    which leads to simpler and more modular unification implementations, and can
+    be naturally generalize to more complicated types.
+
+    In this part, we first apply promotion to the unification algorithm for
+    simply typed lambda calculus, and then its polymorphic extension to the
+    subtyping algorithm for implicit predicative higher-rank polymorphism.
+
+  \item \Cref{chap:kindinference} applies the design of promotion in the context
+    of kind inference for datatypes, and presents two kind inference systems for
+    Haskell. The first system, we believe, is the first formalization of this
+    aspect of Haskell98, and the second one models the challenging features for
+    kind inference in modern Haskell. Specifically,
+      \begin{itemize}
+    \item We formalize Haskell98’s datatype declarations, providing both a
+      declarative specification and syntax-driven algorithm for kind inference.
+      We prove that the algorithm is sound and observe how Haskell98's technique
+      of \textit{defaulting} leads to incompleteness.
+    \item We then present a type and kind language that is unified and dependently
+      typed, modeling the challenging features for kind inference in modern
+      Haskell. We include both a declarative specification and a syntax-driven
+      algorithm. The algorithm is proved sound, and we observe where and why
+      completeness fails. In the design of our algorithm, we must choose between
+      completeness and termination; we favor termination but conjecture that an
+      alternative design would regain completeness. Unlike other dependently typed
+      languages, we retain the ability to infer top-level kinds instead of relying
+      on compulsory annotations.
+    \end{itemize}
+  \end{itemize}
+
+\end{description}
+
+
 
 \paragraph{\Cref{part:gradual}: Higher-rank polymorphism and gradual typing.}
 
