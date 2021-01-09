@@ -18,18 +18,47 @@
   \label{fig:gradual:objects}
 \end{figure}
 
+Gradual typing~\citep{siek2006gradual} is an increasingly popular topic in both
+programming language practice and theory. On the practical side there is a
+growing number of programming languages adopting gradual typing. Those languages
+include Clojure~\citep{Bonnaire_Sergeant_2016}, Python~\citep{Vitousek_2014, lehtosalo2016mypy},
+TypeScript~\citep{typescript}, Hack~\citep{verlaguet2013facebook}, and the
+addition of Dynamic to C\#~\citep{Bierman_2010}, to name a few. On the
+theoretical side, recent years have seen a large body of research that defines
+the foundations of gradual typing~\citep{garcia:abstracting,
+  cimini2016gradualizer, CiminiPOPL}, explores their use for both functional and
+object-oriented programming~\citep{siek2006gradual, siek2007gradual}, as well as
+its applications to many other areas~\citep{Ba_ados_Schwerter_2014,
+  castagna2017gradual, Jafery:2017:SUR:3093333.3009865}.
+
 \citet{siek2007gradual} developed a gradual type system for object-oriented
-languages that they call \obb. Central to gradual typing is the concept of
-\emph{consistency} (written $[[~]]$) between gradual types, which are types
-that may involve the unknown type $[[unknown]]$. The intuition is that consistency
-relaxes the structure of a type system to tolerate unknown positions in a
-gradual type. They also defined the subtyping relation in a way that static type
+languages that they call \obb.
+A key concept in gradual type systems is the concept of
+\emph{consistency} (written $\sim$) between gradual types. Consistency weakens type equality to
+allow for the presence of \emph{unknown} types $[[ unknown ]]$. The intuition is
+that consistency relaxes the structure of a type system to tolerate unknown
+positions in a gradual type.
+They also defined the subtyping relation in a way that static type
 safety is preserved. Their key insight is that the unknown type $[[unknown]]$ is
 neutral to subtyping, with only $[[ unknown <: unknown  ]]$. Both relations are
 defined in \Cref{fig:gradual:objects}.
-
 A primary contribution of their work is to show that consistency and subtyping
-are orthogonal. However, the orthogonality of consistency and subtyping does not
+are orthogonal. As \citet{siek2007gradual} put it, this shows that ``gradual
+typing and subtyping are orthogonal and can be combined in a principled
+fashion''.
+
+% In some gradual type systems with subtyping, consistency is combined with
+% subtyping to give rise to the notion of \emph{consistent
+% subtyping}~\citep{siek2007gradual}. Consistent subtyping is employed by
+% gradual type systems to validate type conversions arising from conventional
+% subtyping. One nice feature of consistent subtyping is that it is derivable
+% from the more primitive notions of
+% \emph{consistency} % (arising from gradual typing)
+% and \emph{subtyping}. Thus consistent subtyping is often used as a guideline
+% for designing gradual type systems with subtyping.
+
+
+However, the orthogonality of consistency and subtyping does not
 lead to a deterministic relation. Thus \citeauthor{siek2007gradual} defined
 \emph{consistent subtyping} (written $[[<~]]$) based on a \emph{restriction
   operator}, written $\mask {[[A1]]} {[[B]]}$ that ``masks off'' the parts of type $[[A1]]$ that
