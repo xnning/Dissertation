@@ -90,12 +90,12 @@ In particular, I offer the following specific contributions:
 
 \item[\Cref{part:promotion}]
   \begin{itemize}
-  \item \Cref{chap:Promotion} proposes a simpler algorithmic system of the type
-    inference algorithm for higher-rank implicit polymorphism, based on a new
-    strategy called \textit{promotion} in the \textit{type inference in context}
-    \citep{gundry2010type, DK} framework. Promotion helps resolve the dependency
-    between variables during solving, which leads to simpler and more modular
-    implementations, and can be naturally generalized to more complicated types.
+  \item \Cref{chap:Promotion} proposes a simpler algorithmic subtyping of the
+    type inference algorithm for higher-rank implicit polymorphism, based on a
+    new strategy called \textit{promotion} in the \textit{type inference in
+      context} \citep{gundry2010type, DK} framework. Promotion helps resolve the
+    dependency between variables during solving, and can be naturally
+    generalized to more complicated types.
 
     In this part, we first apply promotion to the unification algorithm for
     simply typed lambda calculus, and then its polymorphic extension to the
@@ -107,7 +107,7 @@ In particular, I offer the following specific contributions:
     aspect of Haskell98, and the second one models the challenging features for
     kind inference in modern Haskell. Specifically,
       \begin{itemize}
-    \item We formalize Haskell98’s datatype declarations, providing both a
+    \item We formalize Haskell98's datatype declarations, providing both a
       declarative specification and syntax-driven algorithm for kind inference.
       We prove that the algorithm is sound and observe how Haskell98's technique
       of \textit{defaulting} leads to incompleteness.
