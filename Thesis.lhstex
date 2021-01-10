@@ -20,7 +20,7 @@
 \makeAck
 \tableofcontents
 \listoffigures
-\listoftables
+% \listoftables
 % \listoftheorems[ignoreall, show={theorem,lemma}]
 
 %%---------------------%%
@@ -76,3 +76,9 @@
 
 
 \end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "Thesis"
+%%% org-ref-default-bibliography: "Thesis.bib"
+%%% End:
