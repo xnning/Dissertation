@@ -1,7 +1,10 @@
-In this dissertation, we study the type inference problem of predicative
-implicit higher-rank polymorphism and integrate techniques we have developed
-into other advanced type system features including \textit{gradual typing}
-\citep{siek2007gradual} and \textit{kind inference}.
+\section{Contributions}
+
+The goal of this dissertation is to explore the design space of type inference
+for implicit predicative higher-rank polymorphism, as well as to study the
+integration of techniques we have developed into other advanced type system
+features including \textit{gradual typing} \citep{siek2007gradual} and
+\textit{kind inference}.
 
 In particular, I offer the following specific contributions:
 

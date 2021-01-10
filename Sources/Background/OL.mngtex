@@ -172,17 +172,6 @@ polymorphic types with universal quantifiers only at the top level. For example,
   \end{tabular}
 \end{center}
 
-\paragraph{Predicativity.}
-
-In a system with high-ranker types, one important design decision to make is
-whether the system is \textit{predicative} or \textit{impredicative}. A system
-is predicative, if the type variable bound by a universal quantifier is only
-allowed to be substituted by a monotype; otherwise it is impredicative. It is
-well-known that general type inference for impredicativity is
-undecidable~\citep{F:undecidable}. OL is predicative, which can be seen from
-\rref{ol-s-forallL}. We focus only on predicative type systems throughout the
-thesis.
-
 \subsection{Relating to HM}
 
 It can be proved that OL is a conservative extension of HM. That is, every

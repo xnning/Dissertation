@@ -1,0 +1,66 @@
+\section{Motivation}
+
+Most type inference systems used in practice are based on the Hindley-Milner
+(HM) type system~\citep{hindley,Damas:Milner}. The HM system comes with a simple
+yet effective algorithm that can infer the most general, or \textit{principal},
+types for expressions without any type annotations. However, the HM system comes
+with a restriction. That is, universal quantifiers in types are restricted to
+the top-level. For example, $[[\/a. a -> a]]$ is a valid type, while $[[(\/a. a
+-> a) -> int]]$ is not as $[[\/]]$ appears inside the $[[->]]$ constructor.
+
+This is unfortunate, as modern programming often requires \textit{higher-order}
+polymorphism, i.e., universal quantifiers can appear anywhere inside a type. For
+example, it is well-known that \textit{rank-2} polymorphic types (i.e.,
+universal quantifier can appear one level deeper in
+$[[->]]$)~\citep{McCracken:rank2,Jones:fcmodules} can be used for resource
+encapsulation. This is a well-understood technique used in Haskell's state
+monad~\citep{gill1993short}, which has a function \lstinline{runST} with the
+following type:
+
+\begin{lstlisting}
+runST :: foralla. (foralls. ST s a) -> a
+\end{lstlisting}
+
+\noindent where the \lstinline{forall} in the rank-2 type ensures by
+construction that the internal state \lstinline{s} used by the
+\lstinline{ST s a} computation is inaccessible to the rest of the program.
+
+There has been lots of work in extending the HM type system with higher-rank
+polymorphism~\citep{practical:inference,DK,le2014mlf,leijen2009flexible,quick:look,guarded:impred}.
+In this work, we focus on \textit{predicative implicit higher-rank
+  polymorphism}~\citep{practical:inference,DK}.
+
+\paragraph{Implicit polymorphism.}
+
+A system is implicit, if the type system can automatically figure out missing
+type arguments. For example, given
+
+\begin{lstlisting}
+map :: foralla b. (a -> b) -> [a] -> [b]
+fst :: foralla b. (a, b) -> a
+\end{lstlisting}
+
+\noindent we would like to write \lstinline{map fst [(1, 'a'), (2, 'b')]}
+instead of \lstinline{map (Int, Char) Int (fst Int Char) [(1, 'a'), (2, 'b')]}.
+It thus replies on the type inference algorithm of the system to reconstruct
+missing type arguments.
+
+\paragraph{Predicativity.}
+
+In a system with higher-rank types, one important design decision to make is
+whether the system is \textit{predicative} or \textit{impredicative}. A system
+is predicative, if the type variable bound by a universal quantifier is only
+allowed to be substituted by a monotype (i.e., a type without universal
+quantifiers); otherwise it is impredicative. It is well-known that general type
+inference for impredicativity is undecidable~\citep{F:undecidable}. We focus
+only on predicative type systems throughout the thesis. The most recent line of
+work in impredicativity can be found in \cite{quick:look,guarded:impred}.
+
+
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
