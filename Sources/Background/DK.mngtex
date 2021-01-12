@@ -58,7 +58,7 @@ including DK and \cite{practical:inference}. Let's revisit the example in
 \noindent which is not typeable in HM as it they fail to infer the type of
 \lstinline{f}. In OL, it can be type-checked by adding a polymorphic type
 annotation on \lstinline{f}. In DK, we can also add a polymorphic type
-annotation on \lstinline{f}. But with bi-directional type checking, the type
+annotation on \lstinline{f}. But with bidirectional type checking, the type
 annotation can be propagated from somewhere else. For example, we can rewrite
 this program as:
 
@@ -67,7 +67,7 @@ this program as:
 \end{lstlisting}
 
 \noindent Here the type of \lstinline{f} can be easily derived from the type
-signature using checking mode in bi-directional type checking.
+signature using checking mode in bidirectional type checking.
 
 
 \begin{figure}[t]
@@ -137,7 +137,7 @@ Now we turn to the checking mode. When an expression is checked against a type,
 the expression is expected to have that type. More importantly, the checking mode
 allows us to push the type information into the expressions.
 
-\Rref{dk-chk-int} checks literals again the integer type $[[int]]$.
+\Rref{dk-chk-int} checks literals against the integer type $[[int]]$.
 \Rref{dk-chk-lam} is where the system benefits from bidirectional type checking:
 the type information gets pushed inside an lambda. For an unannotated lambda
 abstraction $[[\x. e]]$, recall that in the inference mode, we can only guess a
@@ -165,7 +165,7 @@ function type (\rref{dk-app-arr}). In the function type case, since the function
 expects an argument of type $[[A1]]$, the rule proceeds by checking $[[e2]]$
 against $[[A1]]$.
 
-In many other type systems
+In some other type systems
 \citep{garcia:principal,esop2018:consistent,toplas:consistent}, the application
 judgment is replaced by \textit{matching}. Using matching, \rref{dk-inf-app} is
 replaced by \rref{dk-inf-app2}.
@@ -174,12 +174,13 @@ replaced by \rref{dk-inf-app2}.
   \drule{dk-inf-appTwo}
 \end{center}
 
-In \rref{dk-inf-app2} where we type-check an application $[[e1 e2]]$, we derive
-that $[[e1]]$ has type $[[A]]$, but $[[e1]]$ must have a function type so that
-it can be applied to an argument. The \textit{matching} judgment instantiates
-$[[A]]$ into a function $[[A1 -> A2]]$. We then check $[[e2]]$ against $[[A1]]$.
-
-The definition of matching given below.
+\noindent
+In \rref{dk-inf-app2}, we first derive that $[[e1]]$ has type $[[A]]$. But
+$[[e1]]$ must have a function type so that it can be applied to an argument. We
+thus use the \textit{matching} judgment to instantiate $[[A]]$ into a function
+$[[A1 -> A2]]$, and proceed by checking $[[e2]]$ against $[[A1]]$, and return
+the final result $[[A2]]$.
+The definition of matching is given below.
 
 \drules[dk-m]{$ [[dd |-DK A1 |> A2]] $}{Matching}{forall, arr}
 
@@ -210,7 +211,7 @@ system. The key idea of the algorithm is using \textit{ordered} algorithmic
 contexts for storing existential variables and their solutions. Comparing to the
 algorithm for HM, they argued that their algorithm is remarkably simple. The
 algorithm is later discussed and used in \Cref{part:gradual} and
-\Cref{part:dependentTypes}. We will discuss more about it there.
+\Cref{part:promotion}. We will discuss more about it there.
 
 
 

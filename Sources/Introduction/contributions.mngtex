@@ -87,7 +87,7 @@ In particular, I offer the following specific contributions:
 
 \item[\Cref{part:promotion}]
   \begin{itemize}
-  \item \Cref{chap:Promotion} proposes a simpler algorithmic subtyping of the
+  \item \Cref{chap:Promotion} proposes an arguably simpler algorithmic subtyping of the
     type inference algorithm for higher-rank implicit polymorphism, based on a
     new strategy called \textit{promotion} in the \textit{type inference in
       context} \citep{gundry2010type, DK} framework. Promotion helps resolve the

@@ -21,7 +21,7 @@ annotations. As a motivation, consider the following program\footnote{For the
 \end{lstlisting}
 
 \noindent which is not typeable under HM because it fails to infer the type of
-\lstinline{f}: \lstinline{F} is supposed to be polymorphic as it is applied to
+\lstinline{f}: \lstinline{f} is supposed to be polymorphic as it is applied to
 two arguments of different types. With OL we can add the type annotation for
 \lstinline{f}:
 

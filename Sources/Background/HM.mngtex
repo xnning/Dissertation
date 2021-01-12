@@ -112,12 +112,12 @@ the expression can derive. Formally,
 \begin{theorem}[Principality for HM]
   If $[[dd |-HM e : A]]$,
   then there exists $[[A']]$ such that $[[dd |-HM e : A']]$,
-  and for all $[[A]]$ such that $[[dd |-HM e : A]]$,
-  we have $[[|-HM A' <: A]]$.
+  and for all $[[A'']]$ such that $[[dd |-HM e : A'']]$,
+  we have $[[|-HM A' <: A'']]$.
 \end{theorem}
 
 Consider the expression $[[\x. x]]$. It has a principal type $[[\/a. a -> a]]$,
-which is more general than other options, e.g., $[[int -> int]]$, $[[(int ->
+which is more general than any other options, e.g., $[[int -> int]]$, $[[(int ->
 int) -> (int -> int)]]$, etc.
 
 \subsection{Algorithmic Type System}

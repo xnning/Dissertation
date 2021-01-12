@@ -11,7 +11,7 @@ the top-level. For example, $[[\/a. a -> a]]$ is a valid type, while $[[(\/a. a
 This is unfortunate, as modern programming often requires \textit{higher-order}
 polymorphism, i.e., universal quantifiers can appear anywhere inside a type. For
 example, it is well-known that \textit{rank-2} polymorphic types (i.e.,
-universal quantifier can appear one level deeper in
+universal quantifier can appear one level \textit{contravariantly} deeper in
 $[[->]]$)~\citep{McCracken:rank2,Jones:fcmodules} can be used for resource
 encapsulation. This is a well-understood technique used in Haskell's state
 monad~\citep{gill1993short}, which has a function \lstinline{runST} with the
