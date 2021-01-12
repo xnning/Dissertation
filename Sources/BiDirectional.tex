@@ -3,24 +3,24 @@
 \label{chap:BiDirectional}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-We have seen in \Cref{sec:DK} that bi-directional type checking is an useful and
+We have seen in \Cref{sec:DK} that bidirectional type checking is an useful and
 versatile tool for type checking and type inference. In traditional
-bi-directional type-checking, type information flows from functions to arguments
+bidirectional type-checking, type information flows from functions to arguments
 (e.g., \rref{dk-in-app} in \Cref{sec:DK:declarative}). In this section, we
-present a novel variant of bi-directional type checking where the type
+present a novel variant of bidirectional type checking where the type
 information flows from arguments to functions. This variant retains the
 inference mode, but adds a so-called \textit{\mode} mode. Such design can remove
-annotations that basic bi-directional type checking cannot, and is useful when
+annotations that basic bidirectional type checking cannot, and is useful when
 type information from arguments is required to type-check the functions being
 applied.
 
-We illustrate our novel design of bi-directional type-checking using System \ap,
+We illustrate our novel design of bidirectional type-checking using System \ap,
 a lambda calculus with implicit higher-rank polymorphism. This section first
 presents the declarative, syntax-directed type system of System \ap
 in \Cref{sec:AP:declarative}. The interesting aspects about the new type system
 are: 1) the typing rules, which employ a combination of the inference mode and
 the \textit{\mode} mode; 2) the novel subtyping relation under an application
-context. Later, we prove our type system is type-safe by a type directed
+context. Later, we prove our type system is type-safe by a type-directed
 translation to System F in \Cref{sec:AP:translation}. An algorithmic type system
 is discussed in \Cref{sec:AP:algorithm}.
 

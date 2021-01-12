@@ -29,7 +29,7 @@ elimination rules. Constructs which correspond to introduction forms are
 \emph{checked} against a given type, while constructs corresponding to
 elimination forms \emph{infer} (or synthesize) their types. For instance, under
 this design principle, the introduction rule for literals is supposed to be in
-checking mode, as in the rule \rref{dk-chk-int}:
+the checking mode, as in the rule \rref{dk-chk-int}:
 
 \[
   \drule{dk-chk-int}
@@ -53,8 +53,9 @@ the introduction form of constructs. For literals, the corresponding rule is
 Now we can type check $[[1]]$, but the price to pay is that two typing rules for
 literals are needed. Worse still, the same criticism applies to other constructs
 (e.g., pairs). This shows one drawback of bidirectional type checking: often to
-minimize annotations, many rules are duplicated for having both inference and
-checking mode, which scales up with the typing rules in a type system.
+minimize annotations, many rules are duplicated for having both the inference
+mode and the checking mode, which scales up with the typing rules in a type
+system.
 
 \subsection{Type Checking with The Application Mode}
 
@@ -82,8 +83,8 @@ consider the simple expression
 checking, because unannotated abstractions, as a construct which correspond to
 introduction forms, only have a checking mode, so annotations are
 required~\footnote{It type-checks in DK, because in DK rules for lambdas are
-  duplicated for having both inference (integrated with type inference
-  techniques) and checking mode.}. For example,
+  duplicated for having both the inference (integrated with type inference
+  techniques) and the checking mode.}. For example,
 \lstinline{((\x. x) : Int -> Int) 1}.
 
 In this example we can observe that if the type of the argument is accounted
@@ -141,7 +142,7 @@ systems with subtyping.
 
 \paragraph{Interpretation of the Application Mode.}
 
-As we have seen, the guideline for designing bi-directional type checking
+As we have seen, the guideline for designing bidirectional type checking
 \citep{dunfield:tridirectional}, based on introduction and elimination rules,
 is often not enough in practice. This leads to extra introduction rules in the
 inference mode. The application mode does not distinguish between introduction
@@ -157,18 +158,18 @@ arguments are always inferred first in applications and propagated through
 application contexts. An empty application context means that an expression is
 not being applied to anything, which allows us to model the inference mode as a
 particular case\footnote{Although the application mode generalizes the inference mode,
-  we refer to them as two different modes. Thus the variant of bi-directional
-  type checking in this paper is interpreted as a type system with both
+  we refer to them as two different modes. Thus the variant of bidirectional
+  type checking in this work is interpreted as a type system with both
   \emph{inference} and \emph{application} modes.}.
 
 \paragraph{Partial Type Checking.}
 
-The inference mode synthesizes the type of an expression, and the checked mode
+The inference mode synthesizes the type of an expression, and the checking mode
 checks an expression against some type. A natural question is how do these modes
-compare to application mode. An answer is that, in some sense: the application
-mode is stronger than inference mode, but weaker than checked mode.
-Specifically, the inference mode means that we know nothing about the type an
-expression before hand. The checked mode means that the whole type of the
+compare to the application mode. An answer is that, in some sense: the application
+mode is stronger than the inference mode, but weaker than the checking mode.
+Specifically, the inference mode means that we know nothing about the type of an
+expression before hand. The checking mode means that the whole type of the
 expression is already known before hand. With the application mode we know some
 partial type information about the type of an expression: we know some of its
 argument types (since it must be a function type when the application context is
@@ -176,11 +177,11 @@ non-empty), but not the return type.
 
 Instead of nothing or all, this partialness gives us a finer grain notion on how
 much we know about the type of an expression. For example, assume $[[e: A1 -> A2
--> A3]]$. In the inference mode, we only have ${e}$. In the checked mode, we
+-> A3]]$. In the inference mode, we only have ${e}$. In the checking mode, we
 have both $[[e]]$ and $[[A1 -> A2 -> A3]]$. In the application mode, we have
 $[[e]]$, and maybe an empty context (which degenerates into inference mode), or
 an application context $[[A1]]$ (we know the type of first argument), or an
-application context $[[A1]], [[A2]]$ (we know the types of both arguments).
+application context $[[A1]], [[A2]]$ (we know the type of both arguments).
 
 \paragraph{Trade-offs.}
 
@@ -203,29 +204,29 @@ functional languages with implicit polymorphism, function calls such as $[[(id
 function call the type system must instantiate $[[a]]$ to $[[int]]$. Dealing
 with such implicit instantiation gets trickier in systems with
 \emph{higher-rank types}. For example, \cite{practical:inference} require
-additional syntactic forms and relations, whereas DK add a special purpose
-matching or the application judgment.
+additional syntactic forms and relations, whereas DK adds a special-purpose
+application judgment.
 
 With the application mode, all the type information about the arguments being
-applied is available in application contexts and can be used to solve
+applied is available in the application context and can be used to solve
 instantiation constraints. To exploit such information, the type system employs
 a special subtyping judgment called \emph{application subtyping}, with the form
-$[[ss |- A1 <: A2]]$. Unlike conventional subtyping, computationally $[[dd]]$
-and $[[A1]]$ are interpreted as inputs and $[[A2]]$ as output. In above example,
+$[[ss |- A1 <: A2]]$. Unlike conventional subtyping, computationally $[[ss]]$
+and $[[A1]]$ are interpreted as inputs and $[[A2]]$ as output. In the example above,
 we have that $[[int |- \/a.a -> a <: A]]$ and we can determine that
-$[[a = int]]$ and $[[A = int -> int]]$. In this way, type system is able to solve
-the constraints \textit{locally} according to the application contexts since we
+$[[a = int]]$ and $[[A = int -> int]]$. In this way, the type system is able to solve
+the constraints \textit{locally} according to the application context since we
 no longer need to propagate the instantiation constraints to the typing process.
 
 \paragraph{Declaration Desugaring for Lambda Abstractions.}
 
 An interesting consequence of the usage of an application mode is that it
 enables the following $[[let]]$ sugar:
-
+%
 \[
 [[let x = e1 in e2]] [[~~>]] [[(\x. e2) e1]]
 \]
-
+%
 \noindent Such syntactic sugar for $[[let]]$ is, of course, standard. However,
 in the context of implementations of typed languages it normally requires extra
 type annotations or a more sophisticated type-directed translation. Type
@@ -268,7 +269,7 @@ applied to \lstinline{\x. x}, which is of type \lstinline{foralla. a -> a}.
 
 \paragraph{Type Inference for Higher-rank Types with the Application Mode.}
 
-Using our bi-directional type system with an application mode, the original
+Using our bidirectional type system with an application mode, the original
 expression can type check without annotations or rewrites:
 \lstinline{(\f. (f 1, f 'c')) (\x. x)}.
 
@@ -327,7 +328,7 @@ above provides an example of this.
 higher rank types, a clear answer to the question where annotations are needed
 is necessary so that programmers know when they are required to write
 annotations. To this question, previous systems give a concrete answer: only on
-the binding of polymorphic types. Our answer is slightly different: only on the
+the bindings of polymorphic types. Our answer is slightly different: only on the
 bindings of polymorphic types in abstractions \emph{that are not applied to
   arguments}. Roughly speaking this means that our system ends up with fewer or
 smaller annotations.
@@ -335,7 +336,7 @@ smaller annotations.
 3) Expressiveness. Based on these two answers, it may seem that our system
 should accept all expressions that are typeable in their system. However, this
 is not true because the application mode is \textit{not} conservative over traditional
-bi-directional type checking. Consider the expression:
+bidirectional type checking. Consider the expression:
 
 \begin{lstlisting}
 (\f : (foralla. a -> a) -> (nat, char). f) (\g. (g 1, g 'a'))
@@ -351,7 +352,7 @@ polymorphic binder. Programmers that strictly follow their guideline can still
 add a polymorphic type annotation for \lstinline{g}. However it does mean that
 it is a little harder to understand where annotations for polymorphic binders
 can be \emph{omitted} in their system. This requires understanding how the
-applications in checked mode operate.
+applications in checking mode operate.
 
 In our system the above expression is not typeable, as a consequence 
 of the information flow in the application mode.
