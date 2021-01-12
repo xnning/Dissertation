@@ -544,7 +544,7 @@ following lemma:
   \item If for some (static) $[[C]]$,
     we have $[[A1]] \lessp [[C]]$,
     and $[[B]] \lessp [[C]]$,
-    then we have $[[A1]] ~ [[B]]$.
+    then we have $[[A1 ~ B]]$.
   \end{itemize}
 \end{lemma}
 

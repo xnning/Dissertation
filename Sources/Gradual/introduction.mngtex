@@ -204,8 +204,8 @@ Consider for instance the typed
 Scott encoding of parametric lists in a system with implicit polymorphism:
 \begin{align*}
    [[ List a ]] &\triangleq [[  mu L . \/b. b -> (a -> L -> b) -> b       ]] \\
-   [[nil]] &\triangleq [[  fold [ List a ] (\m . \c . m ): \/ a . List a    ]] \\
-   [[cons]] & \triangleq [[ \x . \xs . fold [List a]  (\m . \c. c x xs) :  \/a . a -> List a -> List a  ]]
+   [[nil]] &\triangleq [[  fold [ List a ] (\m . \cc . m ): \/ a . List a    ]] \\
+   [[cons]] & \triangleq [[ \x . \xs . fold [List a]  (\m . \cc. cc x xs) :  \/a . a -> List a -> List a  ]]
 \end{align*}
 This encoding requires both polymorphic and recursive types\footnote{Here we use
 iso-recursive types, but equi-recursive types can be used too.}.
