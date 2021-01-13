@@ -69,7 +69,7 @@ source type and target type are the same. In \rref{ap-s-arrow}, the coercion
 function $[[ef1]]$ of type $[[C -> A1]]$ is applied to $[[y]]$ to get a value of
 type $[[A1]]$. Then the resulting value becomes an argument to $[[x]]$, and a
 value of type $[[B]]$ is obtained. Finally we apply $[[f2]]$ to the value of
-type $[[B]]$, so that a value of type $[[D]]$ is computed. In
+type $[[B]]$, so that a value of type $[[A4]]$ is computed. In
 \rref{a-ps-ForallL}, the input argument is a polymorphic type, so we feed the
 type $[[t]]$ to it and apply the coercion function $[[ef]]$ from the
 precondition. \Rref{ap-s-forallR} uses the coercion $[[ef]]$ and, in order to

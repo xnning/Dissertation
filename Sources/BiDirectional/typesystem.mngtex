@@ -1,10 +1,10 @@
 \section{Declarative System}
 \label{sec:AP:declarative}
 
-This section first presents the declarative, \emph{syntax-directed}
-specification of \ap. The interesting aspects about the new type system
-are: 1) the typing rules, which employ a combination of inference and \mode
-modes; 2) the novel subtyping relation under an application context.
+This section presents the declarative, \emph{syntax-directed} specification of
+\ap. As mentioned before, the interesting aspects about the new type system are:
+1) the typing rules, which employ a combination of inference and \mode modes; 2)
+the novel subtyping relation under an application context.
 
 % Later, we prove our type system is type-safe by a type
 % directed translation to System F\citep{systemF}.
@@ -49,11 +49,11 @@ without universal quantifiers.
 \paragraph{Contexts.}
 
 Typing contexts $[[dd]]$ are standard: they map a term variable $[[x]]$ to its
-type $[[A]]$. In this system, the context is modeled in a HM-style context
+type $[[A]]$. In this system, the context is modeled as the HM-style context
 (\Cref{sec:HM}), which does not track type variables. Again, we implicitly
-assume that all the variables in $[[dd]]$ are distinct.
+assume that all variables in $[[dd]]$ are distinct.
 
-The main novelty lies in the \emph{application contexts} $[[ss]]$, which are the
+The key novelty lies in the \emph{application contexts} $[[ss]]$, which are the
 main data structure needed to allow types to flow from arguments to functions.
 Application contexts are modeled as a stack. The stack collects the types of
 arguments in applications. The context is a stack because if a type is pushed
@@ -89,7 +89,7 @@ are unsurprising. \Rref{ap-inf-int} shows that integer literals are only
 inferred to have type $[[int]]$ under an empty application context. This is
 obvious since an integer cannot accept any arguments. \Rref{ap-inf-lam} deals
 with lambda abstractions when the application context is empty. In this
-situation, a monotype $[[t]]$ is \emph{guessed} for the argument, just like
+situation, a monotype $[[t]]$ is \emph{guessed} for the argument, just like in
 previous calculi. \Rref{ap-inf-lamann} also works as expected: a new variable
 $[[x]]$ is put with its type $[[A]]$ into the typing context, and inference
 continues on the abstraction body.
@@ -118,9 +118,9 @@ rule first infers the type of the argument $[[e2]]$ with type $[[A1]]$. Then the
 type $[[A1]]$ is generalized in the same way as the HM type system. The
 resulting generalized type is $[[A2]]$. Thus the type of $[[e1]]$ is now
 inferred under an application context extended with type $[[A2]]$. The
-generalization step is important to infer higher ranked types: since $[[A2]]$ is
+generalization step is important to infer higher-rank types: since $[[A2]]$ is
 a possibly polymorphic type, which is the argument type of $[[e1]]$, then
-$[[e1]]$ is of possibly a higher rank type.
+$[[e1]]$ is of possibly a higher-rank type.
 
 \paragraph{Let Expressions.}
 
@@ -185,8 +185,8 @@ form of the typing result.
 Having this lemma, we can always use the judgment $[[dd;ss |-AP e => ss -> A']]$
 instead of $[[dd;ss|-AP e => A]]$.
 
-In traditional bi-directional type checking, we often have one subsumption rule
-that transfers between inference and checked mode, which states that if an
+In traditional bidirectional type checking, we often have one subsumption rule
+that transfers between the inference and the checking mode, which states that if an
 expression can be inferred to some type, then it can be checked with this type
 (e.g., \rref{dk-chk-sub} in DK). In our system, we regard the normal inference
 mode $[[dd |-AP e => A]]$ as a special case, when the application context is
@@ -215,7 +215,7 @@ system, with a more general typing result.
   and desugaring let expression in $[[e]]$ gives back $[[e']]$,
   then for some $[[A']]$,
   we have $[[dd |-AP e' => A']]$,
-  and $ A' <: A$.
+  and $[[ A' <: A]]$.
 \end{lemma}
 
 \subsection{Subtyping}
@@ -252,11 +252,11 @@ at \rref{ap-app-var} (here we assume $[[id:\/a.a -> a]] \in [[dd]]$):
 \noindent
 Here we know that $[[id:\/a.a->a]]$ and also, from the application context, that
 $[[id]]$ is applied to an argument of type $[[int]]$. Thus we need a mechanism
-for solving the instantiation $[[a=int]]$ and return a supertype $[[int->int]]$
+for solving the instantiation $[[a=int]]$ and returning a supertype $[[int->int]]$
 as the type of $[[id]]$. This is precisely what the application subtyping
-achieves: resolve instantiation constraints according to the application
+achieves: resolving instantiation constraints according to the application
 context. Notice that unlike existing works (\cite{practical:inference} or
-DK),application subtyping provides a way to solve instantiation more
+DK), application subtyping provides a way to solve instantiation more
 \textit{locally}, since it does not mutually depend on typing.
 
 Back to the rules in \Cref{fig:AP:static}, one way to understand the judgment
@@ -291,7 +291,7 @@ and return $[[A3->A4]]$ as the result type of the function.
 \paragraph{Metatheory.}
 
 Application subtyping is novel in our system, and it enjoys some interesting
-properties. For example, similarly to typing, the application context decides
+properties. For example, As with typing, the application context decides
 the form of the supertype.
 
 \begin{lemma}[$[[ss]]$ Coincides with Subtyping Results]

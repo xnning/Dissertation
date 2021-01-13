@@ -3,37 +3,35 @@
 \subsection{Combining  Application and Checking Modes}
 
 Although the application mode provides us with alternative design choices in a
-bi-directional type system, a checking mode can still be \textit{easily} added.
+bidirectional type system, a checking mode can still be \textit{easily} added.
 One motivation for the checking mode would be annotated expressions $[[e:A]]$,
-where the type of expressions is known and is therefore used to check
-expressions, as in DK.
+where the type of the expression is known and is therefore used to check
+the expression, as in DK.
 
 Consider adding $[[e:A]]$ for introducing the checking mode for the language.
-Notice that, since the checking mode is stronger than application mode, when
-entering checking mode the application context is no longer useful. Instead we
+Notice that, since the checking mode is stronger than the application mode, when
+entering the checking mode the application context is no longer useful. Instead we
 use application subtyping to satisfy the application context requirements. A
-possible typing rule for annotation expressions is:
+possible typing rule for annotated expressions is:
 %
 \[
   \drule{ap-app-anno}
 \]
 
-\noindent Here, $[[e]]$ is checking using its annotation $[[A1]]$, and then we
-instantiate $[[A1]]$ to $[[B]]$ using subtyping with application context
+\noindent Here, $[[e]]$ is checked using its annotation $[[A1]]$, and then we
+instantiate $[[A1]]$ to $[[B]]$ using application subtyping with the application context
 $[[ss]]$.
 
 Now we can have a rule set of the checking mode for all expressions, much like
-those checking rules in DK. For example, one useful rule for abstractions in
+those checking rules in DK. For example, one useful rule for abstractions in the
 checking mode could be \rref{ap-chk-lam}, where the parameter type $[[A1]]$
-serves as the type of $[[x]]$, and typing checks the body with $[[B]]$. Also,
-combined with the information flow, the checking rule for application checks the
-function with the full type.
+serves as the type of $[[x]]$, and typing checks the body with $[[B]]$.
 %
 \[
   \drule{ap-chk-lam}
 \]
 
-Moreover, combined with the information flow, the checked rule for application
+Moreover, combined with the information flow, the checking rule for application
 checks the function with the full type.
 %
 \[
@@ -41,16 +39,16 @@ checks the function with the full type.
 \]
 
 
-Note that adding expression annotations might bring convenience for programmers,
+Note that adding annotated expressions might bring convenience for programmers,
 since annotations can be more freely placed in a program. For example,
 $[[(\x. x 1) : (int -> int) -> int]]$ becomes valid.
-However this does not add expressive power, since programs that are typeable
-under expression annotations, would remain typeable after moving the annotations
+However this does not add any expressive power, since annotated expressions
+that are typeable would remain typeable after moving the annotations
 to bindings. For example the previous program is equivalent to
 $[[(\x:int->int. x 1)]]$.
 
 This discussion is a sketch. We have not defined the corresponding declarative
-system nor algorithm. However we believe that the addition of a checked mode
+system nor algorithm. However we believe that the addition of the checking mode
 will \textit{not} bring surprises to the meta-theory.
 
 \subsection{Additional Constructs}
@@ -134,7 +132,7 @@ details.
 To explain the new design, consider the expression:
 %
 \[
-  \Lambda [[a]]. [[(\x :a . x + 1)]]~[[int]]
+  (\Lambda [[a]]. [[\x :a . x + 1]])~[[int]]
 \]
 
 \noindent which is not typeable in the traditional type system for System F. In

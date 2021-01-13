@@ -26,7 +26,7 @@ their solutions. For example, \rref{ap-inf-lam} becomes
   }
 \]
 %
-Comparing it to rule \rref{ap-inf-lam}, $[[t]]$ is replaced by a new meta type
+Comparing it to \rref{ap-inf-lam}, $[[t]]$ is replaced by a new meta type
 variable $[[Xb]]$ from name supply $N_0[[Xb]]$. But despite of the name supply
 and substitution, the rule retains the structure of \rref{ap-inf-lam}.
 
