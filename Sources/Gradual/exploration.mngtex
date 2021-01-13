@@ -337,18 +337,18 @@ This is reflected in \Cref{fig:obser:a}. A symmetrical observation is given in
 
 
 From the above observations, we see what the problem is with the original
-definition. In \cref{fig:obser:a}, if $[[B]]$ can reach $[[C]]$ by $[[A']]$,
+definition. In \Cref{fig:obser:a}, if $[[B]]$ can reach $[[C]]$ by $[[A']]$,
 then by subtyping transitivity, $[[A1]]$ can reach $[[C]]$ by $[[A']]$. However,
 if $[[B]]$ can only reach $[[C]]$ by $[[A'']]$, then $[[A]]$ cannot reach
 $[[C]]$ through the original definition. A similar problem is shown in
-\cref{fig:obser:b}.
+\Cref{fig:obser:b}.
 
 It turns out that these two problems can be fixed using the same strategy:
 instead of taking one-step subtyping and one-step consistency, our definition of
 consistent subtyping allows types to take \emph{one-step subtyping, one-step
   consistency, and one more step subtyping}. Specifically, $[[A1 <: B]] [[~]]
 [[A'']] [[<:]] [[C]] $ (in \Cref{fig:obser:a}) and $[[C <: A']] [[~]] [[B]]
-[[<:]] [[A]]$ (in \Cref{fig:obser:b}) have the same relation chain: subtyping,
+[[<:]] [[A1]]$ (in \Cref{fig:obser:b}) have the same relation chain: subtyping,
 consistency, and subtyping.
 
 \paragraph{Definition of Consistent subtyping.} From the above discussion, we
@@ -383,7 +383,7 @@ system of \citet{siek2007gradual}. However, more generally,
       \\
       [[A1]]
       &
-      [[D]]  \\
+      [[A4]]  \\
       };
 
     \path[-stealth]
@@ -496,7 +496,7 @@ The judgment $[[A1]] \lessp [[B]]$ is read ``$[[A1]]$ is less precise than
 $[[B]]$''.\footnote{\citeauthor{Jafery:2017:SUR:3093333.3009865} actually read
   $[[A1]] \lessp [[B]]$ as ``$[[A1]]$ is \emph{more precise} than $[[B]]$''. We,
   however, use the ``less precise'' notation (which is also adopted by
-  \citet{cimini2016gradualizer} ) throughout the paper. The full rules can be
+  \citet{cimini2016gradualizer} ) throughout this work. The full rules can be
   found in \Cref{fig:gradual:lessp}.} In their setting, precision is first
 defined for type constructors and then lifted to gradual types, and subtyping is
 defined for gradual types. If we interpret this definition from the AGT point of
