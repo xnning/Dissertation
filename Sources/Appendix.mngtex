@@ -1,4 +1,4 @@
-\section{Full Rules for Algorithmic \ap}
+\chapter{Full Rules for Algorithmic \ap}
 \label{sec:appendix:algo:ap}
 
   \drules[ap-a-s]{$ [[( tsub1 , AN1 )  |-AP A <: B `-> ( tsub2 , AN2 )]] $}

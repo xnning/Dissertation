@@ -5,7 +5,7 @@ Even though our specification is syntax-directed, it does not directly lead to
 an algorithm, because there are still many guesses in the system, such as in
 \rref{ap-inf-lam}. This subsection presents a brief introduction of the
 algorithm, which closely follows the approach by \citet{practical:inference}.
-The full rules of the algorithm can be found in \Cref{sec:appendix:algo:ap}
+The full rules of the algorithm can be found in \Cref{sec:appendix:algo:ap}.
 
 Instead of guessing, the algorithm creates \textit{meta} type variables $[[Xa]], [[Xb]]$
 which are waiting to be solved. The judgment for the algorithmic type system is
