@@ -74,6 +74,7 @@
 
 \appendix
 
+\include{Gen/Appendix}
 
 \end{document}
 

@@ -16,6 +16,10 @@ grammar
 
 % Types
 
+
+AN {{ tex N }} :: 'name_supply' ::=
+  | AN kvs  ::  :: append
+
 mode :: 'mode_' ::=
   | =>       ::  :: infer {{ tex \Rightarrow }}
   | <=       ::  :: check {{ tex \Leftarrow }}
@@ -76,6 +80,8 @@ kvarset, kvs {{ tex \phi }} , kvsy {{tex \phi }},  ckvs {{ tex \phi^{\mathsf{c} 
     {{ tex [[dom]]([[DD]]) }}
   | var ( K )         ::   :: var
     {{ tex [[var]]([[K]]) }}
+  | fv ( dd )                ::  :: fv_dd
+  | fv ( A )                 ::  :: fv_A
 
 dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA {{tex \mu}}, eK {{tex \eta}}  :: 'dtyp_' ::=
   | X              ::  :: vars
@@ -478,6 +484,7 @@ dataconstr, dc {{tex \mathcal{D} }} , dcc {{tex \mathcal{D} }} :: 'dc_' ::=
   | \/  kvs  . D </ Ai // i /> :: :: sigl_exist
 
 typesubst, tsub {{ tex S }}, tsubstar {{tex S^{\star} }} :: 'tsub_' ::=
+  | [ Xa ~> A ]  .  tsub   ::  :: append  {{ tex [ [[Xa]] [[~>]] [[A]] ] \cdot [[tsub]] }}
 
 group :: 'group_' ::=
   | rec </ dti // i />  :: :: group
@@ -612,9 +619,12 @@ formula :: formula_ ::=
   | evar in GG            :: :: evargg {{ tex [[evar]] \in  [[GG]]  }}
   | ( Xa : K ) in DD  ::  :: xain {{ tex ( [[Xa]] : [[K]] ) \in [[DD]] }}
   | evar notin fv ( aA )  :: :: nfv {{ tex [[evar]] \notin \textsc{fv} ( [[aA]] ) }}
+  | evar notin fv (  A )  :: :: nfvA {{ tex [[evar]] \notin \textsc{fv} ( [[A]] ) }}
   | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
   | varset1 notin varset2     :: :: notin_varset
   | ma notin fv ( GG )     :: :: mafv {{ tex [[ma]] \notin \textsc{fv} ( [[GG]] ) }}
+  | evar notin tsub  :: :: evar_notin_tsub {{ tex [[evar]] \notin [[tsub]]  }}
+  | evar in tsub  :: :: evar_in_tsub {{ tex [[evar]] \in [[tsub]]  }}
   | aA1 = aA2             :: :: eq
   | dd |- e : A           :: :: typ
   | dd |- e => A           :: :: typ_inf
@@ -926,7 +936,7 @@ by
 ---------------------------- :: arrow
 |-AP A1 -> A2 <: A3 -> A4  ~~> \x:A1->A2. \y:A3. ef2 (x (ef1 y))
 
-|-AP A [a ~> t] <: A2 ~~> ef
+|-AP A1 [a ~> t] <: A2 ~~> ef
 ----------------- :: forallL
 |-AP \/ a. A1 <: A2 ~~> \x:\/a.A1. ef (x t)
 
@@ -3570,3 +3580,161 @@ by
 </ xckvsi = unsolved (eAi) // i />
 -------------------------------- :: gen
 DD ||-gen ckvs </ Di : eAi // i /> ~> </ D : \/i [ckvs] . \/i [ckvsi] . (eA [ xckvsi |-> ckvsi ]) // i />
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Algorithmic AP
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+APA :: 'ap_a_' ::=
+
+defn
+
+( tsub1 , AN1 )  |-AP A <: B `-> ( tsub2 , AN2 ) ::  :: subtyping :: s_
+
+by
+
+tsub0 |-AP t1 ~= t2  `-> tsub1
+------------------ :: mono
+(tsub0, AN0) |-AP t1 <: t2 `-> (tsub1, AN0)
+
+
+(tsub0, AN0) |-AP A |> A3 -> A4 `-> (tsub1, AN1)
+(tsub1, AN1) |-AP A3 <: A1 `-> (tsub2, AN2)
+(tsub2, AN2) |-AP A2 <: A4 `-> (tsub3, AN3)
+---------------------------- :: arrowL
+(tsub0, AN0) |-AP A1 -> A2 <: A  `-> (tsub3, AN3)
+
+(tsub0, AN0) |-AP A |> A1 -> A2 `-> (tsub1, AN1)
+(tsub1, AN1) |-AP A3 <: A1 `-> (tsub2, AN2)
+(tsub2, AN2) |-AP A2 <: A4 `-> (tsub3, AN3)
+---------------------------- :: arrowR
+(tsub0, AN0) |-AP A <: A3 -> A4  `-> (tsub3, AN3)
+
+(tsub0, AN0) |-AP A1 [a ~> Xb] <: A2 `-> (tsub1, AN1)
+----------------- :: forallL
+(tsub0, AN0 Xb) |-AP \/ a. A1 <: A2 `-> (tsub1, AN1)
+
+(tsub0, AN0) |-AP A1 <: A2 [ a ~> b ] `-> (tsub1, AN1)
+b notin fv ( tsub ( A1 ) )
+b notin fv ( tsub ( \/a. A2 ) )
+----------------- :: forallR
+(tsub0, AN0 b) |-AP A1 <: \/ a. A2 `-> (tsub1, AN1)
+
+defn
+
+( tsub1 , AN1 ) ; ss |-AP A <: B `-> ( tsub2 , AN2 )  ::  :: asubtyping :: as_
+
+by
+
+---------------- :: empty
+( tsub0 , AN0 ) ; empty |-AP A <: A `-> ( tsub0 , AN0 )
+
+
+( tsub0 , AN0 ) ; ss , A3 |-AP A1 [a ~> Xb] <: A2 `-> ( tsub1 , AN1 )
+------------------------ :: forall
+( tsub0 , AN0 Xb ) ; ss , A3 |-AP \/a. A1 <: A2 `-> ( tsub1 , AN1 )
+
+
+( tsub0 , AN0 )      |-AP A3 <: A1 `-> ( tsub1 , AN1 )
+( tsub1 , AN1 ) ; ss |-AP A2 <: A4 `-> ( tsub2 , AN2 )
+------------------------ :: arrow
+( tsub0 , AN0 ) ; ss , A3 |-AP A1 -> A2 <: A3 -> A4 `-> ( tsub2 , AN2 )
+
+( tsub0, AN0 ) |-AP t |> t1 -> t2 `-> ( tsub1, AN1 )
+( tsub1 , AN1 )    ; ss , A3 |-AP t1 -> t2 <: A `-> ( tsub2 , AN2 )
+------------------------ :: mono
+( tsub0 , AN0 Xb ) ; ss , A3 |-AP t <: A `-> ( tsub2 , AN2 )
+
+defn
+
+( tsub1 , AN1 ) |-AP A |> A1 -> A2 `-> ( tsub2 , AN2 )  ::  :: matching :: m_
+by
+
+
+tsub0 |-AP Xa ~= Xa1 -> Xa2 `-> tsub1
+------------------------ :: tvar
+( tsub0 , AN0 Xa1 Xa2 ) |-AP Xa |> Xa1 -> Xa2 `-> ( tsub1 , AN0 )
+
+------------------------ :: arrow
+( tsub0 , AN0 ) |-AP A1 -> A2 |> A1 -> A2 `-> ( tsub0 , AN0 )
+
+defn
+
+tsub1 |-AP A1 ~= A2 `-> tsub2 ::  :: unif :: u_
+
+by
+
+------------------ :: refl
+tsub0 |-AP t ~= t `-> tsub0
+
+Xa in tsub0
+tsub0 |-AP tsub0 (Xa) ~= t `-> tsub1
+------------------ :: solvedEvarL
+tsub0 |-AP Xa ~= t `-> tsub1
+
+Xa in tsub0
+tsub0 |-AP t ~= tsub0 (Xa) `-> tsub1
+------------------ :: solvedEvarR
+tsub0 |-AP t ~= Xa `-> tsub1
+
+Xa notin tsub0
+Xa notin fv ( tsub0 (t) )
+------------------ :: evarL
+tsub0 |-AP Xa ~= t `-> [ Xa ~> tsub0(t)] . tsub1
+
+Xa notin tsub0
+Xa notin fv ( tsub0 (t) )
+------------------ :: evarR
+tsub0 |-AP t ~= Xa `-> [ Xa ~> tsub0(t)] . tsub1
+
+tsub0 |-AP t1 ~= t3 `-> tsub1
+tsub1 |-AP t2 ~= t4 `-> tsub2
+------------------ :: arrow
+tsub0 |-AP t1 -> t2 ~= t3 -> t4 `-> tsub2
+
+defn
+
+( tsub0 , AN0 ) ; dd |-AP e => A `-> ( tsub1 , AN1 )  ::  :: inf :: 'inf_'
+
+by
+
+--------------------------- :: int
+(tsub0, AN0) ; dd |-AP n => int `-> (tsub0, AN0)
+
+(tsub0, AN0) ; dd, x: Xb |-AP e => A `-> (tsub1, AN1)
+--------------------------- :: lam
+(tsub0, AN0 Xb) ; dd |-AP \x. e => Xb -> A  `-> (tsub1, AN1)
+
+(tsub0, AN0) ; dd , x: A1 |-AP e => A2  `-> (tsub1, AN1)
+--------------------------- :: lamann
+(tsub0, AN0) ; dd |-AP \x: A1. e => A1 -> A2  `-> (tsub1, AN1)
+
+defn
+
+( tsub0 , AN0 ) ; dd ; ss |-AP e => A `-> ( tsub1 , AN1 )  ::  :: app :: 'app_'
+by
+
+(x : A1) in dd
+(tsub0, AN0) ; ss |-AP A1 <: A2  `-> (tsub1, AN1)
+--------------------------- :: var
+(tsub0, AN0) ; dd ; ss |-AP x => A2 `-> (tsub1, AN1)
+
+(tsub0, AN0) ; dd, x: A1 |-AP e => A2  `-> (tsub1, AN1)
+--------------------------- :: lam
+(tsub0, AN0) ; dd ; ss , A1 |-AP \x. e => A1 -> A2  `-> (tsub1, AN1)
+
+
+(tsub0, AN0) |-AP A2 <: A1   `-> (tsub1, AN1)
+(tsub1, AN1) ; dd, x: A1 |-AP e => A3  `-> (tsub2, AN2)
+--------------------------- :: lamann
+(tsub0, AN0) ; dd ; ss, A2 |-AP \x: A1. e => A2 -> A3  `-> (tsub2, AN2)
+
+
+(tsub0, AN0) ; dd |-AP e2 => A1 `-> (tsub1, AN1 </ ai // i />)
+</ Xai // i /> =  fv( tsub1 (A1)) - fv( tsub1 (dd) )
+A2 = \/ </ai//i/> . A1 [ </ Xai ~> ai // i /> ] 
+(tsub1, AN1) ; dd ; ss, A2 |-AP e1 => A2 -> A3  `-> (tsub2, AN2)
+------------------------------- :: app
+(tsub0, AN0) ; dd ; ss |-AP e1 e2 => A3 `-> (tsub2, AN2)
+

@@ -1,0 +1,25 @@
+\section{Full Rules for Algorithmic \ap}
+\label{sec:appendix:algo:ap}
+
+  \drules[ap-a-s]{$ [[( tsub1 , AN1 )  |-AP A <: B `-> ( tsub2 , AN2 )]] $}
+  {Algorithmic Subtyping}{mono,arrowL,arrowR,forallL,forallR}
+
+  \drules[ap-a-as]{$ [[( tsub1 , AN1 ) ; ss |-AP A <: B `-> ( tsub2 , AN2 )]] $}
+  {Algorithmic Application Subtyping}{empty,forall,arrow,mono}
+
+  \drules[ap-a-m]{$ [[( tsub1 , AN1 ) |-AP A |> A1 -> A2 `-> ( tsub2 , AN2 ) ]] $}
+  {Matching}{tvar, arrow}
+
+  \drules[ap-a-u]{$ [[ tsub1   |-AP t1 ~= t2 `-> tsub2 ]] $}
+  {Unification}{refl,solvedEvarL,evarL,solvedEvarR,evarR,arrow}
+
+  \drules[ap-a-inf]{$ [[(tsub1, AN1) ; dd |-AP e => A `-> (tsub2, AN2) ]] $}
+  {Algorithmic Typing Inference}{int,lam,lamann}
+  \drules[ap-a-app]{$ [[(tsub1, AN1) ; dd ; ss |-AP e => A `-> (tsub2, AN2)]] $}
+  {Algorithmic Typing Application Mode}{var,lam,lamann,app}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../Thesis"
+%%% org-ref-default-bibliography: "../Thesis.bib"
+%%% End:

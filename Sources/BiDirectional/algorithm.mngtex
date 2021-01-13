@@ -5,25 +5,22 @@ Even though our specification is syntax-directed, it does not directly lead to
 an algorithm, because there are still many guesses in the system, such as in
 \rref{ap-inf-lam}. This subsection presents a brief introduction of the
 algorithm, which closely follows the approach by \citet{practical:inference}.
+The full rules of the algorithm can be found in \Cref{sec:appendix:algo:ap}
 
 Instead of guessing, the algorithm creates \textit{meta} type variables $[[Xa]], [[Xb]]$
 which are waiting to be solved. The judgment for the algorithmic type system is
 %
 \[
-   (S_0, N_0) ; [[dd ; ss |-AP e => A]] \hookrightarrow (S_1, N_1)
+  [[(tsub1, AN1) ; dd |-AP e => A `-> (tsub2, AN2) ]]
 \]
 %
-Here we use $N$ as name supply, from which we can always extract new names.
+Here we use $[[AN]]$ as name supply, from which we can always extract new names.
 Also, every time a meta type variable is solved, we need to record its solution.
-We use $S$ as a notation for the substitution that maps meta type variables to
+We use $[[tsub]]$ as a notation for the substitution that maps meta type variables to
 their solutions. For example, \rref{ap-inf-lam} becomes
 %
 \[
-  \inferrule*[right=ap-inf-lam-algo]{
-    (S_0, N_0) ; [[dd]], [[x]]:[[Xb]] [[|-AP]] [[\x. e]] [[=>]] [[A]] \hookrightarrow (S_1, N_1)
-  }{
-    (S_0, N_0[[Xb]]) ; [[dd]] [[|-AP]] [[\x.e]] [[=>]] [[Xb]] [[->]] [[A]] \hookrightarrow (S_1, N_1)
-  }
+  \drule{ap-a-inf-lam}
 \]
 %
 Comparing it to \rref{ap-inf-lam}, $[[t]]$ is replaced by a new meta type
@@ -35,12 +32,11 @@ extension of the specification in \Cref{fig:AP:static}, with a process to
 do unifications that solve meta type variables. Such unification process is
 quite standard and similar to the one used in the Hindley-Milner system. We
 proved our algorithm is sound and complete with respect to the specification.
-Here \textit{fmv} means free meta type variables.
 
 \begin{theorem}[Soundness]
   If $([], N_0) ; [[dd |-AP e => A]] \hookrightarrow (S_1, N_1)$,
   then for any substitution $V$
-  with $dom(V) = $ \textit{fmv} $(S_1 [[dd]], S_1 [[A]])$,
+  with $dom(V) = $ \textit{fv} $(S_1 [[dd]], S_1 [[A]])$,
   we have $V S_1 [[dd]] [[|-AP]] [[e]] [[=>]] VS_1[[A]]$.
 \end{theorem}
 
