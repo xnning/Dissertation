@@ -230,8 +230,8 @@ version):
 \end{lemma}
 
 \begin{lemma}[Soundness of $[[|-Gm]]$]
-  If $[[dd |-Gm e : A]]$, then there exists some $B$,
-  such that $[[dd|-G e : B]]$ and $[[dd|-G B <: A]]$.
+  If $[[dd |-Gm e : A1]]$, then there exists some $[[B]]$,
+  such that $[[dd|-G e : B]]$ and $[[dd|-G B <: A1]]$.
 \end{lemma}
 
 %%% Local Variables:

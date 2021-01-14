@@ -52,7 +52,7 @@ consistent subtyping judgment.
 
 The matching judgment of \citet{siek:criteria} is extended to polymorphic types
 naturally, resulting in $[[ dd|-G A |> A1 -> A2 ]]$. Note that the matching
-rules generalize that of DK in \Cref{fig:DK:static} with the unknown type. In
+rules generalize that of DK in \Cref{sec:DK:declarative} with the unknown type. In
 \rref{gpc-m-forall}, a monotype $[[t]]$ is guessed to instantiate the universal
 quantifier $[[a]]$. If $[[A]]$ is a polymorphic type, the judgment works by
 guessing instantiations until it reaches an arrow type. \Rref{gpc-m-arr} returns
@@ -61,7 +61,7 @@ $[[unknown]]$, then \rref{gpc-m-unknown} returns $[[unknown]]$ as both the type
 for the domain and the range.
 
 Note that in GPC, matching saves us from having a subsumption rule
-(\rref{ol-sub} in \cref{fig:OL:static}). The subsumption rule is incompatible
+(\rref{ol-sub} in \Cref{fig:OL:static}). The subsumption rule is incompatible
 with consistent subtyping, since the latter is not transitive. A discussion of a
 subsumption rule based on normal subtyping can be found in
 \Cref{sec:gradual:variant}.
@@ -73,12 +73,12 @@ We give the dynamic semantics of our language by translating it to \pbc\citep{am
 we show a subset of the terms in \pbc that are used in the translation:
 \begin{center}
   \begin{tabular}{lrcl} \toprule
-    \pbc Terms &  $[[pe]]$   & $\Coloneqq$ & $[[x]] \mid [[n]] \mid [[\x : A . pe]] \mid [[/\a . pe]] \mid [[pe1 pe2]] \mid [[ < A `-> B > pe  ]] $ \\ \bottomrule
+    \pbc Terms &  $[[pe]]$   & $\Coloneqq$ & $[[x]] \mid [[n]] \mid [[\x : A . pe]] \mid [[/\a . pe]] \mid [[pe1 pe2]] \mid [[ < A1 `-> B > pe  ]] $ \\ \bottomrule
   \end{tabular}
 \end{center}
 A cast $[[ < A1 `-> B > pe  ]]$ converts the value of term $[[pe]]$ from type $[[A1]]$ to type $[[B]]$.
 A cast from $[[A1]]$ to $[[B]]$ is permitted only if the types are \emph{compatible},
-written $[[A1 `-> B]]$, as briefly mentioned in
+written $[[A1]] \prec [[B]]$, as briefly mentioned in
 \Cref{sec:gradual:consistency-subtyping}. The syntax of types in \pbc is the
 same as ours.
 
@@ -89,14 +89,14 @@ matching or consistent subtyping. Instead we insert the source and target types
 of a cast directly in the translated expressions, thanks to the following two
 lemmas:
 
-\begin{lemma}[$[[|>]]$ to $[[`->]]$]
+\begin{lemma}[$[[|>]]$ to $\prec$]
   \label{lemma:comp-match}
-  If $[[ dd |-G A |> A1 -> A2  ]]$, then $[[A `-> A1 -> A2]]$.
+  If $[[ dd |-G A |> A1 -> A2  ]]$, then $[[A]]  \prec [[A1 -> A2]]$.
 \end{lemma}
 
-\begin{lemma}[$[[<~]]$ to $[[`->]]$]
+\begin{lemma}[$[[<~]]$ to $\prec$]
   \label{lemma:comp-conssub}
-  If $[[  dd |-G A <~ B ]]$, then $[[A `-> B]]$.
+  If $[[  dd |-G A1 <~ B ]]$, then $[[A1]] \prec [[B]]$.
 \end{lemma}
 
 In order to show the correctness of the translation, we prove that our
@@ -200,7 +200,7 @@ either results in a cast error, or produces $1$, nothing else.
 We defined contextual equivalence \citep{morris1969lambda} to formally
 characterize that two open expressions have the same behavior. The definition of
 contextual equivalence requires a notion of well-typed expression contexts
-$[[C]]$, written $ [[ CC : (dd |- A) ~~> (dd' |- A') ]] $. The definitions of
+$[[CC]]$, written $ [[ CC : (dd |- A) ~~> (dd' |- A') ]] $. The definitions of
 contexts and context typing are standard and thus omitted. As is common, we
 first define contextual approximation. In our setting, we need to
 relax the notion of
@@ -240,7 +240,6 @@ examining each elaboration rule. We use $[[ \ pe \]]$ to denote an expression in
 \end{restatable}
 
 Second, at runtime, the only role of types and casts is to emit cast errors caused
-
 by type mismatch. Therefore, By \cref{lemma:erase} coherence follows as a corollary:
 \begin{restatable}[Coherence up to cast errors]{lemma}{lemmacoherence}
   \label{lemma:coherence:up}
@@ -262,21 +261,21 @@ criteria.
 \begin{lemma}[Correctness Criteria]\leavevmode
     \begin{itemize}
     \item \textbf{Conservative extension:}
-      for all static $[[dd]]$, $[[e]]$, and $[[A]]$,
+      for all static $[[dd]]$, $[[e]]$, and $[[A1]]$,
       \begin{itemize}
-      \item if $[[ dd |-OL e : A   ]]$,
+      \item if $[[ dd |-OL e : A1   ]]$,
         then there exists $[[B]]$,
         such that $[[ dd |-G e : B  ]]$,
-        and $[[  dd |-G B <: A  ]]$.
+        and $[[  dd |-G B <: A1  ]]$.
       \item if $[[ dd |-G e : A   ]]$,
         then $[[ dd |-OL e : A  ]]$
       \end{itemize}
     \item \textbf{Monotonicity w.r.t. precision:}
-      for all $[[dd]], [[e]], [[e']], [[A]]$,
-      if $[[ dd |-G e : A   ]]$,
+      for all $[[dd]], [[e]], [[e']], [[A1]]$,
+      if $[[ dd |-G e : A1   ]]$,
       and $[[ e' <<= e  ]]$,
       then $[[ dd |-G e' : B     ]]$,
-      and $[[ B <<= A ]]$ for some B.
+      and $[[ B <<= A1 ]]$ for some $[[B]]$.
     \item \textbf{Type Preservation of cast insertion:}
       for all $[[dd]], [[e]], [[A]]$,
       if $[[ dd |-G e : A   ]]$,
@@ -323,7 +322,7 @@ system and the latter is a less-precise version of it.
 The last two criteria relate the compilation to the cast calculus. The third
 criterion is essentially the same as \Cref{lemma:type-safety}, given that a
 target expression should always exist, which can be easily seen from
-\cref{fig:gradual:decl-typing}. The last criterion ensures that the translation must be
+\Cref{fig:gradual:decl-typing}. The last criterion ensures that the translation must be
 monotonic over the precision relation $[[<<=]]$. \citet{amal:blame} does not
 include a formal definition of precision, but an \emph{approximation}
 definition and a \emph{simulation relation}. Here we adapt the simulation
