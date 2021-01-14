@@ -16,15 +16,15 @@ monotypes} $[[tc]]$ are those castable types that are also monotypes.
   \centering
   \begin{small}
     \begin{tabular}{lrcl} \toprule
-      Types & $[[A]], [[B]]$ & \syndef & $[[int]] \mid [[a]] \mid [[A -> B]] \mid [[\/ a. A]] \mid [[unknown]] \mid \hlmath{[[static]] \mid [[gradual]]} $ \\
-      Monotypes & $[[t]], [[s]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[t -> s]] \mid \hlmath{[[static]] \mid [[gradual]]}$ \\
+      Types & $[[A]]$ & \syndef & $[[int]] \mid [[a]] \mid [[A1 -> B]] \mid [[\/ a. A]] \mid [[unknown]] \mid \hlmath{[[static]] \mid [[gradual]]} $ \\
+      Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[t1 -> t2]] \mid \hlmath{[[static]] \mid [[gradual]]}$ \\
       \hl{Castable Types} & $[[gc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[gc1 -> gc2]] \mid [[\/ a. gc]] \mid [[unknown]] \mid [[gradual]] $ \\
       \hl{Castable Monotypes} & $[[tc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[tc1 -> tc2]] \mid [[gradual]]$ \\
 
       \bottomrule
     \end{tabular}
 
-    \begin{drulepar}[gpc-cs]{$ [[dd |-G A <~ B ]] $}{Consistent Subtyping}{}
+    \begin{drulepar}[gpc-cs]{$ [[dd |-G A1 <~ B ]] $}{Consistent Subtyping}{}
       \drule{tvar}
       \drule{int}
       \drule{arrow}
