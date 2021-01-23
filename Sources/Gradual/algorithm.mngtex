@@ -48,7 +48,7 @@ in \Cref{fig:gradual:algo-syntax}.
 
 \paragraph{Notational convenience.}
 
-Following DK system, we use contexts as substitutions on types. We write $[[
+Following DK's system, we use contexts as substitutions on types. We write $[[
 [GG]aA ]]$ to mean $[[GG]]$ applied as a substitution to type $[[aA]]$. We also
 use a hole notation, which is useful when manipulating contexts by inserting and
 replacing declarations in the middle. The hole notation is used extensively in
@@ -127,7 +127,7 @@ reasons as in \rref{gpc-as-forallR}, we drop them from the output context. A cen
 idea behind these two rules is that we defer the decision of picking a monotype
 for a type variable, and hope that it could be solved later when we have more
 information at hand. As a side note, when both types are universal quantifiers,
-then either \rref{gpc-as-forallR} or \rref{gpc-as-forallL} could be tried. In practice,
+then either \rref{gpc-as-forallR} or \rref{gpc-as-forallL} applies. In practice,
 one can apply \rref{gpc-as-forallR} eagerly as it is invertible.
 
 The last two rules (\rref{gpc-as-instL} and \rref{gpc-as-instR}) are specific to the
@@ -153,7 +153,7 @@ existential variables, but leave the real work to the instantiation judgment.
 
 
 Two symmetric judgments $[[ GG |-G evar <~~ aA -| DD ]]$ and $[[ GG |-G aA <~~
-evar -| DD ]]$ defined in \Cref{fig:gradual:algo:instantiate} instantiate
+evar -| DD ]]$, defined in \Cref{fig:gradual:algo:instantiate}, instantiate
 unsolved existential variables. They read ``under input context $[[GG]]$,
 instantiate $[[evar]]$ to a consistent subtype (or supertype) of $[[aA]]$, with
 output context $[[DD]]$''. The judgments are extended naturally from DK system,
@@ -299,7 +299,7 @@ input context when needed.
 
 \paragraph{Decidability of Algorithmic Consistent Subtyping.}
 
-Proving decidability of the algorithmic consistent subtyping is a bit more
+Proving decidability of algorithmic consistent subtyping is a bit more
 involved, as the induction measure consists of several parts.
 We measure the judgment $[[GG |-G aA1 <~ aA2 -| DD]]$ lexicographically by
 \begin{enumerate}[(M1)]

@@ -181,7 +181,7 @@ It is well-known that polymorphic calculi such as System F can encode datatypes
 via Church encodings. However these encodings have well-known drawbacks. In
 particular, some operations are hard to define, and they can have a time
 complexity that is greater than that of the corresponding functions for built-in
-algebraic datatypes. A good example is the definition of the predecessor
+algebraic datatypes. A well-known example is the definition of the predecessor
 function for Church numerals~\citep{church1941calculi}. Its definition requires
 significant ingenuity (while it is trivial with built-in algebraic datatypes),
 and it has \emph{linear} time complexity (versus the \emph{constant} time
@@ -236,7 +236,7 @@ $ [[< (\/b . b -> (a -> Listu a -> b) -> b) `-> Listu a > pe]] $ where $[[pe]]$ 
 In order to perform recursive traversals on lists, e.g., to compute their
 length, we need a fixpoint combinator like the Y combinator. Unfortunately, this combinator
 cannot be assigned a type in the simply typed lambda calculus or System F.
-Yet, we can still provide a gradual typing for it in our system.
+Yet, we can still provide a gradual type for it in our system.
 \begin{align*}
 [[fix]] &\triangleq [[  \ f . (\x : unknown . f (x x)) (\x : unknown . f (x x)) : \/ a. (a -> a) -> a ]]
 \end{align*}
@@ -277,7 +277,7 @@ With fake dependent types~\citep{mcbride2002faking}, heterogeneous vectors are
 also possible with type-level constructors.
 
 In our type system, with explicit type annotations that set the element types to
-the unknown type we can disable the homogeneous typing discipline for the
+the unknown type, we can disable the homogeneous typing discipline for the
 elements and get gradually typed heterogeneous lists\footnote{This argument is
   based on the extended type system in \Cref{chap:Dynamic}.}. Such
 gradually typed heterogeneous lists are akin to Haskell's approach with Dynamic

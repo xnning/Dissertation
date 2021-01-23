@@ -1,7 +1,7 @@
 \section{Simple Extensions and Variants}
 \label{sec:gradual:discussion}
 
-This section considers two simple variations on the presented system.
+This section considers two simple variations of the presented system.
 The first variation extends the system with a top type, while the
 second variation considers a more declarative formulation using a
 subsumption rule.
@@ -54,7 +54,7 @@ by adding another equation $\gamma([[top]]) = \{[[top]]\}$. Note that
 \citet{castagna2017gradual} also have this equation in their calculus. It is
 easy to verify that \cref{lemma:coincide-agt} still holds:
 
-\begin{restatable}[Equivalent to AGT on $\top$]{proposition}{propagttop}
+\begin{restatable}[Equivalence to AGT on $\top$]{proposition}{propagttop}
   \label{prop:agt-top}
   $[[A1 <~ B]]$ if and only if $[[A1]] \agtconssub [[B]]$.
 \end{restatable}

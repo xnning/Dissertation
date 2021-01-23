@@ -201,8 +201,8 @@ We defined contextual equivalence \citep{morris1969lambda} to formally
 characterize that two open expressions have the same behavior. The definition of
 contextual equivalence requires a notion of well-typed expression contexts
 $[[CC]]$, written $ [[ CC : (dd |- A) ~~> (dd' |- A') ]] $. The definitions of
-contexts and context typing are standard and thus omitted. As is common, we
-first define contextual approximation. In our setting, we need to
+contexts and context typing are standard and thus omitted. We
+first define contextual approximation in a conventional way. In our setting, we need to
 relax the notion of
 contextual approximation of \pbc~\citep{amal:blame} to also take into
 consideration of cast errors. We write $[[dd]] \vdash
