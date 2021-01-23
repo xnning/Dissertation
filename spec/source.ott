@@ -619,7 +619,6 @@ formula :: formula_ ::=
   | evar in GG            :: :: evargg {{ tex [[evar]] \in  [[GG]]  }}
   | ( Xa : K ) in DD  ::  :: xain {{ tex ( [[Xa]] : [[K]] ) \in [[DD]] }}
   | evar notin fv ( aA )  :: :: nfv {{ tex [[evar]] \notin \textsc{fv} ( [[aA]] ) }}
-  | evar notin fv (  A )  :: :: nfvA {{ tex [[evar]] \notin \textsc{fv} ( [[A]] ) }}
   | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
   | varset1 notin varset2     :: :: notin_varset
   | ma notin fv ( GG )     :: :: mafv {{ tex [[ma]] \notin \textsc{fv} ( [[GG]] ) }}
