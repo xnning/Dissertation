@@ -127,7 +127,7 @@ $[[e1]]$ is of possibly a higher-rank type.
 The language does not have built-in let expressions, but instead supports
 $[[let]]$ as syntactic sugar. Recall the syntactic-directed typing rule
 (\rref{hm-let-gen}) for let expressions with generalization in the HM system.
-With slight reformat to match AP, we get (without the gray-shaded part):
+With some slight reformating to match AP, we get (without the gray-shaded parts):
 %
 \[
   \inferrule{[[dd |- e1 => A1]]\\
@@ -139,7 +139,7 @@ With slight reformat to match AP, we get (without the gray-shaded part):
 
 \noindent where we do generalization on the type of $[[e1]]$, which is then
 assigned as the type of $[[x]]$ while inferring $[[e2]]$. Adapting this rule to
-our system with application contexts would result in the gray-shaded part, where
+our system with application contexts would result in the gray-shaded parts, where
 the application context is only used for $[[e2]]$, because $[[e2]]$ is the
 expression being applied. If we desugar the let expression ($[[let x = e1 in
 e2]]$) to $[[(\x. e2) e1]]$, we have the following derivation:
@@ -190,7 +190,7 @@ that transfers between the inference and the checking mode, which states that if
 expression can be inferred to some type, then it can be checked with this type
 (e.g., \rref{dk-chk-sub} in DK). In our system, we regard the normal inference
 mode $[[dd |-AP e => A]]$ as a special case, when the application context is
-empty. We can also turn from normal inference mode into application mode with an
+empty. We can also turn from the normal inference mode into the application mode with an
 application context.
 
 \begin{lemma}[Subsumption]

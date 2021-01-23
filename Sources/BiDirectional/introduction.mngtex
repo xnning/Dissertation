@@ -147,7 +147,8 @@ As we have seen, the guideline for designing bidirectional type checking
 is often not enough in practice. This leads to extra introduction rules in the
 inference mode. The application mode does not distinguish between introduction
 rules and elimination rules. Instead, to decide whether a rule should be in
-inference or application mode, we need to think whether the expression can be
+the
+inference or the application mode, we need to think whether the expression can be
 applied or not. Variables, lambda expressions and applications are all examples
 of expressions that can be applied, and they should have application mode rules.
 However literals or pairs cannot be applied and should have inference rules. For
@@ -179,7 +180,7 @@ Instead of nothing or all, this partialness gives us a finer grain notion on how
 much we know about the type of an expression. For example, assume $[[e: A1 -> A2
 -> A3]]$. In the inference mode, we only have ${e}$. In the checking mode, we
 have both $[[e]]$ and $[[A1 -> A2 -> A3]]$. In the application mode, we have
-$[[e]]$, and maybe an empty context (which degenerates into inference mode), or
+$[[e]]$, and maybe an empty context (which degenerates into the inference mode), or
 an application context $[[A1]]$ (we know the type of first argument), or an
 application context $[[A1]], [[A2]]$ (we know the type of both arguments).
 
@@ -352,7 +353,7 @@ polymorphic binder. Programmers that strictly follow their guideline can still
 add a polymorphic type annotation for \lstinline{g}. However it does mean that
 it is a little harder to understand where annotations for polymorphic binders
 can be \emph{omitted} in their system. This requires understanding how the
-applications in checking mode operate.
+applications in the checking mode operate.
 
 In our system the above expression is not typeable, as a consequence 
 of the information flow in the application mode.

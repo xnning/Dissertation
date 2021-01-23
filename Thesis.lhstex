@@ -33,7 +33,7 @@
 
 \include{Sources/Background}
 
-\part{Bidirectional Type Checking With Application Mode} \label{part:typeinference}
+\part{Bidirectional Type Checking With the Application Mode} \label{part:typeinference}
 
 \include{Sources/BiDirectional}
 

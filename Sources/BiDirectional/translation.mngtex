@@ -29,9 +29,9 @@ The syntax and typing rules of our target language are given in \Cref{fig:F}.
 Expressions include variables $[[x]]$, integers $[[n]]$, annotated abstractions
 $[[\x:A.es]]$, type-level abstractions $[[/\a.es]]$, and $[[es1 es2]]$ for term
 application, and $[[es A]]$ for type application. The types and the typing
-contexts are the same as our system, where typing contexts does not track type
+contexts are the same as our system, where typing contexts do not track type
 variables. In translation, we use $[[ef]]$ to refer to the coercion function produced
-by subtyping translation, and $[[es]]$ to refer to the translated term in System F.
+by the subtyping translation, and $[[es]]$ to refer to the translated term in System F.
 
 Most typing rules are straightforward. \Rref{f-tabs} types a type abstraction
 with explicit generalization, while \rref{f-tapp} types a type application with
