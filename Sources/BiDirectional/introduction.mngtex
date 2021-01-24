@@ -4,7 +4,7 @@
 
 Traditional type checking rules can be heavyweight on annotations, in the sense
 that lambda-bound variables always need explicit annotations. As we have seen in
-\Cref{sec:DK}, bidirectional type checking \citep{pierce:local} provides
+\Cref{sec:DK}, bidirectional type checking provides
 an alternative, which allows types to propagate downward the syntax tree. For
 example, in the expression $[[ (\f:int->int. f) (\y. y)]]$, the type of
 $[[y]]$ is provided by the type annotation on $[[f]]$. This is supported by
