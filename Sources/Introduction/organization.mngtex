@@ -1,27 +1,28 @@
 
 This thesis is largely based on the publications by the
 author~\citep{esop2018:arguments,esop2018:consistent,toplas:consistent,popl:kind,tfp},
-as indicated below. Many metatheory in the paper comes with Coq proofs,
-including type safety, coherence, etc.
+as indicated below. The metatheory of those works is mostly verified using the
+Coq proof assistant, including type safety, coherence, etc.
 
 \begin{description}
 \item[\cref{chap:BiDirectional}:] Ningning Xie and Bruno C. d. S.
   Oliveira. 2018. ``Let Arguments Go First''. In
-  \emph{European Symposium on Programming (ESOP)}.
+  \emph{European Symposium on Programming (ESOP)}\footnote{Proofs in \url{https://bitbucket.org/ningningxie/let-arguments-go-first/src/master/}.}.
 \item[\cref{chap:Gradual}:] Ningning Xie, Xuan Bi, and Bruno C. d. S.
   Oliveira. 2018. ``Consistent Subtyping for All''. In
-  \emph{European Symposium on Programming (ESOP)}.
+  \emph{European Symposium on Programming (ESOP)}\footnote{Proofs in \url{https://github.com/xnning/Consistent-Subtyping-for-All}.}.
 \item[\cref{chap:Dynamic}:] Ningning Xie, Xuan Bi, Bruno C. d. S.
   Oliveira, and Tom Schrijvers. 2019. ``Consistent Subtyping for All''. In
-  \emph{ACM Transactions on Programming Languages and Systems (TOPLAS)}.
+  \emph{ACM Transactions on Programming Languages and Systems
+    (TOPLAS)}\footnote{Proofs in \url{https://github.com/xnning/Consistent-Subtyping-for-All}.}.
 \item[\cref{chap:Promotion}:]
   Ningning Xie and Bruno C. d. S. Oliveira.
   2017. ``Towards Unification for Dependent Types'' (Extended abstract), In \emph{Draft Proceedings
-    of Trends in Functional Programming (TFP)}.
+    of Trends in Functional Programming (TFP)}\footnote{Proofs in \url{https://xnning.github.io/papers/sanitized-type-inference-in-context.pdf}.}.
 \item[\cref{chap:kindinference}:]
   Ningning Xie, Richard Eisenberg and Bruno C. d. S. Oliveira. 2020. ``Kind
   Inference for Datatypes''. In \emph{Symposium on Principles of Programming
-    Languages (POPL)}.
+    Languages (POPL)}\footnote{Proofs in \url{https://arxiv.org/abs/1911.06153}.}.
 \end{description}
 
 
