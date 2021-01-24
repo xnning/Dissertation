@@ -215,6 +215,7 @@ Fortunately, the changes in the algorithmic bidirectional system are minimal: we
 replace every existential variable with a static existential variable.
 Furthermore, we proved that the extended algorithmic system is sound and
 complete with respect to the extended declarative system.
+The full extended algorithmic system can be found in \Cref{sec:appendix:algo:extend-gpc}.
 
 \paragraph{Do We Really Need Type Parameters in the Algorithmic System?}
 

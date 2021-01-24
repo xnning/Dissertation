@@ -18,6 +18,43 @@
   \drules[ap-a-app]{$ [[(tsub1, AN1) ; dd ; ss |-AP e => A `-> (tsub2, AN2)]] $}
   {Algorithmic Typing Application Mode}{var,lam,lamann,app}
 
+\chapter{The Extended Algorithmic \gpc}
+\label{sec:appendix:algo:extend-gpc}
+
+\section{Syntax}
+
+
+\begin{center}
+\begin{tabular}{lrcl} \toprule
+  Expressions & $[[ae]]$ & \syndef & $[[x]] \mid [[n]] \mid [[ \x : aA . ae ]]  \mid  [[\x . ae]] \mid [[ae1 ae2]] \mid [[ae : aA]] \mid [[ let x = ae1 in ae2  ]] $ \\
+  Types & $[[aA]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] \mid [[unknown]] \mid [[static]] \mid [[gradual]] $ \\
+  Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] \mid [[static]] \mid [[gradual]]$ \\
+  Existential variables & $[[evar]]$ & \syndef & $[[sa]]  \mid [[ga]]  $   \\
+  Castable Types & $[[agc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[agc1 -> agc2]] \mid [[\/ a. agc]] \mid [[unknown]] \mid [[gradual]] $ \\
+  Castable Monotypes & $[[atc]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[atc1 -> atc2]] \mid [[gradual]]$ \\
+  Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , x : aA]] \mid [[GG , a]] \mid [[GG , evar]]  \mid [[GG, sa = at]] \mid [[GG, ga = atc]] \mid [[ GG, mevar ]] $ \\
+  Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , x : aA]] \mid [[OO , a]] \mid [[OO, sa = at]] \mid [[OO, ga = atc]] \mid [[OO, mevar]] $ \\
+  \bottomrule
+\end{tabular}
+
+\end{center}
+
+
+\section{Type System}
+
+
+\drules[gpc-as]{$ [[GG |-G aA <~ aB -| DD ]] $}{Algorithmic Consistent Subtyping}{tvar, evar, int, arrow, forallR, forallLL, spar, gpar, unknownLL, unknownRR, instL, instR}
+
+\drules[gpc-instl]{$ [[ GG |-G evar <~~ aA -| DD   ]] $}{Instantiation I}{solveS, solveG, solveUS, solveUG, reachSGOne, reachSGTwo, reachOther, arr, forallR}
+
+\drules[gpc-instr]{$ [[ GG |-G aA <~~ evar -| DD   ]] $}{Instantiation II}{solveS, solveG, solveUS, solveUG, reachSGOne, reachSGTwo, reachOther, arr, forallLL}
+
+\drules[gpc-inf]{$ [[ GG |-G ae => aA -| DD ]] $}{Inference}{var, int, lamannTwo, lamTwo, anno, app, letTwo}
+
+\drules[gpc-chk]{$ [[ GG |-G ae <= aA -| DD ]] $}{Checking}{lam, gen, sub}
+
+\drules[gpc-am]{$ [[ GG |-G aA |> aA1 -> aA2 -| DD ]] $}{Algorithmic Matching}{forallL, arr, unknown, var}
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../Thesis"
