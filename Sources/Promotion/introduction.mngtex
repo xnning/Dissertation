@@ -1,24 +1,25 @@
 \section{Introduction and Motivation}
 
 
-\subsection{Background:Type Inference in Contexts}
+\subsection{Background:Type Inference in Context}
 \label{sec:pr:background}
 
 \cite{gundry2010type} model unification and type inference from a general
-perspective of information increase. The problem context is a ML-style
-polymorphic system, based on the invariant that types can only depend on
-bindings appearing earlier in the context.
+perspective of information increase. Specifically, they studied the unification
+and type inference problem for a ML-style
+polymorphic system, based on the requirement that types may depend only on
+earlier bindings in the type context.
 % DK \citep{DK} provides a
 % meta-theoretical foundation for this strategy in a bi-directional algorithm for
 % higher-rank polymorphism, which is later adopted in \gpc (\Cref{chap:Gradual}).
 Besides contexts being ordered, a key insight of the approach lies in how to
 solve existential variables with other types. In particular, it requires to
 resolve the dependency between existential variables. Consider unifying
-$[[evar]]$ with $[[evarb -> int]]$ under context $[[evar, evarb]]$. Here we
+$[[evar]]$ with $[[evarb -> int]]$ under the context $[[evar, evarb]]$. Here we
 cannot simply set $[[evar]]$ to $[[evarb -> int]]$, as $[[evarb]]$ is out of the
 scope of $[[evar]]$. The way \cite{gundry2010type} solve this problem is to
 examine variables in the context from the tail to the head, \textit{moving
-  segments of context to the left if necessary}. The process finishes when the
+  segments of the context to the left if necessary}. The process finishes when the
 existential variable being unified is found. In this case, \cite{gundry2010type}
 would return a solution context $[[evarb, evar = evarb -> int]]$, where
 $[[evarb]]$ is moved to the front of $[[evar]]$. However, while moving type
@@ -31,10 +32,11 @@ item in $[[GG2]]$ is, after context substitution, well-formed under $[[GG1]]$. T
 semantic definition makes it hard to prove metatheory formally, especially when
 advanced features are involved.
 
-DK \citep{DK} also uses ordered contexts as the input and output of the type
+The Dunfield-Krishnaswami type system (DK) \citep{DK} also uses ordered contexts
+as the input and output of the type
 inference algorithm for a higher-rank polymorphic type system (\Cref{sec:DK}).
-Unlike \cite{gundry2010type}, DK does it in a more syntactic way. In its
-instantiation rules, it decomposes type constructs so that unification between
+Unlike \cite{gundry2010type}, DK does it in a more syntactic way. In their type system,
+instantiation rules decompose type constructs so that unification between
 existential variables can only happen between single variables, which can then
 be solved by setting the one that appears later to the one that appears earlier.
 This way, the information increase of contexts is modeled as the intuitive and
@@ -48,6 +50,7 @@ evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int ]]$ in \gpc:
 \noindent $[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb]]$
 %
 \begin{mathpar}
+  \footnotesize
   \inferrule*[right=\rref*{gpc-instl-arr}]{
     \inferrule*[lab=\rref*{gpc-instl-reach}]{ }
       {[[DD |-G evarb <~~ evar1 -| DD[evarb = evar1] ]]}
@@ -71,10 +74,12 @@ evar1] = evar1, evar2=int, evar=evar1->evar2, evarb=evar1 ]]$.
 \paragraph{Challenges.}
 
 However, while the approach of decomposing type constructs works perfectly for DK
-and \gpc, it has two drawbacks. The first drawback is that it produces
-duplication, in order to deal with both the case when the existential variable
+and \gpc, it has two drawbacks. First, it produces
+duplication: in order to deal with both cases, the instantiation rules are
+duplicated
+for when the existential variable
 appears on the left ($ [[ GG |-G evar <~~ aA -| DD ]] $ in
-\Cref{fig:gradual:algo:instantiate}) and the case when it appears on the right
+\Cref{fig:gradual:algo:instantiate}), and when it appears on the right
 ($ [[ GG |-G aA <~~ evar -| DD ]] $ in \Cref{fig:gradual:algo:instantiate}). For
 example, \rref{gpc-instl-arr} has its symmetric counterpart \rref{gpc-instr-arr}:
 
@@ -91,8 +96,9 @@ more complicated types, e.g., dependent types. For example, consider that under
 the context $[[evar, evarb]]$, we want to instantiate $[[evar]]$ with a
 dependent type $\Pi [[a]]: [[evarb]]. [[a]]$. Here because $[[evarb]]$ appears
 after $[[evar]]$, we cannot directly set $[[evar]] = \Pi [[a]] :
-[[evarb]].[[a]]$ which is ill typed. However, if we try to decompose the type
-$\Pi [[a]]: [[evarb]]. [[a]]$ like in \rref{gpc-instl-arr}, it is obvious that
+[[evarb]].[[a]]$, which is ill-typed. However, if we try to decompose the type
+$\Pi [[a]]: [[evarb]]. [[a]]$ like in \rref{gpc-instl-arr}, in which case we
+have $[[evar]] = \Pi [[a]]: [[evara1]]. [[evara2]]$, it is obvious that
 $[[evar2]]$ should be solved by $[[a]]$. Then, in order to make the solution
 well typed, we need to put $[[a]]$ in the front of $[[evar2]]$ in the context.
 However, this means that $[[a]]$ would remain in the context, and it would be
@@ -114,7 +120,7 @@ $[[evarb]]$ is out of the scope of $[[evar]]$ so we cannot directly set $[[evar
 = evarb -> int ]]$. Therefore, we first \textit{promote} the type $[[evarb ->
 int]]$. At a high level, the promotion process looks for free existential
 variables in the type, and solves those out-of-scope existential
-variables with fresh existential variables added to the front of $[[evar]]$,
+variables with fresh ones added to the front of $[[evar]]$,
 such that existential variables in the promoted type are all in the scope of
 $[[evar]]$. In this case, we will solve $[[evarb]]$ with a fresh variable
 $[[evar1]]$, producing the context $[[ evar1, evar, evarb = evar1 ]]$. Notice
@@ -133,7 +139,7 @@ based on the same observation: \textit{the relative order between existential
   variables does not matter for solving a constraint}. The promotion process
 captures precisely this observation. Its task is to ``move'' existential
 variables to suitable positions \textit{indirectly}, by solving those
-out-of-scope existential variables with fresh in-scope existential variables.
+out-of-scope existential variables with fresh in-scope ones.
 
 This seems to go against the design principle that the contexts are ordered.
 However, ordering is still important for variables whose order matters. For
@@ -146,10 +152,10 @@ $[[evar]]$. Moreover, ordering prevents invalid cyclic contexts, e.g., $[[evara
 
 
 
-\paragraph{Unification for Simply Typed Lambda Calculus.}
+\paragraph{Unification for the Simply Typed Lambda Calculus.}
 
-As a first illustration of the utility of the promotion process,
-\Cref{sec:pr:unif} recasts the unification process for simply typed lambda
+As a first illustration of the promotion process,
+\Cref{sec:pr:unif} recasts the unification process for the simply typed lambda
 calculus (STLC) using the promotion process. This system illustrates the key
 idea of promotion.
 
@@ -174,13 +180,15 @@ $[[evarb, evara = evarb -> evarb]]$.
 
 On the other hand, how can we promote the type $[[\/a.a -> a]]$ in $[[evar]]
 [[|-]] [[evar]] [[<:]] [[\/a.a -> a]]$? It turns out that this subtyping is
-actually unsolvable. Therefore, in this case, promoting $[[\/a.a ->a]]$ will
+actually unsolvable, as there is no monotype that can be a subtype of $[[\/a. a
+-> a]]$. Therefore, in this case, promoting $[[\/a.a ->a]]$ will
 directly add the type variable $[[a]]$ to the tail of the context to promote
 $[[a->a]]$. Since $[[a]]$ is added to the tail, it means that $[[a]]$ is out of
 the scope of $[[evar]]$ and promoting $[[a->a]]$ would fail, which is exactly
-what we want. In fact, the promotion would succeed if only the variable is not
+what we want. In fact, the promotion would succeed only if the universally
+quantified variable is not
 used in the body of the polymorphic type. For example, $[[\/a.int -> int]]$ can
-be promoted to $[[int -> int]]$, which is a valid solution of $[[evar]]$ in
+be promoted to $[[int -> int]]$, which is a valid solution for $[[evar]]$ in
 $[[evar]] [[|-]] [[evar]] <: [[\/a. int -> int]]$.
 
 From these observations, we extend promotion to \textit{polymorphic promotion},
@@ -203,9 +211,9 @@ The covariant mode promotes types as $[[\/a. a->a]]$ in the case of $[[evar]]
 a]]$ will directly add the type variable $[[a]]$ to the tail of the context,
 which corresponds to \rref{gpc-instl-forallR}. Since the type variable is out of
 the scope of the existential variable being solved, and promotion will succeed
-if only the variable is not used in the body of the polymorphic type.
+only if the variable is not used in the body of the polymorphic type.
 
-While promoting polymorphic types behaves differently accroding to the mode, the
+While promoting polymorphic types behaves differently according to the mode, the
 mode does not matter for monotypes, as in both $[[evar]] [[<:]] [[int]]$ and
 $[[int]] [[<:]] [[evar]]$, $[[evar = int]]$ would be the only solution. Since
 function types are contravariant in codomains and covariant in domains,

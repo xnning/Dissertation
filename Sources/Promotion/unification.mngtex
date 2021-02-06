@@ -1,12 +1,12 @@
-\section{Unification for Simply Typed Lambda Calculus}
+\section{Unification for the Simply Typed Lambda Calculus}
 \label{sec:pr:unif}
 
-This section first introduces simple typed lambda calculus, and then present a
+This section first introduces the simply typed lambda calculus, and then presents a
 unification algorithm that uses the novel promotion mechanism.
 
 \subsection{Declarative System}
 
-The definition of types in STLC is given below. We have only monotypes $[[t]]$,
+The definition of declarative types in STLC is given below. We have only monotypes $[[t]]$,
 which includes the integer type $[[int]]$ and function types $[[at1 -> at2]]$.
 In this section, we focus on the unification process. Hence, we do not elaborate
 the details of expressions' syntax or typing rules.
@@ -85,9 +85,9 @@ infinite substitution when applying an algorithmic context. Note that
 
 Below we give the derivation of $[[evar, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb
 -> int ]]$ discussed in \Cref{sec:pr:background}.
-
 %
 \begin{mathpar}
+  \footnotesize
   \inferrule*[right=\rref*{u-eval-r}]{
     \inferrule*[right=\rref*{pr-arrow}]{
       \inferrule*[lab=\rref*{pr-evarR}]{  }{[[ evar, evarb |-pr (evar) evarb ~~> evar -| evar1, evar, evarb = evar1 ]]}

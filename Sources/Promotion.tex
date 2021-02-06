@@ -12,13 +12,15 @@ more syntactic foundation for information increase is presented by DK
 produces duplication and cannot be easily generalized to handle more complicated
 types.
 
-In this section, we propose a strategy called \textit{promotion} that helps
+In this chapter, we propose a strategy called \textit{promotion} that helps
 resolve the dependency of existential variables in the framework of type
 inference in context. As an illustration, \Cref{sec:pr:unif} applies promotion
-to the unification algorithm for simply typed lambda calculus.
+to the unification algorithm for the simply typed lambda calculus.
 \Cref{sec:pr:subtypin} further proposes \textit{polymorphic promotion} to deal
 with subtyping for higher-rank polymorphism. Finally, we briefly discuss how to promote
 dependent types and gradual types in \Cref{sec:pr:discussion}.
+This chapter also sets up the stage for \Cref{chap:kindinference}, where
+promotion is used in a more complex setting.
 
 
 \input{Gen/Promotion/introduction}

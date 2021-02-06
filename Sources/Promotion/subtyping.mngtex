@@ -5,7 +5,7 @@ In this section, we adopt the type promotion strategy to a higher-rank
 polymorphic type system from DK \citep{DK}. We show that promotion can be
 further extended to polymorphic promotion to deal with subtyping, which can be
 used to replace the instantiation relation in the original DK system while
-preserving completeness and soundness.
+preserving soundness and completeness.
 
 \subsection{Declarative System}
 
@@ -45,7 +45,7 @@ relation as of OL (\Cref{fig:OL:static}), and we use the judgment $[[dd |-DK A1
 \end{figure}
 
 The syntax of the algorithmic system is given in \Cref{fig:poly-pr:algo}. The
-promotion mode $[[pm]]$ is either covariant($[[+]]$) or contravariant
+promotion mode $[[pm]]$ is either covariant ($[[+]]$) or contravariant
 ($[[pminus]]$). We can use $[[- pm]]$ to flip the promotion mode. Specifically,
 %
 \begin{center}
@@ -58,8 +58,8 @@ promotion mode $[[pm]]$ is either covariant($[[+]]$) or contravariant
 \paragraph{Subtyping.}
 
 \Cref{fig:poly-pr:algo} also includes the subtyping judgment $[[GG |-sub aA1 <:
-aA2 -| DD]]$, which reads that, under input context $[[GG]]$, type $[[aA1]]$ is
-a subtype of $[[aA2]]$, with output context $[[DD]]$. The rules except the last
+aA2 -| DD]]$, which reads that, under the input context $[[GG]]$, type $[[aA1]]$ is
+a subtype of $[[aA2]]$, with the output context $[[DD]]$. The rules except the last
 two are the same as the algorithmic subtyping rules in DK.
 
 \Rref{s-instL} and \rref{instR} are specific to this system. Recall that in
@@ -85,12 +85,19 @@ polymorphic. Therefore, we replace the universal binder $[[a]]$ with a fresh
 existential variable $[[evar]]$ and put it before $[[evar]]$. Otherwise, in
 \rref{p-pr-forallR}, we put $[[a]]$ in the context and promote $[[aA]]$. Notice
 that since $[[a]]$ is added to the tail of the context, it is not in the scope
-of $[[aA]]$ and can actually never be used in $[[aA]]$ or otherwise promotion
-would fails. We then discard $[[a]]$ in the return context. Note that we can
+of $[[evar]]$ and can actually never be used in $[[aA]]$ or otherwise promotion
+would fails.
+This makes sense, as for a subtyping relation $[[GG]] [[|-sub]] [[evar]] [[<:]] [[\/a. aA]]$ to hold,
+$[[a]]$ must not be used in $[[aA]]$.
+That means $[[\/a. aA]]$ can only be types like $[[\/ a. int]]$
+or $[[\/ a. int -> int]]$, in which case $[[evar]]$ can be promoted to
+$[[int]]$ or $[[int -> int]]$ respectively.
+In the conclusion of the rule,
+we discard $[[a]]$ in the return context. Note that we can
 simplify the rule by directly requiring $[[a notin fv(aA)]]$, as in
 \rref{p-pr-forallRR} given below. This way we would not need to add $[[a]]$ into
 the context and the rule would remain sound.
-
+%
 \begin{mathpar}
   \drule{p-pr-forallRR}
 \end{mathpar}
@@ -106,7 +113,7 @@ not matter, so \rref{p-pr-mono} applies in both modes.
 The promotion judgment is the same as before, and still only works for
 monotypes, except that now we have \rref{pr-tvar} for type variables $[[a]]$.
 Note again that promotion is a partial operation, as it requires $[[a]]$ to be
-the left of $[[evar]]$, since variable orders matter.
+the left of $[[evar]]$, since the order of variable matters.
 
 
 \subsection{Soundness and Completeness}
