@@ -9,6 +9,113 @@ module GhcSection where
 
 \chapter{Kind Inference for Datatypes}
 
+\section{Other Language Extensions}
+\label{sec:appendix:kind:extension}
+
+This section accompanies \Cref{sec:kind:extensions} of the main paper,
+including discussion about more related language extensions. These extensions
+affect kind inference, but not in a fundamental way.
+
+\subsection{Visible Dependent Quantification}
+
+Besides specified type variables for which users can optionally provide
+type arguments, Haskell also incorporates \textit{visible dependent
+  quantification (VDQ)}\footnote{VDQ is implemented in GHC 8.10.},
+e.g., |type T :: forall (k :: *) -> k -> *|, with which users are forced to provide type
+arguments to |T|. That is, one would use |T| with, e.g., |T * Int| and |T (* -> *) Maybe|, never
+just |T Int|. Visible dependent quantification is Haskell's equivalent to routine
+dependent quantification in dependently typed languages.
+
+To support VDQ, \rref{dt-tt} needs to be extended, as VDQ brings variables into
+scope for later reference. For example, given
+\begin{spec}
+data T :: forall (k :: *) -> k -> *
+data T k a = MkT
+\end{spec}
+We should get a context |k:: *, a ::k| when checking |MkT|.
+
+VDQ opens an interesting design choice: should
+unannotated type variables be able to introduce VDQ? For example, in the definition of
+|P| below, we use |f| and |a| as the arguments to |T|. To make it type-check, we need
+to infer |P :: forall (f:: *) -> f -> *|.
+\begin{code}
+data P f a = MkP (T f a)
+\end{code}
+However, the tricky part with inferring the kind of |P| is that we cannot
+have a fixed initial form of the kind of |P|, i.e., $[[Xa -> Xb -> star]]$ or
+$[[\/]] (f:[[Xa]]) [[->]] [[Xb -> star]]$, when type-checking the $[[rec]]$ group of |P|,
+until we type-check |P|'s body. In order to avoid this challenge, we support
+GHC's current ruling on the matter: \textit{dependent variables must be
+  manifestly so}. That is, the initial kind of a datatype includes VDQ only for
+those variables that appear, lexically, in the kind of a variable; other type
+parameters are reflected in a datatype's initial kind with a regular
+(non-dependent) arrow. This guideline rejects |P| as an example of non-manifest
+dependency.
+
+\subsection{Datatype Promotion}
+
+Haskellers can use datatypes as kinds and can write data constructors in
+types~\citep{yorgey2012giving}. In the \tit
+system, types and kinds are mixed (allowing datatypes to be used as kinds), but
+there is no facility to use a data constructor in a type.
+
+To support such usage, the kinding judgment must now use
+the term context to fetch the type of data constructors. %% Haskell allows
+%% datatypes and data constructors to have the same name. To resolve ambiguities
+%% where it is not obvious if a name refers to a datatype or a promoted data
+%% constructor, users can use prefixed single quote as '|MkT| \ningning{need to
+%%   render it normally}, to denote the promoted data constructor.
+%%
+Moreover, dependency analysis needs to take dependencies on data constructors into
+account.
+
+\begin{definition}[Dependency Analysis with Type-Level Data]
+  We extend \Cref{def:dep-cusk} with
+  \begin{enumerate}[(iii)]
+    \item The definition of $[[T1]]$ depends on the definition of
+      $[[T2]]$ if $[[T1]]$ uses data constructors of $[[T2]]$.
+  \end{enumerate}
+\end{definition}
+
+While the appearance of data constructors in types enriches the type language
+considerably, they do not pose a particular challenge for inference; the rest
+of our presentation would remain unaffected.
+
+\subsection{Partial Type Signatures}
+\label{subsec:partial-type}
+
+For quite some time, GHC has supported kind signatures on a subset of a datatype's
+parameters, much like the partial type signatures described by \citet{winant2014partial}.
+For example, |App|, below, does not
+have a signature but still has a kind annotation for |f|.
+\begin{code}
+data App (f:: * -> *) a = A (f a)
+\end{code}
+To deal with such a construct we first need to
+amend the syntax of a datatype declaration to support kind annotations
+for variables.
+\begin{center}
+\begin{tabular}{llll}\toprule
+    datatype decl.           & $[[dt]]$  & $\Coloneqq$ & $[[data T kvs =  </ dcj // j /> ]] $ \\
+    \bottomrule
+\end{tabular}
+\end{center}
+
+Kind annotations can also contain free variables, which need to be generalized
+in a similar way as signatures. For example, |T2| has kind |forall {k:: *}. forall
+(f::k). *|.
+\begin{code}
+data T2 (f::k) = MkT2
+\end{code}
+
+Supporting these partial signatures adds complication to \rref{pgm-dt-tt} (and its
+algorithmic counterpart) to bring the kind variables into scope. However, and critically,
+a partial signature will still go via \rref{pgm-dt-tt}, never \rref{pgm-dt-ttS}, used
+for full signatures only. This means that a partial type signature does \emph{not}
+unlock polymorphic recursion: the datatype will considered monomorphic and ungeneralized
+within its own recursive group.
+
+
 \section{Today's GHC}
 \label{sec:ghc}
 

@@ -14,6 +14,12 @@ import Data.Proxy ( Proxy(..) )
 \end{code}
 %endif
 
+%if style == poly
+%format cusk(decl) = "\keyword{data}\ " decl
+%else
+%format cusk(decl) = "_ = (Proxy :: Proxy (" decl "))"
+%endif
+
 \section{Declarative Syntax and Semantics of \tit}
 \label{sec:kind:tit:decl}
 
@@ -61,7 +67,13 @@ The complete dependency analysis rule, inspired by \citet[Section~11.6.3]{jones9
 
 To avoid a type that mentions itself in its own kind, we disallow
 self-dependency or mutual dependency involving signatures. For example, a group
-|cusk(T1 :: T2 a -> *)|; |cusk(T2 :: T1 -> *)| is rejected, lest |T1| be assigned
+%
+\begin{spec}
+cusk(T1 :: T2 a -> *)
+cusk(T2 :: T1 -> *)
+\end{spec}
+%
+is rejected, lest |T1| be assigned
 type |forall (a::T1). T2 a -> *|.
 In other words, signatures do not form groups: they are always processed
 individually. Moreover, the definition of a datatype which has a signature does

@@ -648,7 +648,7 @@ Although the algorithm is incomplete, we offer the following guarantee:
 \end{definition}
 %
 The relation is embedded in $[[ EE |- eA1 : eK <: ek ~> eA2]]$
-(\Cref{fig:tit:kinding}), where we ignore $[[eA1]]$ and $[[eA2]]$.
+(\Cref{fig:kind:tit:kinding}), where we ignore $[[eA1]]$ and $[[eA2]]$.
 
 
 \begin{definition}[Partial Order of Kinds in \tit]

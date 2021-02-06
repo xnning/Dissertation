@@ -7,17 +7,17 @@
 \ottpremise{[[ </ ckvsi in Q (eki) // i /> ]]}%
 \ottpremise{ \ottcomp{
 [[EE]]\ottsym{,} \, \cup \ottcomp{[[ ckvsi ]]}{\ottmv{i}} \ottsym{,} \, [[</ Ti : eki // i />]]
-[[|-dt]] [[dti]] [[~>]] [[HHi]] }{\ottmv{i}} }  %
+[[|-dt]] [[dti]] \leadsto [[HHi]] }{\ottmv{i}} }  %
 \ottpremise{ \ottcomp{
   [[EE]]\ottsym{,} \, \cup \ottcomp{[[ ckvsi ]]}{\ottmv{i}} \ottsym{,} \, [[</ Ti : eki // i />]]
-  [[|-gen]]_{\!\![[ckvsi]]} [[HHi]] [[~>]] [[HH'i]]
+  [[|-gen]]_{\!\![[ckvsi]]} [[HHi]] \leadsto [[HH'i]]
   }{\ottmv{i}}
 }
 \ottpremise{[[ EE, </ Ti : \/i [ckvsi] . eki // i /> ]] \ottsym{;} [[HH]]
   \ottsym{,} \,
   \ottcomp{
   % [[\/]] \{[[ckvsi]]\}\ottsym{.}
-  [[ HH'i [ </ Ti |-> Ti @@[ckvsi] // i /> ] ]]}{\ottmv{i}} [[|-p]] [[pgm]] \ottsym{:} [[A]] }%
+  [[ HH'i [ </ Ti |-> Ti @[ckvsi] // i /> ] ]]}{\ottmv{i}} [[|-p]] [[pgm]] \ottsym{:} [[A]] }%
 }{
 [[EE]]  \ottsym{;}  \Psi  [[|-p]]  \mathbf{rec} \, \ottcomp{\mathcal{T}_{\ottmv{i}}}{\ottmv{i}} \, \ottsym{;}  \mathit{pgm}  \ottsym{:}  \sigma}{%
 {\ottdrulename{pgm\_dt\_tt}}{}%
@@ -76,19 +76,17 @@
 
 \newcommand{\ottdrulepgmXXdtXXttS}[1]{\ottdrule[#1]
   {
-  \ottpremise{[[(T : eK) in EE]]
-  \quad [[EE |- dt ~> HH1]]
-  \quad [[EE ; HH, HH1 |-p pgm : eA]]}
-  }
+  \ottpremise{[[(T : eK) in EE]]}
+  \ottpremise{[[EE |- dt ~> HH1]]}
+  \ottpremise{[[EE ; HH, HH1 |-p pgm : eA]]}}
   {[[EE ; HH |-p rec dt ; pgm : eA]]}
   {\ottdrulename{pgm\_dt\_ttS}}
 }
 
 \newcommand{\ottdrulepgmXXsig}[1]{\ottdrule[#1]
    {
-     \ottpremise{
-       [[EE |- dtsig ~> T : eK]]
-       \quad [[EE, T : eK ; HH |-p pgm : eA]]}
+     \ottpremise{[[EE |- dtsig ~> T : eK]]}
+     \ottpremise{[[EE, T : eK ; HH |-p pgm : eA]]}
    }
   {[[EE ; HH |-p sig dtsig ; pgm : eA]]}
   {\ottdrulename{pgm\_sig}}

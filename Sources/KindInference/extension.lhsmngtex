@@ -14,8 +14,8 @@ module Extension where
 
 We have seen that the \tit system incorporates many features and enjoys
 desirable properties. In this section, we discuss how the \tit system can be
-extended with more related language features. \cite{xie2019kind} contains a few
-more, less impactful extensions.
+extended with more related language features. \Cref{sec:appendix:kind:extension}
+contains a few more, less impactful extensions.
 
 \subsection{Higher-Rank Polymorphism}
 \label{sec:kind:higher-rank}
@@ -27,22 +27,13 @@ For example, data constructor declarations become $[[\/  kvs  . D </ Ai //
 i />]]$ instead of $[[\/ kvs. D </ ti // i />]]$.
 
 Unfortunately, higher-rank polymorphism breaks principality. Consider:
-
-\begin{tabular}{ll}
-\begin{minipage}{.35\textwidth}
+%
 \begin{spec}
 data Q1 :: forall k1 k2. k1 -> *
-\end{spec}
-\end{minipage}
-&
-\begin{minipage}{.45\textwidth}
-\begin{spec}
 data Q2 :: (forall (k1: *) (k2:k1). k1 -> *) -> *
 \end{spec}
-\end{minipage}
-\end{tabular}
-
-\noindent First, we modify the
+%
+First, we modify the
 definition of partial order of kinds (\Cref{def:tit:partial-order}) to state that one
 kind is more general than another if it can be instantiated to all
 \textit{polykinds} that the other kind can be instantiated to. Now consider the

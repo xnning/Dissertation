@@ -342,7 +342,7 @@ say a signature is \textit{closed} if it contains no free variables, e.g.,
 cusk(T :: forall a. a -> *)
 \end{spec}
 %
-Otherwise, it is \textit{open} e.g.,
+Otherwise, it is \textit{open}, e.g.,
 %
 \begin{spec}
 cusk(Q :: forall (a::(f b)) (c::k). f c -> * )

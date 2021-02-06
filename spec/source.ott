@@ -3338,7 +3338,7 @@ DD |- A <= ek ~> eA2 -| DD2
 defn
 
 DD |- dtsig ~> DD'  ::  :: sig :: 'sig_'
-{{ tex [[DD]] \Vdash^{\!\!\mathsf{sig} } [[dtsig]] [[~>]] [[DD']] }}
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{sig} } [[dtsig]] \leadsto [[DD']] }}
 by
 
 ikvs = LS (K)

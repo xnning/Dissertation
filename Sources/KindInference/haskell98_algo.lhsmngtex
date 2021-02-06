@@ -254,7 +254,8 @@ $[[k]]$, returning $[[k2]]$.
 \label{sec:kind:98:unif}
 
 The unification judgment $[[DD |- k1 ~= k2 -| TT]]$ is given in
-\Cref{fig:kind:h98:unif}. The elaborate style of this judgment (and its helper judgment $[[|-pr]]$)
+\Cref{fig:kind:h98:unif}. The elaborate style of this judgment (with the
+promotion process $[[|-pr]]$)
 is overkill for \hne, but this design sets us up well to understand unification in the
 presence of our \tit system, later. We require the preconditions that $[[ [DD]k1 = k1 ]]$ and $[[
 [DD] k2 = k2 ]]$, so that every time we encounter a unification variable, we
