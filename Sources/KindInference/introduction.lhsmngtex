@@ -16,8 +16,6 @@ import Data.Kind ( Type )
 
 \section{Introduction and Motivation}
 
-\subsection{Kind Inference for Datatypes}
-
 Modern functional languages such as Haskell, ML, and OCaml come with powerful
 forms of type inference. The global type-inference algorithms employed in those
 languages are derived from the Hindley-Milner type system
@@ -32,14 +30,25 @@ Most research work for extensions of HM so far (including OL, DK, \ap and \gpc) 
 focused on forms of polymorphism, where type variables all have the same kind.
 In these systems, the type variables introduced by universal quantifiers and/or
 type declarations all stand for proper types (i.e., they have kind |*|). In such
-a simplified setting, datatype declarations such as |data Maybe a = Nothing ||
-Just a| pose no problem at all for type inference: with only one possible kind
+a simplified setting, datatype declarations such as
+%
+\begin{spec}
+data Maybe a = Nothing | Just a
+\end{spec}
+%
+pose no problem at all for type inference: with only one possible kind
 for |a|, there is nothing to infer.
 
 However, real-world implementations for languages like Haskell support a
 non-trivial kind language, including kinds other than |*|. \hne accepts
 \emph{higher-kinded polymorphism} \citep{jones1995system}, enabling datatype
-declarations such as |data AppInt f = Mk (f Int)|. The type of constructor |Mk|
+declarations such as
+%
+\begin{code}
+data AppInt f = Mk (f Int)
+\end{code}
+%
+The type of constructor |Mk|
 applies the type variable |f| to an argument |Int|. Accordingly, |AppInt Bool|
 would not work, as the type |Bool Int| (in the instantiated type of |Mk|) is
 invalid. Instead, we must write something like |AppInt Maybe|: the argument to
@@ -94,6 +103,13 @@ algorithmic formulations we study various properties, including
   kinds} (Sections~\ref{sec:kind:98:context-extension}, \ref{sec:kind:type_par}, and
 \ref{sec:kind:tit:sound-complete}).
 
+\section{Overview}
+
+This section gives an overview of this work. We start by
+contrasting kind inference with
+type inference, and then summarize the key aspects of the two systems
+of datatypes that we develop.
+
 \subsection{Kind Inference in \hne}
 
 \hne's kind language contains a constant (the
@@ -101,11 +117,15 @@ kind |*|) and kinds built from arrows (|k1 -> k2|).
 Kind inference for \hne datatypes is thus closely related
 to type inference for the simply typed $\lambda$-calculus (STLC). For example,
 consider a term | + :: Int -> Int -> Int| and a type constructor
-| :+: :: * -> * -> *|. At the term level, we infer that
+| (:+:) :: * -> * -> *|. At the term level, we infer that
 |add a b = a + b|
 yields |add :: Int -> Int -> Int|. Similarly, we can create
 a datatype
-|data Add a b = Add (a :+: b)|
+%
+\begin{code}
+data Add a b = Add (a :+: b)
+\end{code}
+%
 and infer |Add :: * -> * -> *|.
 
 \paragraph{No principal types.}
@@ -114,10 +134,14 @@ Consider now the function definition
 |k a = 1|.
 In the STLC, there are infinitely many (incomparable) types that can be assigned
 to |k|, including |k :: Int -> Int| and |k :: (Int -> Int) -> Int|.
-Assuming there are no type variables,
+Assuming that there are no type variables,
 the STLC accordingly has no \emph{principal types}.
 An analogous datatype declaration is
-|data K a = K Int|.
+%
+\begin{spec}
+data K a = K Int
+\end{spec}
+%
 As with |k|, there are infinitely many
 (incomparable) kinds that can be assigned to |K|, including
 |K :: * -> *| and |K :: (* -> *) -> *|.
@@ -149,19 +173,28 @@ for STLC, type inference for various features in modern Haskell is not
 well-studied. While we are motivated concretely by Haskell, many of the challenges
 we face would be present in any dependently typed language seeking principled type
 inference. We use the term \tit
-to refer to the fragment of modern Haskell we model.\footnote{Some of the features
+to refer to the fragment of modern Haskell that we model.\footnote{Some of the features
 we model are slightly different in our presentation than they exist in GHC. \cite{xie2019kind}
 outlines the differences. These minor differences do not affect the applicability of our work to
 improving the GHC implementations, but they may affect the ability to test our examples in GHC.} We enumerate
 the key features of this fragment below.
 
+%if style == poly
+%format cusk(decl) = "\keyword{data}\ " decl
+%else
+%format cusk(decl) = "_ = (Proxy :: Proxy (" decl "))"
+%endif
 
 \paragraph{Kind polymorphism and dependent types}
 
 Global type inference, in the style of \citet{Damas:Milner}, allows
 polymorphic kinds to be assigned to datatype definitions. For instance, 
 reconsider 
-|data K a = K Int|.
+%
+\begin{spec}
+  data K a = K Int
+\end{spec}
+%
 In \tit, |K| can be given the kind | K :: forall {k}. k -> *|.
 This example shows one of the interesting new features
 of \tit over \hne: \emph{kind polymorphism}~\citep{yorgey2012giving}.
@@ -174,7 +207,11 @@ otherwise incomparable monomorphic types.
 
 System-F-based languages do not have dependent types.
 In contrast, \tit supports dependent kinds such as
-|data D :: forall (k :: *) (a :: k). K a -> *|.
+%
+\begin{spec}
+data D :: forall (k :: *) (a :: k). K a -> *
+\end{spec}
+%
 There are two noteworthy aspects about the kind of |D|.
 Firstly, kind and type variables are \emph{typed}: different type
 variables may have different kinds.
@@ -186,7 +223,7 @@ that do not exist in many previous studies of type inference (e.g., \cite{practi
 \paragraph{First-order unification with dependent kinds and typed
   variables.}\label{para:first-oder}
 
-Although \tit is dependently typed, its unification problem is
+Although Poly-Kinds is dependently typed, its unification problem is
 remarkably \emph{first-order}. This is in contrast to many other
 dependently typed languages, where unification is usually
 \emph{higher-order}~\citep{andrews1971resolution,huet73unification}. Since unification plays a central role in
@@ -254,7 +291,7 @@ This example includes a \emph{kind signature}, meaning that we must \emph{check}
 the kind of the datatype, not \emph{infer} it. In the definition of |Poly|, the
 type |Poly Int| requires an instantiation $|k| \mapsto |*|$, while the type
 |Poly Maybe| requires an instantiation of $|k| \mapsto (|* -> *|)$. These
-differing instantiations cause the declaration to be polymorphic recursive.
+differing instantiations mean that the declaration employs polymorphic recursion.
 
 \tit deals with such cases of polymorphic recursion, which also appear
 at the term level---for example, when writing recursive functions over GADTs
@@ -275,7 +312,13 @@ instantiate a function call, as in |id (at Bool) True|, to kinds, giving us \tex
 Following the design of VTA, we distinguish \textit{specified variables} from \textit{inferred variables}. As described by \citet[Section 3.1]{eisenberg2016visible}, only specified variables can be instantiated via VKA.
 Instantiation of variables is inferred when no explicit kind application is
 given.
-To illustrate, consider |data T :: forall a b. a b -> *|. Here, |a| and |b| are
+To illustrate, consider
+%
+\begin{spec}
+data T :: forall a b. a b -> *
+\end{spec}
+%
+Here, |a| and |b| are
   specified variables. Because their order is given, explicit instantiation of
   |a| must happen before |b|. For example, |T (at Maybe)| instantiates
   |a| to |Maybe|. %% This declaration for |T| is not equivalent to
@@ -285,17 +328,27 @@ On the other hand, the kind of |a| and |b| can be generalized to
 |T :: forall {k :: *} (a :: k -> *) (b :: k). a b -> *|. The variable |k| is \emph{inferred}
 and is not available for instantiation with VKA.
 This split between specified and inferred variables supports predictable type
-inference: if the variables invented by the compiler (e.g., |k|)
+inference: if the variables generated by the compiler (e.g., |k|)
 were available for instantiation, then we have no way of knowing
 what order to instantiate them.
 
 
 \paragraph{Open kind signatures and generalization order}
 
-Echoing the design of Haskell, \tit supports \textit{open kind signatures}. We
-say a signature is \textit{closed} if it contains no free variables (e.g., |
-cusk(T :: forall a. a -> *) |). Otherwise, it is \textit{open} (e.g., |
-cusk(Q :: forall (a::(f b)) (c::k). f c -> * ) |). Free variables (in this
+Echoing the design of Haskell, Poly-Kinds supports \textit{open kind signatures}. We
+say a signature is \textit{closed} if it contains no free variables, e.g.,
+%
+\begin{spec}
+cusk(T :: forall a. a -> *)
+\end{spec}
+%
+Otherwise, it is \textit{open} e.g.,
+%
+\begin{spec}
+cusk(Q :: forall (a::(f b)) (c::k). f c -> * )
+\end{spec}
+%
+Free variables (in this
 case, |f|, |b|, |k|) will be generalized over. We have a decision to make: in
 which order do we generalize the free variables?
 This question is non-trivial, as there can be dependency between the
@@ -314,9 +367,20 @@ these variables are considered \emph{inferred}, not \emph{specified}, with respe
 
 \tit supports existentially quantified variables on datatype constructors.
 This is useful, for example, to model GADTs. 
-Given |data T1 = forall a. MkT1 a|, we get |MkT1 :: forall (a :: *). a -> T1|.
+Given
+%
+\begin{spec}
+data T1 = forall a. MkT1 a
+\end{spec}
+%
+we get |MkT1 :: forall (a :: *). a -> T1|.
 The type of the data constructor declaration can also be generalized. Given
-|data P1 :: forall (a :: *). *|, from
+%
+\begin{spec}
+data P1 :: forall (a :: *). *
+\end{spec}
+%
+from
 | data T2 = MkT2 P1|,
 we infer
 |MkT2 :: forall {a :: *}. P1 (at a) -> T2|, where |P1| is

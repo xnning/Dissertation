@@ -611,7 +611,7 @@ We prove our algorithm is sound:
 
 Unfortunately, we lose completeness.
 % while we restrict the algorithm to accept only predictable programs.
-Recall the example in \Cref{subsec:qcheck}. This definition of |T| is rejected
+Recall the example in \Cref{sec:kind:qcheck}. This definition of |T| is rejected
 by the algorithmic quantification check as the kind of |d| cannot be determined.
 However, the declarative system can guess correctly, e.g., |Proxy b| or |Proxy
 c|. Unfortunately, different choices lead to incomparable kinds for |T|. Thus we
@@ -630,7 +630,7 @@ data P  :: forall k (a::k) b. Eq a b -> *
 
 We do not consider the incompleteness as a problematic issue in practice, as this
 scenario is quite contrived and (we expect) will rarely occur ``in the wild''. See
-more discussion of this point in \Cref{sec:related}.
+more discussion of this point in \Cref{sec:related:unification:dependent}.
 
 Although the algorithm is incomplete, we offer the following guarantee:
 \textit{if the algorithm accepts a definition, then that definition has a

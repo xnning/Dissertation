@@ -275,6 +275,7 @@ constraint-solving approach should not change any of our main results.
 
 
 \section{Unification with dependent types}
+\label{sec:related:unification:dependent}
 
 While full higher-order unification is
 undecidable~\citep{goldfarb1981undecidability}, the \textit{pattern}
