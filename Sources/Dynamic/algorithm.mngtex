@@ -26,18 +26,22 @@ consider the following algorithmic typing example:
   f : [[\/a . a -> int]], x : [[unknown]], [[evar]]
 \]
 %
-Compared with the declarative typing, where we have many choices (e.g., $[[int
+Compared with declarative typing, where we have many choices (e.g., $[[int
 -> int]]$, $[[bool -> int]]$, and so on) to instantiate $[[\/ a. a -> int]]$,
 the algorithm computes the instantiation $[[ evar -> int ]]$ with $[[evar]]$
 unsolved in the output context. What can we know from the algorithmic typing?
 First we know that, here $[[evar]]$ is \textit{not constrained} by the typing
 problem. Second, and more importantly, $[[evar]]$ has been compared with an
 unknown type (when typing $([[ f x ]])$). Therefore, it is possible to make a
-more refined distinction between different kinds of existential variables. The
-first kind of existential variables are those that indeed have no constraints at
-all, as they do not affect the dynamic semantics; while the second kind (as in
-this example) are those where the only constraint is that \textit{the variable
-  was once compared with an unknown type}~\citep{garcia:principal}.
+more refined distinction between different kinds of existential variables:
+
+\begin{itemize}
+\item the first kind of existential variables are those that indeed have no
+  constraints at all, as they do not affect the dynamic semantics;
+\item the second kind (as in this example) are those where the only constraint
+  is that \textit{the variable was once compared with an unknown
+    type}~\citep{garcia:principal}.
+\end{itemize}
 
 The syntax of types is shown in \Cref{fig:gradual:exd:algo:type}. A notable
 difference, apart from the addition of static and gradual parameters, is that we
@@ -133,8 +137,10 @@ Based on the above discussion, the following defines $[[ [aA]GG ]]$:
     $[[ [aA] empty    ]]$ & = &  $[[empty]]$  & \\
     $[[ [aA] (GG, x : aA)  ]]$ &=& $[[ [aA] GG , x : aA     ]]$ & \\
     $[[ [aA] (GG, a)  ]]$ &=& $[[ [aA] GG , a     ]]$ & \\
-    $[[ [aA] (GG, sa)  ]]$ &=& $[[ [aA] GG , ga , sa = ga  ]]$  & if $[[sa]]$ occurs in $[[aA]]$     \\
-    $[[ [aA] (GG, sa)  ]]$ &=& $[[ [aA] GG , sa     ]]$     & if $[[sa]]$ does not occur in $[[aA]]$  \\
+      $[[ [aA] (GG, sa)  ]]$ &=& $[[ [aA] GG , ga , sa = ga  ]]$  & \\
+                             & & if $[[sa]]$ occurs in $[[aA]]$     \\
+      $[[ [aA] (GG, sa)  ]]$ &=& $[[ [aA] GG , sa     ]]$   \\
+                             & & if $[[sa]]$ does not occur in $[[aA]]$  \\
     $[[ [aA] (GG, ga)  ]]$ &=& $[[ [aA] GG , ga     ]]$ & \\
     $[[ [aA] (GG, evar = at)  ]]$ &=& $[[ [aA] GG , evar = at     ]]$ & \\
     $[[ [aA] (GG, mevar)  ]]$ &=& $[[ [aA] GG , mevar     ]]$ & \\ \bottomrule
@@ -178,7 +184,7 @@ variable later. The rest of the rules are the same as those in the original syst
 
 The instantiation judgments shown in \Cref{fig:gradual:exd:inst} also change
 significantly. The complication comes from the fact that now we have two different
-kinds of existential variables, and the relative order they appear in the
+kinds of existential variables, and the relative order that they appear in the
 context affects their solutions.
 
 
@@ -217,6 +223,9 @@ Furthermore, we proved that the extended algorithmic system is sound and
 complete with respect to the extended declarative system.
 The full extended algorithmic system can be found in \Cref{sec:appendix:algo:extend-gpc}.
 
+
+\subsection{Discussion}
+
 \paragraph{Do We Really Need Type Parameters in the Algorithmic System?}
 
 As we mentioned earlier, type parameters in the declarative system are merely an
@@ -228,7 +237,7 @@ purpose. In that regard, we could directly solve every \textit{unsolved} static 
 gradual existential variable in the output context to $[[int]]$ and
 $[[unknown]]$, respectively.
 
-\subsection{Restricted Generalization}
+\section{Restricted Generalization}
 
 In \Cref{sec:gradual:type:trans}, we discussed the issue that the translation produces
 multiple target expressions due to the different choices for instantiations, and
