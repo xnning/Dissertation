@@ -14,9 +14,12 @@
 \citet{odersky:putting} introduced a type system for higher-rank implicit
 polymorphic types. Based on that, \citet{practical:inference} developed an
 approach for type inference for higher-rank types using traditional
-bidirectional type checking. They combine a variant of the containment relation
-from \citet{mitchell1988polymorphic} for deep skolemisation in subsumption
-rules, which we believe is compatible with our subtyping definition.
+bidirectional type checking.
+They use a more general subtyping relation, inspired by the type
+containment relation by Mitchell [1988], which supports \textit{deep skolemisation}.
+With deep skolemization, examples like $[[\/a. int -> int <: int -> \/a. a]]$
+are allowed. We believe deep skolemization is compatible with our subtyping
+definition.
 
 \citet{DK} build a simple and concise algorithm for higher-rank polymorphism
 based on traditional bidirectional type checking. They deal with the same
@@ -227,7 +230,7 @@ they should be \emph{inferred}; and the tight connection in our system between
 unification and promotion may improve upon GHC's approach, which separates the
 two. The details of the relationship between our work and GHC (including a
 myriad of ways our design choices differ in small ways from GHC's) appear in
-\cite{xie2019kind}.
+\Cref{sec:appendix:ghc}.
 
 
 \paragraph{Type inference in Haskell.}

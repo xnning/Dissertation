@@ -117,7 +117,7 @@ within its own recursive group.
 
 
 \section{Today's GHC}
-\label{sec:ghc}
+\label{sec:appendix:ghc}
 
 Our \Cref{chap:kindinference} describes, in depth, how kind inference can work
 for datatype declarations. Here, we review how our work relates to GHC. To make
