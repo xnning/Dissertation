@@ -1,0 +1,394 @@
+%include polycode.fmt
+%include rae.fmt
+
+%if style == newcode
+\begin{code}
+module GhcSection where
+\end{code}
+%endif
+
+\chapter{Kind Inference for Datatypes}
+
+\section{Today's GHC}
+\label{sec:ghc}
+
+Our \Cref{chap:kindinference} describes, in depth, how kind inference can work
+for datatype declarations. Here, we review how our work relates to GHC. To make
+the claims concrete, this section contains references to specific stretches of
+code within GHC.
+
+\subsection{Constraint-Based Type Inference}
+
+Type inference in GHC is based on generating and solving constraints~\citep{pottier2005essence,vytiniotis2011outsidein},
+distinct from our approach here, where we unify on the fly. Despite this different architecture,
+our results carry over to the constraint-based style. Instead of using eager unification, we can
+imagine accumulating constraints in output contexts $[[TT]]$, and then invoking a solver
+to extend the context with solutions. This approach is taken by \citet{eisenberg2016dependent}.
+
+In thinking about the change from eager unification to delayed constraints,
+one might worry about information loss around any place where we apply a
+context as a substitution, as these substitutions would be empty in a
+constraint-solving approach without eager unification. At top-level
+(Figure~\ref{fig:kind:tit:algo:pgm}), a constraint-solving approach would run the
+constraint solver, and the substitutions would contain the same mappings as
+our approach provides. Conversely, the relations in
+Figure~\ref{fig:kind:tit:algo:unif} would become part of the constraint solver, so
+substituting here is safe, too. A potential problem arises in
+\rref{a-ktt-app} (Figure~\ref{fig:kind:tit:algo:kinding}), where we substitute in
+the function's kind before running the kind-directed $[[||-kapp]]$ judgment. However,
+our system is predicative: it never unifies a type variable with a polytype.
+Thus, the substitution in \rref{a-ktt-app} can never trigger a new usage of
+\rref{a-kapp-tt-forall}. It \emph{can} distinguish between \rref{a-kapp-tt-arrow} and
+\rref{a-kapp-tt-kuvar}, but we conjecture that the choice between these rules is
+irrelevant: both will lead to equivalent substitutions in the end.
+
+\subsection{Contexts}
+
+A typing context is \emph{not} maintained in much of GHC's inference algorithm. Instead,
+a variable's kind is stored in the data structure representing the variable. This is
+very convenient, as it means that looking up a variable's type or kind is a pure, fast
+operation. One downside is that the compiler must maintain an extra invariant that
+all occurrences of a variable store the same kind; this is straightforward to
+maintain in practice.
+
+Beyond just storing variables' kinds, the typing context in this work also critically
+stores variables' ordering. Lacking contexts, GHC uses a different mechanism:
+\emph{level numbers}, originally invented to implement untouchability~\cite[Section~5.1]{vytiniotis2011outsidein}.
+Every type variable in GHC is assigned a level number during inference.
+Type variables contain a structure that includes level numbers.
+Roughly, the
+level number of a type variable |a| corresponds to the number of type variables in scope
+before |a|. Accordingly, we can tell the relative order (in a hypothetical context,
+according to the systems in this work) of two variables simply by comparing
+their level numbers. One of GHC's invariants is that a unification variable at level $n$
+is never unified with a type that mentions a variable with a level number $m > n$; this
+is much like the extra checks in the unification judgments in our work.
+
+The \emph{local scopes} of this work are also
+tracked
+by GHC. All the variables in the same local scope are assigned the same level
+number, and they are flagged as reorderable. After inference is complete,
+GHC does a topological sort to get the final order.
+
+A final role that contexts play in our formalism is that they store solutions for
+unification variables; we apply contexts as a substitution. In GHC, unification
+variables store mutable cells that get filled in. It has a process called \emph{zonking}\footnote{There are actually two variants of zonking in GHC: we can zonk during type-checking or at the end. The difference between the
+variants is chiefly what to do for an unfilled unification variable. The former leaves
+them alone, while the latter has to default them somehow; details are beyond our scope
+here.},
+which is exactly analogous to our use of contexts as substitutions. Zonking a unification
+variable replaces the variable with its solution, if any.
+
+\subsection{Unification}
+
+The solver in GHC still has to carry out unification, much along the lines of the unification
+judgment we present here. This algorithm has to deal with the heterogeneous unification
+problems we consider, as well. Indeed, GHC's unification algorithm recurs into the kinds
+of a unification variable and the type it is unifying with, just as ours does. As implied
+by our focus on decidability of unification, there have been a number of bugs in GHC's
+implementation that led to loops in the type checker; the most recent is \href{https://gitlab.haskell.org/ghc/ghc/issues/16902}{\#16902}.
+
+GHC actually uses several unification algorithms internally. It has an eager unifier,
+much like the one we describe. When that unifier fails, it generates the constraint
+that is sent to the solver. (The eager unifier is meant solely to be an optimization.)
+There is also a unifier meant to work after type inference is complete; it checks
+for instance overlap, for example. All the unifiers recur into kinds:
+
+\begin{itemize}
+
+\item The eager unifier recurs into kinds.
+
+\item The unifier in the solver recurs into kinds.
+
+\item The pure unifier uses an invariant that the kinds are related before looking
+      at the types. It must recur when decomposing applications.
+
+\end{itemize}
+
+In addition, GHC also has an overlap problem within unification, as exhibited in our
+work by the overlap between \rref{a-u-kvarL,a-u-kvarR} in \Cref{fig:kind:h98:unif}.
+Both the eager unifier and
+the constraint-solver unifier deal with this ambiguity
+by using heuristics to choose which variable might be more suitable for unification.
+This particular issue---which variable to unify when there is a choice---has been the
+subject of some amount of churn over the years.
+
+\subsection{Promotion}
+
+The promotion
+operation, too, is present in GHC, though its form is quite different than what we have
+presented. Instead of promoting during unification, GHC simply refuses to solve a
+unification variable if any of the free variables of its supposed solution lives to
+the right of the variable in the context. Because GHC is working with constraints,
+it just leaves the unification problem as an unsolved constraint. If there remain
+unsolved constraints, GHC then promotes the variables it can: some cannot be promoted
+because they depend on locally bound quantified (not unification) type variables.
+
+\subsection{Complete User-Supplied Kinds}
+
+Along with stand-alone kind signatures, as described in this work,
+GHC supports \emph{complete user-supplied kinds}, or CUSKs. A datatype has a CUSK
+when certain syntactic conditions are satisfied; GHC detects these conditions \emph{before}
+doing any kind inference. These CUSKs are a poor substitute for proper kind signatures, as
+the syntactic cues are fragile and unexpected: users sometimes write a CUSK without meaning
+to, and also sometimes leave out a necessary part of a CUSK when they intend to specify the
+kind. Stand-alone kind signatures are a new feature; they
+begin with the keyword |type| instead of |data|, as we have used in our work.
+
+Interestingly, it would be wrong to support CUSKs in a system without polymorphic
+kinds. Consider this example:
+\begin{spec}
+  data S1 a = MkT1 S2
+  data S2 = MkS2 (S1 Maybe)
+\end{spec}
+The types |S1| and |S2| form a group. We put |S2| (which has a CUSK) into the context
+with kind |*|. When we check |S1|, we find no constraints on |a| (in the constraint-generation
+pass; see the general approach below). The kind of |S1| is then defaulted to |* -> *|.
+Checking |S2| fails. Instead, we wish to pretend that |S2| does not have a CUSK. This
+would mean that constraint-generation happens for all the constructors in both |S1| and
+|S2|, and |S1| would get its correct kind |(* -> *) -> *|.
+
+With kind-polymorphism, we have no problem because the kind of |T1| will be generalized to
+|forall (k:: *). k -> *|.
+
+This was reported as bug \href{https://gitlab.haskell.org/ghc/ghc/issues/16609}{\#16609}.
+
+\subsection{Dependency Analysis}
+
+The algorithm implemented in GHC for processing datatype declarations starts with
+dependency analysis, as ours does. The dependency analysis is less fine-grained than
+what we have proposed in this work: signatures are ignored in the dependency analysis, and so
+datatypes with signatures are processed alongside all the others. This means that
+the kinds in the example below have more restrictive kinds
+in GHC than they do in our system:
+%
+%if style == poly
+%format cusk(decl) = "\keyword{data}\ " decl
+%else
+%format cusk(decl) = "_ = (Proxy :: Proxy (" decl "))"
+%endif
+\begin{spec}
+cusk(S1 :: forall k. k -> *)
+data S1 a = MkS1 (S2 Int)
+data S2 a = MkS2 (S3 Int)
+data S3 a = MkS3 (S1 Int)
+\end{spec}
+%
+A na\"ive dependency analysis would put all three definitions in the same group.
+The kind for |S1| is given; it would indeed have that kind. The parameters
+of |S2| and |S3| would initially have an unknown kind, but when occurrences of
+|S2| and |S3| are processed (in the definitions of |S1| and |S2|, respectively),
+this unknown kind would become |*|. Neither |S2| nor |S3| would be generalized.
+
+There is a ticket to improve the dependency analysis: \href{https://gitlab.haskell.org/ghc/ghc/issues/9427}{\#9427}.
+
+\subsection{Approach to Kind-Checking Datatypes}
+
+In GHC's approach,
+after dependency analysis, so-called \emph{initial kinds} are produced for all the
+datatypes in the group. These either come from a datatype's CUSK or from a simple
+analysis of the header of the datatype (without looking at constructors). This step
+corresponds to our algorithm's placing a binding for the datatype in the context,
+either with the kind signature or with a unification variable (\rref{a-pgm-dt-ttS,a-pgm-dt-tt}).
+
+If there is no CUSK, GHC then passes over all the datatype's constructors,
+collecting constraints on unification variables.
+After solving these constraints, GHC generalizes the datatype kind.
+
+For all datatypes, now with generalized kinds, all data constructors are checked
+(again, for non-CUSK types). Because the kinds of the types are now generalized, a
+pass infers any invisible parameters to polykinded types. For non-CUSK types, this
+second pass using generalized kinds replaces the $ [[Ti]] [[|->]] [[Ti @@[ckvsi] ]] $
+substitution in the context in the last premise to \rref{a-pgm-dt-tt}. Performing
+a substitution---instead of re-generating and solving constraints---may be an opportunity
+for improvement in GHC.
+
+\subsection{Polymorphic Recursion}
+\label{subsec:appendix:poly-rec}
+
+One challenge in kind inference is in the handling of polymorphic recursion. Although non-CUSK types
+are indeed monomorphic during the constraint-generation pass, some limited form
+of polymorphic recursion can get through. This is because all type variables are
+represented by a special form of unification variable called a TyVarTv. TyVarTvs
+can unify only with other type variables. This design is motivated by the following
+examples:
+
+\begin{code}
+data T1 (a :: k) b = MkT1 (T2 a b)
+data T2 (c :: j) d = MkT2 (T1 c d)
+
+data T3 a where
+  MkT3 :: forall (k :: *) (b :: k). T3 b
+\end{code}
+
+We want to accept all of these definitions. The first two, |T1| and |T2|, form a mutually
+recursive group. Neither has a CUSK. However, the recursive occurrences are not polymorphically
+recursive: both recursive occurrences are at the \emph{same} kind as the definition.
+Yet the first parameter to |T1| is declared to have kind |k| while the first parameter to
+|T2| is declared to have kind |j|. The solution: allow |k| to unify with |j| during
+the constraint-generation pass. We would \emph{not} want to allow either |k| or |j| to
+unify with a non-variable, as that would seem to go against the user's wishes. But they
+must be allowed to unify with each other to accept this example.
+
+With |T3| (identical to |T| from Section~\ref{sec:future:gadts}),
+we have a different motivation. During inference, we will guess the kind
+of |a|; call it $[[Xa]]$. When checking the |MkT3| constructor, we will need to
+unify $[[Xa]]$ with the locally bound |k|. We cannot set $[[Xa]] \mathrel{{:}{=}} |k|$,
+as that will fill $[[Xa]]$ with a |k|, bound to $[[Xa]]$'s \emph{right} in the context.
+Instead, we must set $|k| \mathrel{{:}{=}} [[Xa]]$. This is possible only if |k| is
+represented by a unification variable.
+
+There are two known problems with this approach:
+
+\begin{enumerate}
+\item It sometimes accepts polymorphic recursion, even without a CUSK. Here is an
+example:
+%
+\begin{code}
+data T4 a = forall (k :: *) (b :: k). MkT4 (T4 b)
+\end{code}
+%
+The definition of |T4| is polymorphically recursive: the occurrence |T4 b| is specialized
+to a kind other than the kind of |a|. Yet this definition is accepted. The two kinds
+unify (as |k| becomes a unification variable, set to the guessed kind of |a|) during
+the constraint-generation pass. Then, |T4| is generalized to get the kind |forall k. k -> *|,
+at which point the last pass goes through without a hitch.
+
+The reason this acceptance is troublesome is not that |T4| is somehow dangerous or unsafe.
+It is that we know that polymorphic recursion cannot be inferred~\cite{henglein-polymorphic-recursion},
+and yet GHC does it. Invariably, this must mean that GHC's algorithm will be hard to
+specify beyond its implementation.
+
+\item In rare cases, the constraint-generation pass will succeed, while the final
+pass---meant to be redundant---will fail. Here is an example:
+%
+\begin{spec}
+data SameKind :: k -> k -> Type
+data Bad a where
+  MkBad :: forall k1 k2 (a :: k1) (b :: k2). Bad (SameKind a b)
+\end{spec}
+%
+During the constraint-generation pass, the kinds |k1| and |k2| are allowed to unify,
+accepting the definition of |Bad|. During the final pass, however, |k1| and |k2|
+are proper quantified type variables, always distinct. Thus the |SameKind a b|
+type is ill-kinded and rejected.
+
+The fact that this final pass can fail means that we cannot implement it via
+a simple substitution, as we do in \rref{a-pgm-dt-tt}. One possible solution
+is our suggestion to change the scoping of type parameters to GADT-syntax
+datatype declarations. With that change, our second
+motivation above for TyVarTvs would disappear. GHC could then use TyVarTvs only
+for kind variables in the head of a datatype declaration, using proper quantified
+type variables in constructors. Of course, this change would break much code
+in the wild, and we do not truly expect it to ever be adopted.
+
+\end{enumerate}
+
+\subsection{The Quantification Check}
+\label{sec:appendix:ghc:qcheck}
+
+Our quantification check (\Cref{sec:kind:qcheck}) also has a parallel in GHC, but
+GHC's solution to the problem differed from ours. Instead of rejecting programs
+that fail the quantification check, GHC accepted them, replacing the variables
+that would be (but cannot be) quantified with its constant |Any :: forall k. k|.
+The |Any| type is uninhabited, but exists at all kinds. As such, it is an
+appropriate replacement for unquantifiable, unconstrained unification variables.
+Yet this decision in GHC had unfortunate consequences: the |Any| type can appear
+in error messages, and its introduction induces hard-to-understand type errors.
+
+We have later implemented our quantification check in GHC; see
+\href{https://gitlab.haskell.org/ghc/ghc/-/issues/16775}{\#16775}.
+
+Another design alternative is to generalize the variable to the leftmost
+position where it is still well-formed. Recall the example in
+\Cref{sec:kind:qcheck}:
+\begin{code}
+data Proxy :: forall k. k -> *
+data Relate :: forall a (b :: a). a -> Proxy b -> *
+data T :: forall (a :: *) (b :: a) (c :: a) d. Relate b d -> *
+\end{code}
+We have |d|$::[[Xa]]$, and $[[Xa]] = |Proxy|\ [[Xb]]$, with $[[Xb]] |:: a|$.
+As there are no further constraints on $[[Xb]]$, the definition of |T| is
+rejected by the quantification check.
+
+Instead of rejecting the program, or solving $[[Xb]]$ using |Any|, we can
+generalize over $[[Xb]]$ as a fresh variable |f|, which is put after |a| to make
+it well-kinded. Namely, we get
+\begin{code}
+data T :: forall (a :: *) {f :: a} (b :: a) (c :: a) (d :: Proxy f). Relate (at a) (at f) b d -> *
+\end{code}
+
+However, this ordering of the variables violates our declarative specification.
+Moreover, this type requires an inferred variable to be between specified
+variables. With higher-rank polymorphism, due to the fact that GHC does not
+support first-class type-level abstraction (i.e., $\Lambda$ in types), this type
+cannot be instantiated to
+\begin{code}
+forall (a :: *) (b :: a) (c :: a) (d :: Proxy f). Relate (at a) (at b) b d -> *
+\end{code}
+or
+\begin{code}
+forall (a :: *) (b :: a) (c :: a) (d :: Proxy f). Relate (at a) (at c) b d -> *
+\end{code}
+\noindent which makes the generalization less useful.
+
+\subsection{ScopedSort}
+
+When GHC deals with a local scope---a set of variables that may be reordered---it
+does a topological sort on the variables at the end. However, not any topological
+sort will do: it must use one that preserves the left-to-right ordering of the variables
+as much as possible. This is because GHC considers these implicitly bound variables
+to be \emph{specified}: they are available for visible type application. For example,
+recall the example from \Cref{sec:kind:tit-overview}, modified slightly:
+%
+\begin{code}
+data Q (a::(f b)) (c::k) (x :: f c)
+\end{code}
+%
+Inference will tell us that |k| must come before |f| and |b|, but the order of |f|
+and |b| is immaterial. Our approach here is to make |f|, |b|, and |k| \emph{inferred}
+variables: users of |Q| will not be able to instantiate these parameters with visible
+type application. However, GHC takes a different view: because the user has written
+the names of |f|, |b|, and |k|, they will be \emph{specified}. This choice means that
+the precise sorting algorithm GHC uses to fix the order of local scopes becomes part
+of the \emph{specification} of the language. Indeed, GHC documents the precise
+algorithm in its manual. If we followed suit, the algorithm would have to appear
+in our declarative specification, which goes against the philosophy of a declarative system.
+
+Some recent debate led to a conclusion (see
+\href{https://gitlab.haskell.org/ghc/ghc/issues/16726}{\#16726}) that
+we would change the interpretation of the |Q| example from the main work,
+meaning that its kind variables would indeed become \emph{inferred}. However,
+the problem with ScopedSort still exists in type signatures, where type
+variables may be implicitly bound.
+
+\subsection{The ``Forall-or-Nothing'' Rule}
+
+GHC implements the so-called \href{https://github.com/goldfirere/ghc-proposals/blob/no-kind-variables/proposals/0000-no-kind-vars.rst}{\emph{forall-or-nothing} rule}, which states that either \emph{all} variables
+are quantified by a user-written |forall|, or none are. These examples illustrate the effect:
+%
+\begin{spec}
+ex1 :: a -> b -> a
+ex2 :: forall a b. a -> b -> a
+ex3 :: forall a. a -> b -> a
+ex4 :: (forall a. a -> b -> a)
+\end{spec}
+%
+The signatures for both |ex1| and |ex2| are accepted: |ex1| quantifies none, while |ex2| quantifies all.
+The signature for |ex3| is rejected, as GHC rejects a mixed economy. However, and perhaps surprisingly,
+|ex4| is accepted. The only difference between |ex3| and |ex4| is the seemingly-redundant parentheses.
+However, because the forall-or-nothing rule applies only at the top level of a signature, the rule
+is not in effect for the $\forall$ in |ex4|.
+
+This rule interacts with the main work only in that our formalism (and some of our examples) does
+not respect it. This may be the cause of differing behavior between GHC and the examples we present.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../../Thesis"
+%%% org-ref-default-bibliography: "../../Thesis.bib"
+%%% End:
+
+%% LocalWords:  polycode GhcSection untouchability reorderable zonking zonk
+%% LocalWords:  CUSKs CUSK MkT MkS cusk polykinded MkR MkP dissatisfying
+%% LocalWords:  TyVarTv TyVarTvs SameKind MkBad ScopedSort

@@ -18,6 +18,9 @@
   \drules[ap-a-app]{$ [[(tsub1, AN1) ; dd ; ss |-AP e => A `-> (tsub2, AN2)]] $}
   {Algorithmic Typing Application Mode}{var,lam,lamann,app}
 
+%--------------------------------------------------------------------------------------------%
+%--------------------------------------------------------------------------------------------%
+
 \chapter{The Extended Algorithmic \gpc}
 \label{sec:appendix:algo:extend-gpc}
 
@@ -54,6 +57,11 @@
 \drules[gpc-chk]{$ [[ GG |-G ae <= aA -| DD ]] $}{Checking}{lam, gen, sub}
 
 \drules[gpc-am]{$ [[ GG |-G aA |> aA1 -> aA2 -| DD ]] $}{Algorithmic Matching}{forallL, arr, unknown, var}
+
+% --------------------------------------------------------------------------------------------%
+% --------------------------------------------------------------------------------------------%
+
+\input{Gen/Appendix/ghc.lhstex}
 
 %%% Local Variables:
 %%% mode: latex
