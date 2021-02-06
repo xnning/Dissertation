@@ -191,7 +191,8 @@ generalize $[[unsolved(DD)]]$ outside $[[kvs]]$.\footnote{See also the
 \end{figure}
 
 \Cref{fig:kind:tit:algo:kinding} presents the selected rules for kinding judgment
-$[[||-k]]$, along with the auxiliary judgments. Most rules correspond directly
+$[[||-k]]$, along with the auxiliary judgments. Full rules can be found in
+\Cref{sec:appendix:kind:rules}. Most rules correspond directly
 to their declarative counterparts.
 For applications $[[t1 t2]]$, \rref{a-ktt-app} first synthesizes the kind of
 $[[t1]]$ to be $[[eK1]]$, then uses $[[||-kapp]]$ to type-check $[[t2]]$. The

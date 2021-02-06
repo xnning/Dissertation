@@ -87,7 +87,7 @@ dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA 
   | int            ::   :: int
   | star           ::   :: star
   | nat            ::   :: nat
-  | natu           ::   :: natu {{ tex \mathsf{Nat}_\unknown }}
+  | natu           ::   :: natu {{ tex \mathsf{Int}_\unknown }}
   | float          ::   :: float
   | bool           ::   :: bool
   | boolu          ::   :: boolu {{ tex \mathsf{Bool}_\unknown }}
@@ -511,7 +511,7 @@ terminals :: 'terminals_' ::=
   | fst     :: :: fst     {{ tex \mathbf{fst} }}
   | snd     :: :: snd     {{ tex \mathbf{snd} }}
   | int     :: :: int     {{ tex \mathsf{Int} }}
-  | nat     :: :: nat     {{ tex \mathsf{Nat} }}
+  | nat     :: :: nat     {{ tex \mathsf{Int} }}
   | bool    :: :: bool    {{ tex \mathsf{Bool} }}
   | top     :: :: top     {{ tex \top }}
   | float     :: :: float     {{ tex \mathsf{Float} }}
@@ -595,6 +595,7 @@ terminals :: 'terminals_' ::=
   | LS         :: :: lexicalsort {{ tex \mathsf{fkv} }}
   | SS         :: :: scopedsort {{ tex \mathsf{scoped\_sort} }}
   | <<:        ::  :: more_general {{ tex \preceq }}
+  | ++         ::  :: append {{ tex \mathrel{ {+}\!\!{+} }^{\mathsf{mv} } }}
 
 
 formula :: formula_ ::=
@@ -2911,7 +2912,7 @@ DD |- k1 -> k2 . k : k2 -| TT
 defn
 
 DD |- ( A1 : K1 ) . A2 : K' ~> A -| TT :: :: app_mode_poly :: 'kapp_tt_'
-{{ tex [[DD]] \Vdash^{\!\!\mathsf{kapp} } ([[A1]] : [[K1]]) \bullet [[A2]] : [[K']] [[~>]] [[A]] [[-|]] [[TT]] }}
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{kapp} } ([[A1]] : [[K1]]) \bullet [[A2]] : [[K']] \leadsto [[A]] [[-|]] [[TT]] }}
 by
 
 DD |- t <= ek1 ~> et2 -| TT
@@ -3325,7 +3326,7 @@ DD |- A <= k2
 defn
 
 DD |- A <= K ~> A' -| TT :: :: kinding_checking :: 'kc_'
-{{ tex [[DD]] \Vdash^{\!\!\mathsf{kc} } [[A]] [[<=]] [[K]] [[~>]] [[A']] [[-|]] [[TT]] }}
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{kc} } [[A]] [[<=]] [[K]] \leadsto [[A']] [[-|]] [[TT]] }}
 
 by
 
@@ -3357,7 +3358,7 @@ OO |- data T : A ~> T : \/i [ckvs2] . ((\/i [ckvs1] . [DD] eK)[xckvs2 |-> ckvs2]
 defn
 
 DD |- A : K1 <: K2 ~> A' -| TT :: :: instantiation :: 'inst_'
-{{ tex [[DD]] \Vdash^{\!\!\mathsf{inst} } [[A]] : [[K1]] [[<:]] [[K2]] [[~>]] [[A']] [[-|]] [[TT]] }}
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{inst} } [[A]] : [[K1]] [[<:]] [[K2]] \leadsto [[A']] [[-|]] [[TT]] }}
 by
 
 DD |- ek1 ~= ek2 -| TT
@@ -3377,7 +3378,7 @@ DD |- eA1 : \/i [a:ek1] . eK <: ek2 ~> eA2 -| TT
 defn
 
 DD |- A : K ~> K' -| TT :: :: kinding_tt :: 'ktt_'
-{{ tex [[DD]] \Vdash^{\!\!\mathsf{k} } [[A]] : [[K]] [[~>]] [[K']] [[-|]] [[TT]] }}
+{{ tex [[DD]] \Vdash^{\!\!\mathsf{k} } [[A]] : [[K]] \leadsto [[K']] [[-|]] [[TT]] }}
 by
 
 
@@ -3572,7 +3573,7 @@ a : ek , DD1 ++ DD2 -| TT
 defn
 
 DD ||-gen ckvs GG1 ~> GG2  :: :: agen :: ''
-{{ tex [[DD]] [[||-gen]]_{\!\![[ckvs]]} [[GG1]] [[~>]] [[GG2]] }}
+{{ tex [[DD]] [[||-gen]]_{\!\![[ckvs]]} [[GG1]] \leadsto [[GG2]] }}
 
 by
 

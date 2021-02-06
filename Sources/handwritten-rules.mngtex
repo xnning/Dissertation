@@ -150,3 +150,43 @@
 }{%
 {\ottdrulename{a\_k\_arrow}}{}%
 }}
+
+\newcommand{\ottdrulekttXXarrow}[1]{\ottdrule[#1]{%
+    \ottpremise{ }
+}{
+[[EE]] \vdash^{\!\!\mathsf{k} } [[->]] : [[star -> star -> star]] \leadsto [[->]]
+}{%
+{\ottdrulename{ktt\_arrow}}{}%
+}}
+
+\newcommand{\ottdruleelaXXarrow}[1]{\ottdrule[#1]{%
+    \ottpremise{ }
+}{
+[[EE]] \vdash^{\!\!\mathsf{ela} } [[->]] : [[star -> star -> star]]
+}{%
+{\ottdrulename{ela\_arrow}}{}%
+}}
+
+\newcommand{\ottdruleaXXkttXXarrow}[1]{\ottdrule[#1]{%
+    \ottpremise{ }
+}{
+[[DD]] \Vdash^{\!\!\mathsf{k} } [[->]] : [[star -> star -> star]] \leadsto [[->]] [[-|]] [[DD]]
+}{%
+{\ottdrulename{a\_ktt\_arrow}}{}%
+}}
+
+\newcommand{\ottdruleaXXelaXXarrow}[1]{\ottdrule[#1]{%
+    \ottpremise{ }
+}{
+[[DD]] \Vdash^{\!\!\mathsf{ela} } [[->]] : [[star -> star -> star]]
+}{%
+{\ottdrulename{ela\_arrow}}{}%
+}}
+
+\newcommand{\ottdruleaXXprXXarr}[1]{\ottdrule[#1]{%
+    \ottpremise{ }
+}{
+[[DD]] [[|-pr]]_{\!\![[Xa]]} [[->]] [[~~>]] [[->]] [[-|]] [[DD]]
+}{%
+{\ottdrulename{a\_pr\_arrow}}{}%
+}}

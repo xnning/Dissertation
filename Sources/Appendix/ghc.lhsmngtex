@@ -383,6 +383,193 @@ is not in effect for the $\forall$ in |ex4|.
 This rule interacts with the main work only in that our formalism (and some of our examples) does
 not respect it. This may be the cause of differing behavior between GHC and the examples we present.
 
+% --------------------------------------------------------------------------------------------%
+% --------------------------------------------------------------------------------------------%
+
+\section{Complete Set of Rules}
+\label{sec:appendix:kind:rules}
+
+In this section we include the complete set of rules for \Cref{chap:kindinference}. Some of the rules are
+repeated from those in the chapter.
+
+\subsection{Declarative \hne}
+
+\drules[k]{$[[EE |- A : k]]$}{Kinding for Polymorphic Types}{forall}
+\drules[ectx]{$[[EE |- HH]]$}{Well-formed Term Contexts}{empty,dcon}
+
+\subsection{Algorithmic \hne}
+
+\drules[a-k]{$[[DD |- A : k -| TT]]$}{Kinding for Polymorphic Types}{forall}
+\drules[a-kc]{$[[DD |- A <= k]]$}{Checking}{eq}
+\drules[a-kv]{$[[DD |- k]]$}{Well-formed Kinds}{star,arrow,kuvar}
+\drules[a-tctx]{$[[DD ok]]$}{Well-formed Type Contexts}{empty,tvar,tcon,kuvar,kuvarSolved}
+\drules[a-ectx]{$[[DD ||- GG]]$}{Well-formed Term Contexts}{empty, dcon}
+\drules[a-ctxde]{$[[DD --->> OO]]$}{Defaulting}{empty, tvar, tcon,
+  kuvarSolved, solve}
+
+\subsection{Context Application in \hne}
+
+\begin{center}
+   \begin{tabular}{lll} \toprule
+     \multicolumn{3}{c}{$[[ [DD] k ]]$ applies $[[DD]]$ as a substitution to $[[k]]$.} \\
+    $[[ [DD] star  ]]$     & = & $[[ star ]]$ \\
+    $[[ [DD] k1 -> k2  ]]$ & = & $[[ [DD] k1 -> [DD] k2 ]]$ \\
+    $[[ [DD[Xa] ] Xa  ]]$  & = & $[[ Xa ]]$ \\
+    $[[ [DD[Xa=k] ] Xa  ]]$  & = & $[[ [DD[Xa=k] ] k ]]$ \\
+     \bottomrule
+   \end{tabular}
+\end{center}
+
+\begin{center}
+   \begin{tabular}{lll} \toprule
+     \multicolumn{3}{c}{$[[ [DD] GG ]]$ applies $[[DD]]$ as a substitution to $[[GG]]$.} \\
+    $[[ [DD] empty  ]]$     & = & $[[ empty ]]$ \\
+    $[[ [DD] (GG, D : A)  ]]$ & = & $[[ [DD]GG, D : [DD]A  ]]$ \\
+     \bottomrule
+   \end{tabular}
+\end{center}
+
+\begin{center}
+   \begin{tabular}{lll} \toprule
+    \multicolumn{3}{c}{$[[ [OO]DD ]]$ applies $[[OO]]$ as a substitution to $[[DD]]$.} \\
+    $[[ [empty] empty  ]]$      & = & $[[ empty ]]$ \\
+    $[[ [OO, a:k] (DD, a : k) ]]$ & = & $[[ [OO] DD, a : [OO] k ]]$ \\
+    $[[ [OO, T:k] (DD, T : k) ]]$ & = & $[[ [OO] DD, T : [OO] k ]]$ \\
+    $[[ [OO, Xa = k] (DD, Xa) ]]$ & = & $[[ [OO] DD ]]$ \\
+    $[[ [OO, Xa = k] (DD, Xa = k') ]]$ & = & $[[ [OO] DD ]]$ \quad if $[[ [OO] k ]] = [[ [OO] k' ]]$ \\
+    $[[ [OO, Xa = k] DD]]$ & = & $[[ [OO] DD ]]$ \quad if $ [[ Xa]] [[notin]] [[DD]] $ \\
+     \bottomrule
+   \end{tabular}
+\end{center}
+
+\subsection{Context Extension in \hne}
+
+\drules[a-ctxe]{$[[DD --> TT]]$}{Context Extension}
+{empty, tvar,tcon,kuvar,kuvarSolved,solve,add,addSolved}
+
+\subsection{Declarative \tit}
+
+\drules[sr]{$[[rs A]]$}{Kind results in $[[star]]$}{star,arrow,forall}
+
+\drules[inst]{$[[EE |- eA1 : eK <: ek ~> eA2]]$}{Instantiation}
+{refl,forall ,forall-infer}
+
+\drules[kc]{$[[EE |- A <= ek ~> eA]]$}{Kind Checking}{sub}
+
+\drules[ktt]{$[[EE |- A : eK ~> eA]]$}{Kinding}{
+  star ,nat,var,arrow,tcon ,app,kapp ,kapp-infer ,forall ,foralli}
+
+\drules[ela]{$[[EE |-el eA : eK]]$}{Elaborated Kinding}{
+  star,nat,var,tcon,arrow, app,kapp ,kapp-infer ,forall,forall-infer}
+
+\drules[tctx]{$[[EE ok]]$}{Well-formed Type Contexts}
+{empty, tvar-tt, tcon-tt}
+
+\drules[ectx]{$[[EE |- HH]]$}{Well-formed Term Contexts}{empty,dcon-tt}
+
+\subsection{Algorithmic \tit}
+
+\drules[a-inst]{$[[DD |- eA1 : eK <: ek ~> eA2 -| TT]]$}{Instantiation}{
+  refl, forall , forall-infer}
+
+\drules[a-kc]{$[[DD |- A <= eK ~> eA -| TT]]$}{Kind Checking}{sub}
+
+\drules[a-ktt]{$[[DD |- A : eK ~> eA -| TT]]$}{Kinding}{
+  star , nat, var, tcon, arrow , forall , app , foralli , kapp , kapp-infer
+}
+\drules[a-kapp-tt]{$[[ DD |- (et1 : eK) . t : ek ~> et2 -| TT]]$}
+{Application Kinding}{arrow,forall, forall-infer, kuvar}
+
+\drules[a-ela]{$[[DD |-el eA : eK]]$}{Elaborated Kinding}{
+  star , kuvar , nat, var, tcon, arrow, forall, forall-infer, app , kapp, kapp-infer
+}
+
+\drules[a]{$[[DD ||-gen ckvs GG1 ~> GG2]]$}{Generalization}{gen}
+
+\drules[a-tctx]{$[[DD ok]]$}{Well-formed Type Contexts}
+{empty,tvar-tt,tcon-tt,kuvar-tt,kuvarSolved-tt,lo,marker}
+
+\drules[a-ectx]{$[[DD ||- GG]]$}{Well-formed Term Contexts}
+{empty, dcon-tt}
+
+\drules[a-u]{$[[DD |- ek1 ~= ek2 -| TT]]$}
+{Unification}{
+  refl-tt
+  , app
+  , kapp
+  , kvarL-tt
+  , kvarR-tt
+  , kvarL-lo-tt
+  , kvarR-lo-tt
+}
+
+\drules[a-pr]{$[[ DD |-pr (Xa) ek1 ~~> ek2 -| TT]]$}
+{Promotion}
+{  star
+  , arr,tcon
+  , nat
+  , app
+  , kapp
+  , tvar
+  , kuvarL
+  , kuvarR-tt}
+
+\drules[a-mv]{$[[ DD1 ++ DD2 -| TT ]]$}
+{Moving}
+{empty, kuvar, kuvarM, tvar, tvarM}
+
+\subsection{Context Application in \tit}
+
+\begin{center}
+   \begin{tabular}{lll}\toprule
+     \multicolumn{3}{c}{$[[ [DD] eK ]]$ applies $[[DD]]$ as a substitution to $[[eK]]$.} \\
+     $[[ [DD] star  ]]$     & = & $[[ star ]]$ \\
+     $[[ [DD] nat  ]]$     & = & $[[ nat ]]$ \\
+     $[[ [DD] a  ]]$     & = & $[[ a ]]$ \\
+     $[[ [DD] T  ]]$     & = & $[[ T ]]$ \\
+     $[ [[DD]] ] [[->]]$ & = & $[[ -> ]]$ \\
+     $[[ [DD] \/ a: ek. eK ]]$ & = & $[[ \/ a : [DD] ek. [DD] eK ]]$ \\
+     $[[ [DD] \/i [ a: ek ]. eK ]]$ & = & $[[ \/i [a : [DD] ek]. [DD] eK ]]$ \\
+     $[[ [DD] (et1 et2)  ]]$ & = & $[[ ([DD] et1) ([DD] et2) ]]$ \\
+     $[[ [DD] (et1 @@et2)  ]]$ & = & $[[ ([DD] et1) @@ ([DD] et2) ]]$ \\
+     $[[ [DD[Xa] ] Xa  ]]$  & = & $[[ Xa ]]$ \\
+     $[[ [DD[Xa:ek=et] ] Xa  ]]$  & = & $[[ [DD[Xa:ek=et] ] et ]]$ \\
+     \bottomrule
+   \end{tabular}
+\end{center}
+
+\begin{center}
+   \begin{tabular}{lll} \toprule
+     \multicolumn{3}{c}{$[[ [DD] GG ]]$ applies $[[DD]]$ as a substitution to $[[GG]]$.} \\
+     $[[ [OO] empty  ]]$      & = & $[[ empty ]]$ \\
+     $[[ [OO] (GG, D : eA) ]]$ & = & $[[ [OO] GG, D : [OO] eA ]]$ \\
+     \bottomrule
+   \end{tabular}
+\end{center}
+
+\begin{center}
+   \begin{tabular}{lll}\toprule
+    \multicolumn{3}{c}{$[[ [OO]DD ]]$ applies $[[OO]]$ as a substitution to $[[DD]]$.} \\
+     $[[ [OO] empty  ]]$      & = & $[[ empty ]]$ \\
+     $[[ [OO, a:ek] (DD, a : ek) ]]$ & = & $[[ [OO] DD, a : [OO] ek ]]$\\
+     $[[ [OO, T:ek] (DD, T : ek) ]]$ & = & $[[ [OO] DD, T : [OO] ek ]]$ \\
+     $[[ [OO, Xa : ek = et] (DD, Xa : ek) ]]$ & = & $[[ [OO] DD ]]$ \\
+     $[[ [OO, Xa : ek = et1] (DD, Xa  : ek = et2) ]]$ & = & $[[ [OO] DD ]]$ \qquad if $[[ [OO] et1 ]] = [[ [OO] et2 ]]$ \\
+     $[[ [OO, Xa :ek = et] DD]]$ & = & $[[ [OO] DD ]]$ \qquad if $ [[ Xa]] [[notin]] [[DD]] $ \\
+     $[[ [OO, marker D] (DD, marker D) ]]$ & = & $[[ [OO] DD ]]$\\
+     $[[ [OO, {OO1} ] (DD, {DD1}) ]]$ & = & $[[ [OO, OO1] (DD, DD') ]]$\\
+                                        &   & where $[[DD' = topo (DD1)]]$ \\ \bottomrule
+   \end{tabular}
+\end{center}
+
+\subsection{Context Extension in \tit}
+
+\drules[a-ctxe]{$[[DD --> TT]]$}{Context Extension}
+  {empty, tvar-tt, tcon-tt, kuvar-tt, kuvarSolved-tt, solve-tt, add-tt,
+    addSolved-tt, marker, lo}
+
+
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../../Thesis"
