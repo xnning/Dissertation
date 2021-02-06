@@ -4,7 +4,7 @@ Most type inference systems used in practice are based on the Hindley-Milner
 (HM) type system~\citep{hindley,Damas:Milner}. The HM system comes with a simple
 yet effective algorithm that can infer the most general, or \textit{principal},
 types for expressions without any type annotations. However, the HM system comes
-with a restriction. That is, universal quantifiers in types are restricted to
+with a restriction: universal quantifiers in types are restricted to
 the top-level. For example, $[[\/a. a -> a]]$ is a valid type, while $[[(\/a. a
 -> a) -> int]]$ is not as $[[\/]]$ appears inside the $[[->]]$ constructor.
 
@@ -34,15 +34,25 @@ In this work, we focus on \textit{predicative implicit higher-rank
 
 A system is implicit, if the type system can automatically figure out missing
 type arguments. For example, given
-
+%
 \begin{lstlisting}
 map :: foralla b. (a -> b) -> [a] -> [b]
 fst :: foralla b. (a, b) -> a
 \end{lstlisting}
-
-\noindent we would like to write \lstinline{map fst [(1, 'a'), (2, 'b')]}
-instead of \lstinline{map (Int, Char) Int (fst Int Char) [(1, 'a'), (2, 'b')]}.
-It thus replies on the type inference algorithm of the system to reconstruct
+%
+we would like to write
+%
+\begin{lstlisting}
+map fst [(1, 'a'), (2, 'b')]
+\end{lstlisting}
+%
+instead of
+%
+\begin{lstlisting}
+map (Int, Char) Int (fst Int Char) [(1, 'a'), (2, 'b')]
+\end{lstlisting}
+%
+To this end, the type inference algorithm of the system needs to reconstruct
 missing type arguments.
 
 \paragraph{Predicativity.}
@@ -54,7 +64,7 @@ allowed to be substituted by a monotype (i.e., a type without universal
 quantifiers); otherwise it is impredicative. It is well-known that general type
 inference for impredicativity is undecidable~\citep{F:undecidable}. We focus
 only on predicative type systems throughout the thesis. The most recent line of
-work in impredicativity can be found in \cite{quick:look,guarded:impred}.
+work in impredicativity can be found in work by \cite{quick:look,guarded:impred}.
 
 
 

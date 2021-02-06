@@ -38,7 +38,7 @@ In particular, I offer the following specific contributions:
     polymorphism and gradual typing.
 
     We start by studying the gradually typed subtyping and \textit{type
-      consistent} \citep{siek2006gradual}, the central concept for gradual
+      consistence} \citep{siek2006gradual}, the central concept for gradual
     typing, for implicit higher-rank polymorphism. To accomplish this, we first
     define a framework for \textit{consistent
       subtyping}~\citep{siek2007gradual} with
