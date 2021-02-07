@@ -1,10 +1,223 @@
-\section{Contributions}
+\section{Contribution Overview}
 
 The goal of this dissertation is to explore the design space of type inference
 for implicit predicative higher-rank polymorphism, as well as to study the
 integration of techniques we have developed into other advanced type system
 features including \textit{gradual typing} \citep{siek2007gradual} and
 \textit{kind inference}.
+
+\subsection{Type Inference for Predicative Implicit Higher-rank Polymorphism}
+
+There have been lots of work on type inference for higher-rank
+polymorphism~\citep{odersky:putting,practical:inference,DK}. However, since
+general type inference for higher-rank polymorphism is
+undecidable~\citep{F:undecidable}, all work involves difference design
+tradeoffs. In particular, given \lstinline{id:foralla. a -> a}, consider:
+%
+\begin{lstlisting}
+(\f. (f 1, f 'a')) id
+\end{lstlisting}
+%
+Systems including \cite{odersky:putting,practical:inference,DK} fail to
+type-check this program, as they fail to infer a polymorphic type for
+\lstinline{f}. However, much like we do not need to write type annotations in
+expressions like \lstinline{\x. \y. x + y}, we should not be required to provide
+an explicit type annotation for \lstinline{f}, given that we can derive this type
+information from the context: \lstinline{id} has type \lstinline{foralla. a -> a},
+which can be serve as the type of \lstinline{f}.
+
+Bidirectional type checking, popularized by local type
+inference~\citep{pierce:local}, exploits the idea of recovering type information
+from adjacent nodes in the syntax tree. For example, using bidirectional type
+checking, type information can be propagated inwards in programs like
+\lstinline{(\x. x + 1): Int -> Int}. Several
+systems~\citep{practical:inference,DK} integrates bidirectional type checking
+into type inference for higher-rank polymorphism.
+
+Unfortunately, traditional bidirectional typechecking is not working for this
+example. Specifically, traditional bidirectional checking does not make use of
+the type information from the \textit{argument} (in this case, \lstinline{id})
+to infer the type of the function (in this case, \lstinline{(\f. (f 1, f 'a'))}).
+
+The first contribution of this dissertation is a design of a variant of
+bidirectional type checking algorithm that, when applied to higher-rank
+polymorphism, is able to accept the above example without any additional type
+annotations. Like other systems, the design of this system involves different
+tradeoffs, and those difference tradeoffs provide new insights for designing
+bidirectional type checking algorithms. Besides illustrating the key idea, we
+also compare our system in detail with other systems with (bidirectional) type inference
+for higher-rank polymorphism.
+
+
+
+\subsection{Gradually Typed Higher-rank Polymorphism}
+
+\textit{Static typing} enjoys many benefits. For example, it is guaranteed that
+ill-typed programs will be rejected at compile-type. Also, types serve as good
+documentation for programs, as well as accelerate program execution when
+combined with type-based compiler optimization. So far we have only considered
+programs with static typing.
+
+On the other hand, \textit{dynamic typing}, where majority of its type checking
+is performed at run-time, has its own merits. Languages with dynamic typing,
+like Python and Javascript, are generally considered to have less cognitive
+load, better expressiveness, as well as better support for fast prototyping.
+
+\textit{Gradual typing}~\citep{siek2006gradual} is designed to enjoy the best of
+both worlds. Languages with gradual typing include
+Clojure~\citep{Bonnaire_Sergeant_2016}, Python~\citep{Vitousek_2014,
+  lehtosalo2016mypy}, TypeScript~\citep{typescript}, etc. With gradual typing,
+programmers have fine-grained control over the static-to-dynamic spectrum:
+programs can be partially type-checked, where the type-checked part enjoys
+benefits from static typing, and the untype-checked part is dynamically
+type-checked. In particular, gradual typing also provides an explicit type
+annotation $[[unknown]]$, which indicates unknown types that should be
+type-checked during runtime. As an example, in the following program:
+%
+\begin{lstlisting}
+\x:Int. \y:?. (x + 1, not y)
+\end{lstlisting}
+%
+\lstinline{x} is statically type-checked and \lstinline{y} is dynamically
+type-checked, so that the following program is statically rejected
+%
+\begin{lstlisting}
+(\x:Int. \y:?. (x + 1, not y)) 'a' False
+\end{lstlisting}
+%
+while the following is dynamically rejected
+%
+\begin{lstlisting}
+(\x:Int. \y:?. (x + 1, not y)) 1 'a'
+\end{lstlisting}
+
+However, while gradual typing is increasingly popular in programming language
+research, the integration of gradual typing with advanced type features still
+largely remains unclear. This is not surprising though, as great care must be
+taken in the design of the interaction between static types features and the
+unknown type. Therefore, there has been more work in adding basic static typing
+support in dynamically typed languages, than gradualizing statically typed
+languages with advanced features.
+
+The second contribution of this dissertation is the integration of gradual
+typing and higher-rank polymorphism. Higher-rank polymorphism, as we have shown,
+is pervasive in languages like Haskell. Therefore, our study provides a step
+forward in adding gradual types in modern static typing languages. In
+particular, with gradual typing, we are able to accept
+%
+\begin{lstlisting}
+  (\f:?. (f 1, f 'a')) id
+\end{lstlisting}
+%
+without providing explicitly the large type annotation for \lstinline{f}.
+
+Designing a gradually typed higher-rank polymorphic type system poses great
+challenges. First, it requires to integrate \textit{subtyping} and
+\textit{consistency}. Implicit polymorphism is often built on a
+\textit{subtyping} relation, which implicitly converts a more general type
+(e.g., \lstinline{foralla. a -> a}) to a more specific one (e.g.,
+\lstinline{Int -> Int}) so that for example \lstinline{id} can be used where an
+expression of type \lstinline {Int -> Int} is expected. On the other hand,
+gradual typing deals with the powerful unknown type, so that an expression with the
+unknown type can be used as an expression of any type. We show that existing
+design of such integration \citep{siek2007gradual} is inadequate, and we provide
+a generalized design that is able to deal with higher-rank polymorphism. Second,
+we must ensure that our system is well-designed, by showing that our system
+satisfies the \textit{correctness criteria} \citep{siek:criteria}. We will show
+that the \textit{dynamic gradual guarantee} is particular tricky to deal with.
+
+
+\subsection{Type Promotion and Kind Inference for Datatypes}
+
+An ideal type inference algorithm should enjoy various desired properties:
+\textit{soundness}, \textit{completeness} and \textit{inference of principal
+  types}. An algorithm is sound and complete, if it accepts and only accepts
+programs that are well-typed in the \textit{declarative} type system.
+
+However, the design of type inference algorithms is challenging, as it often involves
+low-level details, including \textit{constraint solving},
+\textit{unification}, etc. In systems with advanced type features, like
+higher-rank polymorphism, the inference algorithm further needs to deal with the
+scoping and dependency issues between different kinds of variables.
+For example, consider the type \lstinline{foralla. forallb. a -> b } and
+\lstinline{forallc. c -> c}. Intuitively, we know that the first type is more
+general than the other, but how can show that algorithmically? We first need to
+\textit{skolemize} \lstinline{c} as a \textit{type variable}, and then instantiate
+\lstinline{a, b} with fresh \textit{unification variables}, and finally show that we can
+\textit{solve} those unification variables with \lstinline{c}. Handling the scoping and
+dependency issues properly is tricky.
+
+In the third part of the dissertation, we propose a \textit{type promotion}
+process, which helps resolve the dependency between variables during type
+inference. We show that it leads to an arguably simpler type inference algorithm
+for higher-rank polymorphism, and can be easily applied to other advanced
+features like gradual typing.
+
+Another advanced feature that involves more complicated scoping and dependency
+issues is \textit{dependent types}. So far, we have only considered programs
+where expressions can depend on types, e.g., the term \lstinline{2} has type
+\lstinline{Int}. In dependently typed languages, types can depend on expressions, e.g.,
+the type \lstinline{Vec Int 2} may express a vector of integer of length
+\lstinline{2}. A vector with polymorphic length can then be expressed as
+\lstinline{foralln:Int. Vec Int n}. Note how the term \lstinline{n} of type \lstinline{Int} scopes over
+the body of the type.
+
+In the second half of this part, as another application of promotion,
+we consider type inference for dependent types
+in a practical setting; that is, \textit{kind inference} for \textit{datatypes}.
+Datatype declarations offer a way to define new types along with their
+constructors. For example,
+%
+\begin{lstlisting}
+data Maybe a = Nothing | Just a
+\end{lstlisting}
+%
+defines a type \lstinline{Maybe a} with two constructors, \lstinline{Nothing}, and
+\lstinline{Just} which has one field of type \lstinline{a}. This datatype is
+useful to express optional types. For example, we can express a division
+algorithm which, when the second argument is \lstinline{0}, returns
+\lstinline{Nothing}, or otherwise wraps the result inside \lstinline{Just}.
+%
+\begin{lstlisting}
+div : Int -> Int -> Maybe Int
+div 42 2  -- Just 21
+div 42 0  -- Nothing
+\end{lstlisting}
+%
+Note that \lstinline{Maybe} takes a type (e.g., \lstinline{Int} in this case),
+and returns another type (e.g., \lstinline{Maybe Int}). In the same sense as
+expressions are classified using \textit{types}, types are classified using
+\textit{kinds}. We say that primitive types like \lstinline{Int} have kind \lstinline{*},
+and therefore \lstinline{Maybe} has \textit{kind} \lstinline{* -> *}. We call
+the process of inferring the kind of types \textit{kind inference}.
+
+In type systems with only simple types, kind inference for datatypes is
+straightforward. However, in recent years, languages have seen a dramatic surge
+of new features, and kind inference for datatypes has become non-trivial.
+For example, consider inferring the kind of the following complicated datatype
+declarations:
+%
+\begin{lstlisting}
+data App f a  = MkApp (f a)
+data Fix f    = In (f (Fix f))
+
+data T        =  MkT1 (App Maybe Int) |  MkT2 (App Fix Maybe)
+\end{lstlisting}
+
+In the second half of this part, we study kind inference for datatypes in two
+systems: \hne, and a more advanced system we call \tit, based on the extensions
+in modern Haskell, where the type and kind languages are \textit{unified}, and
+\textit{dependently typed}. We show that proper design of kind inference for
+datatypes is
+challenging, and \textit{unification} between dependent types also pose
+challenges in the proof of termination.
+Both formalization are novel and without precedent,
+and thus this work can serve as a guide to language designers who wish to
+formalize their datatype declarations.
+
+
+
+\section{Contributions}
 
 In particular, I offer the following specific contributions:
 

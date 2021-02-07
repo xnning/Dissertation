@@ -7,7 +7,7 @@ in lambda abstractions are always missing, HM only derives polymorphic types of
 Polymorphic types are of \textit{higher-rank}, if universal quantifiers can
 appear anywhere in a type.
 
-Essentially higher-rank types enable much of the expressive power of System F,
+Essentially implicit higher-rank types enable much of the expressive power of System F,
 with the advantage of implicit polymorphism. Complete type inference for System
 F is known to be undecidable \citep{F:undecidable}. \cite{odersky:putting}
 proposed a type system, hereafter referred to as OL, which extends HM by
