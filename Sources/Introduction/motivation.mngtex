@@ -1,14 +1,112 @@
 \section{Motivation}
 
+\subsection{Type Inference}
+
+In real world, many programming languages are typed, including C, Java, and most
+functional programming languages like Haskell. In those languages, numbers like
+\lstinline{1,2,3} are given type \lstinline{Int}, while \lstinline{True} and
+\lstinline{False} are given type \lstinline{Bool}. With these type information, if we
+know that
+%
+\begin{lstlisting}
+add : Int -> Int -> Int
+\end{lstlisting}
+%
+we can accept expressions like
+%
+\begin{lstlisting}
+add 1 2
+\end{lstlisting}
+%
+while correctly rejecting programs like
+%
+\begin{lstlisting}
+add 1 True
+\end{lstlisting}
+%
+
+Typed programs are more reliable, as they offer strong static guarantees. For
+example, if the program is type-checked, then we know for sure that expressions
+like \lstinline{add 1 True} will never occur during runtime. Moreover, typed
+programs often have better performance at runtime since a compiler can apply
+optimizations according to the type information.
+
+However, writing type annotations can be tedious, especially when the type
+annotations can be \textit{inferred} from the context. Consider the
+definition of \lstinline{add}, which uses the built-in primitive
+\lstinline{+ : Int -> Int -> Int}\footnote{The syntax \lstinline{\\} creates a
+    \textit{lambda} for defining functions. The definition is essentially
+    equivalent to \lstinline{add(Int x, Int y) {return x + y;}} in languages like
+  Java.}.
+%
+\begin{lstlisting}
+add = \x:Int. \y:Int. x + y
+\end{lstlisting}
+%
+Here we have provided explicit type annotations for \lstinline{x} and
+\lstinline{y}. But we do not really have to: from the use of \lstinline{+}, it
+is obvious that the type of these two variables are \lstinline{Int}. What we
+really want to write is instead
+%
+\begin{lstlisting}
+add2 = \x. \y. x + y
+\end{lstlisting}
+%
+We thus need \textit{type inference}, which reconstructs missing types in
+expressions. In this case, with type inference, we would write \lstinline{add2},
+and type inference would automatically figure out the right type annotations,
+generating \lstinline{add} for free. Such a facility eliminates a great deal of
+needless verbosity without losing the benefits of static guarantees. Moreover,
+it reduces the burden of programmers, as programs are now easier to read and
+write.
+
+\subsection{The Hindley-Milner Type System}
+
 Most type inference systems used in practice are based on the Hindley-Milner
 (HM) type system~\citep{hindley,Damas:Milner}. The HM system comes with a simple
 yet effective algorithm that can infer the most general, or \textit{principal},
-types for expressions without any type annotations. However, the HM system comes
-with a restriction: universal quantifiers in types are restricted to
-the top-level. For example, $[[\/a. a -> a]]$ is a valid type, while $[[(\/a. a
--> a) -> int]]$ is not as $[[\/]]$ appears inside the $[[->]]$ constructor.
+types for expressions without any type annotations.
 
-This is unfortunate, as modern programming often requires \textit{higher-order}
+For example, consider the expression
+%
+\begin{lstlisting}
+id = \x. x
+\end{lstlisting}
+%
+There are many possible types we can give for \lstinline{id}, including
+\lstinline{Int -> Int}, and \lstinline{Bool -> Bool}, etc. In this case, HM will
+derive the principal type for \lstinline{id}: \lstinline{foralla. a -> a}, a
+\textit{polymorphic} type with a universal quantifier over the type variable
+\lstinline{a}. From the principal type, other types like \lstinline{Int -> Int}
+and \lstinline{Bool -> Bool} can be derived by instantiating \lstinline{a} to
+\lstinline{Int} and \lstinline{Bool} respectively. With the principal type, we
+can use \lstinline{id} as in the following program:
+%
+\begin{lstlisting}
+let id = \x. x
+in (id 1, id True)
+\end{lstlisting}
+%
+
+
+\subsection{Higher-rank Polymorphism}
+
+While elegant and expressive, the HM system comes with a restriction: universal
+quantifiers in types are restricted to the top-level. For example,
+%
+\begin{lstlisting}
+foralla. a -> a
+\end{lstlisting}
+%
+is a valid type, while
+%
+\begin{lstlisting}
+foralla. (a -> a) -> int
+\end{lstlisting}
+%
+is not as $[[\/]]$ appears inside the $[[->]]$ constructor.
+
+This is unfortunate, as modern programming often requires \textit{higher-rank}
 polymorphism, i.e., universal quantifiers can appear anywhere inside a type. For
 example, it is well-known that \textit{rank-2} polymorphic types (i.e.,
 universal quantifier can appear one level \textit{contravariantly} deeper in
@@ -16,55 +114,78 @@ $[[->]]$)~\citep{McCracken:rank2,Jones:fcmodules} can be used for resource
 encapsulation. This is a well-understood technique used in Haskell's state
 monad~\citep{gill1993short}, which has a function \lstinline{runST} with the
 following type:
-
+%
 \begin{lstlisting}
-runST :: foralla. (foralls. ST s a) -> a
+runST : foralla. (foralls. ST s a) -> a
 \end{lstlisting}
-
-\noindent where the \lstinline{forall} in the rank-2 type ensures by
+%
+The \lstinline{forall} in the rank-2 type ensures by
 construction that the internal state \lstinline{s} used by the
 \lstinline{ST s a} computation is inaccessible to the rest of the program.
 
-There has been lots of work in extending the HM type system with higher-rank
-polymorphism~\citep{practical:inference,DK,le2014mlf,leijen2009flexible,quick:look,guarded:impred}.
-In this work, we focus on \textit{predicative implicit higher-rank
-  polymorphism}~\citep{practical:inference,DK}.
+\subsection{Implicit Polymorphism}
 
-\paragraph{Implicit polymorphism.}
+System F \citep{systemF,reynolds1974towards} is the \textit{polymorphic lambda
+  calculus} with full power of higher-rank polymorphism, where functions like
+\lstinline{runST} can be defined easily. System F has been used extensively in
+researches on polymorphism, and has served as the basis for various programming
+language designs.
 
-A system is implicit, if the type system can automatically figure out missing
-type arguments. For example, given
+In System F, type arguments are passed explicitly. For example, consider
 %
 \begin{lstlisting}
 map :: foralla b. (a -> b) -> [a] -> [b]
 fst :: foralla b. (a, b) -> a
 \end{lstlisting}
 %
-we would like to write
+where \lstinline{map} takes a function, and a list, and applies the function to
+every element in the list; and \lstinline{fst} takes out the first component
+from a tuple. We can use the functions as
+%
+\begin{lstlisting}
+map (Int, Char) Int (fst Int Char) [(1, 'a'), (2, 'b')]
+-- [(1, 2)]
+\end{lstlisting}
+%
+
+However, writing type arguments, much like writing type annotations, is quite
+tedious. In this case, the type arguments are almost as large as the problem
+itself!
+
+For systems with polymorphism, type inference enables \textit{implicit
+  polymorphism}, where missing type arguments are reconstructed automatically.
+In this case, as types can be inferred from the argument
+(\lstinline{[(1, 'a'), (2, 'b')]}), with type inference we could simply write
 %
 \begin{lstlisting}
 map fst [(1, 'a'), (2, 'b')]
 \end{lstlisting}
-%
-instead of
-%
-\begin{lstlisting}
-map (Int, Char) Int (fst Int Char) [(1, 'a'), (2, 'b')]
-\end{lstlisting}
-%
-To this end, the type inference algorithm of the system needs to reconstruct
-missing type arguments.
+
+There has been lots of work in extending the HM type system with implicit
+higher-rank
+polymorphism~\citep{practical:inference,DK,le2014mlf,leijen2009flexible,quick:look,guarded:impred}.
+
 
 \paragraph{Predicativity.}
 
-In a system with higher-rank types, one important design decision to make is
-whether the system is \textit{predicative} or \textit{impredicative}. A system
-is predicative, if the type variable bound by a universal quantifier is only
-allowed to be substituted by a monotype (i.e., a type without universal
-quantifiers); otherwise it is impredicative. It is well-known that general type
-inference for impredicativity is undecidable~\citep{F:undecidable}. We focus
-only on predicative type systems throughout the thesis. The most recent line of
-work in impredicativity can be found in work by \cite{quick:look,guarded:impred}.
+In a system with implicit higher-rank polymorphism, one important design
+decision to make is whether the system is \textit{predicative} or
+\textit{impredicative}.
+
+A system is predicative, if the type variable bound by a
+universal quantifier is only allowed to be substituted by a monotype (i.e., a
+type without universal quantifiers); otherwise it is impredicative. For example,
+instantiating \lstinline{a} with \lstinline{Int} in \lstinline{foralla. a -> a},
+generating \lstinline{Int -> Int}, is predicative; while instantiating
+\lstinline{a} with \lstinline{foralla. a -> Int} in \lstinline{foralla. a -> a},
+generating \lstinline{(foralla. a -> Int) -> (foralla. a -> Int)}, is
+impredicative.
+
+In this work, we focus on \textit{predicative implicit higher-rank
+  polymorphism}~\citep{practical:inference,DK}. It is well-known that general
+type inference for impredicativity is undecidable~\citep{F:undecidable}. The
+most recent line of work in impredicativity can be found in work by
+\cite{quick:look,guarded:impred}.
 
 
 
