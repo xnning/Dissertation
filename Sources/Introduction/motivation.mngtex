@@ -75,12 +75,16 @@ id = \x. x
 %
 There are many possible types we can give for \lstinline{id}, including
 \lstinline{Int -> Int}, and \lstinline{Bool -> Bool}, etc. In this case, HM will
-derive the principal type for \lstinline{id}: \lstinline{foralla. a -> a}, a
+derive the principal type for \lstinline{id}: \lstinline{foralla. a -> a}. a
 \textit{polymorphic} type with a universal quantifier over the type variable
-\lstinline{a}. From the principal type, other types like \lstinline{Int -> Int}
-and \lstinline{Bool -> Bool} can be derived by instantiating \lstinline{a} to
-\lstinline{Int} and \lstinline{Bool} respectively. With the principal type, we
-can use \lstinline{id} as in the following program:
+\lstinline{a}. We call types without universal quantifiers, like
+\lstinline{Int -> Int} and \lstinline{Bool -> Bool}, \textit{monomorphic types} (i.e.,
+\textit{monotypes}), and types like \lstinline{foralla. a -> a} polymorphic
+types. For this example, from the principal type \lstinline{foralla. a -> a}, other types like
+\lstinline{Int -> Int} and \lstinline{Bool -> Bool} can be derived by instantiating
+\lstinline{a} to \lstinline{Int} and \lstinline{Bool} respectively.
+With the
+principal type, we can use \lstinline{id} as in the following program:
 %
 \begin{lstlisting}
 let id = \x. x
@@ -165,27 +169,31 @@ There has been lots of work in extending the HM type system with implicit
 higher-rank
 polymorphism~\citep{practical:inference,DK,le2014mlf,leijen2009flexible,quick:look,guarded:impred}.
 
+\subsection{Predicativity}
 
-\paragraph{Predicativity.}
-
-In a system with implicit higher-rank polymorphism, one important design
-decision to make is whether the system is \textit{predicative} or
-\textit{impredicative}.
+In a system with polymorphism, one important design decision to make is whether
+the system is \textit{predicative} or \textit{impredicative}.
 
 A system is predicative, if the type variable bound by a
-universal quantifier is only allowed to be substituted by a monotype (i.e., a
-type without universal quantifiers); otherwise it is impredicative. For example,
+universal quantifier is only allowed to be instantiated by a monotype;
+otherwise it is impredicative. For example,
 instantiating \lstinline{a} with \lstinline{Int} in \lstinline{foralla. a -> a},
 generating \lstinline{Int -> Int}, is predicative; while instantiating
 \lstinline{a} with \lstinline{foralla. a -> Int} in \lstinline{foralla. a -> a},
 generating \lstinline{(foralla. a -> Int) -> (foralla. a -> Int)}, is
-impredicative.
-
-In this work, we focus on \textit{predicative implicit higher-rank
-  polymorphism}~\citep{practical:inference,DK}. It is well-known that general
-type inference for impredicativity is undecidable~\citep{F:undecidable}. The
+impredicative. HM is an example of predicative polymorphic system, with universal
+quantifiers restricted to the top-level, while System F is impredicative.
+It is well-known that general
+type inference for impredicativity is undecidable~\citep{F:undecidable}.
+The
 most recent line of work in impredicativity can be found in work by
 \cite{quick:look,guarded:impred}.
+
+In this work, we focus on \textit{predicative implicit higher-rank
+  polymorphism}~\citep{practical:inference,DK}. In the rest of this thesis, whenever
+we refer to \textit{higher-rank polymorphism}, unless otherwise specified, we
+denote predicative implicit higher-rank polymorphism.
+
 
 
 
