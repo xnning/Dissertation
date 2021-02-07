@@ -194,26 +194,30 @@ the process of inferring the kind of types \textit{kind inference}.
 In type systems with only simple types, kind inference for datatypes is
 straightforward. However, in recent years, languages have seen a dramatic surge
 of new features, and kind inference for datatypes has become non-trivial.
-For example, consider inferring the kind of the following complicated datatype
+For example, consider inferring the kind of the following datatype
 declarations:
 %
 \begin{lstlisting}
 data App f a  = MkApp (f a)
 data Fix f    = In (f (Fix f))
-
 data T        =  MkT1 (App Maybe Int) |  MkT2 (App Fix Maybe)
 \end{lstlisting}
+%
+which includes several complicated features:
+in the definition of \lstinline{App}, the type of \lstinline{f} and
+\lstinline{a} can be polymorphic; in \lstinline{Fix}, the
+type \lstinline{Fix} recurs in its constructor definition; in
+\lstinline{T}, the type \lstinline{Maybe} and \lstinline{Fix} are both used in their
+unsaturated form, and \lstinline{App} is used polymorphically.
 
 In the second half of this part, we study kind inference for datatypes in two
 systems: \hne, and a more advanced system we call \tit, based on the extensions
 in modern Haskell, where the type and kind languages are \textit{unified}, and
 \textit{dependently typed}. We show that proper design of kind inference for
-datatypes is
-challenging, and \textit{unification} between dependent types also pose
-challenges in the proof of termination.
-Both formalization are novel and without precedent,
-and thus this work can serve as a guide to language designers who wish to
-formalize their datatype declarations.
+datatypes is challenging, and \textit{unification} between dependent types also
+poses a threat to termination. Both formalization are novel and without
+precedent, and thus this work can serve as a guide to language designers who
+wish to formalize their datatype declarations.
 
 
 
