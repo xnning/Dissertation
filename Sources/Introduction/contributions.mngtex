@@ -8,7 +8,7 @@ features including \textit{gradual typing} \citep{siek2007gradual} and
 
 \subsection{Type Inference for Predicative Implicit Higher-rank Polymorphism}
 
-There have been lots of work on type inference for higher-rank
+There has been much work on type inference for higher-rank
 polymorphism~\citep{odersky:putting,practical:inference,DK}. However, since
 general type inference for higher-rank polymorphism is
 undecidable~\citep{F:undecidable}, all work involves difference design
@@ -24,7 +24,7 @@ type-check this program, as they fail to infer a polymorphic type for
 expressions like \lstinline{\x. \y. x + y}, we should not be required to provide
 an explicit type annotation for \lstinline{f}, given that we can derive this type
 information from the context: \lstinline{id} has type \lstinline{foralla. a -> a},
-which can be serve as the type of \lstinline{f}.
+which can serve as the type of \lstinline{f}.
 
 Bidirectional type checking, popularized by local type
 inference~\citep{pierce:local}, exploits the idea of recovering type information
@@ -53,8 +53,8 @@ for higher-rank polymorphism.
 \subsection{Gradually Typed Higher-rank Polymorphism}
 
 \textit{Static typing} enjoys many benefits. For example, it is guaranteed that
-ill-typed programs will be rejected at compile-type. Also, types serve as good
-documentation for programs, as well as accelerate program execution when
+ill-typed programs will be rejected at compile-time. Also, types serve as good
+documentation for programs, as well as to accelerate program execution when
 combined with type-based compiler optimization. So far we have only considered
 programs with static typing.
 
@@ -79,20 +79,20 @@ type-checked during runtime. As an example, in the following program:
 \end{lstlisting}
 %
 \lstinline{x} is statically type-checked and \lstinline{y} is dynamically
-type-checked, so that the following program is statically rejected
+type-checked, so that the following program is rejected at compile-time:
 %
 \begin{lstlisting}
 (\x:Int. \y:?. (x + 1, not y)) 'a' False
 \end{lstlisting}
 %
-while the following is dynamically rejected
+while the following is only rejected at runtime:
 %
 \begin{lstlisting}
 (\x:Int. \y:?. (x + 1, not y)) 1 'a'
 \end{lstlisting}
 
-However, while gradual typing is increasingly popular in programming language
-research, the integration of gradual typing with advanced type features still
+However, while gradual typing is increasingly popular in the programming language
+research community, the integration of gradual typing with advanced type features still
 largely remains unclear. This is not surprising though, as great care must be
 taken in the design of the interaction between static types features and the
 unknown type. Therefore, there has been more work in adding basic static typing
@@ -134,7 +134,7 @@ An ideal type inference algorithm should enjoy various desired properties:
   types}. An algorithm is sound and complete, if it accepts and only accepts
 programs that are well-typed in the \textit{declarative} type system.
 
-However, the design of type inference algorithms is challenging, as it often involves
+However, design of type inference algorithms is challenging, as it often involves
 low-level details, including \textit{constraint solving},
 \textit{unification}, etc. In systems with advanced type features, like
 higher-rank polymorphism, the inference algorithm further needs to deal with the
@@ -147,7 +147,7 @@ general than the other, but how can show that algorithmically? We first need to
 \textit{solve} those unification variables with \lstinline{c}. Handling the scoping and
 dependency issues properly is tricky.
 
-In the third part of the dissertation, we propose a \textit{type promotion}
+In the third part of the dissertation, we propose a novel \textit{type promotion}
 process, which helps resolve the dependency between variables during type
 inference. We show that it leads to an arguably simpler type inference algorithm
 for higher-rank polymorphism, and can be easily applied to other advanced
@@ -205,17 +205,17 @@ data T        =  MkT1 (App Maybe Int) |  MkT2 (App Fix Maybe)
 %
 which includes several complicated features:
 in the definition of \lstinline{App}, the type of \lstinline{f} and
-\lstinline{a} can be polymorphic; in \lstinline{Fix}, the
-type \lstinline{Fix} recurs in its constructor definition; in
+\lstinline{a} can be polymorphic; in
 \lstinline{T}, the type \lstinline{Maybe} and \lstinline{Fix} are both used in their
-unsaturated form, and \lstinline{App} is used polymorphically.
+unsaturated form (i.e., \lstinline{Maybe} and \lstinline{Fix} are not applied to
+any type arguments), and \lstinline{App} is used polymorphically.
 
 In the second half of this part, we study kind inference for datatypes in two
 systems: \hne, and a more advanced system we call \tit, based on the extensions
 in modern Haskell, where the type and kind languages are \textit{unified}, and
 \textit{dependently typed}. We show that proper design of kind inference for
 datatypes is challenging, and \textit{unification} between dependent types also
-poses a threat to termination. Both formalization are novel and without
+poses a threat to termination. Both formulations are novel and without
 precedent, and thus this work can serve as a guide to language designers who
 wish to formalize their datatype declarations.
 
@@ -250,12 +250,12 @@ In particular, I offer the following specific contributions:
 \item[\Cref{part:gradual}]
   \begin{itemize}
   \item \cref{chap:Gradual} integrates implicit higher-rank polymorphism with
-    \textit{gradual types}\citep{siek2006gradual}, which is, as far as we are
+    \textit{gradual types}~\citep{siek2006gradual}, which is, as far as we are
     aware, the first work on bridging the gap between implicit higher-rank
     polymorphism and gradual typing.
 
     We start by studying the gradually typed subtyping and \textit{type
-      consistence} \citep{siek2006gradual}, the central concept for gradual
+      consistency} \citep{siek2006gradual}, the central concept for gradual
     typing, for implicit higher-rank polymorphism. To accomplish this, we first
     define a framework for \textit{consistent
       subtyping}~\citep{siek2007gradual} with

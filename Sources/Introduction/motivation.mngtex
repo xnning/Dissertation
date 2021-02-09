@@ -6,7 +6,7 @@
 In real world, many programming languages are typed, including C, Java, and most
 functional programming languages like Haskell. In those languages, numbers like
 \lstinline{1,2,3} are given type \lstinline{Int}, while \lstinline{True} and
-\lstinline{False} are given type \lstinline{Bool}. With these type information, if we
+\lstinline{False} are given type \lstinline{Bool}. With such type information, if we
 know that
 %
 \begin{lstlisting}
@@ -106,7 +106,7 @@ foralla. a -> a
 is a valid type, while
 %
 \begin{lstlisting}
-foralla. (a -> a) -> int
+(foralla. a -> a) -> int
 \end{lstlisting}
 %
 is not as $[[\/]]$ appears inside the $[[->]]$ constructor.
@@ -133,7 +133,7 @@ construction that the internal state \lstinline{s} used by the
 System F \citep{systemF,reynolds1974towards} is the \textit{polymorphic lambda
   calculus} with full power of higher-rank polymorphism, where functions like
 \lstinline{runST} can be defined easily. System F has been used extensively in
-researches on polymorphism, and has served as the basis for various programming
+research on polymorphism, and has served as the basis for various programming
 language designs.
 
 In System F, type arguments are passed explicitly. For example, consider
@@ -154,7 +154,7 @@ map (Int, Char) Int (fst Int Char) [(1, 'a'), (2, 'b')]
 %
 
 However, writing type arguments, much like writing type annotations, is quite
-tedious. In this case, the type arguments are almost as large as the problem
+tedious. In this case, the type arguments are almost as large as the program
 itself!
 
 For systems with polymorphism, type inference enables \textit{implicit
@@ -191,9 +191,9 @@ most recent line of work in impredicativity can be found in work by
 \cite{quick:look,guarded:impred}.
 
 In this work, we focus on \textit{predicative implicit higher-rank
-  polymorphism}~\citep{practical:inference,DK}. In the rest of this thesis, whenever
-we refer to \textit{higher-rank polymorphism}, unless otherwise specified, we
-denote predicative implicit higher-rank polymorphism.
+  polymorphism}~\citep{practical:inference,DK}. In the rest of this
+dissertation, whenever we refer to \textit{higher-rank polymorphism}, unless
+otherwise specified, it denotes predicative implicit higher-rank polymorphism.
 
 
 
