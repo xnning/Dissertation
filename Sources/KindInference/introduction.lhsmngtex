@@ -16,15 +16,12 @@ import Data.Kind ( Type )
 
 \section{Introduction and Motivation}
 
-Modern functional languages such as Haskell, ML, and OCaml come with powerful
-forms of type inference. The global type-inference algorithms employed in those
-languages are derived from the Hindley-Milner type system
-(HM) \citep{hindley,Damas:Milner}, with multiple extensions. As the languages
-evolve, researchers also formalize the key aspects of type inference for the new
-extensions. Common extensions of HM include \emph{higher-ranked
-  polymorphism} \citep{odersky:putting, practical:inference} and
-\emph{type-inference for GADTs} \citep{PeytonJones:gadt}, which have both been
-formally studied thoroughly.
+The global type-inference algorithms employed in modern functional languages
+such as Haskell, ML, and OCaml are derived from the Hindley-Milner type system
+(HM) \citep{hindley,Damas:Milner}, with multiple extensions. Common extensions
+of HM include \emph{higher-ranked polymorphism} \citep{odersky:putting,
+  practical:inference} and \emph{type-inference for GADTs}
+\citep{PeytonJones:gadt}, which have both been formally studied thoroughly.
 
 Most research work for extensions of HM so far (including OL, DK, \ap and \gpc) has
 focused on forms of polymorphism, where type variables all have the same kind.
