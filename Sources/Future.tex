@@ -1,15 +1,21 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\chapter{Conclusion and Future Directions}
+\chapter{Summary and Future Directions}
 \label{chap:future}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-In this dissertation we have studied type inference and extensions of
-predicative implicit higher-rank polymorphism. Specifically, the dissertation
-consists of three main technical parts: bidirectional type checking for
-higher-rank polymorphism with the new \textit{\mode} mode, integration of
-higher-rank polymorphism and gradual typing, and a strategy called \textit{type
-  promotion} that helps build simpler solving process that can be applied to polymorphic
-subtyping and the kind inference algorithm for datatypes.
+Through type-theoretic design of language features, we have pushed the research
+on predicative implicit higher-rank polymorphism further, and we believe that
+contributions in this dissertation can be used to guide the continued evolution
+of (functional) programming language design and implementations. Specifically,
+with the new bidirectional type checking algorithm using the \mode mode, we were
+able to type-check programs that traditional type inference algorithms cannot,
+and thus provide new insights for inference algorithm design with bidirectional
+type checking. With the integration of higher-rank polymorphism and gradual
+typing, we provided a step forward in gradualizing modern functional programming
+languages like Haskell. Moreover, the work on \textit{type promotion} simplified
+type inference algorithms with tricky dependency and scoping issues, and the
+kind inference for datatypes presented a first known, detailed account of
+datatypes, which can serve as a guide for future development of datatypes.
 
 In this section we discuss some future directions we would like to pursue.
 
