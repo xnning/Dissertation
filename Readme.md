@@ -1,6 +1,6 @@
 # My PhD Thesis
 
-Working-in-progress :D.
+- 2020-02-11 First draft submitted :D
 
 **Let me know if you have any good advice against procrastination**.
 
