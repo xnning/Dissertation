@@ -9,6 +9,7 @@
 \maketitle
 
 \begin{abstract}
+  \vspace{-25pt}
  \input{Sources/Abstract}
 \end{abstract}
 
