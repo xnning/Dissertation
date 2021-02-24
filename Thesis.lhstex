@@ -66,7 +66,6 @@
 \include{Sources/Related}
 
 \include{Sources/Future}
-\nolinenumbers
 
 
 % This ensures that the subsequent sections are being included as root
@@ -80,8 +79,10 @@
 \cleardoublepage
 \bibliography{Thesis}
 
+\nolinenumbers
 \part{Technical Appendix}
 
+\linenumbers
 \appendix
 
 \include{Gen/Appendix}
