@@ -30,34 +30,43 @@
 
 \part{Prologue}
 
+\linenumbers
 \include{Sources/Introduction}
 
 \include{Sources/Background}
+\nolinenumbers
 
 \part{Bidirectional Type Checking With the Application Mode} \label{part:typeinference}
 
+\linenumbers
 \include{Sources/BiDirectional}
+\nolinenumbers
 
 \part{Higher-Rank Polymorphism and Gradual Typing}
 \label{part:gradual}
 
+\linenumbers
 \include{Sources/Gradual}
 \include{Sources/Dynamic}
+\nolinenumbers
 
 \part{Type Inference with Promotion}
 \label{part:promotion}
 
+\linenumbers
 \include{Sources/Promotion}
 \include{Sources/KindInference}
+\nolinenumbers
 
 
 
 \part{Epilogue}
 
+\linenumbers
 \include{Sources/Related}
 
 \include{Sources/Future}
-
+\nolinenumbers
 
 
 % This ensures that the subsequent sections are being included as root
