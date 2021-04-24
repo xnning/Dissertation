@@ -92,7 +92,8 @@ while the following is only rejected at runtime:
 \end{lstlisting}
 
 However, while gradual typing is increasingly popular in the programming language
-research community, the integration of gradual typing with advanced type features still
+research community~\citep{gradual:theory:practice},
+the integration of gradual typing with advanced type features still
 largely remains unclear. This is not surprising though, as great care must be
 taken in the design of the interaction between static types features and the
 unknown type. Therefore, there has been more work in adding basic static typing
@@ -192,7 +193,7 @@ and therefore \lstinline{Maybe} has \textit{kind} \lstinline{* -> *}. We call
 the process of inferring the kind of types \textit{kind inference}.
 
 In type systems with only simple types, kind inference for datatypes is
-straightforward. However, in recent years, languages have seen a dramatic surge
+straightforward. However, in recent years, languages like Haskell have seen a dramatic surge
 of new features, and kind inference for datatypes has become non-trivial.
 For example, consider inferring the kind of the following datatype
 declarations:
@@ -240,7 +241,8 @@ In particular, I offer the following specific contributions:
       (checking)} \citep{pierce:local} with a new \textit{application} mode. The
     new variant preserves the advantage of bidirectional type checking, namely
     many redundant type annotations are removed, while certain programs can type
-    check with even fewer annotations. We believe that, similarly to standard
+    check with even fewer annotations than traditional bidirectional type
+    checking algorithm. We believe that, similarly to standard
     bidirectional type checking, bidirectional type checking with an \mode mode
     can be applied to a wide range of type systems.
   \end{itemize}

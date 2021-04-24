@@ -190,10 +190,13 @@ The
 most recent line of work in impredicativity can be found in work by
 \cite{quick:look,guarded:impred}.
 
-In this work, we focus on \textit{predicative implicit higher-rank
-  polymorphism}~\citep{practical:inference,DK}. In the rest of this
-dissertation, whenever we refer to \textit{higher-rank polymorphism}, unless
-otherwise specified, it denotes predicative implicit higher-rank polymorphism.
+
+Type inference for a predicative type system is much easier, while still enables
+most of the expressiveness of higher-rank polymorphism. Thus just like
+\cite{DK,practical:inference}, in this work, we focus on \textit{predicative
+  implicit higher-rank polymorphism}. In the rest of this dissertation, whenever
+we refer to \textit{higher-rank polymorphism}, unless otherwise specified, it
+denotes predicative implicit higher-rank polymorphism.
 
 
 
