@@ -69,7 +69,8 @@ instance, consider these datatype declarations:
 \begin{code}
 data App f a  = MkApp (f a)
 data Fix f    = In (f (Fix f))
-
+\end{code}
+\begin{code}
 data T        =  MkT1 (App Maybe Int) 
               |  MkT2 (App Fix Maybe)  -- accept or reject?
 \end{code}

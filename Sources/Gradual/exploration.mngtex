@@ -264,14 +264,14 @@ $[[A1]]$ can be used where $[[C]]$ is expected, since there is at most one-time
 loss of information.
 
 \begin{observation}
-  If $[[C <~ B]]$, and $[[B <: A1]]$, then $[[C <~ A1]]$.
+  If $[[A <: B]]$, and $[[B <~ C]]$, then $[[A <~ C]]$.
 \end{observation}
 
 This is reflected in \Cref{fig:obser:a}. A symmetrical observation is given in
 \Cref{fig:obser:b}:
 
 \begin{observation}
-  If $[[C <~ B]]$, and $[[B <: A]]$, then $[[C <~ A]]$.
+  If $[[C <~ B]]$, and $[[B <: A1]]$, then $[[C <~ A1]]$.
 \end{observation}
 
 \begin{figure}
@@ -403,7 +403,7 @@ compatible with top types (which are also problematic with the original definiti
   [[A1]] &= [[(((\/a . a -> int) -> int) -> bool) -> (\/a . a)]] \\
   [[B]] &= [[(((\/a.a -> int) -> int) -> bool) -> (int -> int)]] \\
   [[C]] &= [[(((\/a. unknown -> int) -> int) -> bool) -> (int -> unknown)]] \\
-  [[D]] &= [[(((unknown -> int) -> int) -> bool) -> (int -> unknown)]]
+  [[A4]] &= [[(((unknown -> int) -> int) -> bool) -> (int -> unknown)]]
   \end{align*}
   \end{subfigure}
   \caption{Example that is fixed by the new definition of consistent subtyping.}

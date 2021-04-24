@@ -323,7 +323,9 @@ examples:
 \begin{code}
 data T1 (a :: k) b = MkT1 (T2 a b)
 data T2 (c :: j) d = MkT2 (T1 c d)
+\end{code}
 
+\begin{code}
 data T3 a where
   MkT3 :: forall (k :: *) (b :: k). T3 b
 \end{code}

@@ -167,10 +167,12 @@ Consider these examples:
 \begin{code}
   data R a where
   MkR :: b -> R b
-
+\end{code}
+\begin{code}
   data S a where
   MkS :: S b
-
+\end{code}
+\begin{code}
   data T a where
   MkT :: forall (k :: *) (b :: k). T b
 \end{code}
