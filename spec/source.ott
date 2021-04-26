@@ -884,6 +884,10 @@ defn
 ----------------- :: forallL
 |-HM \/ a. A1 <: A2
 
+|-HM A [a ~> t1] <: t
+----------------- :: a_forallL
+|-HM \/ a. A <: t
+
 a notin fv(A1)
 |-HM A1 <: A2
 ----------------- :: forallR

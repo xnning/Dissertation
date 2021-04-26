@@ -74,7 +74,7 @@ arbitrary \emph{monotypes}.
 
 \begin{figure}[t]
     \drules[hm-s]{$ [[|-HM A1 <: A2]] $}{Subtping}{refl,forallR,forallL}
-  \caption{Subtyping in the Hindley-Milner type system.}
+  \caption{Declarative subtyping in the Hindley-Milner type system.}
   \label{fig:HM:subtyping}
 \end{figure}
 
@@ -84,7 +84,7 @@ present the definition of principal types, let's first define the
 \emph{subtyping} relation among types.
 
 The judgment $[[|-HM A1 <: A2]]$, given in \Cref{fig:HM:subtyping}, reads that
-$[[A1]]$ is a subtype of $[[A2]]$. The subtyping relation indicates that
+$[[A1]]$ is a subtype of $[[A2]]$. The declarative subtyping relation indicates that
 $[[A1]]$ is more \textit{general} than $[[A2]]$: for any instantiation of
 $[[A2]]$, we can find an instantiation of $[[A1]]$ to make two types match.
 \Rref{hm-s-refl} is simply reflexive for monotypes. \Rref{hm-s-forallR} has a
@@ -142,6 +142,12 @@ presented as the original system, with instantiation applied to only variables,
 and generalization applied to only let expressions. Specifically,
 \begin{mathpar}
  \drule{hm-var-inst} \and \drule{hm-let-gen}
+\end{mathpar}
+
+A syntax-directed subtyping relation can also be derived, by restricting
+\rref{hm-s-forallL} to allow only for a monotype on the right:
+\begin{mathpar}
+  \drule{hm-s-a-forallL}
 \end{mathpar}
 
 
