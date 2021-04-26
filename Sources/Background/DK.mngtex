@@ -69,11 +69,19 @@ this program as:
 \noindent Here the type of \lstinline{f} can be easily derived from the type
 signature using checking mode in bidirectional type checking.
 
+\cite{dunfield:tridirectional} establish a design principle of bidirectional
+type checking inspired by \textit{mode correctness} from logical programming,
+where \textit{introduction rules} are distinguished from \textit{elimination
+  rules}. Following the design principle, constructors corresponding to
+introduction rules (e.g., tuples) are checked against a given type, while
+destructors corresponding to elimination rules (e.g., tuple projections) infer a
+type. DK is designed following this principle.
+
 
 \begin{figure}[t]
   \centering
     \begin{tabular}{lrcl} \toprule
-      Expressions & $[[e]]$ & \syndef & $[[x]] \mid [[n]] \mid [[ \x : A . e ]] \mid [[\x . e]]  \mid [[e1 e2]] \mid [[e : A]] $ \\
+      Expressions & $[[e]]$ & \syndef & $[[x]] \mid [[n]] \mid [[\x . e]]  \mid [[e1 e2]] \mid [[e : A]] $ \\
       Types & $[[A]] $ & \syndef & $ [[int]] \mid [[a]] \mid  [[A1 -> A2]] \mid [[\/ a. A]] $ \\
       Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[t1 -> t2]] $ \\
       Contexts & $[[dd]]$ & \syndef & $[[empty]] \mid [[dd , x : A]] \mid [[dd , a]] $ \\
@@ -89,12 +97,13 @@ signature using checking mode in bidirectional type checking.
 \paragraph{Syntax.}
 
 The syntax of the DK is given in \Cref{fig:DK}. Comparing to OL, only the
-definition of expressions slightly differs. First, the expressions $e$ in DK
+definition of expressions slightly differs. First, the expressions $[[e]]$ in DK
 have no let expressions. \cite{DK} omitted let-bindings from the formal
 development, but argued that restoring let-bindings is easy, as long as they get
 no special treatment incompatible with substitution (e.g., a syntax-directed HM
 does polymorphic generalization only at let-bindings). Second, DK has annotated
-expressions $[[e:A]]$, in which the type annotation can be propagated into the
+expressions $[[e:A]]$ (instead of annotated lambda expressions $[[\x:A. e]]$),
+in which the type annotation can be propagated into the
 expression, as we will see shortly.
 
 The definitions of types and contexts are the same as in OL. Thus, DK also shares
