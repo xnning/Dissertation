@@ -49,9 +49,10 @@ without universal quantifiers.
 \paragraph{Contexts.}
 
 Typing contexts $[[dd]]$ are standard: they map a term variable $[[x]]$ to its
-type $[[A]]$. In this system, the context is modeled as the HM-style context
-(\Cref{sec:HM}), which does not track type variables. Again, we implicitly
-assume that all variables in $[[dd]]$ are distinct.
+type $[[A]]$. Again, we implicitly assume that all variables in $[[dd]]$ are
+distinct. In this system, the context is modeled as the HM-style context
+(\Cref{sec:HM}), which does not contain type variables; so the type system needs
+to explicitly ensure freshness of type variables.
 
 The key novelty lies in the \emph{application contexts} $[[ss]]$, which are the
 main data structure needed to allow types to flow from arguments to functions.

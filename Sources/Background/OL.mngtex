@@ -111,10 +111,11 @@ Finally, in addition to variable types, the contexts $[[dd]]$ now also keep
 track of type variables. Note that in the original work in
 \cite{odersky:putting}, the system, much like HM, does not track type variables;
 instead, it explicitly checks that type variables are fresh with respect to a
-context or a type when needed. Here we include type variables in contexts, as it
-sets us well for the Dunfield-Krishnaswami type system to be introduced in the
-next section. Moreover, it provides a complete view of possible formalisms of
-contexts in a type system with generalization.
+context or a type when needed. The difference is more presentational rather
+than semantic. Here we include type variables in contexts, as it sets us well
+for the Dunfield-Krishnaswami type system to be introduced in the next section.
+Moreover, it provides a complete view of possible formalisms of contexts in a
+type system with generalization.
 
 Now since the context tracks type variables, we define the notion of
 \textit{well-formedness} of types, given in \Cref{fig:OL:wf}. For a type to be
@@ -187,6 +188,37 @@ representation of contexts.
 Moreover, since OL is predicative and only guesses monotypes for unannotated
 lambda abstractions, its algorithmic system can be implemented as a direct
 extension of the one for HM.
+
+\subsection{Discussion: Variance and Eta-equality}
+
+As we have discussed before, the subtyping rule for functions in OL is
+contravariant in arguments, and covariant in return types (\rref{ol-s-arrow}).
+This is a design choice rather than a requirement. In fact, in some systems,
+e.g., \cite{guarded:impred,quick:look}, all type constructs are invariant,
+including functions, which makes type inference for impredicativity much easier
+in their setting.
+
+Contravariance and covariance are more powerful than invariance, in the sense
+that they can accept some more programs. But they also come with a cost. In
+particular, if we translate a higher-rank implicit polymorphic type system into
+a system with explicit polymorphism (e.g. System F~\citep{systemF}), then
+contravariance and covariance often require the target language to support
+$\eta$-equality (i.e., an expression $[[\x. e x]]$ is equivalent to $[[e]]$). We
+show such a translation in \Cref{sec:AP:translation}. Unfortunately, while
+$\eta$-equality is sound in System F, it may be unsound in some other languages,
+like Haskell. Specifically, in Haskell, an expression of type $[[int]]$ may
+reduce to a value of type $[[int]]$, or it may actually be \textit{bottom}
+(e.g., \lstinline{undefined} in Haskell),
+which throws a runtime error when evaluated.
+On the other hand, \lstinline{\x. undefined x}, the $\eta$-expanded form of
+\lstinline{undefined}, is always a value,
+and so is semantically different from \lstinline{undefined}. Thus
+$\eta$-equality is unsound in Haskell.
+
+In systems presented in this thesis, as we do not model the bottom value (or any
+\textit{side effects}), we support the contravariant/ covariant function
+subtyping rule as \rref{ol-s-arrow}, while we see no particular challenges in
+supporting invariant constructs instead.
 
 
 %%% Local Variables:
