@@ -227,7 +227,111 @@ algorithm for HM, they argued that their algorithm is remarkably simple. The
 algorithm is later discussed and used in \Cref{part:gradual} and
 \Cref{part:promotion}. We will discuss more about it there.
 
+\subsection{Discussion: lazy and eager instantiation}
 
+We say that DK's style of instantiation is \textit{lazy}, where top-level quantifiers
+are only instantiated when needed (e.g., when applied as a function to
+arguments); while HM's style of instantiation is \textit{eager}, where in the
+syntax-directed rules, instantiation eagerly instantiates all top-level universal
+quantifiers when possible (as in \rref{hm-var-inst}). Eager instantiation is also
+used in the higher-rank polymorphic type system in \cite{practical:inference}.
+
+The differences between lazy and eager instantiation have pervasive
+consequences. The first and direct consequence is that for the same expression
+lazy instantiation can derive a more polymorphic type. Consider that given
+\lstinline{id: foralla. a -> a}, we want to
+infer the type of \lstinline{id}. With lazy instantiation, the algorithm can
+directly return \lstinline{foralla. a -> a} unchanged, while eager instantiation
+can only return \lstinline{a -> a} (among others). In this case, we can make two
+types match by generalizing the final result from eager instantiation, which
+gives us \lstinline{foralla. a -> a}. However, when the system features
+higher-rank types, after generalization eager instantiation may still fail
+to derive the same type.
+For example, consider the expression
+%
+\begin{lstlisting}
+  \x: Int. id
+\end{lstlisting}
+%
+\noindent In this case, lazy instantion returns the type
+\lstinline{Int -> foralla. a -> a}, while eager instantiation returns the type
+\lstinline{Int -> a -> a} which, after generalization,
+becomes \lstinline{foralla. Int -> a -> a}, and is less polymorphic than
+\lstinline{Int -> foralla. a -> a}, according to the subtyping relation in OL.
+In this sense naive eager instantiation may reject programs that lazy
+instantiation can accept,
+e.g.,
+%
+\begin{lstlisting}
+let g = \x:Int. id in (\f: Int -> foralla. a -> a. f) g
+\end{lstlisting}
+%
+The problem can be avoided by, for example, featuring \textit{deep
+skolemisation} as in \cite{practical:inference}. Deep skolemisation floats out all its
+universal quantifiers that appear to the right of a top level arrow, so that
+\lstinline{foralla. Int -> a -> a} and \lstinline{Int -> foralla. a -> a} are
+actually isomorphic.
+
+% One possible fix is to use
+% \textit{eager generalization}, by generalising every lambda body.
+% With eager instantiation and eager generalization, the type of \lstinline{id}
+% will be instantiated and then immediately generalized again, so
+% \lstinline{\x:Int. id} can return \lstinline{Int -> \foralla. a -> a}
+
+Secondly, with lazy instantiation, as instantiation is done only when necessary,
+we must be aware of \textit{when} it is necessary. We have seen one particular
+case in the formalism, i.e., when applying a top-level polymorphic type as a
+function to arguments (\rref{dk-app-forall}). When we extend the system with
+more constructs, there may be more cases where instantiation is needed. For
+example, consider we extend the system with \lstinline{if} expressions:
+%
+\begin{lstlisting}
+if flag then id else \x. x + 1
+\end{lstlisting}
+%
+\noindent We expect the two branches in \lstinline{if} to return the same type.
+Therefore when collecting the result type from branches, we must instantiate the
+type of \lstinline{id} to \lstinline{Int -> Int}, so that it matches the type of
+another branch. \cite{practical:inference} discuss three possible typing
+formalizations of \lstinline{if} expressions under eager instantiation. To adopt
+either formalization in lazy instantiation systems, instantiation of the return
+types of the branches must be performed.
+
+Finally, the choice can have unexpected interaction with other rules involving
+generalization, for example, \lstinline{let} expressions. Specifically, under
+let generalization and lazy instantiation, typability may not be preserved after
+let-binding inlining. To illustrate the issue, consider the expression:
+%
+\begin{lstlisting}
+let f = \x. x
+in let g = \y. f
+in e
+\end{lstlisting}
+%
+If we generalize the type of \lstinline{f} as in HM, then we get
+\lstinline{f:foralla. a -> a}. Now we continue type-checking \lstinline{g},
+which requires another step of generalization. With lazy instantiation,
+we get \lstinline{g: forallb. b -> foralla. a -> a}, which is again, more
+polymorphic than the type \lstinline{g: forallb a. b -> a -> a} we get from
+eager instantiation. However, if we inline the definition of \lstinline{f}, then
+the program becomes
+%
+\begin{lstlisting}
+  in let g = \y. \x. x
+  in e
+\end{lstlisting}
+%
+\noindent Now both lazy and eager instantiation can only get the type
+\lstinline{g: forallb a. b -> a -> a}. Namely, with lazy instantiation,
+let-binding inlining gets us a less polymorphic type (according to the subtyping
+rule in OL). The problem has also been discussed in DK \citep{DK}, where they
+fix the issue by not treating let expressions specially -- namely, there is no
+generalization for let expressions at all.
+
+In this thesis, the choice does not matter so much for the key contributions of
+the work. As we do not feature deep skolemisation, we mostly follow the idea of
+lazy instantiation as in DK. Nevertheless, we believe that deep skolemisation is
+compatible with our subtyping relations used in later chapters.
 
 
 
