@@ -178,7 +178,7 @@ since they are actually equivalent.
 \paragraph{Sugar for Type Synonyms.}
 
 In the same way that we can regard $[[let]]$ expressions as syntactic sugar, in
-the new type system we further \textit{gain built-in type synonyms for free}. A
+the new type system we further \textit{gain built-in type synonyms}. A
 \textit{type synonym} is a new name for an existing type. Type synonyms are
 common in languages such as Haskell. In our calculus a simple form of type
 synonyms can be desugared as follows:
