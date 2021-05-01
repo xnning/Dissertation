@@ -166,6 +166,11 @@ $[[A1]]$ is a subtype of $[[A2]]$.
 
 \paragraph{Application judgment.}
 
+Notably, unlike HM or OL, DK does not feature an explicit instantiation rule.
+Instead, \rref{dk-inf-var} directly returns a (possibly) polymorphic type, and
+thus when typing applications (\rref{dk-app-inf}), we need to explicitly discuss
+the possible shape of the function type.
+
 The application judgment $[[dd |-DK A1 . e =>=> A2]]$ is interpreted as, when we
 apply an expression of type $[[A1]]$ to the expression $[[e]]$, we get a return
 type $[[A2]]$. For a polymorphic type (\rref{dk-app-forall}), we

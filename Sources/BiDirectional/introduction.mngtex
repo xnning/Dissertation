@@ -51,11 +51,35 @@ the introduction form of constructs. For literals, the corresponding rule is
 \]
 
 Now we can type check $[[1]]$, but the price to pay is that two typing rules for
-literals are needed. Worse still, the same criticism applies to other constructs
-(e.g., pairs). This shows one drawback of bidirectional type checking: often to
-minimize annotations, many rules are duplicated for having both the inference
-mode and the checking mode, which scales up with the typing rules in a type
-system.
+literals are needed. Worse still, the same criticism applies to other
+constructs, for example, pairs. Below we give the type inference and checking rules
+for pairs.
+%
+\begin{mathpar}
+    \inferrule*[lab=inf-pair]{
+      [[dd |- e1 => A1]]
+      \\
+      [[dd |- e2 => A2]]
+    }{
+      [[dd |- (e1, e2) => (A1, A2)]]
+    }
+    \and
+    \inferrule*[lab=check-pair]{
+      [[dd |- e1 <= A1]]
+      \\
+      [[dd |- e2 <= A2]]
+    }{
+      [[dd |- (e1, e2) <= (A1, A2)]]
+    }
+\end{mathpar}
+
+
+This shows one drawback of bidirectional type checking: often to minimize
+annotations, many rules are duplicated for having both the inference mode and
+the checking mode, which scales up with the typing rules in a type system. It is
+possible, though, to parameterize the rules over the direction, as is done in
+\cite{practical:inference}, which is helpful to eliminate the notational
+duplication but perhaps not the cognitive one.
 
 \subsection{Type Checking with The Application Mode}
 
@@ -79,13 +103,14 @@ consider the simple expression
 \end{lstlisting}
 
 
-\noindent This expression cannot type check in traditional bidirectional type
-checking, because unannotated abstractions, as a construct which correspond to
-introduction forms, only have a checking mode, so annotations are
-required~\footnote{It type-checks in DK, because in DK rules for lambdas are
-  duplicated for having both the inference (integrated with type inference
-  techniques) and the checking mode.}. For example,
-\lstinline{((\x. x) : Int -> Int) 1}.
+\noindent This expression cannot type check in a traditional bidirectional type
+system if the system follows strictly the design guideline for bidirectional type
+checking \citep{dunfield:tridirectional}, because unannotated abstractions, as a
+construct which correspond to introduction forms, only have a checking mode, so
+annotations are required~\footnote{It type-checks in DK, because in DK rules for
+  lambdas are duplicated for having both the inference (integrated with type
+  inference techniques) and the checking mode.}.
+For example, \lstinline{((\x. x) : Int -> Int) 1}.
 
 In this example we can observe that if the type of the argument is accounted
 for in inferring the type of \lstinline{\x. x}, then it is actually possible to
@@ -134,7 +159,8 @@ $[[1]]$ is used as the type of the binding $[[x]]$.
 
 Note that, since the examples so far are based on simple types, obviously they
 can be solved by integrating type inference and relying on techniques like
-unification or constraint solving (as in DK). However, here the point is that
+unification or constraint solving (as in DK) in the algorithm.
+However, here the point is that
 the application mode helps to reduce the number of annotations \emph{without
   requiring such sophisticated techniques}. Also, the application mode helps
 with situations where those techniques cannot be easily applied, such as type
@@ -183,6 +209,9 @@ have both $[[e]]$ and $[[A1 -> A2 -> A3]]$. In the application mode, we have
 $[[e]]$, and maybe an empty context (which degenerates into the inference mode), or
 an application context $[[A1]]$ (we know the type of first argument), or an
 application context $[[A1]], [[A2]]$ (we know the type of both arguments).
+Partial type checking has also been used in techniques like
+\textit{colored local type inference} \citep{odersky2001colored} and
+\textit{boxy types} \citep{dimitrios:boxy}.
 
 \paragraph{Trade-offs.}
 
@@ -285,21 +314,6 @@ syntactic sugar to a combination of lambda/application:
   [[let x = e1 in e2]] [[~~>]] [[(\x. e2) e1]]
 \]
 
-\noindent With this approach, nested lets can lead to types which are \emph{more
-  general} than HM. For example, consider the following expression:
-
-\begin{lstlisting}
-let s = \x. x in let t = \y. s in e
-\end{lstlisting}
-
-The type of \lstinline{s} is \lstinline{foralla. a -> a} after
-generalization. Because \lstinline{t} returns \lstinline{s} as a result, we
-might expect \lstinline{t: forallb. b -> (foralla. a -> a)}, which is what our
-system will return. However, HM will return type
-\lstinline{t: forallb. foralla. b -> (a -> a)},
-as it can only return rank 1 types, which is less general than
-the previous one according to the subtyping relation for
-polymorphic types in OL (\Cref{fig:OL:static}).
 
 \paragraph{Conservativity over the Hindley-Milner Type System.}
 
@@ -335,7 +349,7 @@ bindings of polymorphic types in abstractions \emph{that are not applied to
 smaller annotations.
 
 3) Expressiveness. Based on these two answers, it may seem that our system
-should accept all expressions that are typeable in their system. However, this
+should accept all expressions that are typeable in their systems. However, this
 is not true because the application mode is \textit{not} conservative over traditional
 bidirectional type checking. Consider the expression:
 
@@ -352,7 +366,7 @@ not contradict their guideline of providing type annotations for every
 polymorphic binder. Programmers that strictly follow their guideline can still
 add a polymorphic type annotation for \lstinline{g}. However it does mean that
 it is a little harder to understand where annotations for polymorphic binders
-can be \emph{omitted} in their system. This requires understanding how the
+can be \emph{omitted} in their systems. This requires understanding how the
 applications in the checking mode operate.
 
 In our system the above expression is not typeable, as a consequence 

@@ -1282,7 +1282,7 @@ ss |-AP A1 <: A2 ~~> ef
 --------------------------- :: var
 dd ; ss |-AP x => A2 ~~> ef x
 
-dd, x: A1 |-AP e => A2 ~~> es
+dd, x: A1 ; ss |-AP e => A2 ~~> es
 --------------------------- :: lam
 dd ; ss , A1 |-AP \x. e => A1 -> A2 ~~> \x:A1. es
 
