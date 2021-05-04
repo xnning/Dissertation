@@ -153,12 +153,12 @@ Instead of rejecting the program outright, due to missing type annotations,
 gradual typing provides a simple alternative by giving \lstinline$f$ the unknown
 type $[[unknown]]$. With this type the same program type-checks and produces
 \lstinline$(1, 'a')$. By running the program, programmers can gain more insight
-about its run-time behaviour. Then, with this insight, they can also give
-\lstinline$f$ a more precise type (\lstinline$foralla. a -> a$) a posteriori so
-that the program continues to type-check via implicit polymorphism and also
-grants more static safety. In this paper, we envision such a language that
-combines the benefits of both implicit higher-rank polymorphism and gradual
-typing.
+about its run-time behaviour (e.g., \lstinline{f} behaves just like an identity
+function). Then, with this insight, they can also give \lstinline$f$ a more
+precise type (\lstinline$foralla. a -> a$) a posteriori so that the program
+continues to type-check via implicit polymorphism and also grants more static
+safety. In this paper, we envision such a language that combines the benefits of
+both implicit higher-rank polymorphism and gradual typing.
 
 \subsection{Application: Efficient (Partly) Typed Encodings of ADTs}
 
@@ -177,7 +177,7 @@ function-based encodings of (optionally polymorphic) ADTs\footnote{In a type
   only get the \textit{lazy} version of those datatypes.}. This offers an
 immediate way to model algebraic datatypes in our calculus without requiring
 extensions to our calculus or, more importantly, to its target---the polymorphic
-blame calculus. While we believe that such extensions are possible, they would
+blame calculus \pbc. While we believe that such extensions are possible, they would
 likely require non-trivial extensions to the polymorphic blame calculus. Thus
 the alternative of being able to model algebraic datatypes without extending
 \pbc is appealing. The encoding also paves the way to provide built-in support
