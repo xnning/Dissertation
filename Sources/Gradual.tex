@@ -3,22 +3,35 @@
 \label{chap:Gradual}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-\textit{Consistent subtyping} is employed in some gradual type systems to validate type
-conversions. The original definition by \citet{siek2007gradual} serves as
-a guideline for designing gradual type systems with subtyping. Polymorphic
-types \`a la System F also induce a subtyping relation that relates
-polymorphic types to their instantiations. However
-\citeauthor{siek2007gradual}'s definition is not adequate for polymorphic
-subtyping.
-This section first proposes a generalization of consistent subtyping
-(\Cref{sec:gradual:exploration}) that is adequate for polymorphic subtyping, and
-subsumes the original definition by \citeauthor{siek2007gradual}. The new
-definition of consistent subtyping provides novel insights with respect to
-previous polymorphic gradual type systems, which did not employ consistent
-subtyping.
+Gradual typing~\citep{siek2006gradual} is an increasingly popular topic in both
+programming language practice and theory. On the practical side there is a
+growing number of programming languages adopting gradual typing. Those languages
+include Clojure~\citep{Bonnaire_Sergeant_2016}, Python~\citep{Vitousek_2014, lehtosalo2016mypy},
+TypeScript~\citep{typescript}, Hack~\citep{verlaguet2013facebook}, and the
+addition of Dynamic to C\#~\citep{Bierman_2010}, to name a few. On the
+theoretical side, recent years have seen a large body of research that defines
+the foundations of gradual typing~\citep{garcia:abstracting,
+  cimini2016gradualizer, CiminiPOPL}, explores their use for both functional and
+object-oriented programming~\citep{siek2006gradual, siek2007gradual}, as well as
+its applications to many other areas~\citep{Ba_ados_Schwerter_2014,
+  castagna2017gradual, Jafery:2017:SUR:3093333.3009865}.
 
-We then present \gpc, a gradually typed calculus for implicit
-higher-rank polymorphism that uses our new notion of consistent subtyping. We
+In this chapter, we present \gpc, a gradually typed calculus for implicit
+higher-rank polymorphism. Integrating gradual typing with higher-rank
+polymorphism is challenging. In particular, gradual typing calculi employ
+\textit{type consistency} to validate type conversions. Polymorphic types \`a la
+System F also induce a subtyping relation that relates polymorphic types to
+their instantiations. The original definition of \textit{consistent subtyping}
+by \citet{siek2007gradual} serves as a guideline for designing gradual type
+systems with subtyping. However \citeauthor{siek2007gradual}'s definition is not
+adequate for polymorphic subtyping. Therefore, this section first proposes a
+generalization of consistent subtyping (\Cref{sec:gradual:exploration}) that is
+adequate for polymorphic subtyping, and subsumes the original definition by
+\citeauthor{siek2007gradual}. The new definition of consistent subtyping
+provides novel insights with respect to previous polymorphic gradual type
+systems, which did not employ consistent subtyping.
+
+We then develop \gpc on top of our new notion of consistent subtyping. We
 develop both declarative (\Cref{sec:gradual:type-system}) and bidirectional
 algorithmic versions (\Cref{sec:gradual:algorithm}) for the type system. The
 algorithmic version employs techniques developed by DK \citep{DK} for
