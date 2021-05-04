@@ -9,60 +9,73 @@
     {#3}
     {#4}
   }
-  \drules[FOb-s]{$ [[ A1 <: B ]] $}{Subtyping}{int,bool,float,intfloat,arrow,rcd,unknown}
 
   \drules[FOb-consist]{$ [[ A1 ~ B ]] $}{Type Consistency}{refl, unknownR,
     unknownL, arrow, rcd}
+
+  \drules[FOb-s]{$ [[ A1 <: B ]] $}{Subtyping}{int,bool,float,intfloat,arrow,rcd,unknown}
 
   \caption{Subtyping and type consistency in \obb}
   \label{fig:gradual:objects}
 \end{figure}
 
-Gradual typing~\citep{siek2006gradual} is an increasingly popular topic in both
-programming language practice and theory. On the practical side there is a
-growing number of programming languages adopting gradual typing. Those languages
-include Clojure~\citep{Bonnaire_Sergeant_2016}, Python~\citep{Vitousek_2014, lehtosalo2016mypy},
-TypeScript~\citep{typescript}, Hack~\citep{verlaguet2013facebook}, and the
-addition of Dynamic to C\#~\citep{Bierman_2010}, to name a few. On the
-theoretical side, recent years have seen a large body of research that defines
-the foundations of gradual typing~\citep{garcia:abstracting,
-  cimini2016gradualizer, CiminiPOPL}, explores their use for both functional and
-object-oriented programming~\citep{siek2006gradual, siek2007gradual}, as well as
-its applications to many other areas~\citep{Ba_ados_Schwerter_2014,
-  castagna2017gradual, Jafery:2017:SUR:3093333.3009865}.
+As is well known, a gradually typed language supports both fully static and
+fully dynamic checking of program properties, as well as the continuum between
+these two extremes. It also offers programmers fine-grained control over the
+static-to-dynamic spectrum, i.e., a program can be evolved by introducing more
+or less precise types as needed~\citep{garcia:abstracting}. The untyped part of
+a program is dynamically checked, while the typed part is statically checked.
+Therefore, an expression like $[[(\x:unknown. x + 1) true]]$ is dynamically
+rejected, while an expression like $[[(\x:int. x + 1) true]]$ is statically
+rejected. Here in the example we see the use of the \textit{unknown type}
+$[[unknown]]$, which indicates missing of static type information and thus the
+use of dynamic typing.
+
+Gradual type calculi formalize the interaction between static types and dynamic
+type by featuring the unknown type $[[unknown]]$, as well as a key concept,
+\emph{consistency}, which weakens type equality to allow for the presence of the
+unknown type $[[ unknown ]]$. Essentially, if $[[A1]]$ is consistent with
+$[[B]]$ (written $[[A1 ~ B]]$), then a function $[[e1]]$ expecting an argument
+of type $[[A1]]$ can also accept an argument $[[e2]]$ of type $[[B]]$.
+Importantly, the unknown type $[[unknown]]$ is consistent with any type.
+Therefore, the expression $[[(\x:unknown. x + 1) true]]$ type checks and only
+later gets rejected at runtime.
 
 \citet{siek2007gradual} developed a gradual type system for object-oriented
-languages that they call \obb.
-A key concept in gradual type systems is the concept of
-\emph{consistency} (written $\sim$) between gradual types. Consistency weakens type equality to
-allow for the presence of \emph{unknown} types $[[ unknown ]]$. The intuition is
-that consistency relaxes the structure of a type system to tolerate unknown
-positions in a gradual type.
-They also defined the subtyping relation in a way that static type
-safety is preserved. Their key insight is that the unknown type $[[unknown]]$ is
-neutral to subtyping, with only $[[ unknown <: unknown  ]]$. Both relations are
-defined in \Cref{fig:gradual:objects}.
-A primary contribution of their work is to show that consistency and subtyping
-are orthogonal. As \citet{siek2007gradual} put it, this shows that ``gradual
-typing and subtyping are orthogonal and can be combined in a principled
-fashion''.
+languages that they call \obb. The definition of type consistency, $[[A1 ~ B]]$,
+is given at the top of \Cref{fig:gradual:objects}. The intuition is that
+consistency relaxes the structure of a type system to tolerate unknown positions
+in a gradual type. Consider some examples:
 
-% In some gradual type systems with subtyping, consistency is combined with
-% subtyping to give rise to the notion of \emph{consistent
-% subtyping}~\citep{siek2007gradual}. Consistent subtyping is employed by
-% gradual type systems to validate type conversions arising from conventional
-% subtyping. One nice feature of consistent subtyping is that it is derivable
-% from the more primitive notions of
-% \emph{consistency} % (arising from gradual typing)
-% and \emph{subtyping}. Thus consistent subtyping is often used as a guideline
-% for designing gradual type systems with subtyping.
+\begin{center}
+  \begin{tabular}{rrl}
+    $[[int]]$ & $[[~]]$ & $ [[int]]$ \\
+    $[[int]]$ & $[[~]]$ & $ [[unknown]]$ \\
+    $[[unknown]]$ & $[[~]]$ & $ [[int]]$ \\
+    $[[int -> unknown]]$ & $[[~]]$ & $ [[unknown -> int]]$ \\
+  \end{tabular}
+\end{center}
 
+\obb also features subtyping. \citeauthor{siek2007gradual} defined the subtyping
+relation in a way that static type safety is preserved. Their key insight is
+that the unknown type $[[unknown]]$ is neutral to subtyping, with only
+$[[unknown <: unknown ]]$. The subtyping relation $[[A1 <: B]]$ relations are
+defined in \Cref{fig:gradual:objects}. With subtyping, if $[[A1 <: B]]$, then a
+function $[[e1]]$ expecting an argument of type $[[A1]]$ can also accept an
+argument $[[e2]]$ of type $[[B]]$. For example, a function expecting
+$[[float]]$ can accept an integer.
 
-However, the orthogonality of consistency and subtyping does not
-lead to a deterministic relation. Thus \citeauthor{siek2007gradual} defined
-\emph{consistent subtyping} (written $[[<~]]$) based on a \emph{restriction
-  operator}, written $\mask {[[A1]]} {[[B]]}$ that ``masks off'' the parts of type $[[A1]]$ that
-are unknown in type $[[B]]$. For example,
+However, the orthogonality of consistency and subtyping does not lead to a
+deterministic relation.
+Now the question is that if we know a
+function $[[e1]]$ expecting an argument of type $[[A1]]$, and an argument
+$[[e2]]$ with type $[[B]]$, how can we determine if $[[e1 e2]]$ is well-typed?
+To this end, \citeauthor{siek2007gradual} defined \emph{consistent subtyping},
+such that $[[e1 e2]]$ is well-typed only if $[[B]]$ is a consistent subtype of
+$[[A1]]$ (written $[[B <~ A1]]$). They defined algorithmic consistent subtyping
+based on a \emph{restriction operator}, written $\mask {[[A1]]} {[[B]]}$ that
+``masks off'' the parts of type $[[A1]]$ that are unknown in type $[[B]]$. For
+example,
 
 \begin{center}
   \begin{tabular}{lcl}
@@ -92,14 +105,17 @@ With the restriction operator, consistent subtyping is simply defined as:
   $[[A1 <~ B]] \equiv \mask {[[A1]]} {[[B]]} [[<:]] \mask {[[B]]} {[[A1]]}$.
 \end{definition}
 
-Later they show a proposition that consistent subtyping is equivalent to two
-declarative definitions, which we refer to as the strawman for \emph{declarative}
-consistent subtyping because it servers as a good guideline on superimposing
-consistency and subtyping. Both definitions are non-deterministic because of
-the intermediate type $[[C]]$.
+A primary contribution of their work is to show that, as \citet{siek2007gradual}
+put it, ``gradual typing and subtyping are orthogonal and can be combined
+in a principled fashion''. To compose subtyping and consistency, Siek and Taha
+showed a proposition that algorithmic consistent subtyping is equivalent to two
+declarative definitions, which we refer to as the strawman for
+\emph{declarative} consistent subtyping because it servers as a good guideline
+on superimposing consistency and subtyping. Both definitions are
+non-deterministic because of the intermediate type $[[C]]$.
 
-\begin{definition}[Strawman for Declarative Consistent Subtyping] \label{def:old-decl-conssub}
-  The following two are equivalent:
+\begin{definition}[Strawman for Declarative Consistent
+  Subtyping] \label{def:old-decl-conssub} \leavevmode
   \begin{enumerate}
   \item $[[A1 <~ B]]$ if and only if $[[A1 ~ C]]$ and $[[C <: B]]$ for some $[[C]]$.
   \item $[[A1 <~ B]]$ if and only if $[[A1 <: C]]$ and $[[C ~ B]]$ for some $[[C]]$.
@@ -113,13 +129,6 @@ to. For example, we focus more on \cref{def:old-decl-conssub} in
 
 \subsection{Motivation: Gradually Typed Higher-Rank Polymorphism}
 \label{sec:gradual:motivation}
-
-Our work combines implicit (higher-rank) polymorphism with gradual typing. As
-is well known, a gradually typed language supports both fully static and fully
-dynamic checking of program properties, as well as the continuum between these
-two extremes. It also offers programmers fine-grained control over the
-static-to-dynamic spectrum, i.e., a program can be evolved by introducing more
-or less precise types as needed~\citep{garcia:abstracting}.
 
 Haskell is a language renowned for its advanced type system, but it does not
 feature gradual typing. Of particular interest to us is its support for implicit
