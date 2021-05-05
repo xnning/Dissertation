@@ -1,26 +1,35 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-\chapter{Higher-Rank Type Inference with Type Promotion}
+\chapter{Higher-Rank Type Inference Algorithm with Type Promotion}
 \label{chap:Promotion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
-\cite{gundry2010type} proposed type inference in context as a general foundation
-for unification/type inference algorithms. The key idea is based on the notion
-of information increase. However, their semantic definition of information
-increase makes it hard to prove metatheory formally. Following their work, a
-more syntactic foundation for information increase is presented by DK
-(\cite{DK}) to deal with higher-rank polymorphism. However, the DK approach
-produces duplication and cannot be easily generalized to handle more complicated
-types.
+Designing type inference algorithms is challenging. In particular, while a
+declarative type system can \textit{guess} a type (e.g., the type of
+\lstinline{x} in \lstinline{\x. e}) and can even be \textit{non-deterministic}
+in the guessing (e.g., multiple possible types for \lstinline{x} in
+\lstinline{\x. x}), an type inference algorithm needs to be deterministic, and
+thus has to deal with many low-level details including \textit{unification}. At the
+same time we expect an type inference algorithm to retain desirable properties
+like \textit{inference of principal types}, as well as \textit{soundness} and
+\textit{completeness} with respect to the declarative type system. An algorithm
+is sound and complete, if it accepts and only accepts programs that are
+well-typed in the declarative type system.
 
-In this chapter, we propose a strategy called \textit{promotion} that helps
-resolve the dependency of existential variables in the framework of type
-inference in context. As an illustration, \Cref{sec:pr:unif} applies promotion
-to the unification algorithm for the simply typed lambda calculus.
-\Cref{sec:pr:subtypin} further proposes \textit{polymorphic promotion} to deal
-with subtyping for higher-rank polymorphism. Finally, we briefly discuss how to promote
-dependent types and gradual types in \Cref{sec:pr:discussion}.
-This chapter also sets up the stage for \Cref{chap:kindinference}, where
-promotion is used in a more complex setting.
+In this chapter, we focus on the design of type inference algorithms in the
+presence of higher-rank polymorphism. Compared to type inference for simple
+types, type inference for higher-rank polymorphism needs to further take care of
+scoping and dependency issues between different kinds of variables. We propose a
+strategy called \textit{promotion} that helps resolve the dependency of
+unification variables in the framework of \textit{type inference in
+  context}~\citep{gundry2010type}. To illustrate the key idea,
+\Cref{sec:pr:unif} applies promotion to the unification algorithm for the simply
+typed lambda calculus. \Cref{sec:pr:subtypin} then proposes \textit{polymorphic
+  promotion} to deal with subtyping for higher-rank polymorphism, which leads to
+an arguably simpler type inference algorithm for higher-rank polymorphism.
+Finally, we briefly discuss how promotion can be further applied to other
+advanced features like dependent types and gradual types in
+\Cref{sec:pr:discussion}. This chapter also sets up the stage for
+\Cref{chap:kindinference}, where promotion is used in a more complex setting.
 
 
 \input{Gen/Promotion/introduction}
