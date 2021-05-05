@@ -49,7 +49,8 @@ in \Cref{fig:gradual:algo-syntax}.
 \paragraph{Notational convenience.}
 
 Following DK's system, we use contexts as substitutions on types. We write $[[
-[GG]aA ]]$ to mean $[[GG]]$ applied as a substitution to type $[[aA]]$. We also
+[GG]aA ]]$ to mean $[[GG]]$ applied as a substitution to type $[[aA]]$, whose
+definition is given below. We also
 use a hole notation, which is useful when manipulating contexts by inserting and
 replacing declarations in the middle. The hole notation is used extensively in
 proving soundness and completeness. For example, $[[GG]] [ [[TT]] ]$ means
@@ -57,6 +58,18 @@ $[[GG]]$ has the form $[[GL]], [[TT]], [[GR]]$; if we have $[[ GG[evar] ]] =
 [[(GL, evar, GR)]]$, then $[[ GG[evar = at] ]] = [[(GL, evar = at, GR)]] $.
 Occasionally, we will see a context with two \emph{ordered} holes, e.g., $[[GG]]
 = [[ GG0[TT1][TT2] ]]$ means $[[GG]]$ has the form $[[ GL, TT1, GM, TT2, GR ]]$.
+
+\begin{center}
+  \begin{tabular}{lll} \toprule
+    $[[ [DD] int  ]]$     & = & $[[ int ]]$ \\
+    $[[ [DD] a  ]]$     & = & $[[ a ]]$ \\
+    $[[ [DD[evar] ] evar  ]]$     & = & $[[ evar ]]$ \\
+    $[[ [DD[evar=at] ] evar  ]]$     & = & $[[ [DD[evar=at] ]at ]]$ \\
+    $[[ [DD] aA1 -> aA2  ]]$ & = & $[[ [DD] aA1 -> [DD] aA2 ]]$ \\
+    $[[ [DD] (\/a. aA)  ]]$     & = & $[[ \/a. [DD]aA ]]$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
 
 \paragraph{Input and output contexts.}
 

@@ -49,36 +49,37 @@ types, and comparing our definitions with the compatibility relation by
 
 \paragraph{Consistency.}
 
-The key observation here is that consistency is mostly a structural relation,
-except that the unknown type $\unknown$ can be regarded as any type. In other
-words, consistency is an equivalence relation lifted from static types to
-gradual types~\citep{garcia:abstracting}. Following this observation, we
-naturally extend the definition from \Cref{fig:gradual:objects} with polymorphic
-types, as shown in the middle of \Cref{fig:gradual:decl:subtyping}. In
-particular a polymorphic type $[[ \/a . A]]$ is consistent with another
-polymorphic type $[[ \/a. B ]]$ if $[[A]]$ is consistent with $[[B]]$.
+The key observation here is that consistency, $[[A ~ B]]$, is mostly a
+structural relation, except that the unknown type $[[unknown]]$ can be regarded as
+any type. In other words, consistency is an equivalence relation lifted from
+static types to gradual types~\citep{garcia:abstracting}. Following this
+observation, we naturally extend the definition from \Cref{fig:gradual:objects}
+with polymorphic types, as shown in the middle of
+\Cref{fig:gradual:decl:subtyping}. In particular a polymorphic type $[[ \/a .
+A]]$ is consistent with another polymorphic type $[[ \/a. B ]]$ if $[[A]]$ is
+consistent with $[[B]]$.
 
 \paragraph{Subtyping.}
 
 We express the fact that one type is a polymorphic generalization of another by
 means of the subtyping judgment $[[ dd |-G A <: B ]]$. Compared with the
-subtyping rules of \citet{odersky:putting} in \Cref{fig:OL:static}, the
-only addition is the neutral subtyping of $[[unknown]]$. Notice that, in
-\rref{gpc-s-forallL}, the universal quantifier is only allowed to be instantiated
-with a \emph{monotype}. The judgment $[[ dd |-G A ]]$ checks whether all the type
-variables in $[[A]]$ are bound in the context $[[dd]]$. According to the syntax
-in \Cref{fig:gradual:decl:subtyping}, monotypes do not include the unknown type
-$[[unknown]]$. This is because if we were to allow the unknown type to be used
-for instantiation, we could have $[[ \/a . a -> a <: unknown -> unknown ]]$ by
-instantiating $[[a]]$ with $[[unknown]]$. Since $[[ unknown -> unknown ]]$ is
-consistent with any functions $[[ A1 -> B ]]$, for instance, $[[ int -> bool ]]$,
-this means that we could provide an expression of type $[[ \/a . a -> a ]]$ to a
-function where the input type is supposed to be $[[ int -> bool ]]$. However, as
-we know, $[[ \/a . a -> a ]]$ is definitely not compatible with $[[ int -> bool
-]]$. Indeed, this does not hold in any polymorphic type systems without gradual
-typing. So the gradual type system should not accept it either. (This is the
-\emph{conservative extension} property that will be made precise in
-\Cref{sec:gradual:criteria}.)
+subtyping rules of \citet{odersky:putting} in \Cref{fig:OL:static}, the only
+addition is the neutral subtyping of $[[unknown]]$. In \rref{gpc-s-forallL}, the
+judgment $[[ dd |-G A ]]$ checks whether all the type variables in $[[A]]$ are
+bound in the context $[[dd]]$. Notice that, in this rule, the universal
+quantifier is only allowed to be instantiated with a \emph{monotype}. According
+to the syntax in \Cref{fig:gradual:decl:subtyping}, monotypes do not include the
+unknown type $[[unknown]]$. This is because if we were to allow the unknown type
+to be used for instantiation, we could have $[[ \/a . a -> a <: unknown ->
+unknown ]]$ by instantiating $[[a]]$ with $[[unknown]]$. Since $[[ unknown ->
+unknown ]]$ is consistent with any functions $[[ A1 -> B ]]$, for instance, $[[
+int -> bool ]]$, this means that we could provide an expression of type $[[ \/a
+. a -> a ]]$ to a function where the input type is supposed to be $[[ int ->
+bool ]]$. However, as we know, $[[ \/a . a -> a ]]$ is definitely not compatible
+with $[[ int -> bool ]]$. Indeed, this does not hold in any polymorphic type
+systems without gradual typing. So the gradual type system should not accept it
+either. (This is the \emph{conservative extension} property that will be made
+precise in \Cref{sec:gradual:criteria}.)
 
 
 Importantly there is a subtle distinction between a type variable and the
@@ -144,13 +145,18 @@ would expect $[[ \/a. a -> a  ]]$ to be related with $[[int -> int]]$,
 since $[[a]]$ can be instantiated to $[[int]]$.
 
 Nonetheless, when it comes to interactions between dynamically typed and
-polymorphically typed terms, both relations allow $[[ \/a. a -> int  ]]$
-to be related with $[[ unknown -> int ]]$ for example, which in our view, is a kind of
-(implicit) polymorphic subtyping combined with type consistency, and
-that should be derivable by the more primitive notions in the type system
-(instead of inventing new relations). One of our design principles is that
-subtyping and consistency are \emph{orthogonal}, and can be naturally
-superimposed, echoing the opinion of \citet{siek2007gradual}.
+polymorphically typed terms, both relations allow $[[ \/a. a -> int ]]$ to be
+related with $[[ unknown -> int ]]$ for example (i.e., $[[ \/a. a -> int ]]
+\prec [[unknown -> int]]$ in \pbc and $[[ \/a. a -> int ~ unknown -> int]]$ in
+\citet{yuu2017poly}), which in our view, is a kind of (implicit) polymorphic
+subtyping combined with type consistency, and that should be derivable by the
+more primitive notions in the type system (instead of inventing new relations).
+One of our design principles is that subtyping and consistency are
+\emph{orthogonal}, and can be naturally superimposed, echoing the opinion of
+\citet{siek2007gradual}. In this case, we can for example derive the relation
+between $[[ \/a. a -> int ]]$ and $[[ unknown -> int ]]$ via an intermediate
+type $[[int -> int]]$, and by the subtyping relation $[[\/a. a -> int <: int ->
+int]]$ and the consistency relation $[[int -> int ~ unknown -> int]]$.
 
 \subsection{Towards Consistent Subtyping}
 \label{sec:gradual:towards-conssub}
@@ -165,7 +171,7 @@ consistency and subtyping for polymorphic types. Consider two types: $[[ (\/a. a
 -> int) -> int ]]$, and $[[ (unknown -> int) -> int ]]$. The first type can only
 reach the second type in one way (first by applying consistency, then
 subtyping), but not the other way, as shown in \Cref{fig:example:a}. We use
-$\emptyset$ to mean that we cannot find such a type. Similarly, there are
+$????$ to mean that we cannot find such a type. Similarly, there are
 situations where the first type can only reach the second type by the other way
 (first applying subtyping, and then consistency), as shown in
 \Cref{fig:example:b}.
@@ -177,7 +183,7 @@ situations where the first type can only reach the second type by the other way
       \begin{tikzpicture}
         \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=4em,minimum width=2em]
         {
-          \emptyset & [[(unknown -> int) -> int]]  \\
+          ???? & [[(unknown -> int) -> int]]  \\
           [[(\/a. a -> nat) -> nat]] & [[(\/a. unknown -> nat) -> nat]] \\};
 
         \path[-stealth]
@@ -197,7 +203,7 @@ situations where the first type can only reach the second type by the other way
       \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=4em,minimum width=2em]
       {
         [[int -> int]] & [[int -> unknown]]  \\
-        [[\/a.a]] & \emptyset \\};
+        [[\/a.a]] & ???? \\};
 
       \path[-stealth]
       (m-2-1) edge node [left] {$[[<:]]$} (m-1-1)
@@ -215,11 +221,11 @@ situations where the first type can only reach the second type by the other way
     \begin{tikzpicture}
       \matrix (m) [matrix of math nodes,row sep=2.5em,column sep=1em,minimum width=2em]
       {
-        \emptyset &
+        ???? &
         [[(((unknown -> int) -> int) -> bool) -> (int -> unknown)]] \\
       [[(((\/a.a -> int) -> int) -> bool) -> (\/a.a)]]
          &
-        \emptyset \\};
+        ???? \\};
 
       \path[-stealth]
       (m-2-1) edge node [left] {$[[<:]]$} (m-1-1)
@@ -241,13 +247,14 @@ What is worse, if those two examples are composed in a way that those types all
 appear co-variantly, then the resulting types cannot reach each other in either
 way. For example, \Cref{fig:example:c} shows two such types by putting a
 $[[bool]]$ type in the middle, and neither definition of consistent subtyping
-works.
+in \Cref{def:old-decl-conssub} works.
 
 \paragraph{Observations on Consistent Subtyping Based on Information Propagation.}
 
 In order to develop a correct definition of consistent subtyping for polymorphic
 types, we need to understand how consistent subtyping works. We first review two
-important properties of subtyping: (1) subtyping induces the subsumption rule:
+important properties of subtyping: (1) subtyping induces the subsumption rule
+used in typing:
 if $[[ A1 <: B ]]$, then an expression of type $[[A1]]$ can be used where
 $[[B]]$ is expected; (2) subtyping is transitive: if $[[ A1 <: B ]]$, and $[[B
 <: C]]$, then $[[A1 <: C]]$. Though consistent subtyping takes the unknown type
@@ -255,13 +262,15 @@ into consideration, the subsumption rule should also apply: if $[[ A1 <~ B ]]$,
 then an expression of type $[[A1]]$ can also be used where $[[B]]$ is expected,
 given that there might be some information lost by consistency. A crucial
 difference from subtyping is that consistent subtyping is \emph{not} transitive
-because information can only be lost once (otherwise, any two types are a
-consistent subtype of each other). Now consider a situation where we have both
+because information can only be lost once; otherwise, any two types are a
+consistent subtype of each other, e.g., we could derive $[[int ~ bool]]$ from
+$[[int ~ unknown]]$ and $[[unknown ~ bool]]$.
+Now consider a situation where we have both
 $[[ A1 <: B ]]$, and $[[ B <~ C ]]$, this means that $[[A1]]$ can be used where
 $[[B]]$ is expected, and $[[B]]$ can be used where $[[C]]$ is expected, with
 possibly some loss of information. In other words, we should expect that
 $[[A1]]$ can be used where $[[C]]$ is expected, since there is at most one-time
-loss of information.
+loss of information. We thus have the following desirable property:
 
 \begin{observation}
   If $[[A <: B]]$, and $[[B <~ C]]$, then $[[A <~ C]]$.
@@ -370,9 +379,9 @@ At first sight, \Cref{def:decl-conssub} seems worse than the original: we need
 to guess \emph{two} types! It turns out that \Cref{def:decl-conssub} is a
 generalization of \Cref{def:old-decl-conssub}, and they are equivalent in the
 system of \citet{siek2007gradual}. However, more generally,
-\Cref{def:decl-conssub} is compatible with polymorphic types.
-Furthermore, as we shall see in \Cref{sec:gradual:extension-top}, this definition is also
-compatible with top types (which are also problematic with the original definition).
+\Cref{def:decl-conssub} works well for with polymorphic subtyping.
+Furthermore, as we shall see in \Cref{sec:gradual:extension-top}, this
+definition also works for top types (which are also problematic with the original definition).
 
 \begin{figure}
   \centering
@@ -419,8 +428,10 @@ compatible with top types (which are also problematic with the original definiti
     \\In \Cref{def:decl-conssub},
     by choosing $[[A'' = B]]$, we have $[[A1 <: A']]$ and $[[A' ~ B]]$;
     by choosing $[[A' = A1]]$, we have $[[A1 ~ A'']]$, and $[[A'' <: B]]$.
-  \item \Cref{def:old-decl-conssub} is equivalent to
-    \Cref{def:decl-conssub} in the system of \citeauthor{siek2007gradual}.
+  \item
+    In the system of \citeauthor{siek2007gradual},
+    \Cref{def:old-decl-conssub} is equivalent to
+    \Cref{def:decl-conssub} .
     \\If $[[A1 <: A']]$, $[[A' ~ A'']]$, and $[[A'' <: B]]$,
     by \Cref{def:old-decl-conssub},
     $[[A1 ~ C]]$, $[[C <: A'']]$ for some $[[C]]$.

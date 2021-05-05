@@ -177,24 +177,25 @@ function-based encodings of (optionally polymorphic) ADTs\footnote{In a type
   only get the \textit{lazy} version of those datatypes.}. This offers an
 immediate way to model algebraic datatypes in our calculus without requiring
 extensions to our calculus or, more importantly, to its target---the polymorphic
-blame calculus \pbc. While we believe that such extensions are possible, they would
+blame calculus. While we believe that such extensions are possible, they would
 likely require non-trivial extensions to the polymorphic blame calculus. Thus
 the alternative of being able to model algebraic datatypes without extending
-\pbc is appealing. The encoding also paves the way to provide built-in support
+the target calculus is appealing. The encoding also paves the way to provide built-in support
 for algebraic datatypes in the source language, while elaborating them via the
 encoding into \pbc.
 
 \paragraph{Church and Scott Encodings.}
 
 It is well-known that polymorphic calculi such as System F can encode datatypes
-via Church encodings. However these encodings have well-known drawbacks. In
-particular, some operations are hard to define, and they can have a time
-complexity that is greater than that of the corresponding functions for built-in
-algebraic datatypes. A well-known example is the definition of the predecessor
-function for Church numerals~\citep{church1941calculi}. Its definition requires
-significant ingenuity (while it is trivial with built-in algebraic datatypes),
-and it has \emph{linear} time complexity (versus the \emph{constant} time
-complexity for a definition using built-in algebraic datatypes).
+via Church encodings. However these encodings have well-known
+drawbacks~\citep{Koopman:church}. In particular, some operations are hard to
+define, and they can have a time complexity that is greater than that of the
+corresponding functions for built-in algebraic datatypes. A well-known example
+is the definition of the predecessor function for Church
+numerals~\citep{church1941calculi}. Its definition requires significant
+ingenuity (while it is trivial with built-in algebraic datatypes), and it has
+\emph{linear} time complexity (versus the \emph{constant} time complexity for a
+definition using built-in algebraic datatypes).
 
 An alternative to Church encodings are the so-called Scott
 encodings~\citep{curry1958combinatory}. They address the two drawbacks of Church
@@ -261,7 +262,8 @@ language with a $\mathbf{letrec}$ construct in a standard way to
 support general recursion, instead of defining a fixpoint combinator.
 
 Observe that the gradual typing of lists still enforces that all elements in the
-list are of the same type. For instance, a heterogeneous list like $[[ consu
+list are of the same type: a list of type $[[Listu a]]$ requires every element
+to have type $[[a]]$. For instance, a heterogeneous list like $[[ consu
 zerou (consu trueu nilu) ]]$, is rejected because $[[ zerou : natu ]]$ and $[[
 trueu : boolu ]]$ have different types.
 
