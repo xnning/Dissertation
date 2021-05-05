@@ -4,26 +4,59 @@
 \subsection{Background:Type Inference in Context}
 \label{sec:pr:background}
 
-\cite{gundry2010type} model unification and type inference from a general
-perspective of information increase. Specifically, they studied the unification
-and type inference problem for a ML-style
-polymorphic system, based on the requirement that types may depend only on
-earlier bindings in the type context.
-% DK \citep{DK} provides a
-% meta-theoretical foundation for this strategy in a bi-directional algorithm for
-% higher-rank polymorphism, which is later adopted in \gpc (\Cref{chap:Gradual}).
-Besides contexts being ordered, a key insight of the approach lies in how to
-solve existential variables with other types. In particular, it requires to
-resolve the dependency between existential variables. Consider unifying
-$[[evar]]$ with $[[evarb -> int]]$ under the context $[[evar, evarb]]$. Here we
+Given a declarative type system, the goal of type inference is to reconstruct
+missing type annotations for the system in a deterministic way that is also
+sound and complete with respect to the declarative specification. In its
+standard form, a type inference algorithm represents missing type annotations
+using \textit{unification variables} that will be solved during the process of
+\textit{unification} (or more generally, \textit{constraint solving}).
+
+\cite{gundry2010type} model unification and type inference for an ML-style
+polymorphic system from a general perspective of \textit{information increase}
+in the problem context. Specifically, they formalize unification process is formalized as
+%
+\begin{mathpar}
+[[GG |-u at1 ~= at2 -| DD]]
+\end{mathpar}
+%
+\noindent where the type contexts ($[[GG]]$ and $[[DD]]$) are used to to keep
+track of the solutions of unification variables. The judgment reads that under
+the input context $[[GG]]$, unifying $[[at1]]$ with $[[at2]]$ yields the output
+context $[[DD]]$. We say that the output context $[[DD]]$ is more
+\textit{informative} than the original one $[[GG]]$. For example, the following
+derivation unifies $[[evara]]$ with $[[int]]$, which leads to the solution
+$[[evara = int]]$.
+%
+\begin{mathpar}
+  [[evara, evarb |-u evara ~= int -| evara = int, evarb]]
+\end{mathpar}
+%
+To ensure that the algorithm produces only solutions, the algorithm depends on
+the notion of \textit{well-founded} contexts; that is, unification variable
+solutions may depend only on earlier bindings. For example, $[[evara, evarb =
+evara -> int]]$ is well-founded, while $[[evar = evarb -> int, evarb]]$ is not,
+as the binding $[[evar = evarb -> int]]$ refers to the variable $[[evar]]$ bound
+later in the type context. This way, they rule out invalid recursive solutions
+like $[[evar = evarb -> int, evarb = evara -> int]]$.
+
+Besides contexts being ordered, a key insight of their approach lies in how to
+solve unification variables with other types. In particular, it requires to
+resolve the dependency between unification variables. Consider the following
+unification problem
+%
+\begin{mathpar}
+[[evara, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb -> int]]
+\end{mathpar}
+%
+\noindent Here we
 cannot simply set $[[evar]]$ to $[[evarb -> int]]$, as $[[evarb]]$ is out of the
 scope of $[[evar]]$. The way \cite{gundry2010type} solve this problem is to
 examine variables in the context from the tail to the head, \textit{moving
   segments of the context to the left if necessary}. The process finishes when the
-existential variable being unified is found. In this case, \cite{gundry2010type}
+unification variable being unified is found. In this case, \cite{gundry2010type}
 would return a solution context $[[evarb, evar = evarb -> int]]$, where
 $[[evarb]]$ is moved to the front of $[[evar]]$. However, while moving type
-variables around is a feasible way to resolve the dependency between existential
+variables around is a feasible way to resolve the dependency between unification
 variables, the unpredictable context movements make the information increase
 hard to formalize and reason about. In their system, the information increase of
 contexts is defined in a semantic way: a context $[[GG1]]$ is more informative
@@ -33,83 +66,109 @@ semantic definition makes it hard to prove metatheory formally, especially when
 advanced features are involved.
 
 The Dunfield-Krishnaswami type system (DK) \citep{DK} also uses ordered contexts
-as the input and output of the type
-inference algorithm for a higher-rank polymorphic type system (\Cref{sec:DK}).
-Unlike \cite{gundry2010type}, DK does it in a more syntactic way. In their type system,
-instantiation rules decompose type constructs so that unification between
-existential variables can only happen between single variables, which can then
-be solved by setting the one that appears later to the one that appears earlier.
-This way, the information increase of contexts is modeled as the intuitive and
-syntactic definition of \textit{context extension} ($[[GG --> DD]]$), which
-allows for inductive reasoning and proofs. This approach is adopted in \gpc
-(\Cref{chap:Gradual}), so let us consider how DK works in terms of the
-instantiation rules in \gpc. Specifically, consider the derivation of $[[evar,
-evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int ]]$ in \gpc:
+as the input and output of the type inference algorithm for a higher-rank
+polymorphic type system (\Cref{sec:DK}). Unlike \cite{gundry2010type}, DK does
+it in a more syntactic way. In their type system, instantiation rules decompose
+type constructs so that unification between unification variables can only
+happen between single variables, which can then be solved by setting the one
+that appears later to the one that appears earlier. This way, the information
+increase of contexts is modeled as the intuitive and syntactic definition of
+\textit{context extension} ($[[GG --> DD]]$), which allows for inductive
+reasoning and proofs. As an example, consider we want to unify ($[[~=]]$)
+$[[evar]]$ with $[[evarb -> int]]$ under the context $[[evar, evarb]]$ using
+DK's approach. Recall that we use the hole notation for manipulating contexts by
+inserting and replacing declarations in the middle.
+For example, $[[GG]] [ [[TT]] ]$ means
+$[[GG]]$ has the form $[[GL]], [[TT]], [[GR]]$; if we have $[[ GG[evar] ]] =
+[[(GL, evar, GR)]]$, then $[[ GG[evar = at] ]] = [[(GL, evar = at, GR)]] $.
 
 \vspace{5pt}
 \noindent $[[DD]] = [[evar1, evar2, evar = evar1 -> evar2, evarb]]$
 %
 \begin{mathpar}
-  \footnotesize
-  \inferrule*[right=\rref*{gpc-instl-arr}]{
-    \inferrule*[lab=\rref*{gpc-instl-reach}]{ }
-      {[[DD |-G evarb <~~ evar1 -| DD[evarb = evar1] ]]}
+  \inferrule{
+    \inferrule{ }
+      {[[DD |-u evarb ~= evar1 -| DD[evarb = evar1] ]]}
     \qquad
-    \inferrule*[lab=\rref*{gpc-instr-solve}]{
-    }{[[DD[evarb = evar1] |-G evar2 <~~ int -| DD[evar2=int][evarb=evar1] ]]}
+    \inferrule{
+    }{[[DD[evarb = evar1] |-u evar2 ~= int -| DD[evar2=int][evarb=evar1] ]]}
   }{
-    [[evar, evarb |-G evar <~~ evarb -> int -| DD[evar2=int][evarb = evar1]  ]]
+    [[evar, evarb |-u evar ~= evarb -> int -| DD[evar2=int][evarb = evar1]  ]]
   }
 \end{mathpar}
 
-\noindent By \rref{gpc-instl-arr}, the variable $[[evar]]$ is solved by an arrow
-type $[[evar1 -> evar2]]$ consisting of two fresh existential variables. The two
-variables $[[evar1]]$ and $[[evar2]]$ are then instantiated with $[[evarb]]$ and
-$[[int]]$, respectively. By \rref{gpc-instl-reach}, the variable $[[evarb]]$ is
-solved by $[[evar1]]$, as $[[evar1]]$ appears in the context before $[[evarb]]$,
-or otherwise we need to apply \rref{gpc-instr-reach} to set $[[evar1]]$ to
-$[[evarb]]$ instead. The final solution context is $[[DD[evar2=int][evarb =
-evar1] = evar1, evar2=int, evar=evar1->evar2, evarb=evar1 ]]$.
+\noindent Let us step through the derivation. As $[[evar]]$ is unified with an
+arrow type, we know that $[[evar]]$ must be an arrow. Thus the variable
+$[[evar]]$ is solved by an arrow type $[[evar1 -> evar2]]$ consisting of two
+fresh unification variables. The two variables $[[evar1]]$ and $[[evar2]]$ are
+then unified with $[[evarb]]$ and $[[int]]$, respectively. Unifying $[[evar1]]$
+with $[[evarb]]$ solves $[[evarb]]$ by $[[evar1]]$, as $[[evar1]]$ appears in
+the context before $[[evarb]]$; or otherwise we can solve $[[evar1]]$ by
+$[[evarb]]$. The final solution context is $[[DD[evar2=int][evarb = evar1] =
+evar1, evar2=int, evar=evar1->evar2, evarb=evar1 ]]$.
 
 \paragraph{Challenges.}
 
-However, while the approach of decomposing type constructs works perfectly for DK
-and \gpc, it has two drawbacks. First, it produces
-duplication: in order to deal with both cases, the instantiation rules are
-duplicated
-for when the existential variable
-appears on the left ($ [[ GG |-G evar <~~ aA -| DD ]] $ in
-\Cref{fig:gradual:algo:instantiate}), and when it appears on the right
-($ [[ GG |-G aA <~~ evar -| DD ]] $ in \Cref{fig:gradual:algo:instantiate}). For
-example, \rref{gpc-instl-arr} has its symmetric counterpart \rref{gpc-instr-arr}:
-
+However, while the approach of decomposing type constructs works perfectly for
+this example so far, it has two drawbacks. First, it produces duplication: in
+order to deal with both cases, the unification rules are duplicated for when the
+unification variable appears on the left (i.e., $[[ GG |-u evar ~= at -| DD ]]
+$), and when it appears on the right (i.e., $ [[ GG |-u at ~= evar -| DD ]] $).
+For example, the following two rules are symmetric to each other:
+%
 \begin{mathpar}
-  \drule{gpc-instl-arr} \\
-  \drule{gpc-instr-arr}
+  \inferrule{
+    \inferrule{ }
+    {[[ GG[evar1, evar2, evar = evar1 -> evar2] |-u evar1 ~= at1 -| DD1 ]] }
+    \qquad
+    \inferrule{ }
+    {[[ DD1 |-u evar2 ~= [DD1]at1 -| DD2 ]] }
+  }{
+    [[ GG[evar] |-u evar ~= at1 -> at2 -| DD2 ]]
+  }
 \end{mathpar}
-
+%
+\begin{mathpar}
+  \inferrule{
+    \inferrule{ }
+    {[[ GG[evar1, evar2, evar = evar1 -> evar2] |-u evar1 ~= at1 -| DD1 ]] }
+    \qquad
+    \inferrule{ }
+    {[[ DD1 |-u evar2 ~= [DD1]at1 -| DD2 ]] }
+  }{
+    [[ GG[evar] |-u  at1 -> at2 ~= evar -| DD2 ]]
+  }
+\end{mathpar}
+%
 \noindent Worse, this kind of ``duplication'' would scale up with the number of
 type constructs in the system.
 
 Second, while decomposition works for function types, it may not work easily for
-more complicated types, e.g., dependent types. For example, consider that under
-the context $[[evar, evarb]]$, we want to instantiate $[[evar]]$ with a
-dependent type $\Pi [[a]]: [[evarb]]. [[a]]$. Here because $[[evarb]]$ appears
+more complicated types, e.g., dependent types. For example, consider the
+following unification problem, in which $\Pi [[a]] : [[at1]]. [[at2]]$ is a
+dependent type where $[[a]]$ may appear in $[[at2]]$.
+%
+\begin{mathpar}
+[[evar, evarb]] [[|-u]] [[evar]] [[~=]] \Pi [[a]]: [[evarb]]. [[a]]
+\end{mathpar}
+%
+\noindent
+Here because $[[evarb]]$ appears
 after $[[evar]]$, we cannot directly set $[[evar]] = \Pi [[a]] :
 [[evarb]].[[a]]$, which is ill-typed. However, if we try to decompose the type
-$\Pi [[a]]: [[evarb]]. [[a]]$ like in \rref{gpc-instl-arr}, in which case we
+$\Pi [[a]]: [[evarb]]. [[a]]$ like before, in which case we
 have $[[evar]] = \Pi [[a]]: [[evara1]]. [[evara2]]$, it is obvious that
 $[[evar2]]$ should be solved by $[[a]]$. Then, in order to make the solution
 well typed, we need to put $[[a]]$ in the front of $[[evar2]]$ in the context.
 However, this means that $[[a]]$ would remain in the context, and it would be
-available for any later existential variables that should not have access to
+available for any later unification variables that should not have access to
 $[[a]]$.
 
 
 \subsection{Our Approach: Type Promotion}
 
 We propose the \textit{promotion} process, which helps resolve the dependency
-between existential variables. Promotion combines the advantages of
+between unification variables. Promotion combines the advantages of
 \cite{gundry2010type} and DK: it is a simple and predictable process, so that
 information increase can still be modeled as the syntactic context extension;
 moreover, it does not cause any duplication.
@@ -118,10 +177,10 @@ To understand how promotion works, let us consider again the example $[[ evar,
 evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int]]$. The problem here is that
 $[[evarb]]$ is out of the scope of $[[evar]]$ so we cannot directly set $[[evar
 = evarb -> int ]]$. Therefore, we first \textit{promote} the type $[[evarb ->
-int]]$. At a high level, the promotion process looks for free existential
-variables in the type, and solves those out-of-scope existential
+int]]$. At a high level, the promotion process looks for free unification
+variables in the type, and solves those out-of-scope unification
 variables with fresh ones added to the front of $[[evar]]$,
-such that existential variables in the promoted type are all in the scope of
+such that unification variables in the promoted type are all in the scope of
 $[[evar]]$. In this case, we will solve $[[evarb]]$ with a fresh variable
 $[[evar1]]$, producing the context $[[ evar1, evar, evarb = evar1 ]]$. Notice
 that $[[evar1]]$ is inserted right before $[[evar]]$. Now the instantiation
@@ -135,15 +194,15 @@ two solutions are equivalent up to substitution.
 \paragraph{Interpretation of Promotion.}
 
 The approach taken by \cite{gundry2010type} and the approach used by DK are
-based on the same observation: \textit{the relative order between existential
+based on the same observation: \textit{the relative order between unification
   variables does not matter for solving a constraint}. The promotion process
-captures precisely this observation. Its task is to ``move'' existential
+captures precisely this observation. Its task is to ``move'' unification
 variables to suitable positions \textit{indirectly}, by solving those
-out-of-scope existential variables with fresh in-scope ones.
+out-of-scope unification variables with fresh in-scope ones.
 
 This seems to go against the design principle that the contexts are ordered.
 However, ordering is still important for variables whose order matters. For
-instance, for polymorphic types, the order between existential variables
+instance, for polymorphic types, the order between unification variables
 $[[evar]]$ and type variables $[[a]]$ is important, so we cannot set $[[evar]]$
 to $[[a]]$ under the context $[[(evar, a)]]$ as $[[a]]$ is not in the scope of
 $[[evar]]$. Moreover, ordering prevents invalid cyclic contexts, e.g., $[[evara
@@ -162,7 +221,7 @@ idea of promotion.
 \subsection{Polymorphic Promotion}
 
 Instead of unification, the instantiation relation in DK actually deals with the
-polymorphic subtyping relation between existential variables and other types.
+polymorphic subtyping relation between unification variables and other types.
 The promotion process we described above only works for unification. In this
 section, we discuss promotion for polymorphic subtyping.
 
@@ -174,7 +233,7 @@ monotype which can serve as a valid solution for $[[evar]]$? One possible answer
 is to set $[[evar = int -> int]]$, or $[[evar]] = [[bool -> bool]]$. In fact,
 the most general solution for this subtyping problem is $[[evar = evarb ->
 evarb]]$ with fresh $[[evarb]]$. Namely, we remove the universal quantifier in
-$[[\/a.a->a]]$ and replace the variable $[[a]]$ with a fresh existential
+$[[\/a.a->a]]$ and replace the variable $[[a]]$ with a fresh unification
 variable $[[evarb]]$ added to the front of $[[evar]]$, resulting in the solution context
 $[[evarb, evara = evarb -> evarb]]$.
 
@@ -192,17 +251,17 @@ be promoted to $[[int -> int]]$, which is a valid solution for $[[evar]]$ in
 $[[evar]] [[|-]] [[evar]] <: [[\/a. int -> int]]$.
 
 From these observations, we extend promotion to \textit{polymorphic promotion},
-which is able to resolve the polymorphic subtyping relation for existential
-variables. Depending on whether the existential variable appears on the right or
+which is able to resolve the polymorphic subtyping relation for unification
+variables. Depending on whether the unification variable appears on the right or
 left, polymorphic promotion has two modes, which we call the
 \textit{contravariant mode} and the \textit{covariant mode} respectively.
 
 The contravariant mode promotes types as $[[\/a.a ->a]]$ in the case of
 $[[evar]] [[|-]] [[\/a.a -> a]] [[<:]] [[evar]]$, where the universal quantifier
-is removed and the type variable $[[a]]$ is replaced by a fresh existential
-variable added to front of the existential variable being solved. This
+is removed and the type variable $[[a]]$ is replaced by a fresh unification
+variable added to front of the unification variable being solved. This
 corresponds to \rref{gpc-instr-forallL}, except that with promotion, the new
-existential variable $[[evarb]]$ (in \rref{gpc-instr-forallL}) will be added
+unification variable $[[evarb]]$ (in \rref{gpc-instr-forallL}) will be added
 directly before $[[evar]]$ and there is no need to create a marker or to discard
 the context after $[[evarb]]$ anymore.
 
@@ -210,7 +269,7 @@ The covariant mode promotes types as $[[\/a. a->a]]$ in the case of $[[evar]]
 [[|-]] [[evar]] [[<:]] [[\/a. a -> a]]$. In this case, promoting $[[\/a. a ->
 a]]$ will directly add the type variable $[[a]]$ to the tail of the context,
 which corresponds to \rref{gpc-instl-forallR}. Since the type variable is out of
-the scope of the existential variable being solved, and promotion will succeed
+the scope of the unification variable being solved, and promotion will succeed
 only if the variable is not used in the body of the polymorphic type.
 
 While promoting polymorphic types behaves differently according to the mode, the
