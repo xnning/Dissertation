@@ -293,7 +293,8 @@ elements and get gradually typed heterogeneous lists\footnote{This argument is
   based on the extended type system in \Cref{chap:Dynamic}.}. Such
 gradually typed heterogeneous lists are akin to Haskell's approach with Dynamic
 types, but much more convenient to use since no injections and projections are
-needed, and the $[[unknown]]$ type is built-in and natural to use.
+needed, and the $[[unknown]]$ type is built-in and natural to use, with the
+cost paid through gradual typing via explicit casts during runtime.
 
 An example of such gradually typed heterogeneous collections is:
 \[
