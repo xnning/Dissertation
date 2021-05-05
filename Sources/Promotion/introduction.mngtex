@@ -13,19 +13,18 @@ using \textit{unification variables} that will be solved during the process of
 
 \cite{gundry2010type} model unification and type inference for an ML-style
 polymorphic system from a general perspective of \textit{information increase}
-in the problem context. Specifically, they formalize unification process is formalized as
+in the problem context. Specifically, they formalize the unification process as:
 %
 \begin{mathpar}
 [[GG |-u at1 ~= at2 -| DD]]
 \end{mathpar}
 %
-\noindent where the type contexts ($[[GG]]$ and $[[DD]]$) are used to to keep
-track of the solutions of unification variables. The judgment reads that under
-the input context $[[GG]]$, unifying $[[at1]]$ with $[[at2]]$ yields the output
-context $[[DD]]$. We say that the output context $[[DD]]$ is more
-\textit{informative} than the original one $[[GG]]$. For example, the following
-derivation unifies $[[evara]]$ with $[[int]]$, which leads to the solution
-$[[evara = int]]$.
+The judgment reads that under the input context $[[GG]]$, unifying $[[at1]]$
+with $[[at2]]$ yields the output context $[[DD]]$. The type contexts ($[[GG]]$
+and $[[DD]]$) are used to to keep track of the solutions of unification
+variables. We say that the output context $[[DD]]$ is more \textit{informative}
+than the original one $[[GG]]$. For example, the following derivation unifies
+$[[evara]]$ with $[[int]]$, which leads to the solution $[[evara = int]]$.
 %
 \begin{mathpar}
   [[evara, evarb |-u evara ~= int -| evara = int, evarb]]
@@ -35,12 +34,11 @@ To ensure that the algorithm produces only solutions, the algorithm depends on
 the notion of \textit{well-founded} contexts; that is, unification variable
 solutions may depend only on earlier bindings. For example, $[[evara, evarb =
 evara -> int]]$ is well-founded, while $[[evar = evarb -> int, evarb]]$ is not,
-as the binding $[[evar = evarb -> int]]$ refers to the variable $[[evar]]$ bound
-later in the type context. This way, they rule out invalid recursive solutions
-like $[[evar = evarb -> int, evarb = evara -> int]]$.
+as the binding $[[evar = evarb -> int]]$ refers to the variable $[[evarb]]$
+bound later in the type context. Well-founded contexts effectively rule out
+invalid cyclic solutions like $[[evar = evarb -> int, evarb = evara -> int]]$.
 
 Besides contexts being ordered, a key insight of their approach lies in how to
-solve unification variables with other types. In particular, it requires to
 resolve the dependency between unification variables. Consider the following
 unification problem
 %
@@ -50,10 +48,10 @@ unification problem
 %
 \noindent Here we
 cannot simply set $[[evar]]$ to $[[evarb -> int]]$, as $[[evarb]]$ is out of the
-scope of $[[evar]]$. The way \cite{gundry2010type} solve this problem is to
-examine variables in the context from the tail to the head, \textit{moving
-  segments of the context to the left if necessary}. The process finishes when the
-unification variable being unified is found. In this case, \cite{gundry2010type}
+scope of $[[evar]]$. Thus, \cite{gundry2010type} solve this problem by
+examining variables in the context from the tail to the head, and \textit{moving
+  segments of the context to the left if necessary}.
+In this case, \cite{gundry2010type}
 would return a solution context $[[evarb, evar = evarb -> int]]$, where
 $[[evarb]]$ is moved to the front of $[[evar]]$. However, while moving type
 variables around is a feasible way to resolve the dependency between unification
@@ -173,8 +171,13 @@ between unification variables. Promotion combines the advantages of
 information increase can still be modeled as the syntactic context extension;
 moreover, it does not cause any duplication.
 
-To understand how promotion works, let us consider again the example $[[ evar,
-evarb]] [[|-G]] [[evar]] [[<~~]] [[evarb -> int]]$. The problem here is that
+To understand how promotion works, let us consider again the unification problem
+%
+\begin{mathpar}
+[[ evar, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb -> int]]
+\end{mathpar}
+%
+The problem here is that
 $[[evarb]]$ is out of the scope of $[[evar]]$ so we cannot directly set $[[evar
 = evarb -> int ]]$. Therefore, we first \textit{promote} the type $[[evarb ->
 int]]$. At a high level, the promotion process looks for free unification
@@ -182,41 +185,55 @@ variables in the type, and solves those out-of-scope unification
 variables with fresh ones added to the front of $[[evar]]$,
 such that unification variables in the promoted type are all in the scope of
 $[[evar]]$. In this case, we will solve $[[evarb]]$ with a fresh variable
-$[[evar1]]$, producing the context $[[ evar1, evar, evarb = evar1 ]]$. Notice
-that $[[evar1]]$ is inserted right before $[[evar]]$. Now the instantiation
-example becomes $[[ evar1, evar, evarb = evar1]] [[|-G]] [[evar]] [[<~~]]
-[[evar1 -> int]]$, and $[[evar1 -> int]]$ is a valid solution for $[[evar]]$.
-Therefore, we get a final solution context $[[ evar1, evar = evar1 -> int, evarb
-= evar1]]$. Comparing the result with the solution context we get from DK
+$[[evar1]]$, producing the context
+%
+\begin{mathpar}
+[[ evar1, evar, evarb = evar1 ]] [[|-u]] [[evar]] [[~=]] [[evar1 -> evarb]]
+\end{mathpar}
+%
+Notice that $[[evar1]]$ is inserted right before $[[evar]]$. Now after
+substitution $[[evarb]]$ with $[[evar1]]$, the unification example becomes
+%
+\begin{mathpar}
+[[ evar1, evar, evarb = evar1]] [[|-u]] [[evar]] [[~=]] [[evar1 -> int]]
+\end{mathpar}
+%
+\noindent
+and $[[evar1 -> int]]$ is a valid solution for $[[evar]]$. Therefore, we get a
+final solution context $[[ evar1, evar = evar1 -> int, evarb = evar1]]$. Namely,
+%
+\begin{mathpar}
+  [[ evar, evarb |-u evar ~= evarb -> int -| evar1, evar = evar1 -> int, evarb = evar1]]
+\end{mathpar}
+%
+Comparing the result with the solution context we get from DK
 ($[[evar1,evar2=int,evar=evar1->evar2, evarb=evar1]]$), it is obvious that these
 two solutions are equivalent up to substitution.
 
 \paragraph{Interpretation of Promotion.}
 
-The approach taken by \cite{gundry2010type} and the approach used by DK are
-based on the same observation: \textit{the relative order between unification
-  variables does not matter for solving a constraint}. The promotion process
-captures precisely this observation. Its task is to ``move'' unification
-variables to suitable positions \textit{indirectly}, by solving those
-out-of-scope unification variables with fresh in-scope ones.
+The key insight of the promotion process is that \textit{the relative order
+  between unification variables does not matter for solving a constraint}. Thus
+its task is to ``move'' unification variables to suitable positions
+\textit{indirectly}, by solving those out-of-scope unification variables with
+fresh in-scope ones.
 
-This seems to go against the design principle that the contexts are ordered.
-However, ordering is still important for variables whose order matters. For
-instance, for polymorphic types, the order between unification variables
+The observation seems to go against the design principle that the contexts are
+ordered. However, ordering is still important for variables whose order matters.
+For instance, for polymorphic types, the order between unification variables
 $[[evar]]$ and type variables $[[a]]$ is important, so we cannot set $[[evar]]$
-to $[[a]]$ under the context $[[(evar, a)]]$ as $[[a]]$ is not in the scope of
-$[[evar]]$. Moreover, ordering prevents invalid cyclic contexts, e.g., $[[evara
-= evarb -> int]], [[evarb = evara -> int]]$.
-
-
+to $[[a]]$ under the context $[[(evar, a)]]$. Moreover, ordering still prevents
+invalid cyclic contexts, e.g., $[[evara = evarb -> int]], [[evarb = evara ->
+int]]$.
 
 
 \paragraph{Unification for the Simply Typed Lambda Calculus.}
 
-As a first illustration of the promotion process,
-\Cref{sec:pr:unif} recasts the unification process for the simply typed lambda
-calculus (STLC) using the promotion process. This system illustrates the key
-idea of promotion.
+As a first illustration of the promotion process, \Cref{sec:pr:unif} recasts the
+unification process for the simply typed lambda calculus (STLC) using the
+promotion process. Note that using promotion for unification is overkill for
+STLC, but this system illustrates the key idea of promotion and sets us the
+stage for later advanced applications.
 
 \subsection{Polymorphic Promotion}
 
