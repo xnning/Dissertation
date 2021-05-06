@@ -61,12 +61,12 @@ Occasionally, we will see a context with two \emph{ordered} holes, e.g., $[[GG]]
 
 \begin{center}
   \begin{tabular}{lll} \toprule
-    $[[ [DD] int  ]]$     & = & $[[ int ]]$ \\
-    $[[ [DD] a  ]]$     & = & $[[ a ]]$ \\
-    $[[ [DD[evar] ] evar  ]]$     & = & $[[ evar ]]$ \\
-    $[[ [DD[evar=at] ] evar  ]]$     & = & $[[ [DD[evar=at] ]at ]]$ \\
-    $[[ [DD] aA1 -> aA2  ]]$ & = & $[[ [DD] aA1 -> [DD] aA2 ]]$ \\
-    $[[ [DD] (\/a. aA)  ]]$     & = & $[[ \/a. [DD]aA ]]$ \\
+    $[[ [GG] int  ]]$     & = & $[[ int ]]$ \\
+    $[[ [GG] a  ]]$     & = & $[[ a ]]$ \\
+    $[[ [GG[evar] ] evar  ]]$     & = & $[[ evar ]]$ \\
+    $[[ [GG[evar=at] ] evar  ]]$     & = & $[[ [GG[evar=at] ]at ]]$ \\
+    $[[ [GG] aA1 -> aA2  ]]$ & = & $[[ [GG] aA1 -> [DD] aA2 ]]$ \\
+    $[[ [GG] (\/a. aA)  ]]$     & = & $[[ \/a. [GG]aA ]]$ \\
     \bottomrule
   \end{tabular}
 \end{center}

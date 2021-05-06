@@ -48,34 +48,92 @@ system guesses a monotype $[[t]]$.
   \end{tabular}
   \drules[wf]{$ [[GG |-wf at]] $}{Well-formedness}{int, arrow, evar}
   \drules[wfc]{$ [[GG ok]] $}{Well-formedness of algorithmic contexts}{empty,evar,evarSolved}
+  \caption{Syntax of algorithmic STLC}
+  \label{fig:pr:algo:syntax}
+\end{figure}
+
+\begin{figure}
+  \drules[at]{$ [[GG |- ae : at -| DD]] $}{Algorithmic typing}{var, int, lamann, lam, app}
   \drules[u]{$ [[GG |-u at1 ~= at2 -| DD]] $}{Unification}{refl, arrow, evarL, evarR}
   \drules[pr]{$ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $}{Promotion}{int, arrow, evarL, evarR}
-  \caption{Syntax, unification and promotion of algorithmic STLC}
+  \caption{Algorithmic typing, promotion and unification of algorithmic STLC}
   \label{fig:pr:algo}
 \end{figure}
 
-The syntax of the algorithmic system is given in \Cref{fig:pr:algo}. Following
+The syntax of the algorithmic system is given in \Cref{fig:pr:algo:syntax}. Following
 DK \citep{DK}, algorithmic monotypes include unification type variables
 $[[evar]]$. Algorithmic contexts also contain declarations of unification type
 variables, either unsolved ($[[evar]]$) or solved ($[[evar=at]]$). Complete
 contexts $[[OO]]$ contain only solved variables. We use the judgment $[[GG |-wf
 at]]$ to indicate that all unification variables in $[[at]]$ are well-scoped,
-and $[[GG ok]]$ to indicate well-formed contexts.
+and $[[GG ok]]$ to indicate well-formed contexts, where each binding is
+well-formed in its prefix context.
+
+Following \cite{DK}, we use contexts as substitutions on types. We write $[[
+[GG]at ]]$ to mean $[[GG]]$ applied as a substitution to type $[[at]]$, whose
+definition is given below.
+
+\begin{center}
+  \begin{tabular}{lll} \toprule
+    $[[ [GG] int  ]]$     & = & $[[ int ]]$ \\
+    $[[ [GG[evar] ] evar  ]]$     & = & $[[ evar ]]$ \\
+    $[[ [GG[evar=at] ] evar  ]]$     & = & $[[ [GG[evar=at] ]at ]]$ \\
+    $[[ [GG] at1 -> at2  ]]$ & = & $[[ [GG] at1 -> [GG] at2 ]]$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+
+\paragraph{Algorithmic typing.}
+
+\Cref{fig:pr:algo} defines algorithmic typing. The judgment $[[GG |- ae : at -|
+DD]]$ reads that under the input context $[[GG]]$, the expression $[[ae]]$ has
+type $[[at]]$, with the output context $[[DD]]$. Most rules are standard. In
+\rref{at-lamann}, instead of guessing a type as in its declarative counterpart,
+the rule generates a fresh unification variable $[[evar]]$ as the type of
+$[[x]]$, and another fresh unification variable $[[evarb]]$ as the type of the
+body, and continues type-checking the body. After getting the type $[[at]]$ of
+the body, we unify $[[evarb]]$ with $[[ [TT1]at ]]$, and return the result type
+$[[evar -> evarb]]$, where the trailing context $[[TT]]$ is discarded.
+
+Here are several notable things about \rref{at-lamann}. First, we do not
+directly return $[[evar -> at]]$ as the result type, as otherwise we cannot
+discard the type context $[[TT]]$ after $[[x]]$, since the type $[[at]]$ may
+refer to unification variables in $[[TT]]$. As such, we unify $ [[evarb]] [[~=]]
+[[ [TT1]at ]]$, and return $[[evara -> evarb]]$ as the result type instead,
+which ensures that the result type is well-formed under the context $[[DD]]$, so
+that we can safely remove $[[TT]]$. Discarding $[[TT]]$ is mainly an
+optimization step. Second, we do not simply unify $[[evarb]] [[~=]] [[at]]$, but
+$[[evarb]] [[~=]] [[ [TT1]at ]]$, where the context $[[TT1]]$ is applied to
+$[[at]]$ (we do not apply $[[TT1]]$ to $[[evarb]]$ as given $[[evarb]]$ is a
+fresh unification not referred anywhere yet, we know $[[ [TT1]evarb ]] =
+[[evarb]]$). This maintains an invariant: in the unification problem $[[ GG |-u
+at1 ~= at2 -| DD ]]$, the types $[[at1]]$ and $[[at2]]$ are fully applied under
+$[[GG]]$. This invariant simplifies the unification process: we know that every
+unification variable we encounter during unification is unsolved and we do not
+need to discuss the case when it is solved where we need to replace it with its
+solution.
+
+In \rref{at-app}, we first infers the type of the function $[[at1]]$, and the type
+of the argument $[[at2]]$. As we know that $[[at1]]$ must be an arrow type,
+we create a fresh unification variable $[[evar]]$ as the result type of the
+application, and unify $[[ [TT2]at1]] [[~=]] [[ [TT2]at2 -> evar ]]$. Again
+notice we apply the context to the types before we unify them.
+
 
 \paragraph{Unification.}
 
-\Cref{fig:pr:algo} defines the unification process. The judgment $[[GG |-u at1
-~= at2 -| DD]]$ reads that under the input context $[[GG]]$, unifying $[[at1]]$
-with $[[at2]]$ results in the output context $[[DD]]$. \Rref{u-refl} is our base
-case, and \rref{u-arrow} unifies the components of the arrow types. When
-unifying $[[evar]] [[~=]] [[at1]]$ (\rref{u-evarL}), we cannot simply set
-$[[evar]]$ to $[[at1]]$, as $[[at1]]$ might include variables bound to the right
-of $[[evar]]$. Instead, we need to \textit{promote} ($[[|-pr]]$) $[[at1]]$.
-After promoting $[[at1]]$ to $[[at2]]$, we can directly set $[[evar = at2]]$.
-\Rref{u-evarR} is symmetric to \rref{u-evarL}.
-Note that when
-unifying $[[Xa ~= Xb]]$, either \rref{u-evarL} and \rref{u-evarR} could be
-tried; an implementation can arbitrarily choose between them.
+The judgment $[[GG |-u at1 ~= at2 -| DD]]$ reads that under the input context
+$[[GG]]$, unifying $[[at1]]$ with $[[at2]]$ results in the output context
+$[[DD]]$. \Rref{u-refl} is our base case, and \rref{u-arrow} unifies the
+components of the arrow types. When unifying $[[evar]] [[~=]] [[at1]]$
+(\rref{u-evarL}), we cannot simply set $[[evar]]$ to $[[at1]]$, as $[[at1]]$
+might include variables bound to the right of $[[evar]]$. Instead, we need to
+\textit{promote} ($[[|-pr]]$) $[[at1]]$. After promoting $[[at1]]$ to $[[at2]]$,
+we can directly set $[[evar = at2]]$. \Rref{u-evarR} is symmetric to
+\rref{u-evarL}. Note that when unifying $[[Xa ~= Xb]]$, either \rref{u-evarL}
+and \rref{u-evarR} could be tried; an implementation can arbitrarily choose
+between them.
 
 \paragraph{Promotion.}
 

@@ -737,13 +737,14 @@ GG, x: at1 |- ae : at2 -| DD
 --------------------------- :: lamann
 GG |- \x: at1. ae : at1 -> at2 -| DD
 
-GG, evar, x: evar |- ae : at -| DD , x:evar, TT
+GG, evar, evarb, x: evar |- ae : at -| TT1
+TT1 |-u evarb ~= [TT1]at -| DD, x:evar, TT
 --------------------------- :: lam
-GG |- \x. ae : evar -> at -| DD
+GG |- \x. ae : evar -> evarb -| DD
 
-GG |- ae1 : at1 -| DD1
-DD1 |- ae2 : at2 -| DD2
-DD2, evar |- [DD]at1 ~= [DD]at2 -> evar -| DD
+GG |- ae1 : at1 -| TT1
+TT1 |- ae2 : at2 -| TT2
+TT2, evar |- [TT2]at1 ~= [TT2]at2 -> evar -| DD
 ------------------------------- :: app
 GG |- ae1 ae2 : evar -| DD
 
