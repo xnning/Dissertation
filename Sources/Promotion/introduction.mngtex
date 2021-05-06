@@ -237,15 +237,34 @@ stage for later advanced applications.
 
 \subsection{Polymorphic Promotion}
 
-Instead of unification, the instantiation relation in DK actually deals with the
-polymorphic subtyping relation between unification variables and other types.
-The promotion process we described above only works for unification. In this
-section, we discuss promotion for polymorphic subtyping.
+The promotion process we described so far only works for unification. In this
+section, we discuss applying promotion to polymorphic subtyping in a higher-rank
+polymorphic calculus. The challenge raised by higher-rank polymorphism is that,
+instead of unification for type equality, higher-rank polymorphism takes care of
+\textit{polymorphic subtyping}, which allows an expression to have a subtype of
+the expected type. On the other hand, subtyping also needs to take unification
+into account at the same time. For example, for the subtyping constraint
+%
+\begin{mathpar}
+[[GG]] [[|-sub]] [[evar]] [[<:]] [[int]]
+\end{mathpar}
+%
+\noindent
+For this case, promotion works like before: it tries to promote unification
+variables in $[[int]]$, where there is none so the promoted type remains
+$[[int]]$, and the solution is $[[evar = int]]$. Indeed, the only valid solution
+in this case is $[[evar = int]]$ (recall that unification variables can only be
+solved by \textit{monotypes}).
 
-The difficulty of subtyping is that it needs to take unification into account at
-the same time. For example, given that $[[evar]]$ is a subtype of $[[int]]$, the
-only possible solution is $[[evar = int]]$. Now consider $[[evar]] [[|-]]
-[[\/a.a -> a]] [[<:]] [[evar]]$. How can we promote the polymorphic type $[[\/a.a->a]]$ into a
+As the above example shows, for monotypes, promotion works just like before.
+However, with higher-rank polymorphism, we may have polymorphic types in the
+constraint. Consider
+%
+\begin{mathpar}
+[[evar]] [[|-sub]] [[\/a.a -> a]] [[<:]] [[evar]]
+\end{mathpar}
+%
+How can we promote the polymorphic type $[[\/a.a->a]]$ into a
 monotype which can serve as a valid solution for $[[evar]]$? One possible answer
 is to set $[[evar = int -> int]]$, or $[[evar]] = [[bool -> bool]]$. In fact,
 the most general solution for this subtyping problem is $[[evar = evarb ->
@@ -254,18 +273,23 @@ $[[\/a.a->a]]$ and replace the variable $[[a]]$ with a fresh unification
 variable $[[evarb]]$ added to the front of $[[evar]]$, resulting in the solution context
 $[[evarb, evara = evarb -> evarb]]$.
 
-On the other hand, how can we promote the type $[[\/a.a -> a]]$ in $[[evar]]
-[[|-]] [[evar]] [[<:]] [[\/a.a -> a]]$? It turns out that this subtyping is
-actually unsolvable, as there is no monotype that can be a subtype of $[[\/a. a
--> a]]$. Therefore, in this case, promoting $[[\/a.a ->a]]$ will
+What if the subtyping relation is the other way around? Namely,
+%
+\begin{mathpar}
+  [[evar]] [[|-sub]] [[evar]]  [[<:]] [[\/a.a -> a]]
+\end{mathpar}
+%
+\noindent Now how can we promote the type $[[\/a.a -> a]]$? It turns out that this
+subtyping is actually unsolvable, as there is no monotype that can be a subtype
+of $[[\/a. a -> a]]$. Therefore, in this case, promoting $[[\/a.a ->a]]$ will
 directly add the type variable $[[a]]$ to the tail of the context to promote
 $[[a->a]]$. Since $[[a]]$ is added to the tail, it means that $[[a]]$ is out of
 the scope of $[[evar]]$ and promoting $[[a->a]]$ would fail, which is exactly
 what we want. In fact, the promotion would succeed only if the universally
-quantified variable is not
-used in the body of the polymorphic type. For example, $[[\/a.int -> int]]$ can
-be promoted to $[[int -> int]]$, which is a valid solution for $[[evar]]$ in
-$[[evar]] [[|-]] [[evar]] <: [[\/a. int -> int]]$.
+quantified variable is not used in the body of the polymorphic type. For
+example, $[[\/a.int -> int]]$ can be promoted to $[[int -> int]]$, which is a
+valid solution for $[[evar]]$ in $[[evar]] [[|-]] [[evar]] <: [[\/a. int ->
+int]]$.
 
 From these observations, we extend promotion to \textit{polymorphic promotion},
 which is able to resolve the polymorphic subtyping relation for unification
@@ -276,18 +300,21 @@ left, polymorphic promotion has two modes, which we call the
 The contravariant mode promotes types as $[[\/a.a ->a]]$ in the case of
 $[[evar]] [[|-]] [[\/a.a -> a]] [[<:]] [[evar]]$, where the universal quantifier
 is removed and the type variable $[[a]]$ is replaced by a fresh unification
-variable added to front of the unification variable being solved. This
-corresponds to \rref{gpc-instr-forallL}, except that with promotion, the new
-unification variable $[[evarb]]$ (in \rref{gpc-instr-forallL}) will be added
-directly before $[[evar]]$ and there is no need to create a marker or to discard
-the context after $[[evarb]]$ anymore.
+variable added to front of the unification variable being solved.
+% This
+% corresponds to \rref{gpc-instr-forallL}, except that with promotion, the new
+% unification variable $[[evarb]]$ (in \rref{gpc-instr-forallL}) will be added
+% directly before $[[evar]]$ and there is no need to create a marker or to discard
+% the context after $[[evarb]]$ anymore.
 
-The covariant mode promotes types as $[[\/a. a->a]]$ in the case of $[[evar]]
-[[|-]] [[evar]] [[<:]] [[\/a. a -> a]]$. In this case, promoting $[[\/a. a ->
-a]]$ will directly add the type variable $[[a]]$ to the tail of the context,
-which corresponds to \rref{gpc-instl-forallR}. Since the type variable is out of
-the scope of the unification variable being solved, and promotion will succeed
-only if the variable is not used in the body of the polymorphic type.
+On the other hand, the covariant mode promotes types as $[[\/a. a->a]]$ in the
+case of $[[evar]] [[|-]] [[evar]] [[<:]] [[\/a. a -> a]]$. In this case,
+promoting $[[\/a. a -> a]]$ will directly add the type variable $[[a]]$ to the
+tail of the context.
+% which corresponds to \rref{gpc-instl-forallR}.
+Since the type variable is out of the scope of the unification variable being
+solved, and promotion will succeed only if the variable is not used in the body
+of the polymorphic type.
 
 While promoting polymorphic types behaves differently according to the mode, the
 mode does not matter for monotypes, as in both $[[evar]] [[<:]] [[int]]$ and
@@ -296,7 +323,12 @@ function types are contravariant in codomains and covariant in domains,
 promoting a function type under a certain mode proceeds to promote its codomain
 under the other mode and promote its domain under the original mode. For
 example, $[[ evar = (evarb -> evarb) -> (int -> int) ]]$ is a solution for
-$[[evar]] [[|-]] [[evar]] [[<:]] [[(\/a.a ->a) -> (\/a. int -> int)]] $, where
+%
+\begin{mathpar}
+[[evar]] [[|-]] [[evar]] [[<:]] [[(\/a.a ->a) -> (\/a. int -> int)]]
+\end{mathpar}
+%
+\noindent where
 $[[(\/a.a ->a) -> (\/a. int -> int)]]$ is promoted under the covariant mode,
 which means $[[ \/a.a -> a ]]$ is promoted under the \textit{contravariant} mode
 and $[[\/a. int -> int]]$ is promoted under the original covariant mode.
@@ -306,10 +338,11 @@ and $[[\/a. int -> int]]$ is promoted under the original covariant mode.
 
 \paragraph{Polymorphic Promotion for Subtyping.}
 
-We illustrate polymorphic promotion by showing that the original instantiation
-relationship in DK can be replaced by our polymorphic promotion process.
-Furthermore, we show that subtyping, which was built upon instantiation but now
-uses polymorphic promotion, remains sound and complete.
+We illustrate polymorphic promotion by showing that the original
+\textit{instantiation} relationship in DK~\citep{DK} can be replaced by our
+polymorphic promotion process. Furthermore, we show that subtyping, which was
+built upon instantiation but now uses polymorphic promotion, remains sound and
+complete.
 
 
 
