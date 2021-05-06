@@ -99,14 +99,15 @@ $[[evar -> evarb]]$, where the trailing context $[[TT]]$ is discarded.
 Here are several notable things about \rref{at-lamann}. First, we do not
 directly return $[[evar -> at]]$ as the result type, as otherwise we cannot
 discard the type context $[[TT]]$ after $[[x]]$, since the type $[[at]]$ may
-refer to unification variables in $[[TT]]$. As such, we unify $ [[evarb]] [[~=]]
-[[ [TT1]at ]]$, and return $[[evara -> evarb]]$ as the result type instead,
-which ensures that the result type is well-formed under the context $[[DD]]$, so
-that we can safely remove $[[TT]]$. Discarding $[[TT]]$ is mainly an
-optimization step. Second, we do not simply unify $[[evarb]] [[~=]] [[at]]$, but
+refer to unification variables in $[[TT]]$. Discarding $[[TT]]$ is mainly an
+optimization step. In order to safely remove $[[TT]]$, we unify $ [[evarb]]
+[[~=]] [[ [TT1]at ]]$, and return $[[evara -> evarb]]$ as the result type
+instead, which ensures that the result type is well-formed under the context
+$[[DD]]$ (where both $[[evara]] and $$[[evarb]]$ are bound).
+Second, we do not simply unify $[[evarb]] [[~=]] [[at]]$, but
 $[[evarb]] [[~=]] [[ [TT1]at ]]$, where the context $[[TT1]]$ is applied to
 $[[at]]$ (we do not apply $[[TT1]]$ to $[[evarb]]$ as given $[[evarb]]$ is a
-fresh unification not referred anywhere yet, we know $[[ [TT1]evarb ]] =
+fresh unification variable not referred anywhere yet, we know $[[ [TT1]evarb ]] =
 [[evarb]]$). This maintains an invariant: in the unification problem $[[ GG |-u
 at1 ~= at2 -| DD ]]$, the types $[[at1]]$ and $[[at2]]$ are fully applied under
 $[[GG]]$. This invariant simplifies the unification process: we know that every
@@ -130,7 +131,8 @@ components of the arrow types. When unifying $[[evar]] [[~=]] [[at1]]$
 (\rref{u-evarL}), we cannot simply set $[[evar]]$ to $[[at1]]$, as $[[at1]]$
 might include variables bound to the right of $[[evar]]$. Instead, we need to
 \textit{promote} ($[[|-pr]]$) $[[at1]]$. After promoting $[[at1]]$ to $[[at2]]$,
-we can directly set $[[evar = at2]]$. \Rref{u-evarR} is symmetric to
+every unification variable in $[[at2]]$ is bound to the left of $[[evar]]$,
+and thus we can directly set $[[evar = at2]]$. \Rref{u-evarR} is symmetric to
 \rref{u-evarL}. Note that when unifying $[[Xa ~= Xb]]$, either \rref{u-evarL}
 and \rref{u-evarR} could be tried; an implementation can arbitrarily choose
 between them.
@@ -141,14 +143,20 @@ The promotion relation $ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $ given at the
 bottom of \Cref{fig:pr:algo} reads that under the input context $[[DD]]$,
 promoting type $[[at1]]$ yields type $[[at2]]$, so that $[[at2]]$ is well-formed
 in the prefix context of $[[evar]]$, while retaining $[[ [DD]at1 = [DD] at2 ]]$.
-At a high-level, $[[|-pr]]$ looks for free variables in $[[at1]]$. Integers are
+As $[[at2]]$ is well-formed in the prefix context of $[[evar]]$,
+recall that in the unification rule (e.g. \rref{u-evarL}) it is well-scoped to
+solve $[[evar]]$ by $[[at2]]$.
+
+At a high-level, $[[|-pr]]$ looks for free unification variables in $[[at1]]$. Integers are
 always well-formed (\rref{pr-int}). Promoting a function recursively promotes
 its components (\rref{pr-arrow}). Variables bound to the left of $[[evar]]$ in
 $[[GG]]$ are unaffected (\rref{pr-evarL}), as they are already well-formed. In
 \rref{pr-evarR}, a unification variable $[[evarb]]$ bound to the right of
 $[[evar]]$ in $[[GG]]$ is replaced by a fresh variable introduced to
 $[[evar]]$'s left. Promotion is a partial operation, as it requires $[[evarb]]$
-either to be to the right or to the left of $[[evar]]$. There is yet another
+either to be to the right or to the left of $[[evar]]$, i.e., $[[evarb]] \neq
+[[evar]]$.
+There is yet another
 possibility: if $[[evarb = evar]]$, then no rule applies. This is a desired
 property, as the $[[evarb = evar]]$ case exactly corresponds to the
 ``occurs-check'' in a more typical presentation of unification. By preventing
@@ -159,7 +167,8 @@ infinite substitution when applying an algorithmic context. Note that
 \paragraph{Example.}
 
 Below we give the derivation of $[[evar, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb
--> int ]]$ discussed in \Cref{sec:pr:background}.
+-> int ]]$ discussed in \Cref{sec:pr:background}. Notice how the type $[[evarb
+-> int]]$ is promoted to $[[evar1 -> int]]$.
 %
 \begin{mathpar}
   \footnotesize
@@ -174,15 +183,50 @@ Below we give the derivation of $[[evar, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb
     [[evar, evarb |-u evar ~= evarb -> int -| evar1, evar = evar1 -> int, evarb =evar1  ]]
   }
 \end{mathpar}
+%
+The algorithm (correctly) rejects to unify $[[evara]] [[~=]] [[evara -> int]]$,
+where promotions fails due to ``occurs-check''.
+%
+\begin{mathpar}
+  \inferrule*[right=\rref*{u-eval-r}]{
+    \inferrule*[right=\rref*{pr-arrow}]{
+      \inferrule{  }{[[ evar, evarb]] [[|-pr]]_{\!\![[evar]]} [[ evar]] [[~~>]] ??? }
+      \quad
+      ...
+    }
+    {[[evar, evarb]] [[|-pr]]_{\!\![[evar]]} [[evar -> int]] [[~~>]]}%
+  }{
+    [[GG]] [[|-u]] [[evar]] [[~=]] [[evar -> int   ]]
+  }
+\end{mathpar}
+%
+The case for $[[evara]] [[~=]] [[evara]]$ is fine:
+%
+\begin{mathpar}
+  \inferrule*[right=\rref*{u-refl}]{
+  }{
+  [[GG |-u evar ~= evar -| GG  ]]
+  }
+\end{mathpar}
 
 
 \subsection{Soundness and Completeness}
 
 \begin{figure}
   \drules[ext]{$ [[GG --> DD]] $}{Context Extension}{id,var,evar,solved,solve,add,addSolve}
+  \caption{Context extension}
+  \label{fig:stlc:ctx:extension}
 \end{figure}
 
-We prove that our type promotion strategy and the unification algorithm are
+Following \cite{DK}, we first define the \textit{context extension} judgment
+$[[GG --> DD]]$, given in \Cref{fig:stlc:ctx:extension}, which reads that
+$[[GG]]$ is extended by $[[DD]]$. Context extension captures the notion of
+\textit{information increase}. Essentially, if $[[GG --> DD]]$, then $[[DD]]$
+contains more information than $[[GG]]$; for example, solutions to existing
+unification variables (\rref{ext-solve}), more unification variables, either
+unsolved (\rref{ext-add}) or solved (\rref{ext-addSolve}).
+
+We now prove that our type promotion strategy and the unification algorithm are
 sound. First, we show that except for resolving the order problem, promotion
 will not change the type. Namely, the input type and the output type are
 equivalent after substitution by the output context. Moreover, the promoted type
@@ -196,17 +240,22 @@ is well-formed under the prefix context of $[[evar]]$.
   we have $[[DD1 |-wf at2]]$,
 \end{restatable}
 
-With soundness of promotion, we can prove that the unification algorithm is also
-sound:
+With soundness of promotion, we can prove that the unification algorithm and the
+algorithmic typing are also sound:
 
 \begin{restatable}[Soundness of Unification]{theorem}{prunifsound} \label{thm:pr_unif_soundness}%
   If $[[ GG |-u at1 ~= at2 -| DD ]]$,
-  then $[[ [DD]at1 = [DD ]at2 ]]$.
+  then $[[ [DD]at1 = [DD]at2 ]]$.
 \end{restatable}
 
-We can further prove that promotion is complete using the notion of context
-extension. Note that in the completeness statement we require $[[evar notin
-fv(at1)]]$, or otherwise promotion would fail.
+\begin{restatable}[Soundness of Typing]{theorem}{pruniftypesound} \label{thm:pr_unif_type_soundness}%
+  Given $[[DD --> OO]]$,
+  if $[[GG |- ae : at -| DD]]$,
+  then $[[ [OO]DD |- e : [OO]at ]]$.
+\end{restatable}
+
+Now we move to completeness. Note that in the following completeness statement
+we require $[[evar notin fv(at1)]]$, or otherwise promotion would fail.
 
 \begin{restatable}[Completeness of Promotion]{theorem}{prcomplete} \label{thm:pr_complete}%
   Given $[[ GG --> OO  ]]$,
@@ -220,8 +269,6 @@ fv(at1)]]$, or otherwise promotion would fail.
   and $[[  GG |-pr (evar) at1 ~~> at2 -| DD ]]$.
 \end{restatable}
 
-The completeness of unification is then built upon the completeness of promotion.
-
 \begin{restatable}[Completeness of Unification]{theorem}{prunifcomplete} \label{thm:pr_unif_complete}%
   Given $[[ GG --> OO  ]]$,
   and $[[ GG |-wf at1  ]]$,
@@ -234,6 +281,16 @@ The completeness of unification is then built upon the completeness of promotion
   and $[[  GG |-u at1 ~= at2 -| DD ]]$.
 \end{restatable}
 
+\begin{restatable}[Completeness of Typing]{theorem}{pruniftypecomplete} \label{thm:pr_unif_type_complete}%
+  Given $[[ GG --> OO  ]]$,
+  and $[[ GG |-wf at  ]]$,
+  if $[[ [OO]GG |- e : t ]]$,
+  then there exits $[[DD]], [[OO']], [[at']]$
+  such that $[[DD --> OO']]$,
+  $[[OO --> OO']]$,
+  and $[[GG |- ae : at' -| DD]]$,
+  and $[[ [OO] at' = t ]]$,
+\end{restatable}
 
 %%% Local Variables:
 %%% mode: latex
