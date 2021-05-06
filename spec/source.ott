@@ -691,6 +691,105 @@ subrules
   pv <:: pe
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% STLC
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+stlc :: '' ::=
+
+defn
+
+dd |- e : t ::  :: stlc :: 't_' by
+
+
+(x : t) in dd
+------- :: var
+dd |- x : t
+
+--------------------------- :: int
+dd |- n : int
+
+dd, x: t1 |- e : t2
+--------------------------- :: lamann
+dd |- \x: t. e : t1 -> t2
+
+dd, x: t1 |- e : t2
+--------------------------- :: lam
+dd |- \x. e : t1 -> t2
+
+dd |- e1 : t1 -> t2
+dd |- e2 : t1
+------------------------------- :: app
+dd |- e1 e2 : t2
+
+defn
+
+GG |- ae : at -| DD ::  :: stlc_a :: 'at_' by
+
+(x : at) in GG
+------- :: var
+GG |- x : at -| GG
+
+--------------------------- :: int
+GG |- n : int -| GG
+
+GG, x: at1 |- ae : at2 -| DD
+--------------------------- :: lamann
+GG |- \x: at1. ae : at1 -> at2 -| DD
+
+GG, evar, x: evar |- ae : at -| DD , x:evar, TT
+--------------------------- :: lam
+GG |- \x. ae : evar -> at -| DD
+
+GG |- ae1 : at1 -| DD1
+DD1 |- ae2 : at2 -| DD2
+DD2, evar |- [DD]at1 ~= [DD]at2 -> evar -| DD
+------------------------------- :: app
+GG |- ae1 ae2 : evar -| DD
+
+defn
+
+GG --> DD :: :: stlc_ext :: 'ext_' by
+
+
+--------------- :: id
+empty --> empty
+
+
+GG --> DD
+[DD] at = [DD] at'
+-------------------------------- :: var
+GG , x : at --> DD , x : at'
+
+
+GG --> DD
+------------------------- :: evar
+GG , evar --> DD , evar
+
+
+GG --> DD
+[DD] at = [DD] at'
+------------------------------------- :: solved
+GG , evar = at --> DD , evar = at'
+
+
+GG --> DD
+------------------------------------- :: solve
+GG , evar  --> DD , evar = at
+
+
+
+GG --> DD
+------------------------------------- :: add
+GG  --> DD , evar
+
+
+GG --> DD
+------------------------------------- :: addSolve
+GG  --> DD , evar = at
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FOB
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -2180,6 +2279,24 @@ GG |-wf at1 -> at2
 evar in GG
 --------------------- :: evar
 GG |-wf evar
+
+defn
+
+GG ok :: :: stlc_well_formed_tctx :: 'wfc_'
+ {{ tex [[GG]] \ \mathsf{ok} }} by
+
+------------------------- :: empty
+empty ok
+
+GG ok
+------------------------- :: evar
+GG , Xa ok
+
+GG ok
+GG |-wf at
+------------------------- :: evarSolved
+GG , Xa=at ok
+
 
 defn
 

@@ -1,21 +1,38 @@
 \section{Unification for the Simply Typed Lambda Calculus}
 \label{sec:pr:unif}
 
-This section first introduces the simply typed lambda calculus, and then presents a
-unification algorithm that uses the novel promotion mechanism.
+This section first introduces the simply typed lambda calculus (STLC), and then
+presents a unification algorithm that uses the novel promotion mechanism. As we
+have mentioned before, using promotion for unification is overkill for STLC. So
+the purpose of this section is to illustrate the key idea of promotion in the
+context of STLC, which sets us the stage for later advanced applications.
 
 \subsection{Declarative System}
 
-The definition of declarative types in STLC is given below. We have only monotypes $[[t]]$,
-which includes the integer type $[[int]]$ and function types $[[at1 -> at2]]$.
-In this section, we focus on the unification process. Hence, we do not elaborate
-the details of expressions' syntax or typing rules.
+The declarative specification of STLC is given in \Cref{fig:stlc}.
 
-\begin{center}
+Expressions $[[e]]$ include variables $[[x]]$, integers $[[n]]$, annotated
+lambda abstractions $[[\x : t . e]]$, un-annotated lambda abstractions $[[\x .
+e]]$, and applications $[[e1 e2]]$. We have only monotypes $[[t]]$, which
+includes the integer type $[[int]]$ and function types $[[at1 -> at2]]$.
+Contexts $[[dd]]$ keep track of the types of the variables.
+
+The typing rules are standard. For unannotated lambdas (\rref{t-lamann}), the
+system guesses a monotype $[[t]]$.
+
+\begin{figure}
+  \begin{center}
   \begin{tabular}{lrcl} \toprule
-    Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[at1 -> at2]] $ \\ \bottomrule
+    Expressions &  $[[e]]$   & $\Coloneqq$ & $[[x]]  \mid [[n]]  \mid [[\x : t . e]] \mid [[ \x . e ]] \mid [[e1 e2]] $ \\
+    Monotypes & $[[t]]$ & \syndef & $ [[int]] \mid [[t1 -> t2]] $ \\
+    Contexts    & $[[dd]]$ & $\Coloneqq$ & $[[empty]]  \mid [[dd , x : t]] $ \\ \bottomrule
   \end{tabular}
-\end{center}
+  \end{center}
+
+  \drules[t]{$ [[dd |- e : t]] $}{Typing}{var,int,lamann,lam,app}
+  \caption{Syntax and declarative typing of the simply typed lambda calculus.}
+  \label{fig:stlc}
+\end{figure}
 
 
 \subsection{Algorithmic System}
@@ -24,26 +41,26 @@ the details of expressions' syntax or typing rules.
 \begin{figure}
   \centering
   \begin{tabular}{lrcl} \toprule
+    Expressions &  $[[e]]$   & $\Coloneqq$ & $[[x]]  \mid [[n]]  \mid [[\x : at . ae]] \mid [[ \x . e ]] \mid [[e1 e2]] $ \\
     Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[at1 -> at2]] \mid \hlmath{[[evar]]} $ \\
     Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
     Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO, evar = at]]  $ \\ \bottomrule
   \end{tabular}
-  % \drules[wf]{$ [[GG |-wf at]] $}{Well-formedness}{int, arrow, evar}
+  \drules[wf]{$ [[GG |-wf at]] $}{Well-formedness}{int, arrow, evar}
+  \drules[wfc]{$ [[GG ok]] $}{Well-formedness of algorithmic contexts}{empty,evar,evarSolved}
   \drules[u]{$ [[GG |-u at1 ~= at2 -| DD]] $}{Unification}{refl, arrow, evarL, evarR}
   \drules[pr]{$ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $}{Promotion}{int, arrow, evarL, evarR}
-  \caption{Types, contexts, unification and promotion of algorithmic STLC}
+  \caption{Syntax, unification and promotion of algorithmic STLC}
   \label{fig:pr:algo}
 \end{figure}
 
 The syntax of the algorithmic system is given in \Cref{fig:pr:algo}. Following
-DK \citep{DK} and \gpc, algorithmic monotypes include existential type variables
-$[[evar]]$. Algorithmic contexts also contain declarations of existential type
+DK \citep{DK}, algorithmic monotypes include unification type variables
+$[[evar]]$. Algorithmic contexts also contain declarations of unification type
 variables, either unsolved ($[[evar]]$) or solved ($[[evar=at]]$). Complete
 contexts $[[OO]]$ contain only solved variables. We use the judgment $[[GG |-wf
-at]]$ to indicate that all existential variables in $[[at]]$ are well-scoped.
-Its definition is standard and thus omitted. We also use $[[GG --> DD]]$ for
-context extension, whose definition is essentially a simplified version of the
-one in \gpc (\Cref{sec:gradual:ctxt:extension}).
+at]]$ to indicate that all unification variables in $[[at]]$ are well-scoped,
+and $[[GG ok]]$ to indicate well-formed contexts.
 
 \paragraph{Unification.}
 
@@ -102,6 +119,10 @@ Below we give the derivation of $[[evar, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb
 
 
 \subsection{Soundness and Completeness}
+
+\begin{figure}
+  \drules[ext]{$ [[GG --> DD]] $}{Context Extension}{id,var,evar,solved,solve,add,addSolve}
+\end{figure}
 
 We prove that our type promotion strategy and the unification algorithm are
 sound. First, we show that except for resolving the order problem, promotion

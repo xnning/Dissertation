@@ -252,9 +252,11 @@ into account at the same time. For example, for the subtyping constraint
 \noindent
 For this case, promotion works like before: it tries to promote unification
 variables in $[[int]]$, where there is none so the promoted type remains
-$[[int]]$, and the solution is $[[evar = int]]$. Indeed, the only valid solution
-in this case is $[[evar = int]]$ (recall that unification variables can only be
-solved by \textit{monotypes}).
+$[[int]]$. We can then solve $[[evar]]$ by $[[int]]$, which gives us the output
+context $[[evar = int]]$. Indeed, the only valid solution in this case is
+$[[evar = int]]$. Recall that unification variables can only be solved by
+\textit{monotypes}, which is what makes unification decidable and have principal
+solutions.
 
 As the above example shows, for monotypes, promotion works just like before.
 However, with higher-rank polymorphism, we may have polymorphic types in the
