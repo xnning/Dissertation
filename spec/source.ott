@@ -1023,6 +1023,27 @@ defn
 
 dd |-DK A <: B ::  :: dk_subtyping :: dk_s_ by
 
+a in dd
+-------------------- :: tvar
+dd |-DK a <: a
+
+-------------------- :: int
+dd |-DK int <: int
+
+dd |-DK A3 <: A1
+dd |-DK A2 <: A4
+---------------------------- :: arrow
+dd |-DK A1 -> A2 <: A3 -> A4
+
+dd |-DK t
+dd |-DK A [a ~> t] <: A2
+----------------- :: forallL
+dd |-DK \/ a. A1 <: A2
+
+dd, a |-DK A1 <: A2
+----------------- :: forallR
+dd |-DK A1 <: \/ a. A2
+
 defn
 
 |-AP A <: B ~~> ef ::  :: ap_subtyping :: ap_s_
@@ -2234,6 +2255,9 @@ GG |-pr pm ( evar ) aA ~~> at -| DD ::  :: sprpromotion :: 'p_pr_'
 {{ tex [[GG]] \vdash^{\!\![[pm]]}_{\!\![[evar]]} [[aA]] [[~~>]] [[at]] [[-|]] [[DD]] }}
 by
 
+-------------------------- :: int
+GG |-pr pm (evar) int ~~> int -| GG
+
 GG[evarb,evar] |-pr- (evar) aA[a ~> evarb] ~~> at -| DD
 -------------------------- :: forallL
 GG[evar] |-pr- (evar) \/a. aA ~~> at -| DD
@@ -2255,6 +2279,15 @@ GG  |-pr -pm (evar) aA1 ~~> at1 -| TT
 TT |-pr  pm (evar) [TT] aA2  ~~> at2 -| DD
 -------------------------- :: arrow
 GG |-pr pm (evar) aA1 -> aA2 ~~> at1 -> at2 -| DD
+
+-------------------------- :: evarL
+GG[evarb][evar] |-pr pm (evar) evarb ~~> evarb -| GG[evarb][evar]
+
+-------------------------- :: evarR
+GG[evar][evarb] |-pr pm (evar) evarb ~~> evarb1 -| GG[evarb1,evar][evarb=evarb1]
+
+-------------------------- :: tvar
+GG[a][evar] |-pr pm (evar) a ~~> a -| GG[a][evar]
 
 
 -------------------------- :: unknown
@@ -2281,6 +2314,10 @@ evar in GG
 --------------------- :: evar
 GG |-wf evar
 
+a in GG
+-------------- :: tvar
+GG |-wf a
+
 defn
 
 GG ok :: :: stlc_well_formed_tctx :: 'wfc_'
@@ -2290,14 +2327,25 @@ GG ok :: :: stlc_well_formed_tctx :: 'wfc_'
 empty ok
 
 GG ok
+evar notin fv(GG)
 ------------------------- :: evar
-GG , Xa ok
+GG , evar ok
 
 GG ok
 GG |-wf at
+evar notin fv(GG)
 ------------------------- :: evarSolved
 GG , Xa=at ok
 
+GG ok
+a notin fv(GG)
+------------------------- :: tvar
+GG , a ok
+
+GG ok
+mevar notin fv(GG)
+----------------- :: marker
+GG , mevar ok
 
 defn
 

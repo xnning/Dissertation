@@ -1,7 +1,8 @@
 \section{Discussion}
 \label{sec:pr:discussion}
 
-This section discusses two extensions of promotion. The first extension explores
+This section discusses two extensions of promotion, and we can see that
+promotion scales naturally to other type features. The first extension explores
 dependent types, while the second extension considers gradual types.
 
 \subsection{Promoting Dependent Types}

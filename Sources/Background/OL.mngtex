@@ -90,6 +90,7 @@ polymorphic types in HM ($[[A]]$ in \Cref{fig:HM}) has at most rank $1$.
 
 
 \subsection{Declarative System}
+\label{sec:OL:decl}
 
 \paragraph{Syntax.}
 

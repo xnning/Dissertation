@@ -9,13 +9,7 @@ preserving soundness and completeness.
 
 \subsection{Declarative System}
 
-The definition of types in DK (\Cref{fig:DK} in \Cref{sec:DK:declarative}) is
-repeated below. Comparing to STLC, we have polymorphic types $[[\/a. A]]$ and
-type variables $[[a]]$. Again, we omit the details about expressions since we
-focus on types in this section. Recall that DK shares the same subtyping
-relation as of OL (\Cref{fig:OL:static}), and we use the judgment $[[dd |-DK A1
-<: A2]]$ to denote the subtyping relation in DK.
-
+\begin{figure}
 \begin{center}
     \begin{tabular}{lrcl} \toprule
       Types & $[[A]] $ & \syndef & $ [[int]] \mid [[a]] \mid  [[A1 -> A2]] \mid [[\/ a. A]] $ \\
@@ -25,6 +19,24 @@ relation as of OL (\Cref{fig:OL:static}), and we use the judgment $[[dd |-DK A1
     \end{tabular}
 \end{center}
 
+\drules[dk-s]{$ [[dd |-DK A1 <: A2 ]] $}{Subtyping}{tvar, int, arrow, forallL, forallR}
+\caption{Syntax and subtyping for higher-rank polymorphism}
+\label{fig:poly-pr:subtyping}
+\end{figure}
+
+
+The definition of types in DK (\Cref{fig:DK} in \Cref{sec:DK:declarative}) is
+repeated in \Cref{fig:poly-pr:subtyping}. Comparing to STLC, we have polymorphic
+types $[[\/a. A]]$ and type variables $[[a]]$. The context $[[dd]]$ keeps track
+of the types of term bindings $[[x:A]]$, as well as type variables $[[a]]$.
+
+\Cref{fig:poly-pr:algo} also gives the subtyping rules for higher-rank
+polymorphism, which is used in \cite{odersky:putting} (\Cref{sec:OL:decl}) and
+\cite{DK}. We use the judgment $[[dd |-DK A1 <: A2]]$ to denote the subtyping
+relation in DK. In \rref{dk-s-arrow}, functions are contravariant on arguments,
+and covariant on return types. \Rref{dk-s-forallR} simply puts the type variable
+$[[a]]$ into the context, and \rref{dk-s-forallL} guesses a monomorphic
+instantiation of the type variable.
 
 \subsection{Algorithmic System}
 
@@ -32,20 +44,27 @@ relation as of OL (\Cref{fig:OL:static}), and we use the judgment $[[dd |-DK A1
   \centering
   \begin{tabular}{lrcl} \toprule
     Types & $[[aA]] $ & \syndef & $ [[int]] \mid [[a]] \mid [[aA1 -> aA2]] \mid [[\/ a. aA]] \mid \hlmath{[[evar]]} $ \\
-    Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] $ \\
-    Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]]  $ \\
+    Monotypes & $[[at]]$ & \syndef & $ [[int]] \mid [[a]] \mid [[evar]] \mid [[at1 -> at2]] \mid \hlmath{[[evar]]} $ \\
+    Algorithmic Contexts & $[[GG]], [[DD]], [[TT]]$ & \syndef & $[[empty]] \mid [[GG , a]] \mid [[GG , evar]] \mid [[GG, evar = at]] \mid [[GG, mevar]]  $ \\
     Complete Contexts & $[[OO]]$ & \syndef & $[[empty]] \mid [[OO , a]] \mid [[OO, evar = at]]  $ \\
     Promotion Modes  & $[[pm]]$ & \syndef & $[[+]] \mid [[pminus]] $ \\ \bottomrule
   \end{tabular}
-  \drules[s]{$ [[GG |-sub aA1 <: aA2 -| DD]] $}{Subtyping}{tvar,int,evar,arrow,forallR,forallL,instL,instR}
-  \drules[p-pr]{$ [[GG |-pr pm (evar) aA ~~> at -| DD]] $}{Polymorphic Promotion}{forallL,forallR,arrow,mono}
-  \drules[pr]{$ [[GG |-pr (evar) at1 ~~> at2 -| DD]] $}{Promotion}{tvar}
-  \caption{Types, contexts, subtyping and (polymorphic) promotion of the algorithmic system}
+  \drules[wf]{$ [[GG |-wf at]] $}{Well-formedness}{int, arrow, evar, tvar}
+  \drules[wfc]{$ [[GG ok]] $}{Well-formedness of algorithmic contexts}{empty,evar,evarSolved,tvar}
+  \caption{Types, contexts, and well-formedness of the algorithmic system}
   \label{fig:poly-pr:algo}
 \end{figure}
 
-The syntax of the algorithmic system is given in \Cref{fig:poly-pr:algo}. The
-promotion mode $[[pm]]$ is either covariant ($[[+]]$) or contravariant
+The syntax of the algorithmic system is given in \Cref{fig:poly-pr:algo}. We
+distinguish between polymorphic types $[[aA]]$ and monotypes $[[at]]$. Following
+\cite{DK}, types are extended with the unification variable $[[evar]]$. Note
+that while the system includes polymorphic types, the solutions to existential
+variables $[[evar = at]]$ are restricted to monotypes; that is the key to ensure
+algorithmic typing is decidable and have principal types. $[[mevar]]$ is a scope
+marker, subscripted by the existential variable $[[evar]]$, and is used only in
+and explained with subtyping.
+
+The promotion mode $[[pm]]$ is either covariant ($[[+]]$) or contravariant
 ($[[pminus]]$). We can use $[[- pm]]$ to flip the promotion mode. Specifically,
 %
 \begin{center}
@@ -57,20 +76,57 @@ promotion mode $[[pm]]$ is either covariant ($[[+]]$) or contravariant
 
 \paragraph{Subtyping.}
 
-\Cref{fig:poly-pr:algo} also includes the subtyping judgment $[[GG |-sub aA1 <:
-aA2 -| DD]]$, which reads that, under the input context $[[GG]]$, type $[[aA1]]$ is
-a subtype of $[[aA2]]$, with the output context $[[DD]]$. The rules except the last
-two are the same as the algorithmic subtyping rules in DK.
+\begin{figure}
+  \centering
+  \drules[s]{$ [[GG |-sub aA1 <: aA2 -| DD]]$}{Subtyping}{tvar,int,evar,arrow,forallR,forallL}
+  \rulehl{\drule{s-instL}} \qquad \rulehl{\drule{s-instR}}
+  \drules[p-pr]{$ [[GG |-pr pm (evar) aA ~~> at -| DD]] $}{Polymorphic
+    Promotion}{forallL,forallR,arrow, int, evarL, evarR, tvar}
+\caption{Unification, subtyping and polymorphic promotion of the algorithmic system)}
+\end{figure}
 
-\Rref{s-instL} and \rref{instR} are specific to this system. Recall that in
-\gpc (which follows DK), the consistent subtyping between $[[evar]]$ and $[[aA]]$ replies on the
-instantiation rules, which are duplicated for the case when $[[evar]]$ is on the
-left and the case when $[[evar]]$ is on the right. Here, instead of
+\Cref{fig:poly-pr:algo} also includes the subtyping judgment $[[GG |-sub aA1 <:
+aA2 -| DD]]$, which reads that, under the input context $[[GG]]$, type $[[aA1]]$
+is a subtype of $[[aA2]]$, with the output context $[[DD]]$.
+
+The rules except the last two are the same as the algorithmic subtyping rules in
+DK. Let us first briefly go through the subtyping rules before we introduce our
+two new rules. \Rref{s-tvar,s-int,s-evar} are self-explanatory. In
+\rref{s-arrow}, we first solve the contravariant constraint $[[aA3]] [[<:]]
+[[aA1]]$, which returns the output context $[[TT]]$. We then solve the covariant
+constraint $[[ [TT]aA2 ]] [[<:]] [[ [TT]aA4 ]]$. Note that we apply the context
+$[[TT]]$ before we check the subtyping derivation. Just like before, this
+maintains a general invariant: in the subtyping derivation $[[ GG |-sub aA1 <:
+aA2 -| DD ]]$, the types $[[aA1]]$ and $[[aA2]]$ are fully applied under
+$[[GG]]$. \Rref{s-forallR} simply puts $[[a]]$ into the context and continue to
+check $[[aA1 ]] [[<:]] [[aA2]]$, which returns the output context $[[TT, a,
+DD]]$. As $[[a]]$ goes out of the scope in the conclusion, the rule then
+discards $[[a]]$ as well as the trailing context $[[TT]]$ after $[[a]]$.
+\Rref{s-forallL} puts a new unification variable as the instantiation of the
+quantifier, and continues to check $[[ aA1[a~>evar] ]] [[<:]] [[aA2]]$. Just
+like before, as $[[evar]]$ goes out of the scope in the conclusion, we want to
+discard $[[evar]]$ as well as its trailing context in the conclusion. However,
+during the derivation, we may actually add more existential variables right in
+front of $[[evar]]$ that should also be removed. Therefore, we insert a marker
+$[[mevar]]$ that marks the start of the scope that will get discarded in the
+conclusion. In the conclusion, we then discard $[[mevar]]$ together with its
+trailing context.
+
+Note that in the design of \cite{DK}, \rref{s-forallR} and \rref{s-forallL}
+are overlapped, when both types are quantifiers. In practice, since
+\rref{s-forallR} is invertible, one can apply it eagerly. A possible fix is to
+restrict \rref{s-forallL} to only apply when the right hand side is not a
+quantifier~\citep{practical:inference}.
+
+Now we turn to \rref{s-instL} and \rref{instR}, which are specific to this
+system. Recall that in DK, subtyping between $[[evar]]$ and $[[aA]]$ replies on
+the instantiation rules, which are duplicated for the case when $[[evar]]$ is on
+the left and the case when $[[evar]]$ is on the right. Here, instead of
 instantiation, we directly use polymorphic promotion to promote the possibly
 polymorphic type $[[aA]]$ into a monotype $[[at]]$. Specifically, \rref{s-instL}
-uses polymorphic promotion under the covariant mode ($[[+]]$) and
-\rref{s-instR} uses polymorphic promotion under the contravariant mode
-($[[pminus]]$). If promotion succeeds, we can directly set $[[evar]]$ to $[[at]]$.
+uses polymorphic promotion under the covariant mode ($[[+]]$) and \rref{s-instR}
+uses polymorphic promotion under the contravariant mode ($[[pminus]]$). If
+promotion succeeds, we can directly set $[[evar]]$ to $[[at]]$.
 
 \paragraph{Polymorphic promotion.}
 
@@ -82,7 +138,7 @@ The only difference between these two promotion modes is how to promote
 polymorphic types. Under the contravariant mode
 (\rref{p-pr-forallL}), a monotype would make the final type more
 polymorphic. Therefore, we replace the universal binder $[[a]]$ with a fresh
-existential variable $[[evar]]$ and put it before $[[evar]]$. Otherwise, in
+unification variable $[[evar]]$ and put it before $[[evar]]$. Otherwise, in
 \rref{p-pr-forallR}, we put $[[a]]$ in the context and promote $[[aA]]$. Notice
 that since $[[a]]$ is added to the tail of the context, it is not in the scope
 of $[[evar]]$ and can actually never be used in $[[aA]]$ or otherwise promotion
@@ -105,15 +161,69 @@ the context and the rule would remain sound.
 \Rref{p-pr-arrow} flips the mode for codomains, and uses the same mode for
 domains. When the type to be promoted is a monotype, \rref{p-pr-mono} uses the
 promotion judgment ($[[|-pr]]$) directly. Note that for a monotype the mode does
-not matter, so \rref{p-pr-mono} applies in both modes.
+not matter, so the rest of the rules apply in both modes.
+\Rref{p-pr-int,p-pr-evarL,p-pr-evarR} are the same as before.
 
+Importantly, we now have a new \rref{pr-tvar} for type variables $[[a]]$. Note
+again that promotion is a partial operation, as it requires $[[a]]$ to be the
+left of $[[evar]]$, since the order of variable matters. This effectively solves
+the scoping issue between type variables and unification variables. For example,
+if we want to derive $[[ evar, a]] [[|-sub]] [[evar]] [[ <:]] [[a]]$, we should
+fail -- $[[a]]$ is not in the scope of $[[evar]]$ and we cannot set $[[evar = a]]$!
+This is exactly what \rref{pr-tvar} does -- promoting $[[a]]$ fails as this is
+no way we can promote it to be well-typed in the prefix context of $[[evar]]$.
 
-\paragraph{Promotion.}
+\paragraph{Examples.}
 
-The promotion judgment is the same as before, and still only works for
-monotypes, except that now we have \rref{pr-tvar} for type variables $[[a]]$.
-Note again that promotion is a partial operation, as it requires $[[a]]$ to be
-the left of $[[evar]]$, since the order of variable matters.
+Below we give some examples.
+
+The first example is the subtyping derivation of $[[evar]] [[|-sub]] [[\/a. a ->
+a]] [[<:]] [[evara]]$. According to \rref{s-instR}, we start by promoting
+$[[\/a. a -> a]]$ under the contravariant mode ($[[-]]$). We then call
+\rref{p-pr-forallL}, which adds a fresh unification variable $[[evarb]]$ in
+front of $[[evar]]$ and returns the promoted type $[[evarb -> evarb]]$. Note
+that $[[evarb]]$ promotes to itself under both modes as it appears to the left
+of $[[evar]]$ (\rref{p-pr-evarL}). We now return back to the subtyping
+derivation, and set set $[[evar]] = [[evarb -> evarb]]$.
+%
+\begin{mathpar}
+  \inferrule*[right=\rref*{s-instR}]{
+    \inferrule*[right=\rref*{p-pr-forallL}]{
+      \inferrule*[right=\rref*{p-pr-arrow}]{
+        \inferrule*[lab=\rref*{p-pr-evarL}]{ }{[[evarb, evar |-pr + (evar) evarb ~~> evarb -| evarb, evar]]}
+        \qquad
+        \inferrule*[lab=\rref*{p-pr-evarL}]{ }{[[evarb, evar |-pr - (evar) evarb ~~> evarb -| evarb, evar]]}
+      }
+      {[[ evarb, evar |-pr - (evar) evarb -> evarb ~~> evarb -> evarb -| evarb, evar  ]]}
+    }
+    {[[evar |-pr - (evar) \/a. a -> a ~~> evarb -> evarb -| evarb, evara ]]}%
+  }{
+    [[evar |-sub \/a. a -> a <: evara -| evarb, evar = evarb -> evarb  ]]
+  }
+\end{mathpar}
+%
+The second example is the subtyping derivation of $[[evar]] [[|-sub]] [[evar]]
+[[<:]] [[\/a.a -> a]]$. According to \rref{s-instL}, we start by promoting
+$[[\/a. a -> a]]$ under the covariant mode ($[[+]]$). We then call
+\rref{p-pr-forallR}. In this case we directly add the type variable $[[a]]$ into
+the type context, and continue to promote $[[a -> a]]$. After one step of
+\rref{p-pr-arrow}, we got stuck -- note how \rref{p-pr-tvar} fails to apply in
+this case as $[[a]]$ appears to the right of $[[evar]]$. So promotion
+(correctly) rejects this example.
+%
+\begin{mathpar}
+  \inferrule*[right=\rref*{s-instL}]{
+    \inferrule*[right=\rref*{p-pr-forallR}]{
+      \inferrule*[right=\rref*{p-pr-arrow}]{
+        [[evar, a]] [[|-]]^{\!\![[+]]}_{\!\![[evar]]} [[a]] [[~~>]] ???
+      }
+      {[[evar, a]] [[|-]]^{\!\![[+]]}_{\!\![[evar]]} [[a -> a]] [[~~>]] ???}
+    }
+    {[[evar]] [[|-]]^{\!\![[+]]}_{\!\![[evar]]} [[\/a. a -> a]] [[~~>]] ???}%
+  }{
+    [[evar]] [[|-sub]] [[evara]] [[<:]] [[\/a. a -> a ]]
+  }
+\end{mathpar}
 
 
 \subsection{Soundness and Completeness}
@@ -168,7 +278,7 @@ Now we turn to completeness. The completeness of promotion is the same as before
   and $[[  GG |-pr (evar) at ~~> at2 -| DD ]]$.
 \end{restatable}
 
-Completeness of polymorphic promotion has two parts. If the existential variable
+Completeness of polymorphic promotion has two parts. If the unification variable
 appears on the left, then we promote the type under the covariant mode
 $([[+]])$, or otherwise the contravariant mode ($[[pminus]]$). Moreover, it also
 requires $[[evar notin fv(aA)]]$.

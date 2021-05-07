@@ -108,7 +108,7 @@ Second, we do not simply unify $[[evarb]] [[~=]] [[at]]$, but
 $[[evarb]] [[~=]] [[ [TT1]at ]]$, where the context $[[TT1]]$ is applied to
 $[[at]]$ (we do not apply $[[TT1]]$ to $[[evarb]]$ as given $[[evarb]]$ is a
 fresh unification variable not referred anywhere yet, we know $[[ [TT1]evarb ]] =
-[[evarb]]$). This maintains an invariant: in the unification problem $[[ GG |-u
+[[evarb]]$). This maintains an invariant: in the unification derivation $[[ GG |-u
 at1 ~= at2 -| DD ]]$, the types $[[at1]]$ and $[[at2]]$ are fully applied under
 $[[GG]]$. This invariant simplifies the unification process: we know that every
 unification variable we encounter during unification is unsolved and we do not
@@ -164,7 +164,7 @@ promoting $[[evar]]$ to the left of $[[evar]]$, we prevent the possibility of an
 infinite substitution when applying an algorithmic context. Note that
 \rref{u-refl} solves the unification case $[[evar]] [[~=]] [[evar]]$.
 
-\paragraph{Example.}
+\paragraph{Examples.}
 
 Below we give the derivation of $[[evar, evarb]] [[|-u]] [[evar]] [[~=]] [[evarb
 -> int ]]$ discussed in \Cref{sec:pr:background}. Notice how the type $[[evarb
