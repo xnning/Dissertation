@@ -58,10 +58,10 @@ instantiation of the type variable.
 The syntax of the algorithmic system is given in \Cref{fig:poly-pr:algo}. We
 distinguish between polymorphic types $[[aA]]$ and monotypes $[[at]]$. Following
 \cite{DK}, types are extended with the unification variable $[[evar]]$. Note
-that while the system includes polymorphic types, the solutions to existential
+that while the system includes polymorphic types, the solutions to unification
 variables $[[evar = at]]$ are restricted to monotypes; that is the key to ensure
 algorithmic typing is decidable and have principal types. $[[mevar]]$ is a scope
-marker, subscripted by the existential variable $[[evar]]$, and is used only in
+marker, subscripted by the unification variable $[[evar]]$, and is used only in
 and explained with subtyping.
 
 The promotion mode $[[pm]]$ is either covariant ($[[+]]$) or contravariant
@@ -106,7 +106,7 @@ discards $[[a]]$ as well as the trailing context $[[TT]]$ after $[[a]]$.
 quantifier, and continues to check $[[ aA1[a~>evar] ]] [[<:]] [[aA2]]$. Just
 like before, as $[[evar]]$ goes out of the scope in the conclusion, we want to
 discard $[[evar]]$ as well as its trailing context in the conclusion. However,
-during the derivation, we may actually add more existential variables right in
+during the derivation, we may actually add more unification variables right in
 front of $[[evar]]$ that should also be removed. Therefore, we insert a marker
 $[[mevar]]$ that marks the start of the scope that will get discarded in the
 conclusion. In the conclusion, we then discard $[[mevar]]$ together with its

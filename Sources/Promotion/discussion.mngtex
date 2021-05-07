@@ -57,7 +57,7 @@ consider the order of type variables.
   \drule{pr-tvarr}
 \end{mathpar}
 
-Then, while promotion resolves the ordering of existential variables, since
+Then, while promotion resolves the ordering of unification variables, since
 there is no constraint for type variables, it is not guaranteed anymore that the
 promoted type is well-formed in the prefix context of $[[evar]]$. Therefore, we
 need to adjust the rule of subtyping to check explicitly that the result is
@@ -78,7 +78,7 @@ We have shown that polymorphic promotion works for DK. A natural extension is to
 also apply polymorphic promotion to \gpc (\Cref{chap:Gradual}). Then the key is
 to show how to promote the unknown type. Since comparing with the unknown type
 does not impose any constraints, we can simply replace it with a fresh
-existential variable:
+unification variable:
 %
 \begin{mathpar}
 \drule{p-pr-unknown}
@@ -90,7 +90,7 @@ evarb, evar]]$.
 
 For the extended \gpc which restores the dynamic guarantee
 (\Cref{chap:Dynamic}), we can replace the unknown type with a fresh gradual
-existential variables instead.
+unification variables instead.
 %
 \begin{mathpar}
 \drule{p-pr-unknownG}

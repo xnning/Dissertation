@@ -34,11 +34,11 @@ The top of \Cref{fig:gradual:algo-syntax} shows the syntax of the algorithmic
 system. A noticeable difference are the algorithmic contexts $[[GG]]$, which are
 represented as an \emph{ordered} list containing declarations of type variables
 $[[a]]$ and term variables $[[x : aA]]$. Unlike declarative contexts,
-algorithmic contexts also contain declarations of existential type variables
+algorithmic contexts also contain declarations of unification type variables
 $[[evar]]$, which can be either unsolved (written $[[evar]]$) or solved to some
 monotype (written $[[evar = at]]$). Finally, algorithmic contexts include a
 \textit{marker} $[[ mevar ]]$ (read ``marker $[[evar]]$'' ), which is used to
-delineate existential variables created by the algorithm. We will have more to
+delineate unification variables created by the algorithm. We will have more to
 say about markers when we examine the rules. Complete contexts $[[OO]]$ are the
 same as contexts, except that they contain no unsolved variables.
 
@@ -83,7 +83,7 @@ consistent with the notion of \emph{context extension}, which will be described
 in \Cref{sec:gradual:ctxt:extension}.
 
 We start with the explanation of the algorithmic consistent subtyping as it
-involves manipulating existential type variables explicitly (and solving them if
+involves manipulating unification type variables explicitly (and solving them if
 possible).
 
 
@@ -105,11 +105,11 @@ $[[GG]]$, $[[aA1]]$ is a consistent subtype of $[[aA2]]$, with output context
 $[[DD]]$. The first five rules do not manipulate contexts, but illustrate how
 contexts are propagated.
 
-\Rref{gpc-as-tvar} and \rref{gpc-as-int} do not involve existential variables, so the
+\Rref{gpc-as-tvar} and \rref{gpc-as-int} do not involve unification variables, so the
 output contexts remain unchanged. \Rref{gpc-as-evar} says that any unsolved
-existential variable is a consistent subtype of itself. The output is still the
+unification variable is a consistent subtype of itself. The output is still the
 same as the input context as the rule gives no clue as to what is the solution
-of that existential variable. \Rref{gpc-as-unknownL,as-unknownR} are the
+of that unification variable. \Rref{gpc-as-unknownL,as-unknownR} are the
 counterparts of \rref{gpc-cs-unknownL} and \rref{gpc-cs-unknownR}.
 
 
@@ -120,22 +120,22 @@ Note that we do not simply check $[[ aA2 <~ aA4 ]]$, but apply $[[TT]]$ (the inp
 context of the second premise) to both types (e.g., $[[ [TT]aA2 ]]$). This is to
 maintain an important invariant: whenever $[[ GG |-G aA1 <~ aA2 -| DD ]]$ holds,
 the types $[[aA1]]$ and $[[aA2]]$ are fully applied under input context $[[GG]]$
-(they contain no existential variables already solved in $[[GG]]$). The same
+(they contain no unification variables already solved in $[[GG]]$). The same
 invariant applies to every algorithmic judgment.
 
 
 \Rref{gpc-as-forallR}, similar to the declarative \rref{gpc-cs-forallR}, adds
 $[[a]]$ to the input context. Note that the output context of the premise allows
-additional existential variables to appear after the type variable $[[a]]$, in a
-trailing context $[[TT]]$. These existential variables could depend on $[[a]]$;
+additional unification variables to appear after the type variable $[[a]]$, in a
+trailing context $[[TT]]$. These unification variables could depend on $[[a]]$;
 since $[[a]]$ goes out of scope in the conclusion, we need to drop them from the
 concluding output, resulting in $[[DD]]$. The next rule is essential to
 eliminating the guessing work. Instead of guessing a monotype $[[t]]$ out of
-thin air, \rref{gpc-as-forallL} generates a fresh existential variable $[[evar]]$,
-and replaces $[[a]]$ with $[[evar]]$ in the body $[[aA]]$. The new existential
+thin air, \rref{gpc-as-forallL} generates a fresh unification variable $[[evar]]$,
+and replaces $[[a]]$ with $[[evar]]$ in the body $[[aA]]$. The new unification
 variable $[[evar]]$ is then added to the input context, just before the marker
 $[[mevar]]$. The output context ($[[ DD, mevar, TT ]]$) allows additional
-existential variables to appear after $[[mevar]]$ in $[[TT]]$. For the same
+unification variables to appear after $[[mevar]]$ in $[[TT]]$. For the same
 reasons as in \rref{gpc-as-forallR}, we drop them from the output context. A central
 idea behind these two rules is that we defer the decision of picking a monotype
 for a type variable, and hope that it could be solved later when we have more
@@ -145,10 +145,10 @@ one can apply \rref{gpc-as-forallR} eagerly as it is invertible.
 
 The last two rules (\rref{gpc-as-instL} and \rref{gpc-as-instR}) are specific to the
 algorithm, thus having no counterparts in the declarative version. They both
-check consistent subtyping with an unsolved existential variable on one side and
-an arbitrary type on the other side. Apart from checking that the existential
+check consistent subtyping with an unsolved unification variable on one side and
+an arbitrary type on the other side. Apart from checking that the unification
 variable does not occur in the type $[[A]]$, both rules do not directly solve the
-existential variables, but leave the real work to the instantiation judgment.
+unification variables, but leave the real work to the instantiation judgment.
 
 \subsection{Instantiation}
 \label{sec:gradual:algo:instantiate}
@@ -167,13 +167,13 @@ existential variables, but leave the real work to the instantiation judgment.
 
 Two symmetric judgments $[[ GG |-G evar <~~ aA -| DD ]]$ and $[[ GG |-G aA <~~
 evar -| DD ]]$, defined in \Cref{fig:gradual:algo:instantiate}, instantiate
-unsolved existential variables. They read ``under input context $[[GG]]$,
+unsolved unification variables. They read ``under input context $[[GG]]$,
 instantiate $[[evar]]$ to a consistent subtype (or supertype) of $[[aA]]$, with
 output context $[[DD]]$''. The judgments are extended naturally from DK system,
 whose original inspiration comes from \citet{cardelli1993implementation}. Since
 these two judgments are mutually defined, we discuss them together.
 
-\Rref{gpc-instl-solve} is the simplest one -- when an existential variable meets a
+\Rref{gpc-instl-solve} is the simplest one -- when an unification variable meets a
 monotype -- where we simply set the solution of $[[evar]]$ to the monotype
 $[[at]]$ in the output context. We also need to check that the monotype $[[at]]$
 is well-formed under the prefix context $[[GG]]$.
@@ -185,10 +185,10 @@ constraint\footnote{As we will see in \Cref{chap:Dynamic}
 This design decision reflects the point that type inference only produces static
 types~\citep{garcia:principal}.
 
-\Rref{gpc-instl-reach} deals with the situation where two existential variables
-meet. Recall that $[[ GG[evar][evarb]  ]]$ denotes a context where some unsolved existential
+\Rref{gpc-instl-reach} deals with the situation where two unification variables
+meet. Recall that $[[ GG[evar][evarb]  ]]$ denotes a context where some unsolved unification
 variable $[[evar]]$ is declared before $[[evarb]]$. In this situation, the only logical
-thing we can do is to set the solution of one existential variable to the other
+thing we can do is to set the solution of one unification variable to the other
 one, depending on which one is declared before. For example, in the output
 context of \rref{gpc-instl-reach}, we have $[[evarb]] = [[evar]]$ because in the input
 context, $[[evar]]$ is declared before $[[evarb]]$.
@@ -201,7 +201,7 @@ aA]]$, but we can decompose $[[ \/b. aA ]]$ in the same way as in
 
 \Rref{gpc-instl-arr} applies when $[[evar]]$ meets an arrow type. It follows
 that the solution must also be an arrow type. This is why, in the first premise,
-we generate two fresh existential variables $[[evar1]]$ and $[[evar2]]$, and
+we generate two fresh unification variables $[[evar1]]$ and $[[evar2]]$, and
 insert them just before $[[evar]]$ in the input context, so that we can solve
 $[[evar]]$ to $[[ evar1 -> evar2 ]]$. Note that the first premise $[[ aA1 <~~
 evar1 ]]$ switches to the other instantiation judgment.
@@ -235,7 +235,7 @@ $[[aA]]$. We first discuss rules in the inference mode.
 and simply propagate the input context. \Rref{gpc-inf-anno} is standard, switching
 to the checking mode in the premise.
 
-In \rref{gpc-inf-lamann}, we generate a fresh existential variable $[[evarb]]$
+In \rref{gpc-inf-lamann}, we generate a fresh unification variable $[[evarb]]$
 for the function codomain, and check the function body against $[[evarb]]$. Note
 that it is tempting to write $[[ GG, x : aA |-G ae => aA2 -| DD, x : aA, TT ]]$ as
 the premise (in the hope of better matching its declarative counterpart
@@ -246,7 +246,7 @@ found in the output context. This explains why we put $[[evarb]]$ \emph{before}
 $ [[ x : aA ]] $ so that it remains in the output context $[[DD]]$.
 \Rref{gpc-inf-lam}, which corresponds to \rref{gpc-lam}, one of the guessing rules, is
 similar to \rref{gpc-inf-lamann}. As with the other algorithmic rules that eliminate
-guessing, we create new existential variables $[[evar]]$ (for function domain)
+guessing, we create new unification variables $[[evar]]$ (for function domain)
 and $[[evarb]]$ (for function codomain) and check the function body against
 $[[evarb]]$. \Rref{gpc-inf-let} is similar to \rref{gpc-inf-lamann}.
 
@@ -255,7 +255,7 @@ $[[evarb]]$. \Rref{gpc-inf-let} is similar to \rref{gpc-inf-lamann}.
 \Rref{gpc-inf-app} deserves attention. It relies on the algorithmic matching
 judgment $[[ GG |-G aA |> aA1 -> aA2 -| DD ]]$. The matching judgment
 algorithmically synthesizes an arrow type from an arbitrary type.
-\Rref{gpc-am-forall} replaces $a$ with a fresh existential variable $[[evar]]$,
+\Rref{gpc-am-forall} replaces $a$ with a fresh unification variable $[[evar]]$,
 thus eliminating guessing. \Rref{gpc-am-arr} and \rref{gpc-am-unknown} correspond directly to
 the declarative rules. \Rref{gpc-am-var}, which has no corresponding declarative
 version, is similar to \rref{gpc-instl-arr}/\rref*{gpc-instr-arr}: we create
@@ -318,7 +318,7 @@ We measure the judgment $[[GG |-G aA1 <~ aA2 -| DD]]$ lexicographically by
 \begin{enumerate}[(M1)]
 \item the number of $\forall$-quantifiers in $[[aA1]]$ and $[[aA2]]$;
 \item \hl{the number of unknown types in $[[aA1]]$ and $[[aA2]]$;}
-\item $| \textsc{unsolved}([[GG]]) |$: the number of unsolved existential
+\item $| \textsc{unsolved}([[GG]]) |$: the number of unsolved unification
   variables in $[[GG]]$;
 \item $| [[GG |-G aA1]] | + | [[GG |-G aA2]]   |$.
 \end{enumerate}
@@ -398,7 +398,7 @@ notion of information increase from input contexts to output contexts.
 
 A context extension judgment $[[ GG --> DD ]]$ reads ``$[[GG]]$ is extended
 by $[[DD]]$''. Intuitively, this judgment says that $[[DD]]$ has at least as
-much information as $[[GG]]$: some unsolved existential variables in $[[GG]]$
+much information as $[[GG]]$: some unsolved unification variables in $[[GG]]$
 may be solved in $[[DD]]$. The full inductive definition can be found
 \Cref{fig:gradual:ctxt-extension}.
 
@@ -458,7 +458,7 @@ both expressions.
 Notice that the declarative judgment uses $[[ [OO]DD   ]]$, an
 operation that applies a complete context $[[OO]]$ to the algorithmic context
 $[[DD]]$, essentially plugging in all known solutions and removing all
-declarations of existential variables (both solved and unsolved), resulting in a
+declarations of unification variables (both solved and unsolved), resulting in a
 declarative context.
 
 With instantiation soundness, next we show that the algorithmic consistent
@@ -489,8 +489,8 @@ Completeness of the algorithmic system is the reverse of soundness: given a
 declarative judgment of the form $[[ [OO]GG ]] [[|-G]] [ [[OO]] ] \dots $,
 we want to get an algorithmic derivation of $[[GG]] [[|-G]] \dots [[-|]] [[DD]]$.
 It turns out that completeness is a bit trickier to state in that the
-algorithmic rules generate existential variables on the fly, so $[[DD]]$ could
-contain unsolved existential variables that are not found in $[[GG]]$, nor in
+algorithmic rules generate unification variables on the fly, so $[[DD]]$ could
+contain unsolved unification variables that are not found in $[[GG]]$, nor in
 $[[OO]]$. Therefore the completeness proof must produce another complete context
 $[[OO']]$ that extends both the output context $[[DD]]$, and the given complete
 context $[[OO]]$. As with soundness, we need erasure to relate both expressions.
