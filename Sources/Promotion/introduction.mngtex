@@ -164,6 +164,7 @@ $[[a]]$.
 
 
 \subsection{Our Approach: Type Promotion}
+\label{sub:promotion:intro:promotion}
 
 We propose the \textit{promotion} process, which helps resolve the dependency
 between unification variables. Promotion combines the advantages of

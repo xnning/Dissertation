@@ -31,7 +31,7 @@ Data constructor declarations $[[dc]]$ support existential quantification.
 Types and kinds are collapsed into one level; $[[A]]$ and $[[K]]$ are now
 synonymous metavariables and allow
 prenex polymorphism, where variables in a kind binder $[[kvs]]$ can
-optionally have kind annotations. Monotypes $[[t]]$ and $[[k]]$ allow visible kind
+optionally have (monomorphic) kind annotations. Monotypes $[[t]]$ and $[[k]]$ allow visible kind
 applications $[[t1 @@ t2]]$. Elaborated types $[[eA]]$, $[[eK]]$ are the result
 of elaboration, which decorates source types to make them fully explicit.
 This is done so that
@@ -125,32 +125,13 @@ will see in the coming section.
 \begin{minipage}{.42\textwidth}
 \drules[]{$[[EE |-gen ckvs HH1 ~> HH2]]$}{Generalization}{gen}
 \end{minipage}
+\drules[sr]{$[[rs A]]$}{Kind results in $[[star]]$}{star,arrow,forall}
+
 \caption{Declarative specification of \tit}
 \label{fig:kind:tit:decl}
 \end{figure}
 
-\begin{figure}
-  \drules[inst]{$[[EE |- eA1 : eK <: ek ~> eA2]]$}{Instantiation}{refl,forall
-    % ,forall-infer
-  }
-  \drules[kc]{$[[EE |- A <= ek ~> eA]]$}{Kind Checking}{sub}
-  \drules[ktt]{$[[EE |- A : eK ~> eA]]$}{Kinding}{
-    star
-    % ,nat,var,arrow,tcon
-    ,app,kapp
-    % ,kapp-infer
-    % ,forall
-    ,foralli}
-  \drules[ela]{$[[EE |-el eA : eK]]$}{Elaborated Kinding}{
-    % star,nat,var,tcon,arrow,
-    app,kapp
-    % ,kapp-infer
-    % ,forall,forall-infer
-  }
-
-  \caption{Selected rules for declarative kind-checking in \tit}
-  \label{fig:kind:tit:kinding}
-\end{figure}
+\subsection{Checking Programs}
 
 The declarative typing rules appear in \Cref{fig:kind:tit:decl}.
 The judgment $[[EE;HH |-p pgm : A]]$ checks the program. From now on we omit the
@@ -190,7 +171,10 @@ the program.
 \Rref{pgm-dt-tt}, as in \hne, guesses kinds $[[eki]]$ for each datatype $[[Ti]]$
 and puts $[[Ti:eki]]$ in the context \textit{before} looking at the declarations.
 The major difference from \hne is that kinds can be generalized \textit{after}
-the group is checked. We use $[[ckvsi]]$ to denote the free variables in each
+the group is checked. Thus we get rid of the issues of defaulting; that is, the
+example of |Q1| and |Q2| in \Cref{sec:kind:haskell98:defaulting} will be
+accepted in \tit as instead of defaulting |Q2| will get a polymorphic type.
+We use $[[ckvsi]]$ to denote the free variables in each
 kind $[[eki]]$. After the recursive group is typed, we generalize the kind of
 each type constructor as well as the type of its data constructors.
 To generalize the type of data constructors, we use the
@@ -215,16 +199,52 @@ over $[[ckvs]]$. Note that $[[ckvs]]$ (via a small abuse of notation in the rule
 excludes free variables in
 $[[ti]]$ and $[[EE]]$.
 
+\begin{figure}
+  \drules[inst]{$[[EE |- eA1 : eK <: ek ~> eA2]]$}{Instantiation}{refl,forall
+    ,forall-infer
+  }
+  \drules[kc]{$[[EE |- A <= ek ~> eA]]$}{Kind Checking}{sub}
+  \drules[ktt]{$[[EE |- A : eK ~> eA]]$}{Kinding}{
+    star
+    ,nat,var,arrow
+    ,app
+    ,tcon
+    ,kapp
+    ,kapp-infer
+    ,foralli
+    ,forall
+  }
+
+  \caption{Declarative kind-checking in \tit}
+  \label{fig:kind:tit:kinding}
+\end{figure}
+
+\begin{figure}
+  \drules[ela]{$[[EE |-el eA : eK]]$}{Elaborated Kinding}{
+    star,nat,var,tcon,arrow,
+    app,kapp
+    ,kapp-infer
+    ,forall,forall-infer
+  }
+  \caption{Declarative elaborated kinding in \tit}
+  \label{fig:kind:tit:elaborated:kinding}
+\end{figure}
+
+
 \subsection{Checking Kinds}
 
 The kinding judgment $[[|-k]]$ appears in \Cref{fig:kind:tit:kinding}.
-We only highlight selected rules.
 Kinding $[[EE |- A : eK ~> eA]]$ infers the type $[[A]]$ to have kind $[[eK]]$,
 and it elaborates $[[A]]$ to $[[eA]]$. The kinding rules are built
 upon the axiom $[[EE |- star : star ~> star]]$ (\rref{ktt-star}). While this
 axiom is known to violate logical consistency, as Haskell is already logically
 inconsistent because of its general recursion, we do not consider it as an issue
-here.
+here\footnote{This design is different from terminating dependently-typed
+  languages, which require polymorphism to be stratified into a hierarchy of
+  levels, or otherwise they permit an encoding of Girard’s
+  paradox~\citep{girard1972interpretation}. But as Haskell is already
+  non-terminating, there is no motivation for stratification. See
+  \citep{weirich2017specification} for more discussion.}.
 \Rref{ktt-app} concerns applications $[[t1 t2]]$. It first infers the kind of
 $[[t1]]$ to be $[[eK1]]$. The kind $[[eK1]]$ can be a polymorphic kind headed by a $[[\/]]$,
 though it
@@ -237,16 +257,20 @@ the expected argument kind $[[ek1]]$. The kind checking judgment $[[|-kc]]$
 simply delegates the work to kinding and instantiation.
 \Rref{ktt-kapp} checks visible kind applications. Note in the return kind
 $[[eK]]$, the variable $[[a]]$ is substituted by the elaborated argument
-$[[et2]]$. \Rref{ktt-foralli} elaborates an unannotated type $[[\/ a . A]]$ to
+$[[et2]]$. \Rref{ktt-kapp-infer} is similar to \rref{ktt-kapp}, but before we
+instantiated specified variables, we must first instantiate all inferred variables.
+\Rref{ktt-foralli} elaborates an unannotated type $[[\/ a . A]]$ to
 $[[\/ a : ek . eA]]$, where $[[ek]]$ is an \textit{elaborated} kind ($[[|-el]]$)
-guessed for $[[a]]$.
+guessed for $[[a]]$. \Rref{ktt-forall} is similar, elaborating an
+annotated type $[[\/a:k. A]]$ to $[[\/a:ek. eA]]$, where $[[ek]]$ is the elaborated result of $[[k]]$.
 
 The stand-alone elaborated kinding judgment $[[|-el]]$ type-checks elaborated
-types. As all necessary instantiation has been done, type-checking for
-elaborated types is easy. For example, \rref{ela-app} concerns
-applications $[[et1 et2]]$. Compared to \rref{ktt-app}, here $[[et1]]$ has an
-arrow kind, and takes exactly the kind of $[[et2]]$.
-All judgments output well-formed elaborated types, as the following lemma states:
+types, given in \Cref{fig:kind:tit:elaborated:kinding}. As all necessary
+instantiation has been done, type-checking for elaborated types is easy. For
+example, \rref{ela-app} concerns applications $[[et1 et2]]$. Compared to
+\rref{ktt-app}, here $[[et1]]$ has an arrow kind, and takes exactly the kind of
+$[[et2]]$. All judgments output well-formed elaborated types, as the following
+lemma states:
 
 \begin{restatable}[Type Elaboration]{lemma}{lemmattwfkinding}
   \label{lemma:tt:wf_kinding}

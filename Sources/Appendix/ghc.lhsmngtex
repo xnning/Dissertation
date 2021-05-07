@@ -472,6 +472,7 @@ the problem with ScopedSort still exists in type signatures, where type
 variables may be implicitly bound.
 
 \subsection{The ``Forall-or-Nothing'' Rule}
+\label{sec:appendix:forall-or-nothing}
 
 GHC implements the so-called \href{https://github.com/goldfirere/ghc-proposals/blob/no-kind-variables/proposals/0000-no-kind-vars.rst}{\emph{forall-or-nothing} rule}, which states that either \emph{all} variables
 are quantified by a user-written |forall|, or none are. These examples illustrate the effect:
@@ -513,63 +514,9 @@ repeated from those in the chapter.
 \drules[a-kv]{$[[DD |- k]]$}{Well-formed Kinds}{star,arrow,kuvar}
 \drules[a-tctx]{$[[DD ok]]$}{Well-formed Type Contexts}{empty,tvar,tcon,kuvar,kuvarSolved}
 \drules[a-ectx]{$[[DD ||- GG]]$}{Well-formed Term Contexts}{empty, dcon}
-\drules[a-ctxde]{$[[DD --->> OO]]$}{Defaulting}{empty, tvar, tcon,
-  kuvarSolved, solve}
 
-\subsection{Context Application in \hne}
-
-\begin{center}
-   \begin{tabular}{lll} \toprule
-     \multicolumn{3}{c}{$[[ [DD] k ]]$ applies $[[DD]]$ as a substitution to $[[k]]$.} \\
-    $[[ [DD] star  ]]$     & = & $[[ star ]]$ \\
-    $[[ [DD] k1 -> k2  ]]$ & = & $[[ [DD] k1 -> [DD] k2 ]]$ \\
-    $[[ [DD[Xa] ] Xa  ]]$  & = & $[[ Xa ]]$ \\
-    $[[ [DD[Xa=k] ] Xa  ]]$  & = & $[[ [DD[Xa=k] ] k ]]$ \\
-     \bottomrule
-   \end{tabular}
-\end{center}
-
-\begin{center}
-   \begin{tabular}{lll} \toprule
-     \multicolumn{3}{c}{$[[ [DD] GG ]]$ applies $[[DD]]$ as a substitution to $[[GG]]$.} \\
-    $[[ [DD] empty  ]]$     & = & $[[ empty ]]$ \\
-    $[[ [DD] (GG, D : A)  ]]$ & = & $[[ [DD]GG, D : [DD]A  ]]$ \\
-     \bottomrule
-   \end{tabular}
-\end{center}
-
-\begin{center}
-   \begin{tabular}{lll} \toprule
-    \multicolumn{3}{c}{$[[ [OO]DD ]]$ applies $[[OO]]$ as a substitution to $[[DD]]$.} \\
-    $[[ [empty] empty  ]]$      & = & $[[ empty ]]$ \\
-    $[[ [OO, a:k] (DD, a : k) ]]$ & = & $[[ [OO] DD, a : [OO] k ]]$ \\
-    $[[ [OO, T:k] (DD, T : k) ]]$ & = & $[[ [OO] DD, T : [OO] k ]]$ \\
-    $[[ [OO, Xa = k] (DD, Xa) ]]$ & = & $[[ [OO] DD ]]$ \\
-    $[[ [OO, Xa = k] (DD, Xa = k') ]]$ & = & $[[ [OO] DD ]]$ \quad if $[[ [OO] k ]] = [[ [OO] k' ]]$ \\
-    $[[ [OO, Xa = k] DD]]$ & = & $[[ [OO] DD ]]$ \quad if $ [[ Xa]] [[notin]] [[DD]] $ \\
-     \bottomrule
-   \end{tabular}
-\end{center}
-
-\subsection{Context Extension in \hne}
-
-\drules[a-ctxe]{$[[DD --> TT]]$}{Context Extension}
-{empty, tvar,tcon,kuvar,kuvarSolved,solve,add,addSolved}
 
 \subsection{Declarative \tit}
-
-\drules[sr]{$[[rs A]]$}{Kind results in $[[star]]$}{star,arrow,forall}
-
-\drules[inst]{$[[EE |- eA1 : eK <: ek ~> eA2]]$}{Instantiation}
-{refl,forall ,forall-infer}
-
-\drules[kc]{$[[EE |- A <= ek ~> eA]]$}{Kind Checking}{sub}
-
-\drules[ktt]{$[[EE |- A : eK ~> eA]]$}{Kinding}{
-  star ,nat,var,arrow,tcon ,app,kapp ,kapp-infer ,forall ,foralli}
-
-\drules[ela]{$[[EE |-el eA : eK]]$}{Elaborated Kinding}{
-  star,nat,var,tcon,arrow, app,kapp ,kapp-infer ,forall,forall-infer}
 
 \drules[tctx]{$[[EE ok]]$}{Well-formed Type Contexts}
 {empty, tvar-tt, tcon-tt}

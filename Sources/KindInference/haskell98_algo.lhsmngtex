@@ -19,58 +19,78 @@ system.
 
 \subsection{Syntax}
 
-The top of
-\Cref{fig:kind:98:algo:pgm} describes the syntax of kinds and contexts in the
-algorithmic system for \hne. The differences from the declarative system are
-highlighted in gray. Following \citet{DK}, kinds are extended with unification kind variables
-$[[Xa]]$. Algorithmic contexts are also extended with unification kind
-variables, either unsolved ($[[Xa]]$) or solved ($[[Xa = k]]$). Although the
-grammar for algorithmic term contexts $[[GG]]$ appears identical to that
-of declarative contexts, note that the grammar for $[[k]]$ has been extended;
-accordingly, algorithmic contexts $[[GG]]$ might include kinds with unification variables,
-while declarative contexts $[[HH]]$ do not.
+The top of \Cref{fig:kind:98:algo:pgm} describes the syntax of kinds and
+contexts in the algorithmic system for \hne. The differences from the
+declarative system are highlighted in gray. Following \citet{DK}, kinds are
+extended with unification kind variables $[[Xa]]$. Algorithmic type contexts are
+also extended with unification kind variables, either unsolved ($[[Xa]]$) or
+solved ($[[Xa = k]]$). Although the grammar for algorithmic term contexts
+$[[GG]]$ appears identical to that of declarative contexts (i.e., $[[HH]]$ in
+\Cref{fig:kind:rules:98}), note that the grammar for $[[k]]$ has been extended;
+accordingly, algorithmic term contexts $[[GG]]$ might include kinds with
+unification variables, while declarative contexts $[[HH]]$ do not. This approach
+of recording unification variables and their solutions in the contexts is
+inspired by \citet{gundry2010type} and \citet{DK}. Importantly, an algorithmic
+context is an \textit{ordered} list, which enforces that given $[[DD1, Xa=k,
+DD2]]$, the kind $[[k]]$ must be well-formed under $[[DD1]]$. This rules out
+solutions like $[[ Xa = Xa -> star ]]$ or $[[ Xa = Xb, Xb = Xa ]]$. Complete
+contexts $[[OO]]$ are contexts with all unification variables solved.
 
-% \ningning{explanations that have been given before in previous chapters.}
-% This approach of
-% recording unification variables and their solutions in the contexts is inspired
-% by \citet{gundry2010type} and \citet{DK}.
-% Importantly, an algorithmic
-% context is an \textit{ordered} list, which enforces that given
-% $[[DD1, Xa=k, DD2]]$, the kind $[[k]]$ must be well-formed under $[[DD1]]$. This rules out
-% solutions like $[[ Xa = Xa -> star ]]$ or $[[ Xa = Xb, Xb = Xa ]]$. Complete contexts $[[OO]]$ are contexts with all unification
-% variables solved.
+We use a hole notation for inserting or replacing declarations in the middle of
+a context. $[[ DD[TT] ]]$ means that $[[DD]]$ is of the form $[[DD1, TT, DD2]]$.
+To reduce clutter, when we have $[[ DD[Xa] ]]$, we also use only $[[ DD ]]$ to
+refer to the same context. If we have $[[ DD[Xa] ]] = [[ DD1, Xa, DD2 ]]$, then
+$[[ DD[Xa=k] ]] = [[ DD1, Xa=k, DD2 ]]$. This notation allows multiple holes:
+$[[ DD[TT1][TT2] ]]$ means that $[[DD]]$ is of the form $[[DD1, TT1, DD2, TT2,
+DD3]]$. For example, $[[ DD[Xa][Xb] ]]$ is $[[ DD1, Xa, DD2, Xb, DD3 ]]$.
+Critically, $[[Xa]]$ appears before $[[Xb]]$.
 
-% We use a hole notation for inserting or replacing
-% declarations in the middle of a context. $[[ DD[TT] ]]$ means that $[[DD]]$ is of the form
-% $[[DD1, TT, DD2]]$.
-% To reduce clutter, when we have $[[ DD[Xa] ]]$,
-% we also use only $[[ DD ]]$ to refer to the same context.
-% If we have $[[ DD[Xa] ]] = [[ DD1, Xa, DD2 ]]$, then
-% $[[ DD[Xa=k] ]] = [[ DD1, Xa=k, DD2 ]]$.
-% This notation allows
-% multiple holes: $[[ DD[TT1][TT2] ]]$ means that $[[DD]]$ is of the form
-% $[[DD1, TT1, DD2, TT2, DD3]]$. For example,
-% $[[ DD[Xa][Xb] ]]$ is $[[ DD1, Xa, DD2, Xb, DD3 ]]$. Critically, $[[Xa]]$ appears
-% before $[[Xb]]$.
-
-% Since type contexts carry solutions for unification variables, we use
-% contexts as substitutions:
-% $[[ [DD] k ]]$ applies $[[DD]]$ to kind $[[k]]$.
-% Applying $[[DD]]$ substitutes all solved unification variables in its argument
-% idempotently.
-% If
-% under a complete context $[[OO]]$, a kind $[[k]]$ is well-formed, then $[[ [OO]k ]] $
-% contains no unification variables and is thus a well-formed declarative kind.
-% For term contexts, $[[ [DD] GG ]]$ applies $[[DD]]$ to each
-% kind in $[[GG]]$. Similarly, if under $[[OO]]$, a term context $[[GG]]$ is well-formed,
-% then $[[ [OO]GG ]]$ gives back a declarative term context. 
-% The notation $[[ [OO] DD ]]$ applies a complete context $[[OO]]$ to $[[DD]]$.
-% We apply $[[OO]]$ to the
-% kind of type variables and type constructors in $[[DD]]$ and remove the binding
-% of solved unification variables from $[[DD]]$. The full definition of context
-% substitution is in TODO.
-% As above, $[[ [OO]DD ]]$ is a declarative type
-% context.
+Since type contexts carry solutions for unification variables, we use contexts
+as substitutions: $[[ [DD] k ]]$ applies $[[DD]]$ to kind $[[k]]$. Applying
+$[[DD]]$ substitutes all solved unification variables in its argument
+idempotently. If under a complete context $[[OO]]$, a kind $[[k]]$ is
+well-formed, then $[[ [OO]k ]] $ contains no unification variables and is thus a
+well-formed declarative kind.
+%
+\begin{center}
+  \begin{tabular}{lll} \toprule
+    $[[ [DD] star  ]]$     & = & $[[ star ]]$ \\
+    $[[ [DD] k1 -> k2  ]]$ & = & $[[ [DD] k1 -> [DD] k2 ]]$ \\
+    $[[ [DD[Xa] ] Xa  ]]$  & = & $[[ Xa ]]$ \\
+    $[[ [DD[Xa=k] ] Xa  ]]$  & = & $[[ [DD[Xa=k] ] k ]]$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+%
+For term contexts, $[[
+[DD] GG ]]$ applies $[[DD]]$ to each kind in $[[GG]]$. Similarly, if under
+$[[OO]]$, a term context $[[GG]]$ is well-formed, then $[[ [OO]GG ]]$ gives back
+a declarative term context.
+%
+\begin{center}
+  \begin{tabular}{lll} \toprule
+    $[[ [DD] empty  ]]$     & = & $[[ empty ]]$ \\
+    $[[ [DD] (GG, D : A)  ]]$ & = & $[[ [DD]GG, D : [DD]A  ]]$ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+%
+The notation $[[ [OO] DD ]]$ applies a complete
+context $[[OO]]$ to $[[DD]]$. We apply $[[OO]]$ to the kind of type variables
+and type constructors in $[[DD]]$ and remove the binding of solved unification
+variables from $[[DD]]$. As above, $[[ [OO]DD ]]$ is a declarative type context.
+%
+\begin{center}
+  \begin{tabular}{lll} \toprule
+    $[[ [empty] empty  ]]$      & = & $[[ empty ]]$ \\
+    $[[ [OO, a:k] (DD, a : k) ]]$ & = & $[[ [OO] DD, a : [OO] k ]]$ \\
+    $[[ [OO, T:k] (DD, T : k) ]]$ & = & $[[ [OO] DD, T : [OO] k ]]$ \\
+    $[[ [OO, Xa = k] (DD, Xa) ]]$ & = & $[[ [OO] DD ]]$ \\
+    $[[ [OO, Xa = k] (DD, Xa = k') ]]$ & = & $[[ [OO] DD ]]$ \quad if $[[ [OO] k ]] = [[ [OO] k' ]]$ \\
+    $[[ [OO, Xa = k] DD]]$ & = & $[[ [OO] DD ]]$ \quad if $ [[ Xa]] [[notin]] [[DD]] $ \\
+    \bottomrule
+  \end{tabular}
+\end{center}
 
 \subsection{Algorithmic Typing Rules}
 \label{sec:kind:h98:algo-typing}
@@ -105,7 +125,7 @@ each datatype definition (\Cref{sec:kind:haskell98:dt}), producing the context $
 default (\Cref{sec:kind:haskell98:defaulting})
 all unsolved unification variables with $[[star]]$ using $[[ TTsn --->> OO
 ]]$, and continue with the rest of the program. Defaulting here means that the
-constraints of
+unsolved unification variables of
 one group do not propagate to the rest of the program; accordingly,
 the input context of $[[||-p]]$ is always a complete context.
 Echoing the notation for the declarative system, we write $[[OO ||-grp rec </ dti // i />
@@ -117,15 +137,17 @@ $\ottcomp{[[GGi]]}{i}$, and the final output type context $[[TT]]$.
 \subsection{Defaulting}
 \label{sec:kind:haskell98:defaulting}
 
-One of the key properties of datatypes in \hne is the \textit{defaulting} rule.
+\begin{figure}
+\drules[a-ctxde]{$[[DD --->> OO]]$}{Defaulting}{empty, tvar, tcon,
+  kuvarSolved, solve}
+\caption{Defaulting in \hne.}
+\label{fig:h98:defaulting}
+\end{figure}
+
+One of the key properties of datatypes in \hne is the \textit{defaulting} rule,
+$[[DD --->> OO]]$, given in \Cref{fig:h98:defaulting}.
 In a datatype definition, if a type parameter is not fully determined by the
 definitions in its mutually recursive group, it is defaulted to have kind |*|.
-
-\begin{definition}[Defaulting, $[[--->>]]$]
-  An algorithmic context $[[DD]]$ is defaulted to a complete context $[[OO]]$, written
-  $[[DD --->> OO]]$ by replacing all unsolved unification variables $[[Xa]]$ in $[[DD]]$
-  with $[[Xa = star]]$.
-\end{definition}
 
 To understand how this rule affects code in practice, consider the following definitions:
 
@@ -209,7 +231,9 @@ Its \rref{a-dt-decl} first gets the kind $[[k]]$ of the the type constructor
 from the context. It then assigns a fresh unification variable $[[Xa]]$ to each
 type parameter. The expected kind of the type constructor is $[[ </ Xai // i
 /> ---> star ]]$. The rule then unifies $[[k]]$ with $[[ </ Xai // i /> ---> star ]]$.
-Before unification, we apply the context to $[[k]]$; unification (\Cref{sec:kind:98:unif})
+Before unification, we apply the context $[[DD]]$ to $[[k]]$, thus $[[ [DD]k
+]]$;
+unification (\Cref{sec:kind:98:unif})
 requires its inputs to be inert with respect to the context substitution. Our implementation
 of unification guarantees that all the $[[Xai]]$ will be solved, as reflected in the \rref{a-dt-decl}.
 The type parameters are added to the context to type check each data
@@ -274,12 +298,12 @@ context. \Rref{a-u-kvarR} is symmetric to \rref{a-u-kvarL}.
 \paragraph{Promotion.}
 \label{par:h98:promotion}
 
-As described in \Cref{chap:Promotion},
-the crucial observation of $[[|-pr]]$ is that \textit{the
+As described in \Cref{sub:promotion:intro:promotion},
+the crucial insight of $[[|-pr]]$ is that \textit{the
   relative order between unification variables does not matter for solving a
   constraint}.
-The promotion judgment $[[DD |-pr (Xa) k1 ~~> k2 -| TT]]$ captures this
-observation. The judgment says that, under the context $[[ DD ]]$, we
+The promotion judgment $[[DD |-pr (Xa) k1 ~~> k2 -| TT]]$
+says that, under the context $[[ DD ]]$, we
 promote the kind $[[k1]]$, yielding $[[k2]]$, so that $[[k2]]$ is
 well-formed in the prefix context of $[[Xa]]$, while retaining $[[ [TT]k1 =
 [TT]k2 ]]$. The promotion rules here are essentially the same as in \Cref{fig:pr:algo}.
@@ -294,6 +318,13 @@ invented in \rref{a-pgm-dt} and will be promoted (and thus solved).
 
 \subsection{Soundness and Completeness}
 \label{sec:kind:98:context-extension}
+
+\begin{figure}
+  \drules[a-ctxe]{$[[DD --> TT]]$}{Context Extension}
+  {empty, tvar,tcon,kuvar,kuvarSolved,solve,add,addSolved}
+  \caption{Context extension in \hne}
+  \label{fig:h98:algo:context:ext}
+\end{figure}
 
 The main theorem of soundness is for program typing:
 %
@@ -313,12 +344,12 @@ context $[[OO]]$ as a substitution to form a declarative context, free of unific
 variables.
 
 The statement of completeness relies on the definition of \textit{context
-  extension} $[[DD --> TT]]$ \citep{DK}. The judgment
-captures a process of \textit{information
-  increase}, and its definition is similar as in previous chapters.
-% Intuitively, context extension preserves all
-% information in $[[DD]]$, and may increase the information by adding or solving
-% more unification variables.
+  extension} $[[DD --> TT]]$ \citep{DK}. The judgment captures a process of
+\textit{information increase}. The formal definition of context extension is
+given in \Cref{fig:h98:algo:context:ext}, and its treatment is as \cite{DK}.
+Intuitively, context extension preserves all
+information in $[[DD]]$, and may increase the information by adding or solving
+more unification variables.
 In all the algorithmic judgments, the output context
 is an extension of the input context.
 
@@ -341,12 +372,11 @@ groups, defined in \Cref{sec:kind:h98:decl-typing} and
 declarative typing for a group, the algorithmic typing results can be extended
 to support the declarative typing.
 
-Unfortunately, the typing program judgment $[[|-p]]$ is incomplete, as our algorithm
-models defaulting, while the declarative system does not. (For example, the |Q1|/|Q2| example
-of \Cref{sec:kind:haskell98:defaulting} is accepted by the declarative system
-but rejected by both GHC and our algorithmic system.) As straightforward as the
-defaulting rule may seem, it is surprisingly hard to model in a declarative
-system. We remedy this in the next section.
+Unfortunately, the typing program judgment $[[|-p]]$ is incomplete, as our
+algorithm models defaulting, while the declarative system does not. (For
+example, the |Q1|/|Q2| example of \Cref{sec:kind:haskell98:defaulting} is
+accepted by the declarative system but rejected by
+both GHC and our algorithmic system.) We remedy this in the next section.
 
 %%% Local Variables:
 %%% mode: latex

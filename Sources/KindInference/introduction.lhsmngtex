@@ -172,7 +172,7 @@ well-studied. While we are motivated concretely by Haskell, many of the challeng
 we face would be present in any dependently typed language seeking principled type
 inference. We use the term \tit
 to refer to the fragment of modern Haskell that we model.\footnote{Some of the features
-we model are slightly different in our presentation than they exist in GHC. \cite{xie2019kind}
+we model are slightly different in our presentation than they exist in GHC. \Cref{sec:appendix:ghc}
 outlines the differences. These minor differences do not affect the applicability of our work to
 improving the GHC implementations, but they may affect the ability to test our examples in GHC.} We enumerate
 the key features of this fragment below.
@@ -297,8 +297,9 @@ or nested datatypes~\citep{BirdMeertens98Nested}. Polymorphic recursion is known
 type-inference undecidable~\citep{henglein-polymorphic-recursion}. Furthermore,
 most existing formalizations of type inference avoid the question entirely, either by
 not modeling recursion at all or not allowing polymorphic recursion.
-Our \tit system has full support for polymorphic recursion, implemented directly
-without the use of a |fix| operator. Polymorphic recursion is allowed only on
+Our \tit system follows \cite{jones99typing} to support polymorphic recursion
+where there are kind signatures that cut the loops.
+Polymorphic recursion is allowed only on
 datatypes with a kind signature; other datatypes are treated as monomorphic during
 inference.
 
@@ -307,7 +308,8 @@ inference.
   (VTA)}~\citep{eisenberg2016visible}, whereby we can explicitly
 instantiate a function call, as in |id (at Bool) True|, to kinds, giving us \textit{visible
   kind application (VKA)}.
-Following the design of VTA, we distinguish \textit{specified variables} from \textit{inferred variables}. As described by \citet[Section 3.1]{eisenberg2016visible}, only specified variables can be instantiated via VKA.
+Following the design of VTA, we distinguish \textit{specified variables}
+(|a|) from \textit{inferred variables} (|{a}|). As described by \citet[Section 3.1]{eisenberg2016visible}, only specified variables can be instantiated via VKA.
 Instantiation of variables is inferred when no explicit kind application is
 given.
 To illustrate, consider
@@ -347,7 +349,13 @@ cusk(Q :: forall (a::(f b)) (c::k). f c -> * )
 \end{spec}
 %
 Free variables (in this
-case, |f|, |b|, |k|) will be generalized over. We have a decision to make: in
+case, |f|, |b|, |k|) will be generalized over; that is, Haskell implicitly adds
+universal quantifiers for each variable mentioned in the open kind signature
+that is not otherwise bound\footnote{GHC actually implements the
+  \textit{forall-or-nothing} rule, which states that either \textit{all}
+  variables are quantified by a user-written |forall|, or none are. Our
+  treatment here is more general than \textit{forall-or-nothing}.
+  \Cref{sec:appendix:forall-or-nothing} includes more discussion.}. We have a decision to make: in
 which order do we generalize the free variables?
 This question is non-trivial, as there can be dependency between the
 variables. We infer |k :: *|, |f :: k -> *|, |b :: k|. Even though |f| and |b|

@@ -1,6 +1,6 @@
 
 This thesis is largely based on the publications by the
-author~\citep{esop2018:arguments,esop2018:consistent,toplas:consistent,popl:kind,tfp},
+author~\citep{esop2018:arguments,esop2018:consistent,toplas:consistent,popl:kind,tfp,xie2019kind},
 as indicated below. The metatheory of those works is mostly verified using the
 Coq proof assistant, including type safety, coherence, etc.
 
