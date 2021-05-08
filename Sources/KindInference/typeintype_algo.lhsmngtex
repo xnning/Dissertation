@@ -60,12 +60,7 @@ is used only in and explained with \rref{a-dc-tt}.
 \subsection{Algorithmic Program Typing}
 
 \begin{figure}
-    % \drules[a-qc]{$[[DD `-> kvs]]$}{Quantification Checking}{
-    %   tvar
-    %   ,tcon,lo
-    %   ,kuvarSolved
-    %   ,kuvar
-    % }
+  \centering
     \drules[a-pgm]{$[[OO ; GG ||-p pgm : eA]]$}{Typing Program}{sig,dt-ttS}
     \drule{a-pgm-dt-tt}
     \drules[a-sig]{$[[OO |- dtsig ~> T : eK]]$}{Typing Signature}{tt}
@@ -75,7 +70,32 @@ is used only in and explained with \rref{a-dc-tt}.
 \label{fig:kind:tit:algo:pgm}
 \end{figure}
 
-The algorithmic typing rules appear in \Cref{fig:kind:tit:algo:pgm}.
+\begin{figure}
+\begin{center}
+  \begin{tabular}{lll} \toprule
+    $[[ unsolved(empty) ]]$     & = & $[[empty]]$ \\
+    $[[ unsolved(DD, a:ek)  ]]$  & = & $[[unsolved(DD)]]$ \\
+    $[[ unsolved(DD, T:eK)  ]]$  & = & $[[unsolved(DD)]]$ \\
+    $[[ unsolved(DD, {DDlo})  ]]$  & = & $[[unsolved(DD,DDlo)]]$ \\
+    $[[ unsolved(DD, Xa:ek1 = ek2)]]$ & = & $[[unsolved(DD)]]$ \\
+    $[[ unsolved(DD,Xa:ek)]]$  & = & $[[ unsolved(DD), Xa : [DD] ek ]]$ \\
+    \bottomrule
+  \end{tabular}
+
+  \drules[a-qc]{$[[DD `-> kvs]]$}{Quantification Checking}{
+    tvar
+    ,tcon,lo
+    ,kuvarSolved
+    ,kuvar
+  }
+\end{center}
+\caption{Unsolved set of unification variables and quantification check in \tit}
+\label{fig:kind:tit:algo:qc}
+\end{figure}
+
+
+The algorithmic typing rules appear in \Cref{fig:kind:tit:algo:pgm}, with
+some of the auxiliary definitions given in \Cref{fig:kind:tit:algo:qc}.
 The judgment $[[OO ; GG ||-p pgm : eA]]$ checks the program. The
 \rref{a-pgm-sig} and \rref{a-pgm-dt-ttS} correspond directly to the declarative
 rules. Note that as the datatype declaration in \rref{a-pgm-dt-ttS} already has a
@@ -86,9 +106,9 @@ and then type-checks each datatype declaration, yielding the output context
 $[[TTsn]]$. Unlike \hne which then uses defaulting, here from each $[[Xai]]$ we
 get their unsolved unification variables $[[xckvsi]]$ and generalize the kind of
 each type constructor as well as the type of each data constructor. The $[[unsolved(DD)]]$
-metafunction simply extracts a set of free unification variables in $[[DD]]$, with their
+metafunction (\Cref{fig:kind:tit:algo:qc}) simply extracts a set of free unification variables in $[[DD]]$, with their
 kinds substituted by $[[DD]]$.
- Before
+Before
 generalization, we apply $[[TTsn]]$ to the results so all solved unification
 variables get substituted away. We use the notation $[[ xckvsi]] [[|->]] [[ckvsi ]]$
 to mean that all unification variables in $[[xckvsi]]$ are replaced by fresh
@@ -100,7 +120,7 @@ substitutions (the solved unification variables in $[[TTsn]]$, the replacement
 of unification variables with fresh proper type variables $[[xckvsi]] [[|->]] [[ckvsi]]$,
 and the generalization of the kinds of the group of datatypes $[[Ti]] [[|->]] [[Ti @@[ckvsi] ]]$).
 
-The judgment $[[OO |- dtsig ~> T : eK]]$ type-checks a signature definition. We
+The judgment $[[OO |- dtsig ~> T : eK]]$ type-checks a signature definition (\rref{a-sig-tt}). We
 get all free variables in $[[A]]$ using $[[LS(A)]]$ and assign each variable
 $[[ai]]$ a kind $[[Xai : star]]$. Those variables are put
 into a local scope to kind-check $[[A]]$. Then, we use $[[SS]]$---a standard topological
@@ -127,8 +147,7 @@ generalization.
 \subsection{The Quantification Check}
 \label{sec:kind:qcheck}
 
-Ill-ordered kinds are rejected. Consider the following example:
-%
+In \rref{a-sig-tt}, we reject ill-ordered kinds. Consider the following example:
 %
 \begin{code}
 data Proxy :: forall k. k -> *
@@ -150,11 +169,12 @@ we must reject this definition, as our declarative specification always
 puts inferred variables (such as the type variable $[[Xb]]$ would become if
 generalized) before other ones.
 
-The quantification-checking metafunction $[[ DD `-> kvs ]]$, defined as $[[
-fkv(unsolved(DD)) # kvs ]]$, ensures that free variables in
-$[[unsolved(DD)]]$ are disjoint ($\sharp$) with $[[kvs]]$, so that we can safely
-generalize $[[unsolved(DD)]]$ outside $[[kvs]]$.\footnote{See also the
-  alternative design in \Cref{sec:appendix:ghc:qcheck}.}
+The quantification-checking metafunction $[[ DD `-> kvs ]]$, given in
+\Cref{fig:kind:tit:algo:qc}, essentially expresses $[[fkv(unsolved(DD)) # kvs
+]]$, which ensures that free variables in $[[unsolved(DD)]]$ are disjoint
+($\sharp$) with $[[kvs]]$, so that we can safely generalize $[[unsolved(DD)]]$
+outside $[[kvs]]$.\footnote{See also the alternative design in
+  \Cref{sec:appendix:ghc:qcheck}.}
 
 \subsection{Kinding}
 
@@ -610,7 +630,8 @@ We prove our algorithm is sound:
   then $[[ [OO]OO ; [OO] GG |-p pgm : [OO]eA ]]$.
 \end{restatable}
 
-Unfortunately, we lose completeness.
+Unfortunately, we lose completeness, as the declarative system lacks
+principal kinds.
 % while we restrict the algorithm to accept only predictable programs.
 Recall the example in \Cref{sec:kind:qcheck}. This definition of |T| is rejected
 by the algorithmic quantification check as the kind of |d| cannot be determined.
@@ -636,6 +657,8 @@ more discussion of this point in \Cref{sec:related:unification:dependent}.
 Although the algorithm is incomplete, we offer the following guarantee:
 \textit{if the algorithm accepts a definition, then that definition has a
   principal kind, and the algorithm infers the principal kind}.
+To properly state the guarantee, we first define the notion of \textit{kind
+  instantiation} and \textit{partial order of kinds}:
 %
 \begin{definition}[Kind Instantiation]
   Under context $[[EE]]$,
@@ -665,7 +688,7 @@ $[[T:eK2]]$, then it must type-check under $[[T:eK1]]$, as $[[T:eK1]]$ can be
 instantiated to all monokinds that $[[T:eK2]]$ is used at.
 
 Now we lift the definition of $[[||-grp]]$ to be the generalized result of kinds
-and contexts.
+and contexts. And we are ready now to formally prove our guarantee of principality:
 %
 \begin{restatable}[Principality of $[[||-grp]]$]{theorem}{lemmattcompleteddgroup}
   \label{lemma:tt:complete:dt-group}

@@ -676,6 +676,7 @@ formula :: formula_ ::=
   | EE |- K <<: K2          ::  :: kind_prec_ee
   | DD |- K <<: K2          ::  :: kind_prec
   | HH1 <<: HH2       ::  :: ectx_prec
+  | EE |- eK1 <: eK2        ::  :: kind_tit_sub
 
 
 subrules
