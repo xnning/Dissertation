@@ -53,7 +53,10 @@ higher-rank polymorphism for datatypes is not heavily used; and it may be possib
 to recover principality through the use of a more generous type-subsumption relation.
 Currently, GHC (and our model of it) does not support first-class type-level
 abstraction (i.e., $\Lambda$ in types)~\citep{jones1995system}.
-This means that we cannot introduce new variables (also called
+The lack of lambda type-level abstractions largely simplifies the kind inference
+algorithm (e.g., it allows us to decompose type applications as in \rref{a-u-app}).
+However,
+it also means that we cannot introduce new variables (also called
 \emph{skolemization}~\citep[Section~4.6.2]{practical:inference}) in an attempt
 to equate one type with another. Returning to the example above, we \emph{could}
 massage |forall {k3:: *} (k1:: *) (k2::k3). k1 -> *| to |forall (k1:: *) (k2::k1). k1 -> *|

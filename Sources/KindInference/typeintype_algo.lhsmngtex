@@ -167,14 +167,31 @@ There are no further constraints on $[[Xb]]$. Na\"ively, we would generalize
 over $[[Xb]]$, but that would be disastrous, as |a| is locally bound. Instead,
 we must reject this definition, as our declarative specification always
 puts inferred variables (such as the type variable $[[Xb]]$ would become if
-generalized) before other ones.
+generalized) before other ones. Recall in \Cref{sec:kind:tit:checking:program},
+we always put quantified variables in this order:
+variables arising from generalization, from implicit quantification, and from
+explicit quantification. This order is intuitive: variables arising from
+generalization is invisible to the users and thus are always at the front;
+variables from implicit quantification refer to user-written variables and
+follow next; and variables from explicit quantification correspond to a
+user-specified telescope and thus should not be modified.
 
 The quantification-checking metafunction $[[ DD `-> kvs ]]$, given in
 \Cref{fig:kind:tit:algo:qc}, essentially expresses $[[fkv(unsolved(DD)) # kvs
 ]]$, which ensures that free variables in $[[unsolved(DD)]]$ are disjoint
 ($\sharp$) with $[[kvs]]$, so that we can safely generalize $[[unsolved(DD)]]$
-outside $[[kvs]]$.\footnote{See also the alternative design in
-  \Cref{sec:appendix:ghc:qcheck}.}
+outside $[[kvs]]$.
+
+Unfortunately, quantification check also makes us lose principality, as we will
+discuss in \Cref{sec:kind:tit:sound-complete}. We conjecture, though, that
+lifting quantification check and allowing for interleaving specified/inferred
+variables may restore principality. That means, for the above example,
+we can get
+\begin{code}
+  data T :: forall (a :: *) (b :: a) (c :: a) {f :: a} (d :: Proxy f). Relate (at a) (at f) b d -> *
+\end{code}
+
+We also consider alternative design in \Cref{sec:appendix:ghc:qcheck}.
 
 \subsection{Kinding}
 

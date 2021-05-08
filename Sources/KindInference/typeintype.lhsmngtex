@@ -54,15 +54,23 @@ The complete dependency analysis rule, inspired by \citet[Section~11.6.3]{jones9
 
 \begin{definition}[Dependency Analysis in \tit]\leavevmode
   \label{def:dep-cusk}
-  \begin{enumerate}[(i)]
-  \item If the signature/definition of $[[T1]]$ mentions $[[T2]]$, then:
-    \begin{enumerate}
-    \item if $[[T2]]$ has a signature, the signature/definition of $[[T1]]$ depends on
-      the signature of $[[T2]]$;
-    \item otherwise, the signature/definition of $[[T1]]$ depends on the definition of $[[T2]]$.
-    \end{enumerate}
-  \item A definition depends on its signature.
-  \end{enumerate}
+  All definitions form a graph, where
+  \begin{itemize}
+    \item notes are either (a) a signature, or (b) a definition; and
+    \item edges indicate the dependency relation:
+      \begin{enumerate}[(i)]
+      \item If the signature/definition of $[[T1]]$ mentions $[[T2]]$, then:
+         \begin{enumerate}
+         \item if $[[T2]]$ has a signature, the signature/definition of $[[T1]]$ depends on
+           the signature of $[[T2]]$;
+         \item otherwise, the signature/definition of $[[T1]]$ depends on the definition of $[[T2]]$.
+         \end{enumerate}
+      \item A definition depends on its signature.
+      \end{enumerate}
+  \end{itemize}
+  We then perform \textit{strongly connected component} analysis on the group,
+  where mutually recursive definitions form a group, producing the grammar in
+  \Cref{fig:kind:tit:syntax}.
 \end{definition}
 
 To avoid a type that mentions itself in its own kind, we disallow
@@ -132,6 +140,7 @@ will see in the coming section.
 \end{figure}
 
 \subsection{Checking Programs}
+\label{sec:kind:tit:checking:program}
 
 The declarative typing rules appear in \Cref{fig:kind:tit:decl}.
 The judgment $[[EE;HH |-p pgm : A]]$ checks the program. From now on we omit the

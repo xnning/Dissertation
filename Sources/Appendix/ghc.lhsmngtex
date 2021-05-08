@@ -433,11 +433,11 @@ variables. With higher-rank polymorphism, due to the fact that GHC does not
 support first-class type-level abstraction (i.e., $\Lambda$ in types), this type
 cannot be instantiated to
 \begin{code}
-forall (a :: *) (b :: a) (c :: a) (d :: Proxy f). Relate (at a) (at b) b d -> *
+forall (a :: *) (b :: a) (c :: a) (d :: Proxy b). Relate (at a) (at b) b d -> *
 \end{code}
 or
 \begin{code}
-forall (a :: *) (b :: a) (c :: a) (d :: Proxy f). Relate (at a) (at c) b d -> *
+forall (a :: *) (b :: a) (c :: a) (d :: Proxy c). Relate (at a) (at c) b d -> *
 \end{code}
 \noindent which makes the generalization less useful.
 
