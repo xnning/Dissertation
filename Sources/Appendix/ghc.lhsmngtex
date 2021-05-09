@@ -258,7 +258,7 @@ would mean that constraint-generation happens for all the constructors in both |
 With kind-polymorphism, we have no problem because the kind of |T1| will be generalized to
 |forall (k:: *). k -> *|.
 
-This was reported as bug \href{https://gitlab.haskell.org/ghc/ghc/issues/16609}{\#16609}.
+This was reported as a bug \href{https://gitlab.haskell.org/ghc/ghc/issues/16609}{\#16609}.
 
 \subsection{Dependency Analysis}
 

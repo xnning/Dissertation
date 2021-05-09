@@ -285,11 +285,14 @@ However, we must also consider \emph{polymorphic recursion} as in |Poly|:
   data Poly k = C1 (Poly Int) | C2 (Poly Maybe)
 \end{spec}
 % 
-This example includes a \emph{kind signature}, meaning that we must \emph{check}
-the kind of the datatype, not \emph{infer} it. In the definition of |Poly|, the
-type |Poly Int| requires an instantiation $|k| \mapsto |*|$, while the type
-|Poly Maybe| requires an instantiation of $|k| \mapsto (|* -> *|)$. These
-differing instantiations mean that the declaration employs polymorphic recursion.
+This example includes a \emph{kind signature}\footnote{Recently GHC has
+  implemented \textit{standalone kind signatures} \citep{richard:standalone},
+  where instead of |data| it uses the keyword |type|. }, meaning that we must
+\emph{check} the kind of the datatype, not \emph{infer} it. In the definition of
+|Poly|, the type |Poly Int| requires an instantiation $|k| \mapsto |*|$, while
+the type |Poly Maybe| requires an instantiation of $|k| \mapsto (|* -> *|)$.
+These differing instantiations mean that the declaration employs polymorphic
+recursion.
 
 \tit deals with such cases of polymorphic recursion, which also appear
 at the term level---for example, when writing recursive functions over GADTs
