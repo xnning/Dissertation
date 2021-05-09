@@ -220,17 +220,6 @@ by using heuristics to choose which variable might be more suitable for unificat
 This particular issue---which variable to unify when there is a choice---has been the
 subject of some amount of churn over the years.
 
-\subsection{Promotion}
-
-The promotion
-operation, too, is present in GHC, though its form is quite different than what we have
-presented. Instead of promoting during unification, GHC simply refuses to solve a
-unification variable if any of the free variables of its supposed solution lives to
-the right of the variable in the context. Because GHC is working with constraints,
-it just leaves the unification problem as an unsolved constraint. If there remain
-unsolved constraints, GHC then promotes the variables it can: some cannot be promoted
-because they depend on locally bound quantified (not unification) type variables.
-
 \subsection{Complete User-Supplied Kinds}
 
 Along with stand-alone kind signatures, as described in this work,

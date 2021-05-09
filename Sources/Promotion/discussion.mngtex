@@ -100,6 +100,22 @@ With these rules it would be possible to apply polymorphic promotion to \gpc.
 Note this discussion is a sketch and we have not fully worked out the full
 algorithm yet.
 
+\section{Promotion in Action}
+
+The promotion operation is actually present in the \textit{Glasgow Haskell
+  Compiler} (GHC), the state-of-the-art compiler for the Haskell programming
+languages, though its form is different than what we have presented.
+
+In particular, instead of keeping all the unification variables ordered in the
+context, GHC only keeps them in order with respect to type variables in the
+context, by assigning a \textit{level number} to each unification variable and
+each type variable, and incrementing the level number whenever a new type
+variable is brought into scope. When unifying $[[evar]] [[~=]] [[t]]$ where
+$[[evar]]$ is level $N$, GHC ensures that all free variables in $[[t]]$ are from
+level $N$ or lower. If there is a unification variable $[[evarb]]$ in $[[t2]]$,
+where $[[evarb]]$ has level $M > N$, then it allocates $[[evarb1]]$ at level $N$
+and set $[[evar]] = [[evarb]]$, which essentially implements the idea of promotion.
+
 
 
 
