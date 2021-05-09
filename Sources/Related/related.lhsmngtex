@@ -19,7 +19,11 @@ They use a more general subtyping relation, inspired by the type
 containment relation by Mitchell [1988], which supports \textit{deep skolemisation}.
 With deep skolemization, examples like $[[\/a. int -> int <: int -> \/a. a]]$
 are allowed. We believe deep skolemization is compatible with our subtyping
-definition.
+definition (i.e., our subtyping can naturally integrate deep skolemization).
+Note, though, recently GHC has resiled from deep
+skolemisation~\citep{simonpj:simplified},
+as it is believed that the cost of deep skolemisation is large compared to its
+benefit.
 
 \citet{DK} build a simple and concise algorithm for higher-rank polymorphism
 based on traditional bidirectional type checking. They deal with the same
@@ -52,12 +56,12 @@ instantiations~\citep{remy2005simple}.
 
 Recently, \citet{guarded:impred,quick:look} exploit impredicative instantiations
 of type variables that appears under a type constructor (i.e., type variables
-are \textit{guarded}). \cite{guarded:impred} distinguish variables using three
-\textit{sorts},
-% which specify the possible types that the variable can stand for,
-so that certain sorts of variables can be instantiated with higher-rank
-polymorphic types. \cite{quick:look} inspect the function arguments and assign
-impredicative instantiations before monomorphic ones.
+are \textit{guarded}) \cite{guarded:impred} is strictly subsumed by
+\cite{quick:look}. The former distinguishes variables using three
+\textit{sorts}, so that certain sorts of variables can be instantiated with
+higher-rank polymorphic types, while the latter inspects the function arguments
+and assigns impredicative instantiations before monomorphic ones.
+
 
 
 \section{Bidirectional Type Checking}
@@ -264,7 +268,7 @@ recursive definitions based on rank-2 intersection types.
 that corresponds to the abstract interpreter in
 \citet{gori2002experiment,gori2003properties}. Our system \tit does not infer
 polymorphic recursion; instead, we exploit kind annotations to guide the acceptance of polymorphic
-recursion.
+recursion, following \cite{jones99typing}.
 
 
 \paragraph{Constraint-solving approaches.}
