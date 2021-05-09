@@ -55,8 +55,6 @@ kvarset, kvs {{ tex \phi }} , kvsy {{tex \phi }},  ckvs {{ tex \phi^{\mathsf{c} 
     {{ tex [[fkv]]([[K]]) }}
   | fkv ( DD )            ::  :: fkv_tctx
     {{ tex [[fkv]]([[DD]]) }}
-  | fkb ( K )             ::  :: fkb_tctx
-    {{ tex [[fkb]]([[K]]) }}
   | kvs1 - kvs2           ::  :: minus {{ tex [[kvs1]] \backslash_{[[kvs2]]} }}
   | kvs1 + kvs2           ::  :: set_plus  {{ tex [[kvs1]]~\cup~[[kvs2]] }}
   | kvs1 , ... , kvs2     ::  :: append_multiple
@@ -81,6 +79,8 @@ kvarset, kvs {{ tex \phi }} , kvsy {{tex \phi }},  ckvs {{ tex \phi^{\mathsf{c} 
     {{ tex [[dom]]([[DD]]) }}
   | var ( K )         ::   :: var
     {{ tex [[var]]([[K]]) }}
+  | Qk ( EE , K )              ::  :: quantifier_kind
+    {{ tex [[Qk]] ([[EE]], [[K]]) }}
 
 dtyp, A {{tex \sigma}}, B {{tex \sigma_2}}, C {{tex \sigma_3}}, K {{tex K}}, eA {{tex \mu}}, eK {{tex \eta}}  :: 'dtyp_' ::=
   | X              ::  :: vars
@@ -362,10 +362,10 @@ tctx, EE  {{tex \Sigma}} :: 'tctx_' ::=
   | EE [ Xa ]         ::  :: contains
   | EE [ Xa = k ]     ::  :: contains_solve
   | [ OO ] DD         ::  :: context_apply
-  | Q ( K )           ::  :: quantifier
-    {{ tex [[Q]]([[K]]) }}
-  | Q ( K1 - EE )     ::  :: quantifier_minus {{ tex [[Q]] ( [[K1]] \backslash_{[[EE]]} ) }}
-  | Q ( K1 .... Ki ) ::  :: quantifier_mult
+  | Q ( EE , K )           ::  :: quantifier
+    {{ tex [[Q]]([[EE]], [[K]]) }}
+  | Q ( EE1 ,  K1 - EE )   ::  :: quantifier_minus {{ tex [[Q]] ([[EE1]], [[K1]] \backslash_{[[EE]]} ) }}
+  | Q ( EE , K1 .... Ki ) ::  :: quantifier_mult
   | [ ckvs ]          ::  :: fill_kvs {{ tex [[ckvs]] }}
   | tsub ( EE )       ::  :: tsub
 
@@ -499,6 +499,7 @@ other_syntax :: 'other_' ::=
 terminals :: 'terminals_' ::=
   | topo       ::  :: topo {{tex \mathsf{topo} }}
   | Q          :: :: quantifier {{ tex \mathcal{Q} }}
+  | Qk         :: :: quantifier_with_kind {{ tex \mathcal{Q}_{\kappa} }}
   | ok      :: :: ok {{ tex \mathsf{ok} }}
   | ~       :: :: consist {{ tex \sim }}
   | ~=      :: :: approx {{ tex \approx }}
@@ -592,7 +593,8 @@ terminals :: 'terminals_' ::=
   | ||-kapp    :: :: Vdashkapp {{ tex \Vdash^{\!\!\mathsf{kapp} } }}
   | |-kc       :: :: vdashkc {{ tex \vdash^{\!\!\mathsf{kc} } }}
   | \bot       :: :: bot {{ tex \bot }}
-  | LS         :: :: lexicalsort {{ tex \mathsf{fkv} }}
+  | LS         :: :: lexicalsort {{ tex \mathbf{fkv} }}
+  | fkv        :: :: fkv {{ tex \mathbf{fkv} }}
   | SS         :: :: scopedsort {{ tex \mathsf{scoped\_sort} }}
   | <<:        ::  :: more_general {{ tex \preceq }}
   | ++         ::  :: append {{ tex \mathrel{ {+}\!\!{+} }^{\mathsf{mv} } }}
@@ -2564,13 +2566,13 @@ EE |- dtsig ~> EE'  ::  :: sig :: 'sig_'
 by
 
 
-ikvs in Q (K)
+ikvs in Q (EE, K)
 ---------------------------- :: poly
 EE |- data T : K ~> T : \/i [ikvs]. K
 
 rs A
-kvs in Q (A)
-ckvs1 in Q (\/[ckvs]. eK)
+kvs = fkv (A)
+ckvs1 in Q (EE, \/[ckvs]. eK)
 % EE |- ckvs
 EE, [ckvs1] |- \/ [kvs]. A : star ~> \/ [ckvs] . eK
 |kvs| = |ckvs|
@@ -2917,7 +2919,7 @@ EE |-gen ckvs HH1 ~> HH2 :: :: gen :: ''
 
 by
 
-</ ckvs, ckvsi in Q (  eAi  ) // i />
+</ ckvs, ckvsi in Q ( EE,  eAi  ) // i />
 -------------------------------------------- :: gen
 EE |-gen ckvs </ Di :  eAi // i />  ~> </ Di :  \/i [ckvs, ckvsi] . eAi // i />
 

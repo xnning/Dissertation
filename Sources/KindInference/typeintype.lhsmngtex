@@ -135,16 +135,52 @@ will see in the coming section.
 \begin{minipage}{.42\textwidth}
 \drules[]{$[[EE |-gen ckvs HH1 ~> HH2]]$}{Generalization}{gen}
 \end{minipage}
-\drules[sr]{$[[rs A]]$}{Kind results in $[[star]]$}{star,arrow,forall}
 
 \caption{Declarative specification of \tit}
 \label{fig:kind:tit:decl}
 \end{figure}
 
+\begin{figure}
+  \drules[sr]{$[[rs A]]$}{Kind results in $[[star]]$}{star,arrow,forall}
+
+  \begin{center}
+    \begin{tabular}{lll} \toprule
+      $[[ fkv(\/a. A) ]]$     & = & $[[fkv(A) - a]]$ \\
+      $[[ fkv(t1 t2)  ]]$  & = & $[[fkv(t1) + fkv(t2)]]$ \\
+      $[[ fkv(t1 @@t2)  ]]$  & = & $[[fkv(t1) + fkv(t2)]]$ \\
+      $[[ fkv(a)  ]]$  & = & $\{[[a]]\}$ \\
+      $[[ fkv(star)  ]]$  & = & $\emptyset$ \\
+      $[[ fkv(nat)  ]]$  & = & $\emptyset$ \\
+      $[[ fkv(T)  ]]$  & = & $\emptyset$ \\
+      $[[ fkv]]([[->]])$  & = & $\emptyset$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \begin{center}
+    \begin{tabular}{lll} \toprule
+      \multicolumn{3}{c}{$[[Q(EE, A)]]$ is the set of all well-formed orderings of $[[Qk(EE, A)]]$}\\
+      $[[ Qk(EE, \/a. A) ]]$     & = & $[[Qk(EE, A) - a]]$ \\
+      $[[ Qk(EE, t1 t2)  ]]$  & = & $[[Qk(EE, t1) + Qk(EE, t2)]]$ \\
+      $[[ Qk(EE, t1 @@t2)  ]]$  & = & $[[Qk(EE, t1) + Qk(EE, t2)]]$ \\
+      $[[ Qk(EE, a)  ]]$  & = & $ [[Qk(EE,et)]]~\cup~ \{[[a : et]]\}$ \quad \text{where} $[[a : et ]] \in [[EE]]$ \\
+      $[[ Qk(EE, star)  ]]$  & = & $\emptyset$ \\
+      $[[ Qk(EE, nat)  ]]$  & = & $\emptyset$ \\
+      $[[ Qk(EE, T)  ]]$  & = & $\emptyset$ \\
+      $[[ Qk]]([[EE]], [[->]]) $  & = & $\emptyset$ \\
+      \bottomrule
+    \end{tabular}
+  \end{center}
+
+  \caption{Auxiliary functions of declarative specification in \tit}
+  \label{fig:kind:tit:decl:ax}
+\end{figure}
+
 \subsection{Checking Programs}
 \label{sec:kind:tit:checking:program}
 
-The declarative typing rules appear in \Cref{fig:kind:tit:decl}.
+The declarative typing rules appear in \Cref{fig:kind:tit:decl},
+with auxiliary functions defined in \Cref{fig:kind:tit:decl:ax}.
 The judgment $[[EE;HH |-p pgm : A]]$ checks the program. From now on we omit the
 typing rule for expressions in programs, which is essentially the same as in
 \hne.
@@ -156,17 +192,19 @@ $[[star]]$:
 $[[rs A]]$ simply traverses over arrows and foralls, checking that the final kind of $[[A]]$
 is $[[star]]$.
 Then, as $[[A]]$ may be an open kind signature, it extracts the free kind variables
-$[[kvs in  Q (A)]]$, where $[[Q (A)]]$ is the set of all well-formed
-orderings of the free
-variables (transitively looking into variables' kinds) of $[[A]]$;
- thus, $[[kvs]]$ is one such ordering.
+$[[kvs = fkv (A)]]$, so that $[[kvs]]$ is a well-formed ordering of the free variables.
 As discussed in \Cref{sec:kind:tit-overview}, variables in
 $[[kvs]]$ are \textit{inferred} so we accept any relative order,
 as long as it features the necessary dependency between the variables. Then the
 rule tries to elaborate ($[[|-k]]$) the kind $[[\/ [kvs]. A]]$, where $[[kvs]]$
 and $[[ckvs]]$ have the same length ($[[ ||kvs|| = ||ckvs|| ]]$). As the
 elaborated result $[[\/ [ckvs]. eK]]$ can be further generalized, we bring the free
-variables $[[ckvs1 in Q(\/[ckvs]. eK)]]$ into scope when elaborating. The concluding output
+variables $[[ckvs1 in Q(EE, \/[ckvs]. eK)]]$ into scope when elaborating.
+$[[Q (EE, A)]]$ is the set of all well-formed
+orderings of the free
+variables (transitively looking into variables' kinds) of $[[A]]$;
+thus, $[[ckvs1]]$ is one such ordering.
+The concluding output
 is $[[T]]: [[\/i [ckvs1]. \/i [ckvs] . eK]]$. As an example, consider a kind signature $[[\/
 a . b -> star]]$. We have $[[kvs = b]]$, $[[ckvs = b:star]]$, and $[[ckvs1 = c : star ]]$, and the
 final kind is $[[\/i [c:star] . \/i [b:star]. \/ (a :c) . b -> star ]]$. We see
