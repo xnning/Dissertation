@@ -146,6 +146,7 @@ will see in the coming section.
   \begin{center}
     \begin{tabular}{lll} \toprule
       $[[ fkv(\/a. A) ]]$     & = & $[[fkv(A) - a]]$ \\
+      $[[ fkv(\/a:k. A) ]]$     & = & $[[fkv(A) - a + fkv(k) ]]$ \\
       $[[ fkv(t1 t2)  ]]$  & = & $[[fkv(t1) + fkv(t2)]]$ \\
       $[[ fkv(t1 @@t2)  ]]$  & = & $[[fkv(t1) + fkv(t2)]]$ \\
       $[[ fkv(a)  ]]$  & = & $\{[[a]]\}$ \\
@@ -161,6 +162,7 @@ will see in the coming section.
     \begin{tabular}{lll} \toprule
       \multicolumn{3}{c}{$[[Q(EE, A)]]$ is the set of all well-formed orderings of $[[Qk(EE, A)]]$}\\
       $[[ Qk(EE, \/a. A) ]]$     & = & $[[Qk(EE, A) - a]]$ \\
+      $[[ Qk(EE, \/a:k. A) ]]$     & = & $[[Qk(EE, A) - a + Qk(EE,k) ]]$ \\
       $[[ Qk(EE, t1 t2)  ]]$  & = & $[[Qk(EE, t1) + Qk(EE, t2)]]$ \\
       $[[ Qk(EE, t1 @@t2)  ]]$  & = & $[[Qk(EE, t1) + Qk(EE, t2)]]$ \\
       $[[ Qk(EE, a)  ]]$  & = & $ [[Qk(EE,et)]]~\cup~ \{[[a : et]]\}$ \quad \text{where} $[[a : et ]] \in [[EE]]$ \\
@@ -199,11 +201,7 @@ as long as it features the necessary dependency between the variables. Then the
 rule tries to elaborate ($[[|-k]]$) the kind $[[\/ [kvs]. A]]$, where $[[kvs]]$
 and $[[ckvs]]$ have the same length ($[[ ||kvs|| = ||ckvs|| ]]$). As the
 elaborated result $[[\/ [ckvs]. eK]]$ can be further generalized, we bring the free
-variables $[[ckvs1 in Q(EE, \/[ckvs]. eK)]]$ into scope when elaborating.
-$[[Q (EE, A)]]$ is the set of all well-formed
-orderings of the free
-variables (transitively looking into variables' kinds) of $[[A]]$;
-thus, $[[ckvs1]]$ is one such ordering.
+variables $[[ckvs1 ]]$ into scope when elaborating.
 The concluding output
 is $[[T]]: [[\/i [ckvs1]. \/i [ckvs] . eK]]$. As an example, consider a kind signature $[[\/
 a . b -> star]]$. We have $[[kvs = b]]$, $[[ckvs = b:star]]$, and $[[ckvs1 = c : star ]]$, and the
@@ -228,7 +226,11 @@ kind $[[eki]]$. After the recursive group is typed, we generalize the kind of
 each type constructor as well as the type of its data constructors.
 To generalize the type of data constructors, we use the
 $[[|-gen]]$ judgment. \Rref{gen} generalizes every data constructor in the context,
-where $[[ckvs]]$ are
+where
+$[[Q (EE, A)]]$ is the set of all well-formed
+orderings of the free
+variables (transitively looking into variables' kinds) of $[[A]]$.
+$[[ckvs]]$ are
 free type variables of its corresponding type constructor, and $[[ckvsi]]$ are free
 type variables specific to the data constructor.
 % We lift the judgment to the term context $[[HHi]]$.

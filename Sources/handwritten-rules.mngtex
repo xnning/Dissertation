@@ -3,8 +3,8 @@
 
 \newcommand{\ottdrulepgmXXdtXXtt}[1]{\ottdrule[#1]{%
 % \ottpremise{[[EE]] [[|-]] \ottcomp{[[ ckvsi ]]}{\ottmv{i}} }%
-\ottpremise{\ottcomp{[[EE]] , \, [[ ckvsi ]] [[|-el]] [[eki]] \ottsym{:} [[star]]}{\ottmv{i}} }
-\ottpremise{[[ </ ckvsi in Q (eki) // i /> ]]}%
+\ottpremise{\ottcomp{[[EE]], [[ckvsi]]  [[|-el]] [[eki]] \ottsym{:} [[star]]}{\ottmv{i}} }
+% \ottpremise{[[ </ ckvsi in Q (EE, ckvsi, eki) // i /> ]]}%
 \ottpremise{ \ottcomp{
 [[EE]]\ottsym{,} \, \cup \ottcomp{[[ ckvsi ]]}{\ottmv{i}} \ottsym{,} \, [[</ Ti : eki // i />]]
 [[|-dt]] [[dti]] \leadsto [[HHi]] }{\ottmv{i}} }  %
@@ -30,7 +30,7 @@
       [[|-]]
       \ottcomp{[[Tti]]}{\ottmv{i}}  [[~>]] [[</ Tl : kl // l />]]}
 \ottpremise{[[EE' = EE]]\ottsym{,} \, \cup \ottcomp{[[ ikvsi ]]}{\ottmv{i}} \ottsym{,} \, [[</ Tl : kl // l />]] }%
-\ottpremise{[[ </ ikvsl  in Q (kl - EE) // l /> ]]}%
+\ottpremise{[[ </ ikvsl  in Q (EE, kl - EE) // l /> ]]}%
 \ottpremise{[[ </ EE' |- dti ~> HHi // i /> ]]}%
 \ottpremise{[[ EE, </ Tl : \/i [ikvsl] . kl // l /> ]] \ottsym{;} [[HH]]
   \ottsym{,} \,
@@ -53,9 +53,10 @@
 
 \newcommand{\ottdruledcXXtt}[1]{\ottdrule[#1]
   {
-    \ottpremise{ [[ ckvs]] \in [[Q]] ( [[eA]] \backslash_{
-        [[EE]],
-        \ottcomp{[[ti]]}{i} } ) }
+    \ottpremise{[[ckvs]] \notin [[fkv]](\ottcomp{[[ti]]}{i})}
+    % \ottpremise{ [[ ckvs]] \in [[Q]] ([[EE, ckvs]], [[eA]] \backslash_{
+    %   [[EE]],
+    %   \ottcomp{[[ti]]}{i} } ) }
     % \ottpremise{ [[ EE |- ckvs ]] }
     \ottpremise{[[ EE, [ckvs] |- \/kvs. </ ti // i /> ---> et : star ~> eA   ]]}
   }

@@ -2572,7 +2572,7 @@ EE |- data T : K ~> T : \/i [ikvs]. K
 
 rs A
 kvs = fkv (A)
-ckvs1 in Q (EE, \/[ckvs]. eK)
+% ckvs1 in Q ((EE, [ckvs1]), \/[ckvs]. eK)
 % EE |- ckvs
 EE, [ckvs1] |- \/ [kvs]. A : star ~> \/ [ckvs] . eK
 |kvs| = |ckvs|
