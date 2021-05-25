@@ -104,7 +104,7 @@ algorithm yet.
 
 The promotion operation is actually present in the \textit{Glasgow Haskell
   Compiler} (GHC), the state-of-the-art compiler for the Haskell programming
-languages, though its form is different than what we have presented.
+language, though its form is different than what we have presented.
 
 In particular, instead of keeping all the unification variables ordered in the
 context, GHC only keeps them in order with respect to type variables in the
