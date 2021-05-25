@@ -488,7 +488,7 @@ not respect it. This may be the cause of differing behavior between GHC and the 
 \section{Complete Set of Rules}
 \label{sec:appendix:kind:rules}
 
-In this section we include the complete set of rules for \Cref{chap:kindinference}. Some of the rules are
+In this section we include missing rules for \Cref{chap:kindinference}. Some of the rules are
 repeated from those in the chapter.
 
 \subsection{Declarative \hne}

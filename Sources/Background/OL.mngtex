@@ -197,7 +197,9 @@ contravariant in arguments, and covariant in return types (\rref{ol-s-arrow}).
 This is a design choice rather than a requirement. In fact, in some systems,
 e.g., \cite{guarded:impred,quick:look}, all type constructs are invariant,
 including functions, which makes type inference for impredicativity much easier
-in their setting.
+in their setting. This is one of the reasons that the Glasgow Haskell Compiler
+(GHC), the state-of-the-art Haskell compiler, has recently removed
+co/contravariant arrow from the language~\citep{simonpj:simplified}.
 
 Contravariance and covariance are more powerful than invariance, in the sense
 that they can accept some more programs. But they also come with a cost. In
