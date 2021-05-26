@@ -114,7 +114,7 @@ variable is brought into scope. When unifying $[[evar]] [[~=]] [[t]]$ where
 $[[evar]]$ is level $N$, GHC ensures that all free variables in $[[t]]$ are from
 level $N$ or lower. If there is a unification variable $[[evarb]]$ in $[[t2]]$,
 where $[[evarb]]$ has level $M > N$, then it allocates $[[evarb1]]$ at level $N$
-and set $[[evar]] = [[evarb]]$, which essentially implements the idea of promotion.
+and set $[[evarb]] = [[evarb1]]$, which essentially implements the idea of promotion.
 
 
 
