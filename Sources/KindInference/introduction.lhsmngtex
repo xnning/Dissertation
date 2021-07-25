@@ -358,7 +358,7 @@ that is not otherwise bound\footnote{GHC actually implements the
   \textit{forall-or-nothing} rule, which states that either \textit{all}
   variables are quantified by a user-written |forall|, or none are. Our
   treatment here is more general than \textit{forall-or-nothing}.
-  \Cref{sec:appendix:forall-or-nothing} includes more discussion.}. We have a decision to make: in
+  \Cref{sec:appendix:forall-or-nothing} includes more discussion.}~\citep{marlow2010haskell}. We have a decision to make: in
 which order do we generalize the free variables?
 This question is non-trivial, as there can be dependency between the
 variables. We infer |k :: *|, |f :: k -> *|, |b :: k|. Even though |f| and |b|

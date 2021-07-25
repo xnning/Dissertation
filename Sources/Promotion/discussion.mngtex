@@ -100,23 +100,143 @@ With these rules it would be possible to apply polymorphic promotion to \gpc.
 Note this discussion is a sketch and we have not fully worked out the full
 algorithm yet.
 
-\section{Promotion in Action}
+\section{Promotion, Levels, and Generalization}
+
+\subsection{Promotion in Action}
 
 The promotion operation is actually present in the \textit{Glasgow Haskell
   Compiler} (GHC), the state-of-the-art compiler for the Haskell programming
 language, though its form is different than what we have presented.
 
 In particular, instead of keeping all the unification variables ordered in the
-context, GHC only keeps them in order with respect to type variables in the
-context, by assigning a \textit{level number} to each unification variable and
-each type variable, and incrementing the level number whenever a new type
-variable is brought into scope. When unifying $[[evar]] [[~=]] [[t]]$ where
-$[[evar]]$ is level $N$, GHC ensures that all free variables in $[[t]]$ are from
-level $N$ or lower. If there is a unification variable $[[evarb]]$ in $[[t2]]$,
-where $[[evarb]]$ has level $M > N$, then it allocates $[[evarb1]]$ at level $N$
-and set $[[evarb]] = [[evarb1]]$, which essentially implements the idea of promotion.
+context, which can be quite inefficient, GHC only keeps them in order with
+respect to type variables in the context, by assigning a \textit{level number}
+to each unification variable and each type variable, and incrementing the level
+number whenever a new type variable is brought into scope. When unifying
+$[[evar]] [[~=]] [[t]]$ where $[[evar]]$ is level $N$, to ensure
+well-scopedness, GHC checks that all free variables in $[[t]]$ are from level
+$N$ or lower, and update levels when needed: if there is a unification variable
+$[[evarb]]$ in $[[t2]]$, where $[[evarb]]$ has level $M > N$, then it allocates
+$[[evarb1]]$ at level $N$ and set $[[evarb]] = [[evarb1]]$, which essentially
+implements the idea of promotion.
+
+As an example, consider during type inference, we need to prove the following
+subtyping constraint:
+%
+\begin{mathpar}
+[[empty]] [[|-sub]] [[ \/a. \/ b. a -> b ]]  [[<:]] [[\/c. (\/d. d -> d) -> c]]
+\end{mathpar}
+%
+Let us first work through how promotion works for this example, and then work
+through the example again using level numbers.
+
+With promotion, first, we apply \rref{s-forallR} and skolemize $[[c]]$:
+% 
+\begin{mathpar}
+[[c]] [[|-sub]] [[ \/a. \/b. a -> b ]]  [[<:]] [[(\/d. d -> d) -> c]]
+\end{mathpar}
+% 
+Now we apply \rref{s-forallL} twice and instantiate $[[a]]$ and $[[b]]$ with
+fresh unification variables:
+% 
+\begin{mathpar}
+[[c, evara, evarb]] [[|-sub]] [[evara -> evarb]]  [[<:]] [[(\/d. d -> d) -> c]]
+\end{mathpar}
+% 
+We then split the function type on both sides (\rref{s-arrow}), and first solve
+the contravariant constraint on the argument type:
+% 
+\begin{mathpar}
+[[c, evara, evarb]] [[|-sub]]  [[\/d. d -> d]] [[<:]] [[evara]]
+\end{mathpar}
+%
+We apply \rref{s-forallL} and get:
+% 
+\begin{mathpar}
+  [[c, evara, evarb, evarb2]] [[|-sub]]  [[evarb2 -> evarb2]] [[<:]] [[evara]]
+\end{mathpar}
+% 
+At this point, we can promote $[[evarb2 -> evarb2]]$ by creating a new
+unification variable $[[evara2]]$ to the left of $[[evar2]]$, and setting
+$[[evarb2 = evara2]]$, so we can solve $[[evara = evara2 -> evara2]]$
+% 
+\begin{mathpar}
+[[ c, evara, evarb, evarb2 |-sub  evarb2 -> evarb2 <: evara -| c, evara2, evara = evara2 -> evara2, evarb, evarb2 = evara2]]
+\end{mathpar}
+% 
+Then we go back to the covariant constraint on the return type, and solve
+$[[evarb = c]]$, as $[[c]]$ is already to the left of $[[evarb]]$, and we are done:
+\begin{mathpar}
+[[c, evara2, evara = evara2 -> evara2, evarb, evarb2 = evara2 |-sub evarb  <: c
+  -| c, evara2, evara = evara2 -> evara2, evarb = c, evarb2 = evara2 ]]
+\end{mathpar}
+
+Now let us go through the example again with levels\footnote{The process we are
+  going to describe is not exactly how GHC works for this example, but it is
+  sufficient to illustrate the key idea of levels}. We keep tract of the current
+global level, starting from $0$:
+%
+\begin{mathpar}
+  (0) \qquad [[empty]] [[|-sub]] [[ \/a. \/ b. a -> b ]]  [[<:]] [[\/c. (\/d. d -> d) -> c]]
+\end{mathpar}
+%
+Now as before, we skolemise $[[c]]$ on the right, but unlike before, we record
+that $[[c]]$ is skolemised at level $0$. Moreover, we increase the global level
+number by $1$:
+% 
+\begin{mathpar}
+  (1) \qquad [[c]](0) [[|-sub]] [[ \/a. \/ b. a -> b ]]  [[<:]] [[(\/d. d -> d) -> c]]
+\end{mathpar}
+% 
+We continue by instantiating $[[a]]$ and $[[b]]$ on the left with fresh
+unification variables, which are also associated with the current level number. In
+this case, we only created new unification variables, so the global level number
+stays the same:
+% 
+\begin{mathpar}
+  (1)\qquad [[c]](0), [[evara]] (1), [[evarb]](1) [[|-sub]] [[ evara -> evarb]] [[<:]] [[(\/d. d -> d) -> c]]
+\end{mathpar}
+%
+We split the function types, and the first constraint we get is:
+% 
+\begin{mathpar}
+  (1)\qquad [[c]](0), [[evara]] (1), [[evarb]](1) [[|-sub]] [[\/d. d -> d]]  [[<:]] [[evara ]]
+\end{mathpar}
+% 
+We again instantiate $[[d]]$ with fresh unification variables $[[evarb2]]$.
+Since the global level number is still $1$, $[[evarb2]]$ is also at level $[[1]]$:
+% 
+\begin{mathpar}
+  (1)\qquad [[c]](0), [[evara]] (1), [[evarb]](1), [[evarb2]](1) [[|-sub]] [[evarb2 -> evarb2]]  [[<:]] [[evara ]]
+\end{mathpar}
+% 
+Now we want to solve $[[evara]]$ with $[[evarb2 -> evarb2]]$. We check their
+level numbers. They are at the same level, so $[[evarb2 -> evarb2]]$ is a valid
+solution for $[[evara]]$. We thus get:
+% 
+\begin{mathpar}
+  (1)\qquad [[a]](0), [[evara]] (1), [[evarb]](1), [[evarb2]](1) [[|-sub]] [[evarb2 -> evarb2]]  [[<:]] [[evara ]]
+  [[-|]] [[a]](0), [[evara]] (1) = [[evarb2 -> evarb2]], [[evarb]](1), [[evarb2]](1)
+\end{mathpar}
+% 
+Going back to the covariant constraint on the argument types, we get
+\begin{mathpar}
+  (1)\qquad [[a]](0), [[evara]] (1) = [[evarb2 -> evarb2]], [[evarb]](1), [[evarb2]](1) [[|-sub]] [[evarb2 -> evarb2]]  [[<:]] [[evara ]]
+  [[-|]] [[a]](0), [[evara]] (1) = [[evarb2 -> evarb2]], [[evarb]](1), [[evarb2]](1)
+\end{mathpar}
 
 
+
+\subsection{Levels and Generalization}
+
+It turns out that promotion is closely related to type inference with
+\textit{levels}. Levels are first introduced in \citet{remy1992extension} to
+implement type inference efficiently, and has been implemented in the OCaml type
+checker \cite{ocaml:typechecker}, as well as \textit{Glasgow Haskell Compiler}
+(GHC).
+
+Type inference based on levels takes a different than what we have presented. We
+take GHC as an example.
 
 
 %%% Local Variables:
