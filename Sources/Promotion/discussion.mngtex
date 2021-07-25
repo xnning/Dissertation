@@ -100,9 +100,7 @@ With these rules it would be possible to apply polymorphic promotion to \gpc.
 Note this discussion is a sketch and we have not fully worked out the full
 algorithm yet.
 
-\section{Promotion, Levels, and Generalization}
-
-\subsection{Promotion in Action}
+\section{Promotion in Action}
 
 The promotion operation is actually present in the \textit{Glasgow Haskell
   Compiler} (GHC), the state-of-the-art compiler for the Haskell programming
@@ -320,7 +318,7 @@ promotion can fail to promote levels as in $[[c]](1), [[ evara ]](0) [[|-sub]]
 [[evara]] [[<:]] [[c]]$, where even though $[[c]]$ appears before $[[evara]]$ in
 the context, it has a level greater than $[[evara]]$.
 
-\subsection{Levels and Generalization}
+\section{Levels and Generalization}
 
 Levels are first introduced in \citet{remy1992extension} to implement
 generalization more efficiently, and since then have been implemented widely. As
