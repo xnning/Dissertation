@@ -291,7 +291,7 @@ the scope of $[[evar]]$ and promoting $[[a->a]]$ would fail, which is exactly
 what we want. In fact, the promotion would succeed only if the universally
 quantified variable is not used in the body of the polymorphic type. For
 example, $[[\/a.int -> int]]$ can be promoted to $[[int -> int]]$, which is a
-valid solution for $[[evar]]$ in $[[evar]] [[|-]] [[evar]] <: [[\/a. int ->
+valid solution for $[[evar]]$ in $[[evar]] [[|-sub]] [[evar]] [[<:]] [[\/a. int ->
 int]]$.
 
 From these observations, we extend promotion to \textit{polymorphic promotion},
@@ -301,7 +301,7 @@ left, polymorphic promotion has two modes, which we call the
 \textit{contravariant mode} and the \textit{covariant mode} respectively.
 
 The contravariant mode promotes types as $[[\/a.a ->a]]$ in the case of
-$[[evar]] [[|-]] [[\/a.a -> a]] [[<:]] [[evar]]$, where the universal quantifier
+$[[evar]] [[|-sub]] [[\/a.a -> a]] [[<:]] [[evar]]$, where the universal quantifier
 is removed and the type variable $[[a]]$ is replaced by a fresh unification
 variable added to front of the unification variable being solved.
 % This
@@ -311,7 +311,7 @@ variable added to front of the unification variable being solved.
 % the context after $[[evarb]]$ anymore.
 
 On the other hand, the covariant mode promotes types as $[[\/a. a->a]]$ in the
-case of $[[evar]] [[|-]] [[evar]] [[<:]] [[\/a. a -> a]]$. In this case,
+case of $[[evar]] [[|-sub]] [[evar]] [[<:]] [[\/a. a -> a]]$. In this case,
 promoting $[[\/a. a -> a]]$ will directly add the type variable $[[a]]$ to the
 tail of the context.
 % which corresponds to \rref{gpc-instl-forallR}.
@@ -328,7 +328,7 @@ under the other mode and promote its domain under the original mode. For
 example, $[[ evar = (evarb -> evarb) -> (int -> int) ]]$ is a solution for
 %
 \begin{mathpar}
-[[evar]] [[|-]] [[evar]] [[<:]] [[(\/a.a ->a) -> (\/a. int -> int)]]
+[[evar]] [[|-sub]] [[evar]] [[<:]] [[(\/a.a ->a) -> (\/a. int -> int)]]
 \end{mathpar}
 %
 \noindent where

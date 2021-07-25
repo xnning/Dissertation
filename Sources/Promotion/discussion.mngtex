@@ -124,108 +124,201 @@ As an example, consider during type inference, we need to prove the following
 subtyping constraint:
 %
 \begin{mathpar}
-[[empty]] [[|-sub]] [[ \/a. \/ b. a -> b ]]  [[<:]] [[\/c. (\/d. d -> d) -> c]]
-\end{mathpar}
-%
-Let us first work through how promotion works for this example, and then work
-through the example again using level numbers.
-
-With promotion, first, we apply \rref{s-forallR} and skolemize $[[c]]$:
-% 
-\begin{mathpar}
-[[c]] [[|-sub]] [[ \/a. \/b. a -> b ]]  [[<:]] [[(\/d. d -> d) -> c]]
-\end{mathpar}
-% 
-Now we apply \rref{s-forallL} twice and instantiate $[[a]]$ and $[[b]]$ with
-fresh unification variables:
-% 
-\begin{mathpar}
-[[c, evara, evarb]] [[|-sub]] [[evara -> evarb]]  [[<:]] [[(\/d. d -> d) -> c]]
-\end{mathpar}
-% 
-We then split the function type on both sides (\rref{s-arrow}), and first solve
-the contravariant constraint on the argument type:
-% 
-\begin{mathpar}
-[[c, evara, evarb]] [[|-sub]]  [[\/d. d -> d]] [[<:]] [[evara]]
-\end{mathpar}
-%
-We apply \rref{s-forallL} and get:
-% 
-\begin{mathpar}
-  [[c, evara, evarb, evarb2]] [[|-sub]]  [[evarb2 -> evarb2]] [[<:]] [[evara]]
-\end{mathpar}
-% 
-At this point, we can promote $[[evarb2 -> evarb2]]$ by creating a new
-unification variable $[[evara2]]$ to the left of $[[evar2]]$, and setting
-$[[evarb2 = evara2]]$, so we can solve $[[evara = evara2 -> evara2]]$
-% 
-\begin{mathpar}
-[[ c, evara, evarb, evarb2 |-sub  evarb2 -> evarb2 <: evara -| c, evara2, evara = evara2 -> evara2, evarb, evarb2 = evara2]]
-\end{mathpar}
-% 
-Then we go back to the covariant constraint on the return type, and solve
-$[[evarb = c]]$, as $[[c]]$ is already to the left of $[[evarb]]$, and we are done:
-\begin{mathpar}
-[[c, evara2, evara = evara2 -> evara2, evarb, evarb2 = evara2 |-sub evarb  <: c
-  -| c, evara2, evara = evara2 -> evara2, evarb = c, evarb2 = evara2 ]]
+[[empty]] [[|-sub]] [[ \/a. int -> a -> \/b. b ]]  [[<:]] [[int -> \/c. (\/d. d -> d) -> c]]
 \end{mathpar}
 
-Now let us go through the example again with levels\footnote{The process we are
-  going to describe is not exactly how GHC works for this example, but it is
-  sufficient to illustrate the key idea of levels}. We keep tract of the current
-global level, starting from $0$:
+Below, we work through the example using promotion on the left, and then work
+through the example again using level numbers on the right\footnote{The process
+  we are going to describe is not exactly how GHC works for this example, but it
+  is sufficient to illustrate the key idea of levels.}. The reader is encouraged
+to read the left part first before moving to the right.
+
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.48\textwidth}
+With promotion,
+we start with
 %
 \begin{mathpar}
-  (0) \qquad [[empty]] [[|-sub]] [[ \/a. \/ b. a -> b ]]  [[<:]] [[\/c. (\/d. d -> d) -> c]]
+  [[empty]] [[|-sub]] [[ \/a. int -> a -> \/b. b ]]  [[<:]] [[int -> \/c. (\/d. d -> d) -> c]]
 \end{mathpar}
+\end{minipage}
 %
-Now as before, we skolemise $[[c]]$ on the right, but unlike before, we record
-that $[[c]]$ is skolemised at level $0$. Moreover, we increase the global level
-number by $1$:
+\begin{minipage}[t]{0.48\textwidth}
+  Now let us go through the example again with levels. We keep track of the current
+  global level, starting from $0$:
+  % 
+  \begin{mathpar}
+    (0) \quad [[empty]] [[|-sub]] [[ \/a. int -> a -> \/b. b ]]  [[<:]] [[int -> \/c. (\/d. d -> d) -> c]]
+  \end{mathpar}
+\end{minipage}
+ 
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.46\textwidth}
+First, we apply \rref{s-forallL} and instantiate $[[a]]$ with $[[evara]]$:
+\begin{mathpar}
+  [[evara]] [[|-sub]] [[int -> evara -> \/b. b]]  [[<:]] [[int -> \/c. (\/d. d -> d) -> c]]
+\end{mathpar}
+\end{minipage}
+%
+\begin{minipage}[t]{0.8\textwidth}%
+\end{minipage}
+\begin{minipage}[t]{0.46\textwidth}
+Now as before, we first instantiating $[[a]]$ with fresh unification variables
+$[[evara]]$, but unlike before, we record that $[[evara]]$ in created at level
+$0$. In this case, we only created new unification variables, so the global
+level number stays the same:
 % 
 \begin{mathpar}
-  (1) \qquad [[c]](0) [[|-sub]] [[ \/a. \/ b. a -> b ]]  [[<:]] [[(\/d. d -> d) -> c]]
+  (0) \quad  [[evara]] (0) [[|-sub]] [[int -> evara -> \/b. b]]  [[<:]] [[int -> \/c. (\/d. d -> d) -> c]]
 \end{mathpar}
-% 
-We continue by instantiating $[[a]]$ and $[[b]]$ on the left with fresh
-unification variables, which are also associated with the current level number. In
-this case, we only created new unification variables, so the global level number
-stays the same:
-% 
-\begin{mathpar}
-  (1)\qquad [[c]](0), [[evara]] (1), [[evarb]](1) [[|-sub]] [[ evara -> evarb]] [[<:]] [[(\/d. d -> d) -> c]]
-\end{mathpar}
+\end{minipage}
+
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.46\textwidth}
+We then apply \rref{s-arrow} and split the constraint into two constraints. As
+the contravariant constraint on arguments is simply $[[int <: int]]$, we
+continue with the covariant constraint on the return type:
 %
+\begin{mathpar}
+[[evara]] [[|-sub]] [[evara -> \/b. b]]  [[<:]] [[\/c. (\/d. d -> d) -> c]]
+\end{mathpar}
+\end{minipage}
+%
+\begin{minipage}[t]{0.8\textwidth}%
+\end{minipage}
+\begin{minipage}[t]{0.46\textwidth}
+  We continue by spitting the arrow types. Again because the argument is simply
+  $[[int <: int]]$, we proceed by solving the return type:
+  \begin{mathpar}
+    (0) \quad [[evara]](0) [[|-sub]] [[evara -> \/b. b]]  [[<:]] [[\/c. (\/d. d -> d) -> c]]
+  \end{mathpar}
+\end{minipage}
+ 
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.46\textwidth}
+  We apply \rref{s-forallR} and skolemise $[[c]]$:
+  \begin{mathpar}
+    [[evara]], [[c]] [[|-sub]] [[evara -> \/b. b]]  [[<:]] [[(\/d. d -> d) -> c]]
+  \end{mathpar}
+\end{minipage}
+%
+\begin{minipage}[t]{0.8\textwidth}%
+\end{minipage}
+\begin{minipage}[t]{0.46\textwidth}
+  We now skolemise $[[c]]$ on the right, and also remember that $[[c]]$ is
+  skolemised at level $0$. Moreover, since we created a new type variable, we increase the global level number by $1$:
+  % 
+  \begin{mathpar}
+    (1) \quad [[evara]](0), [[c]](0) [[|-sub]] [[evara -> \/b. b]]  [[<:]] [[(\/d. d -> d) -> c]]
+  \end{mathpar}
+\end{minipage}
+
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.46\textwidth}
+We apply \rref{s-arrow} again, and we first solve the constraint on the argument
+  type:
+  \begin{mathpar}
+    [[evara]], [[c]] [[|-sub]] [[\/d. d -> d]]  [[<:]] [[evara]]
+  \end{mathpar}
+\end{minipage}
+\begin{minipage}[t]{0.8\textwidth}%
+\end{minipage}
+\begin{minipage}[t]{0.46\textwidth}
 We split the function types, and the first constraint we get is:
-% 
-\begin{mathpar}
-  (1)\qquad [[c]](0), [[evara]] (1), [[evarb]](1) [[|-sub]] [[\/d. d -> d]]  [[<:]] [[evara ]]
-\end{mathpar}
-% 
-We again instantiate $[[d]]$ with fresh unification variables $[[evarb2]]$.
-Since the global level number is still $1$, $[[evarb2]]$ is also at level $[[1]]$:
-% 
-\begin{mathpar}
-  (1)\qquad [[c]](0), [[evara]] (1), [[evarb]](1), [[evarb2]](1) [[|-sub]] [[evarb2 -> evarb2]]  [[<:]] [[evara ]]
-\end{mathpar}
-% 
-Now we want to solve $[[evara]]$ with $[[evarb2 -> evarb2]]$. We check their
-level numbers. They are at the same level, so $[[evarb2 -> evarb2]]$ is a valid
-solution for $[[evara]]$. We thus get:
-% 
-\begin{mathpar}
-  (1)\qquad [[a]](0), [[evara]] (1), [[evarb]](1), [[evarb2]](1) [[|-sub]] [[evarb2 -> evarb2]]  [[<:]] [[evara ]]
-  [[-|]] [[a]](0), [[evara]] (1) = [[evarb2 -> evarb2]], [[evarb]](1), [[evarb2]](1)
-\end{mathpar}
-% 
-Going back to the covariant constraint on the argument types, we get
-\begin{mathpar}
-  (1)\qquad [[a]](0), [[evara]] (1) = [[evarb2 -> evarb2]], [[evarb]](1), [[evarb2]](1) [[|-sub]] [[evarb2 -> evarb2]]  [[<:]] [[evara ]]
-  [[-|]] [[a]](0), [[evara]] (1) = [[evarb2 -> evarb2]], [[evarb]](1), [[evarb2]](1)
-\end{mathpar}
+  % 
+  \begin{mathpar}
+    (1) \quad [[evara]](0), [[c]](0) [[|-sub]] [[\/d. d -> d]]  [[<:]] [[evara]]
+  \end{mathpar}
+\end{minipage}
 
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.46\textwidth}
+where $[[d]]$ is instantiated with $[[evarb]]$:
+\begin{mathpar}
+  [[evara]], [[c]], [[evarb]] [[|-sub]] [[evarb -> evarb]]  [[<:]] [[evara]]
+\end{mathpar}
+\end{minipage}
+%
+\begin{minipage}[t]{0.8\textwidth}%
+\end{minipage}
+\begin{minipage}[t]{0.46\textwidth}
+We again instantiate $[[d]]$ with fresh unification variables $[[evarb]]$.
+Since the global level number is $1$, $[[evarb]]$ is at level $1$:
+% 
+\begin{mathpar}
+  (1) \quad  [[evara]](0), [[c]](0), [[evarb]](1) [[|-sub]] [[evarb -> evarb]]  [[<:]] [[evara]]
+\end{mathpar}
+% 
+\end{minipage}
 
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.46\textwidth}
+  At this point, we want to solve $[[evara]]$ with $[[evarb -> evarb]]$. However,
+  $[[evarb]]$ is not in the scope of $[[evara]]$. So we promote $[[evarb]]$ by
+  creating a fresh $[[evara2]]$ to the left
+  of $[[evara]]$ and setting $[[evarb = evara2]]$. We can
+  then solve $[[evara = evara2 -> evara2]]$.
+  \begin{mathpar}
+    [[evara]], [[c]], [[evarb]] [[|-sub]] [[evarb -> evarb]]  [[<:]] [[evara]]
+    [[-|]] [[evara2]], [[evara = evara2 -> evara2]], [[c]], [[evarb=evara2]]
+  \end{mathpar}
+\end{minipage}
+\begin{minipage}[t]{0.8\textwidth}%
+\end{minipage}
+\begin{minipage}[t]{0.46\textwidth}
+  Now we want to solve $[[evara]]$ with $[[evarb -> evarb]]$. We check their
+  level numbers. Because $[[evarb]]$ has a level greater than $0$, we
+  ``promote'' $[[evarb]]$ by creating a fresh $[[evara2]]$ at level $0$, and
+  setting $[[evarb = evara2]]$. But unlike before, since the context is not
+  ordered, we can freely put $[[evara2]]$ at the end of the context:
+  % 
+  \begin{mathpar}
+    (1) \quad [[evara]](0), [[c]](0), [[evarb]](1) [[|-sub]] [[evarb -> evarb]]  [[<:]] [[evara]]
+    [[-|]] 
+    [[evara]] (0) = [[evara2 -> evara2]], [[c]](0), [[evarb]] (1) = [[evara2]], [[evara2]](0)
+  \end{mathpar}
+\end{minipage}
+
+% ----------------------------------------------------------------------------
+\begin{minipage}[t]{0.46\textwidth}
+  Going back to the covariant constraint $[[\/d. d -> d <: c]]$ on the left, which
+  can be simply solved by instantiating $[[d]]$ with $[[evarb2]]$ and solve
+  $[[evarb2 = c]]$:
+  \begin{mathpar}
+    [[evara2]], [[evara = evara2 -> evara2]], [[c]], [[evarb=evara2]] [[|-sub]]
+    [[\/b. b]] [[<:]] [[c]]
+    [[-|]]
+    [[evara2]], [[evara = evara2 -> evara2]], [[c]], [[evarb=evara2]], [[evarb2 = c]]
+  \end{mathpar}
+\end{minipage}
+\begin{minipage}[t]{0.8\textwidth}%
+\end{minipage}
+\begin{minipage}[t]{0.46\textwidth}
+Going back to the covariant constraint $[[\/d. d -> d <: c]]$ on the left, which
+can be simply solved by instantiating $[[d]]$ with $[[evarb2]] (1)$ and solve
+$[[evarb2 = c]]$, as $[[c]]$ has a smaller level:
+\begin{mathpar}
+  (1) \quad 
+  [[evara]] (0) = [[evara2 -> evara2]], [[c]](0), [[evarb]] (1) = [[evara2]], [[evara2]](0)
+  [[|-sub]]
+  [[\/b. b]] [[<:]] [[c]]
+  [[-|]]
+  [[evara]] (0) = [[evara2 -> evara2]], [[c]](0), [[evarb]] (1) = [[evara2]],
+  [[evara2]](0), [[evarb2]](1) = [[c]]
+\end{mathpar}
+\end{minipage}
+
+A key observation of the example is that just like promotion, using level
+numbers capture precisely that \textit{the relative order between unification
+  variables does not matter}; but unlike promotion which ensures well-scopedness
+using \textit{order}, using level numbers ensures well-scopedness using
+\textit{levels}. The advantage with levels is that the whole type context is
+unordered, which can be implemented more efficiently in practice. While not
+shown in this example, just like promotion can fail to promote the order of
+variables in, for example, $[[evara, c]] [[|-sub]] [[evara]] [[<:]] [[c]]$,
+promotion can fail to promote levels as in $[[c]](1), [[ evara ]](0) [[|-sub]]
+[[evara]] [[<:]] [[c]]$, where even though $[[c]]$ appears before $[[evara]]$ in
+the context, it has a level greater than $[[evara]]$.
 
 \subsection{Levels and Generalization}
 
