@@ -116,7 +116,9 @@ $[[evar]]$ is level $N$, to ensure well-scopedness, GHC checks that all free
 variables in $[[t]]$ are from level $N$ or lower, and update levels when needed:
 if there is a unification variable $[[evarb]]$ in $[[t2]]$, where $[[evarb]]$
 has level $M > N$, then it allocates $[[evarb1]]$ at level $N$ and set
-$[[evarb]] = [[evarb1]]$, which essentially implements the idea of promotion.
+$[[evarb]] = [[evarb1]]$, which essentially implements the idea of promotion. In
+the following discussion, we refer to the promotion process described in this
+chapter \textit{order promotion}, and the process in GHC \textit{level promotion}.
 
 As an example, consider during type inference, we need to prove the following
 subtyping constraint:
@@ -125,11 +127,11 @@ subtyping constraint:
 [[empty]] [[|-sub]] [[ \/a. int -> a -> \/b. b ]]  [[<:]] [[int -> \/c. (\/d. d -> d) -> c]]
 \end{mathpar}
 
-Below, we work through the example using promotion on the left, and then work
-through the example again using level numbers on the right\footnote{The process
-  we are going to describe is not exactly how GHC works for this example, but it
-  is sufficient to illustrate the key idea of levels.}. The reader is encouraged
-to read the left part first before moving to the right.
+Below, we work through the example using order promotion on the left, and then
+work through the example again using level promotion on the right\footnote{The
+  process we are going to describe is not exactly how GHC works for this
+  example, but it is sufficient to illustrate the key idea of levels.}. The
+reader is encouraged to read the left part first before moving to the right.
 
 % ----------------------------------------------------------------------------
 \begin{minipage}[t]{0.48\textwidth}
@@ -266,7 +268,7 @@ Since the global level number is $1$, $[[evarb]]$ is at level $1$:
 \begin{minipage}[t]{0.46\textwidth}
   Now we want to solve $[[evara]]$ with $[[evarb -> evarb]]$. We check their
   level numbers. Because $[[evarb]]$ has a level greater than $0$, we
-  ``promote'' $[[evarb]]$ by creating a fresh $[[evara2]]$ at level $0$, and
+  promote $[[evarb]]$ by creating a fresh $[[evara2]]$ at level $0$, and
   setting $[[evarb = evara2]]$. But unlike before, since the context is not
   ordered, we can freely put $[[evara2]]$ at the end of the context:
   % 
@@ -280,7 +282,7 @@ Since the global level number is $1$, $[[evarb]]$ is at level $1$:
 % ----------------------------------------------------------------------------
 \begin{minipage}[t]{0.46\textwidth}
   Going back to the covariant constraint $[[\/d. d -> d <: c]]$ on the left, which
-  can be simply solved by instantiating $[[d]]$ with $[[evarb2]]$ and solve
+  can be simply solved by instantiating $[[d]]$ with $[[evarb2]]$ and solving
   $[[evarb2 = c]]$:
   \begin{mathpar}
     [[evara2]], [[evara = evara2 -> evara2]], [[c]], [[evarb=evara2]] [[|-sub]]
@@ -306,26 +308,25 @@ $[[evarb2 = c]]$, as $[[c]]$ has a smaller level:
 \end{mathpar}
 \end{minipage}
 
-A key observation of the example is that just like promotion, using level
-numbers capture precisely that \textit{the relative order between unification
-  variables does not matter}; but unlike promotion which ensures well-scopedness
-using \textit{order}, using level numbers ensures well-scopedness using
-\textit{levels}. The advantage with levels is that the whole type context is
-unordered, which can be implemented more efficiently in practice. While not
-shown in this example, just like promotion can fail to promote the order of
-variables in, for example, $[[evara, c]] [[|-sub]] [[evara]] [[<:]] [[c]]$,
-promotion can fail to promote levels as in $[[c]](1), [[ evara ]](0) [[|-sub]]
-[[evara]] [[<:]] [[c]]$, where even though $[[c]]$ appears before $[[evara]]$ in
-the context, it has a level greater than $[[evara]]$.
+A key observation of the example is that just like order promotion, level
+promotion captures precisely that \textit{the relative order between unification
+  variables does not matter}, and well-scopedness are ensured using levels. The
+advantage with level promotion is that the whole type context does not need to
+be ordered, which can be implemented more efficiently in practice. While not
+shown in this example, just like order promotion, level promotion can fail for
+type variables. For example, order promotion fails to promote $[[c]]$ in
+$[[evara, c]] [[|-sub]] [[evara]] [[<:]] [[c]]$; similarly, level
+promotion fails to promote $[[c]]$ in $[[c]](1), [[ evara ]](0) [[|-sub]]
+[[evara]] [[<:]] [[c]]$, where $[[c]]$ has a level greater than $[[evara]]$.
 
 \section{Levels and Generalization}
 
 Levels are first introduced in \citet{remy1992extension} to implement
-generalization more efficiently, and since then have been implemented widely. As
-we have described, they have been implemented in GHC. \cite{ocaml:typechecker}
-provides a detailed description of levels in the OCaml type checker. In this
-section, we describe why levels are helpful for generalization, and then discuss
-how generalization can be implemented in the setting of ordered type contexts.
+generalization more efficiently. Beside GHC, they have also been implemented in
+OCaml; \cite{ocaml:typechecker} provides a detailed description of levels in the
+OCaml type checker. In this section, we first describe how levels are used to
+implement efficient generalization, and then discuss how we can implement
+generalization in our setting of ordered type contexts.
 
 Let us first recall the declarative generalization rule used in the let
 expression in Hindley-Milner:
@@ -352,17 +353,15 @@ where $[[GG]]$ does not track unification variable, and we calculate the free
 variables in $[[t1]]$ that are not referred in $[[GG]]$, and generalize type
 $[[t1]]$ over $[[</ai // i/>]]$.
 
-However, this implementation requires a linear scan of the type context, and
-type context can usually be very large. If a program makes heavy use of let
-expressions, type-checking such a program can be quite time-consuming. In fact,
-it was one of the main reasons for the slow speed of Caml
-compilation~\citep{remy1992extension}.
+However, this implementation requires a linear scan of the type context, which
+can be very large for big programs. For nested let expressions, type checking
+will be quadratic. In fact, it was one of the main reasons for the slow speed of
+Caml compilation~\citep{remy1992extension}.
 
 \citeauthor{remy1992extension} resolves the problem by using levels to speed up
-the process of generalization, as well as instantiation. The key insight is to
-use levels to keep track of the scope of let expressions (in the previous
-section, we use levels to keep track of the scope of skolemisation). For
-example,
+the process of generalization. The key insight is to use levels to keep track of
+the scope of let expressions (in the previous section, we showed how GHC uses
+levels to keep track of the scope of skolemisation). For example,
 %
 \begin{lstlisting}
                -- starting from level 0
@@ -376,16 +375,19 @@ When we enter a let expression, we increase the level, and when we get out of
 the scope of a let expression, we decrease the level. Every unification variable
 is associated with a level at which it is created. Now generalization can be
 implemented in an efficient way: instead of looking through the context, we
-directly look at the type and compare the level of each unification variable
-with the current level: if a unification variable has a level greater than the
-current level, it is created in a deeper level, but since that level is gone, it
-is now a free variable and thus can be generalized over.
+directly look at the type to be generalized, and compare the level of each
+unification variable with the current level. If a unification variable has a
+level greater than the current level, it is created in a deeper level, but since
+that level is gone, it is now a free variable and thus can be generalized over.
+Such an implementation can be further optimized by updating levels lazily; we
+refer the interested reader to \cite{remy1992extension,ocaml:typechecker} for
+detailed explanations.
 
-With an ordered type context that tracks unification variables, we can also
-implement generalization in a way more efficiently than the naive
-implementation. As we know that all unification variables are put in order, we
-know exactly what unification variables can be generalized over. Therefore, with
-ordered type context, the let generalization rule will look like:
+In our setting with ordered type contexts that tracks unification variables, we
+can also implement generalization in a way more efficient than linearly scanning
+the type context: as we ensure that all unification variables are put in order,
+we know exactly what unification variables can be generalized over. With ordered
+type context, the let generalization rule looks like:
 \begin{mathpar}
   \inferrule{
     [[GG, mevar]] [[|-HM]] [[e1]] : [[at1]] [[-|]] [[DD, mevar, TT]]
@@ -399,16 +401,16 @@ ordered type context, the let generalization rule will look like:
   }
 \end{mathpar}
 %
-Note that we do not need to traverse the whole context $[[DD, mevar, TT]]$,
-because promotion has already guarantees that any unification variables that
-depend on the environment will already have been promoted to the left of the
-$[[mevar]]$, and so we are sure that all unsolved unification variables in
-$[[TT]]$ can be generalized over. Note that we apply $[[TT]]$ to $[[at1]]$ so
-that all solved unification are substituted in $[[at1]]$ before we throw them
-away. We can also be more precise by only generalizing $[[ unsolved(TT)]] \cap
-[[fv([TT]at1) ]]$.
+Note that to generalize $[[at1]]$, we do not need to traverse the whole context
+$[[DD, mevar, TT]]$. That is because promotion has already guaranteed that any
+unification variables that $[[GG]]$ depends on will already have been promoted
+to the left of the $[[mevar]]$, and so all unsolved unification variables in
+$[[TT]]$ are exactly those unification variables that can be generalized over. Note
+that we apply $[[TT]]$ to $[[at1]]$ so that all solved unification variables are
+substituted in $[[at1]]$ before we throw them away. We can also be more precise
+by generalizing only $[[ unsolved(TT)]] \cap [[fv([TT]at1) ]]$.
 
-Efficiency is not a major concern in this dissertation, but we hope this
+Efficiency is not a major focus in this dissertation, but we hope this
 discussion with levels and generalization can help provide a deeper
 understanding of ordered type contexts and promotion.
 
