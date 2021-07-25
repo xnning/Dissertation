@@ -226,11 +226,12 @@ atyp, aA {{ tex \sigma }}, aB, aC  :: 'atyp_' ::=
   | a              ::   :: tvar
   | evar           ::   :: evar
   | aA1 -> aA2     ::   :: arrow
-  | \/ a . aA      ::   :: all
+  | \/ varset . aA      ::   :: all
   | unknown        ::   :: unknown
   | static         ::   :: static
   | gradual        ::   :: gradual
   | aA [ a ~> at ] :: M :: subst
+  | aA [ </ evari ~> ati // i /> ] :: M :: subst_multi
   | [ GG ] aA      :: S :: ctx_subst
   | ( aA )         :: S :: parens
   | Pi a : aA1 . aA2 ::   :: pi
@@ -243,7 +244,7 @@ atyp_static, aT {{ tex T }} :: 'atyp_static_' ::=
   | a          ::   :: tvar
   | evar       ::   :: evar
   | aT1 -> aT2 ::   :: arrow
-  | \/ a . aT  ::   :: all
+  | \/ varset . aT  ::   :: all
   | static     ::   :: static
   | gradual    ::   :: gradual
   | [ GG ] aA  :: S :: ctx_subst
@@ -278,7 +279,7 @@ atyp_castable, agc  {{ tex \mathbb{C} }}  :: 'atyp_castable_' ::=
   | a            :: :: tvar
   | evar         :: :: evar
   | agc1 -> agc2 :: :: arrow
-  | \/ a . agc   :: :: all
+  | \/ varset . agc   :: :: all
   | unknown      :: :: unknown
   | gradual      :: :: gradual
 
@@ -288,7 +289,7 @@ atyp_scastable, asc {{ tex \mathbb{S} }} :: 'atyp_scastable_' ::=
   | a            :: :: tvar
   | evar         :: :: evar
   | asc1 -> asc2 :: :: arrow
-  | \/ a . asc   :: :: all
+  | \/ varset . asc   :: :: all
   | gradual      :: :: gradual
 
 
