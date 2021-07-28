@@ -13,7 +13,7 @@ using \textit{unification variables} that will be solved during the process of
 
 \cite{gundry2010type} model unification and type inference for an ML-style
 polymorphic system from a general perspective of \textit{information increase}
-in the problem context. Specifically, they formalize the unification process as:
+in the problem context. Specifically, the unification process is formalized as:
 %
 \begin{mathpar}
 [[GG |-u at1 ~= at2 -| DD]]

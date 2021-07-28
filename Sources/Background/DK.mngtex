@@ -234,7 +234,7 @@ are only instantiated when needed (e.g., when applied as a function to
 arguments); while HM's style of instantiation is \textit{eager}, where in the
 syntax-directed rules, instantiation eagerly instantiates all top-level universal
 quantifiers when possible (as in \rref{hm-var-inst}). Eager instantiation is also
-used in the higher-rank polymorphic type system in \cite{practical:inference}.
+used in the higher-rank polymorphic type system by \citet{practical:inference}.
 
 The differences between lazy and eager instantiation have pervasive
 consequences. The first and direct consequence is that for the same expression
