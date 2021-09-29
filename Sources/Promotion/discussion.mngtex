@@ -113,12 +113,12 @@ to each unification variable and each type variable, and incrementing the level
 number whenever we enter a new skolemisation scope, i.e., when a new type
 variable is brought into scope. When unifying $[[evar]] [[~=]] [[t]]$ where
 $[[evar]]$ is level $N$, to ensure well-scopedness, GHC checks that all free
-variables in $[[t]]$ are from level $N$ or lower, and update levels when needed:
+variables in $[[t]]$ are from level $N$ or lower, and updates levels when needed:
 if there is a unification variable $[[evarb]]$ in $[[t2]]$, where $[[evarb]]$
-has level $M > N$, then it allocates $[[evarb1]]$ at level $N$ and set
+has level $M > N$, then it allocates $[[evarb1]]$ at level $N$ and sets
 $[[evarb]] = [[evarb1]]$, which essentially implements the idea of promotion. In
-the following discussion, we refer to the promotion process described in this
-chapter as \textit{order promotion}, and the process in GHC as \textit{level promotion}.
+the following discussion, we refer to the promotion process described in \Cref{sub:promotion:intro:promotion}
+as \textit{order promotion}, and the process in GHC as \textit{level promotion}.
 
 As an example, consider during type inference, we need to prove the following
 subtyping constraint:
@@ -321,7 +321,7 @@ precisely that \textit{the relative order between unification variables does not
   matter}, and well-scopedness are ensured using levels. The advantage with
 level promotion is that the whole type context does not need to be ordered,
 which can be implemented more efficiently in practice. While not shown in this
-example, just like order promotion, level promotion can fail for type variables.
+example, level promotion, just like order promotion, should not be applied to type variables.
 For example, order promotion fails to promote $[[c]]$ in $[[evara, c]] [[|-sub]]
 [[evara]] [[<:]] [[c]]$; similarly, level promotion fails to promote $[[c]]$ in
 $[[c]](1), [[ evara ]](0) [[|-sub]] [[evara]] [[<:]] [[c]]$, where $[[c]]$ has a
@@ -334,10 +334,14 @@ generalization more efficiently. Besides GHC, they have also been implemented in
 OCaml; \cite{ocaml:typechecker} provides a detailed description of levels in the
 OCaml type checker. In this section, we first describe how levels are used to
 implement efficient generalization, and then discuss how we can implement
-generalization in our setting of ordered type contexts.
-Efficiency is not a major focus in this dissertation, but we hope this
-discussion with levels and generalization can help provide a deeper
-understanding of ordered type contexts and promotion.
+generalization in our setting of ordered type contexts. Efficiency is not a
+major focus in this dissertation; instead,
+we introduced
+ordered promotion mainly to
+resolve the dependency between variables.
+But we hope this discussion with levels and
+generalization can help provide a deeper understanding of ordered type contexts
+and promotion.
 
 Let us first recall the declarative generalization rule used in the let
 expression in Hindley-Milner:
