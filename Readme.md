@@ -1,6 +1,6 @@
 # My PhD Thesis
 
-- 2020-02-11 First draft submitted :D
+- 2021-08-10 Final draft submitted :D
 
 **Let me know if you have any good advice against procrastination**.
 
